@@ -6,10 +6,14 @@ system, notifications, and full mobile/touch support. One file, no dependencies,
 loads straight from a `loadstring`.
 
 ```lua
-local ChaseUI = loadstring(game:HttpGet("https://raw.githubusercontent.com/USER/REPO/main/ChaseUI.lua"))()
+local ChaseUI = loadstring(game:HttpGet("https://raw.githubusercontent.com/Irakli17/Ui-Library-Test/main/ChaseUI.lua"))()
 ```
 
-> Replace `USER/REPO` with your own GitHub path after you upload `ChaseUI.lua`.
+> **Heads up — ChaseUI is a *library*, not a self-running hub.** The line above
+> only loads it; it draws nothing on its own and will look like "nothing
+> happens." You then build a window with `CreateWindow` → `CreateTab` →
+> elements (see [Quick start](#quick-start)). To just *see* everything working,
+> run **`Demo.lua`** from this repo instead.
 
 ---
 
@@ -46,7 +50,7 @@ local ChaseUI = loadstring(game:HttpGet("https://raw.githubusercontent.com/USER/
 ## Quick start
 
 ```lua
-local ChaseUI = loadstring(game:HttpGet("https://raw.githubusercontent.com/USER/REPO/main/ChaseUI.lua"))()
+local ChaseUI = loadstring(game:HttpGet("https://raw.githubusercontent.com/Irakli17/Ui-Library-Test/main/ChaseUI.lua"))()
 
 local Window = ChaseUI:CreateWindow({
     Title = "My Hub",
@@ -118,9 +122,12 @@ group related controls under a titled section.
 
 ## Elements
 
-Every element takes an options table and returns an **api** object with
-`:Set(value)`, `:Get()`, `.Value`, `.Instance`, and `.Type`.
-All of them accept an optional `Flag` for config/global access, and `Callback`.
+Every element returns an **api** object exposing at least `.Instance` and
+`.Type`. The **value elements** — Toggle, Slider, Input, Keybind, Dropdown and
+ColorPicker — additionally expose `:Set(value)`, `:Get()` and `.Value`, and
+accept an optional `Flag` for config/global access plus a `Callback`.
+(Button, Label, Paragraph and Divider are display/action elements: they expose
+helpers like `:SetText` / `:SetCallback` but no `:Get`/`.Value`.)
 
 ### Button
 
@@ -383,7 +390,7 @@ Tested conceptually against the common modern executor API surface
 3. Use it in your script:
 
 ```lua
-local ChaseUI = loadstring(game:HttpGet("https://raw.githubusercontent.com/USER/REPO/main/ChaseUI.lua"))()
+local ChaseUI = loadstring(game:HttpGet("https://raw.githubusercontent.com/Irakli17/Ui-Library-Test/main/ChaseUI.lua"))()
 ```
 
 See **`Demo.lua`** in this repo for a full working example that exercises every

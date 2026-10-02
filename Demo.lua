@@ -11,7 +11,7 @@
 --]]
 
 -- Load the library (replace with YOUR raw GitHub URL once uploaded):
-local ChaseUI = loadstring(game:HttpGet("https://raw.githubusercontent.com/USER/REPO/main/ChaseUI.lua"))()
+local ChaseUI = loadstring(game:HttpGet("https://raw.githubusercontent.com/Irakli17/Ui-Library-Test/main/ChaseUI.lua"))()
 
 -- If you are testing locally with the file next to this one, you can instead do:
 -- local ChaseUI = require(script.Parent.ChaseUI)

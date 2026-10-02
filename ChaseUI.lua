@@ -41,6 +41,17 @@ local HttpService        = getService("HttpService")
 local CoreGui            = getService("CoreGui")
 
 local LocalPlayer = Players.LocalPlayer
+if not LocalPlayer then
+	-- Very early / unusual injection: wait briefly for the local player.
+	LocalPlayer = Players.PlayerAdded:Wait()
+end
+local function getPlayerGui()
+	-- Safe PlayerGui getter with a bounded wait (never yields forever).
+	local ok, pg = pcall(function()
+		return LocalPlayer:FindFirstChildOfClass("PlayerGui") or LocalPlayer:WaitForChild("PlayerGui", 10)
+	end)
+	return ok and pg or nil
+end
 
 -- // ===================== Executor compatibility ===================== //
 -- All optional globals are resolved safely so the library degrades
@@ -196,9 +207,21 @@ local function buildRoot(name)
 	})
 	local parented = false
 	-- Prefer gethui / protected container, then CoreGui, then PlayerGui.
-	pcall(function() if gethui then gui.Parent = gethui() parented = true end end)
-	if not parented then pcall(function() Protect(gui) gui.Parent = CoreGui parented = true end) end
-	if not parented then pcall(function() gui.Parent = LocalPlayer:WaitForChild("PlayerGui") parented = true end) end
+	pcall(function() if gethui then gui.Parent = gethui() parented = (gui.Parent ~= nil) end end)
+	if not parented then pcall(function() Protect(gui) gui.Parent = CoreGui parented = (gui.Parent ~= nil) end) end
+	if not parented then
+		local pg = getPlayerGui()
+		if pg then pcall(function() gui.Parent = pg parented = (gui.Parent ~= nil) end) end
+	end
+	-- Last resort: never return a silently-unparented root (that renders nothing
+	-- with no error). Force PlayerGui and make the failure visible instead.
+	if not parented then
+		local pg = getPlayerGui()
+		if pg then pcall(function() gui.Parent = pg parented = (gui.Parent ~= nil) end) end
+	end
+	if not parented then
+		warn("[ChaseUI] Could not parent the UI to gethui/CoreGui/PlayerGui — the window will not be visible. Your executor may be sandboxing GUI containers.")
+	end
 	return gui
 end
 
@@ -502,8 +525,15 @@ function ChaseUI:CreateWindow(cfg)
 
 	-- optional key gate (blocking)
 	if cfg.KeySystem then
-		local ok = RunKeySystem(cfg.KeySystem == true and {Keys = cfg.Keys or {}} or cfg.KeySystem)
-		if not ok then return NullWindow end
+		local keyCfg = cfg.KeySystem == true and {Keys = cfg.Keys or {}} or cfg.KeySystem
+		if type(keyCfg) == "table" and (not keyCfg.Keys or #keyCfg.Keys == 0) then
+			-- A key system with no valid keys can never be passed, which would
+			-- silently return a no-op window. Warn and skip the gate instead.
+			warn("[ChaseUI] KeySystem was enabled but no Keys were provided — skipping the key gate.")
+		else
+			local ok = RunKeySystem(keyCfg)
+			if not ok then return NullWindow end
+		end
 	end
 
 	local Window = {Tabs = {}, _conns = {}, _open = true}
