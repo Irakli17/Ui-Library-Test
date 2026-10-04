@@ -1,0 +1,23 @@
+# Downloaded toolchain — installed by tools/install-toolchain.sh, never vendored.
+/.tools/
+
+# Generated: the test runner writes the assembled suites here.
+/tests/build/
+
+# Editor / OS noise.
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/*
+!.vscode/settings.json
+*.swp
+*~
+
+# Node is only used for the build scripts; there is no runtime dependency,
+# but a stray install should never end up in the repository.
+node_modules/
+npm-debug.log*
+
+# Local environment files.
+.env
+.env.local
