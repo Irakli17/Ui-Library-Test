@@ -132,13 +132,19 @@ local SEMANTIC = {
 	info = { h = 0.63, s = 0.72, v = 0.99 },
 }
 
-local function semanticColor(name: string, hue: number, mode: string, amount: number?): any
+--- A semantic colour: success, warning, danger, info.
+---
+--- The hues are fixed, on purpose. Blending the accent hue into them
+--- (which this used to do, at 15%) turned `danger` magenta on the amber
+--- house theme — a destructive button that no longer looks destructive.
+--- Semantics have to survive every theme, so the theme is expressed
+--- through saturation and value, and never through hue.
+local function semanticColor(name: string, mode: string): any
 	local base = SEMANTIC[name]
-	local mixed = (base.h * (1 - (amount or 0.15)) + hue * (amount or 0.15)) % 1
 	if mode == "light" then
-		return hsv(mixed, base.s * 0.92, base.v * 0.62)
+		return hsv(base.h, base.s * 0.92, base.v * 0.62)
 	end
-	return hsv(mixed, base.s, base.v)
+	return hsv(base.h, base.s, base.v)
 end
 
 --- Expands a theme definition into a complete token table.
@@ -238,7 +244,7 @@ function Theme.derive(definition: { [any]: any }): { [any]: any }
 
 	-- Semantic family ----------------------------------------------
 	for _, name in ipairs({ "success", "warning", "danger", "info" }) do
-		local base = semanticColor(name, hue, mode)
+		local base = semanticColor(name, mode)
 		tokens[name] = base
 		tokens[name .. "Surface"] = Util.mixColor(base, tokens.surface, dark and 0.86 or 0.90)
 		tokens["on" .. name:sub(1, 1):upper() .. name:sub(2)] =

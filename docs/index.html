@@ -1,0 +1,1154 @@
+<!doctype html>
+<html lang="en" data-theme="obsidian" data-mode="dark">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Vantage · Interface, engineered</title>
+<meta name="description" content="Vantage is a Roblox interface library: one shared motion engine, seeded themes from real colour maths, frame-drawn icons, and a loading screen that tells the truth about what it is doing." />
+<meta name="theme-color" content="#0a0a09" />
+<meta property="og:title" content="Vantage · Interface, engineered" />
+<meta property="og:description" content="A Roblox interface library with one animation scheduler, ten seeded themes, and a wave-animated loading screen." />
+<meta property="og:image" content="assets/img/vantage-logo.png" />
+<link rel="icon" href="assets/img/vantage-logo.png" />
+<link rel="stylesheet" href="assets/css/vantage.css" />
+<style>
+	/* Documentation-only scaffolding. Nothing here is part of the library;
+	   it exists to demonstrate the motion engine and to label the demos. */
+	.demo-square {
+		width: 46px;
+		height: 46px;
+		border-radius: var(--radius-md);
+		background: linear-gradient(140deg, var(--accent), color-mix(in srgb, var(--accent) 55%, var(--surface)));
+		box-shadow: 0 12px 24px -14px var(--shadow);
+		will-change: transform;
+	}
+	.demo-lane {
+		position: relative;
+		height: 46px;
+		border-radius: var(--radius-md);
+		background: var(--sunken);
+		border: 1px solid var(--border-subtle);
+		overflow: hidden;
+	}
+	.note {
+		margin: 0;
+		font-size: 12px;
+		color: var(--text-dim);
+	}
+	.figure {
+		margin: 0;
+		display: grid;
+		gap: 10px;
+	}
+	.field-value {
+		font-family: var(--font-mono);
+		color: var(--text-muted);
+	}
+	code {
+		font-family: var(--font-mono);
+		font-size: 12.5px;
+		color: var(--text);
+	}
+	/* The stage's tip line. It deliberately does not use the `tip` class:
+	   that class is the fixed-position tooltip panel. */
+	.stage-tip {
+		margin: 18px 0 0;
+		font-size: 12.5px;
+		color: var(--text-dim);
+		max-width: 42ch;
+		transition: opacity 300ms var(--ease-move);
+	}
+	.signature {
+		display: block;
+		font-family: var(--font-mono);
+		font-size: 12px;
+		color: var(--text-muted);
+		padding: 2px 0;
+	}
+	.signature b {
+		color: var(--accent);
+		font-weight: 560;
+	}
+	table.props {
+		width: 100%;
+		border-collapse: collapse;
+		font-size: 12.5px;
+	}
+	table.props th {
+		text-align: left;
+		color: var(--text-dim);
+		font-weight: 560;
+		text-transform: uppercase;
+		letter-spacing: 0.06em;
+		font-size: 10.5px;
+		padding: 4px 8px 6px 0;
+	}
+	table.props td {
+		padding: 5px 8px 5px 0;
+		border-top: 1px solid var(--border-subtle);
+		vertical-align: top;
+		color: var(--text-muted);
+	}
+	table.props td:first-child {
+		color: var(--text);
+		font-family: var(--font-mono);
+		white-space: nowrap;
+	}
+</style>
+</head>
+<body>
+
+<header class="site-header">
+	<a class="brand" href="#top">
+			<img src="assets/img/vantage-logo.png" alt="" width="26" height="26" />
+		<span>Vantage<small>Interface, engineered</small></span>
+	</a>
+	<nav class="site-nav">
+			<a href="#try">Try it</a>
+			<a href="#loading">Loading</a>
+			<a href="#themes">Themes</a>
+			<a href="#easing">Motion</a>
+			<a href="#reference">Reference</a>
+			<a href="#install">Install</a>
+			<a href="TUTORIAL.md">Tutorial</a>
+		<a href="https://github.com/Irakli17/Ui-Library-Test">GitHub</a>
+	</nav>
+	<select class="theme-select" data-theme-select aria-label="Documentation theme"></select>
+</header>
+
+<main class="wrap" id="top">
+
+	<!-- ── Hero ──────────────────────────────────────────────────── -->
+	<section class="hero">
+		<div>
+			<p class="eyebrow">Roblox interface library · v1.0.0</p>
+			<h1>Interface, <em>engineered</em>.</h1>
+			<p class="lede">
+				Thirty modules, one shared motion engine, ten themes derived from
+				real colour maths, and icons drawn from frames instead of uploaded
+				assets. Everything on this page is the behaviour of the shipped
+				library, recreated in the browser so you can judge it before you
+				install it.
+			</p>
+			<ul class="badges">
+				<li>30 modules</li>
+				<li>44 glyphs · no image assets</li>
+				<li>10 seeded themes</li>
+				<li>1 motion engine</li>
+				<li>zero runtime dependencies</li>
+				<li>analyzer: 0 findings</li>
+				<li>66 unit + 29 integration assertions</li>
+			</ul>
+
+			<div class="snippet">
+				<div class="snippet-head">
+					<span class="snippet-url">https://raw.githubusercontent.com/Irakli17/Ui-Library-Test/main/Vantage.luau</span>
+					<button class="copy" data-copy="#hero-code">Copy</button>
+				</div>
+				<pre id="hero-code"><code>local Vantage = loadstring(game:HttpGet(
+	"https://raw.githubusercontent.com/Irakli17/Ui-Library-Test/main/Vantage.luau"
+))()
+
+Vantage.LoadingScreen.Run({
+	Assets = { "rbxassetid://0" },
+	Logo = { Image = "rbxassetid://0" },
+	Title = "My Game",
+}).wait()
+
+Vantage.Setup({ Theme = "obsidian" })
+
+local window = Vantage.Window.new({ Name = "My Game", Subtitle = "Settings" })
+local tab = window:Tab({ Name = "General", Icon = "sliders" })
+local section = tab:Section({ Name = "Appearance" })
+
+section:Toggle({ Name = "Reduce motion", Value = false, Callback = print })
+section:Slider({ Name = "Interface scale", Min = 0.75, Max = 1.5, Value = 1 })
+section:Button({ Text = "Apply", Variant = "primary", Callback = print })</code></pre>
+			</div>
+		</div>
+		<div class="hero-mark">
+			<img src="assets/img/vantage-logo.png" alt="The Vantage mark: a tilted squircle with an orbit ring and a sparkle" />
+		</div>
+	</section>
+
+	<!-- ── Try it ────────────────────────────────────────────────── -->
+	<section class="block" id="try">
+		<div class="block-head">
+			<h2>Try it. It is not a screenshot.</h2>
+			<p>
+				This is the interface rebuilt in the browser: press the buttons,
+				drag the sliders, type in the field, capture a keybind, open the
+				palette with <code>Ctrl</code>+<code>K</code>, switch tabs, collapse a
+				section, throw a notification. Every interaction below maps to a
+				component in <code>src/</code>, and the press feedback, timings and
+				keyboard model are the library's.
+			</p>
+		</div>
+
+		<div class="window">
+			<div class="titlebar">
+				<span class="glyph">◆</span>
+				<span class="wordmark">My Game</span>
+				<span class="subtitle">Settings</span>
+				<span class="version-pill">v1.0.0</span>
+				<span class="titlebar-spacer"></span>
+				<button class="win-btn" aria-label="Minimise" data-tip="Minimise|Collapses the window to its title bar. Double-clicking the title bar maximises the window in-game.">—</button>
+				<button class="win-btn" aria-label="Maximise" data-tip="Maximise|Double-click the title bar. The window clamps itself to the device safe area.">▢</button>
+				<button class="win-btn danger" aria-label="Close" data-tip="Close|Runs every teardown: tweens, signals, pooled ripples, connections.">✕</button>
+			</div>
+
+			<div class="window-body">
+				<aside class="sidebar">
+					<p class="caption">Interface</p>
+					<button class="nav-item active" data-tab="general">General<span class="badge">4</span></button>
+					<button class="nav-item" data-tab="controls">Controls<span class="badge">3</span></button>
+					<button class="nav-item" data-tab="overlays">Overlays<span class="badge">3</span></button>
+					<button class="nav-item" data-tab="motion">Motion<span class="badge">1</span></button>
+					<p class="caption">Meta</p>
+					<button class="nav-item" data-tab="about">About</button>
+				</aside>
+
+				<div class="content">
+
+					<!-- General -->
+					<div class="panel active" data-panel="general">
+						<section class="card">
+							<header>
+								<div>
+									<h3>Buttons</h3>
+									<p class="desc">Seven variants, three sizes. Every press fires a pointer-anchored ripple, a 0.965 scale, a colour step and an optional cue.</p>
+								</div>
+								<span class="chev">▾</span>
+							</header>
+							<div class="body">
+								<div class="row">
+									<button class="btn primary" data-tip="Primary|The one obvious action on a screen.">Primary</button>
+									<button class="btn secondary">Secondary</button>
+									<button class="btn ghost">Ghost</button>
+									<button class="btn outline">Outline</button>
+									<button class="btn success">Success</button>
+									<button class="btn danger">Danger</button>
+									<button class="btn link">Link</button>
+								</div>
+								<div class="row">
+									<button class="btn sm primary">Small</button>
+									<button class="btn primary">Medium</button>
+									<button class="btn lg primary">Large</button>
+									<button class="btn secondary" disabled>Disabled</button>
+									<button class="btn outline" data-toast="success|Saved|Your changes are live for this session.">Press feedback</button>
+								</div>
+								<p class="note">Press and hold: the ripple starts under the pointer and expands to the furthest corner. Release outside and it cancels — the library tracks the pointer, not the button.</p>
+							</div>
+						</section>
+
+						<section class="card">
+							<header>
+								<div>
+									<h3>Toggles and segmented</h3>
+									<p class="desc">A spring-driven knob and a sliding indicator, both owned by the motion engine so they can never desync.</p>
+								</div>
+								<span class="chev">▾</span>
+							</header>
+							<div class="body">
+								<div class="row">
+									<span class="label"><strong>Reduce motion</strong><span>Honours the player's OS setting on first run.</span></span>
+									<span class="control"><button class="toggle" role="switch" aria-checked="false" data-name="reduceMotion"></button></span>
+								</div>
+								<div class="row">
+									<span class="label"><strong>Streamer mode</strong><span>Readout: <code data-readout>false</code></span></span>
+									<span class="control"><button class="toggle" role="switch" aria-checked="true" data-name="streamer"></button></span>
+								</div>
+								<div class="row">
+									<span class="label"><strong>Quality</strong><span>Sliding indicator, spring-eased</span></span>
+									<span class="control">
+										<span class="segmented">
+											<i class="indicator"></i>
+											<button aria-selected="false">Fast</button>
+											<button aria-selected="true">Balanced</button>
+											<button aria-selected="false">Cinematic</button>
+										</span>
+										<code class="value" data-readout>Balanced</code>
+									</span>
+								</div>
+							</div>
+						</section>
+
+						<section class="card">
+							<header>
+								<div>
+									<h3>Progress</h3>
+									<p class="desc">Determinate with a real readout, plus an indeterminate sweep for work of unknown length.</p>
+								</div>
+								<span class="chev">▾</span>
+							</header>
+							<div class="body">
+								<div class="progress-row">
+									<span class="progress"><i class="fill" data-progress-fill style="width: 68%"></i></span>
+									<code class="field-value" data-progress-readout>68%</code>
+									<button class="btn sm secondary" data-progress-run>Run</button>
+									<button class="btn sm ghost" data-progress-reset>Reset</button>
+								</div>
+								<div class="progress-row">
+									<span class="progress indeterminate"><i class="fill"></i></span>
+									<span class="note">Indeterminate: a 34%-wide sweep, no fake percentage.</span>
+								</div>
+							</div>
+						</section>
+
+						<section class="card">
+							<header>
+								<div>
+									<h3>Tooltips</h3>
+									<p class="desc">Dwell before showing, flip above or below, clamp to the viewport. Hover the title-bar buttons, or these.</p>
+								</div>
+								<span class="chev">▾</span>
+							</header>
+							<div class="body">
+								<div class="row">
+									<button class="btn secondary" data-tip="Shortcut|Ctrl+K opens the command palette from anywhere.">Dwell on me</button>
+									<button class="btn secondary" data-tip="Long tooltip|Tooltips wrap rather than stretch: the panel is capped at 260px and measures itself before it decides which side of the anchor to open on.">Long text</button>
+									<button class="btn secondary" data-tip="Edge case|Near the right edge the panel flips rather than overlapping the window.">Near an edge</button>
+								</div>
+							</div>
+						</section>
+					</div>
+
+					<!-- Controls -->
+					<div class="panel" data-panel="controls">
+						<section class="card">
+							<header>
+								<div>
+									<h3>Sliders</h3>
+									<p class="desc">Drag, click, arrow keys, Home/End. Shift multiplies the step. Values are snap-rounded to their step and the readout is formatted from the same number the callback receives.</p>
+								</div>
+								<span class="chev">▾</span>
+							</header>
+							<div class="body">
+								<div class="row">
+									<span class="label"><strong>Interface scale</strong><span>0.75 → 1.5, stepped at 0.05</span></span>
+									<span class="control">
+										<span class="slider" data-min="0.75" data-max="1.5" data-step="0.05" data-value="1" data-decimals="2" role="slider" tabindex="0">
+											<i class="track"><i class="fill"></i></i>
+											<i class="knob"></i>
+										</span>
+										<code class="value" data-readout>1.00</code>
+									</span>
+								</div>
+								<div class="row">
+									<span class="label"><strong>Backdrop opacity</strong><span>Continuous, three decimals</span></span>
+									<span class="control">
+										<span class="slider" data-min="0" data-max="1" data-step="0.01" data-value="0.62" data-decimals="2" role="slider" tabindex="0">
+											<i class="track"><i class="fill"></i></i>
+											<i class="knob"></i>
+										</span>
+										<code class="value" data-readout>0.62</code>
+									</span>
+								</div>
+								<div class="row">
+									<span class="label"><strong>Volume</strong><span>Snaps to ticks at 0 · 25 · 50 · 75 · 100</span></span>
+									<span class="control">
+										<span class="slider" data-min="0" data-max="100" data-step="1" data-value="75" data-decimals="0" data-suffix="%" data-ticks="0,25,50,75,100" role="slider" tabindex="0">
+											<i class="track"><i class="fill"></i></i>
+											<i class="knob"></i>
+										</span>
+										<code class="value" data-readout>75%</code>
+									</span>
+								</div>
+								<p class="note">Focus a slider and press <code>Home</code> / <code>End</code>, then arrow keys — hold <code>Shift</code> for coarse steps. This is the same keyboard model the Luau component implements.</p>
+							</div>
+						</section>
+
+						<section class="card">
+							<header>
+								<div>
+									<h3>Input, dropdown and keybind</h3>
+									<p class="desc">Validation and counters on the field, a flip-and-clamp panel on the dropdown, modifier capture on the keybind.</p>
+								</div>
+								<span class="chev">▾</span>
+							</header>
+							<div class="body">
+								<div class="row">
+									<span class="label"><strong>Display name</strong><span>Live validation, 18 character cap</span></span>
+									<span class="control">
+										<span class="input">
+											<input type="text" maxlength="18" value="Nova" aria-label="Display name" />
+											<span class="counter">4/18</span>
+										</span>
+									</span>
+								</div>
+								<div class="row">
+									<span class="label"><strong>Region</strong><span>Readout: <code data-readout>Europe West</code></span></span>
+									<span class="control">
+										<span class="dropdown">
+											<button class="dropdown-toggle" aria-expanded="false"><span data-label>Europe West</span><span class="chev">▾</span></button>
+											<div class="dropdown-panel">
+												<div class="option" role="option" data-value="Europe West" aria-selected="true">Europe West<span class="tick">✓</span></div>
+												<div class="option" role="option" data-value="East Coast" aria-selected="false">East Coast<span class="tick">✓</span></div>
+												<div class="option" role="option" data-value="West Coast" aria-selected="false">West Coast<span class="tick">✓</span></div>
+												<div class="option" role="option" data-value="Singapore" aria-selected="false">Singapore<span class="tick">✓</span></div>
+												<div class="option" role="option" data-value="Sydney" aria-selected="false">Sydney<span class="tick">✓</span></div>
+											</div>
+										</span>
+									</span>
+								</div>
+								<div class="row">
+									<span class="label"><strong>Toggle menu</strong><span>Readout: <code data-readout>Ctrl+K</code></span></span>
+									<span class="control"><button class="keybind"><kbd data-chord>Ctrl+K</kbd></button></span>
+								</div>
+								<p class="note">Click the keybind to capture: modifiers are recorded as modifiers, not as their own chord. Pressing it again while capturing clears it to <em>Not set</em>.</p>
+							</div>
+						</section>
+
+						<section class="card">
+							<header>
+								<div>
+									<h3>Keyboard first</h3>
+									<p class="desc">Nothing here is mouse-only. This card is collapsed — click the header, exactly like a real <code>Section</code>.</p>
+								</div>
+								<span class="chev">▾</span>
+							</header>
+							<div class="body">
+								<div class="row">
+									<span class="label"><strong>Tab order</strong><span>Sidebar → content → status bar.</span></span>
+								</div>
+								<div class="row">
+									<span class="label"><strong>Escape</strong><span>Closes the topmost overlay only, then returns focus.</span></span>
+								</div>
+							</div>
+						</section>
+					</div>
+
+					<!-- Overlays -->
+					<div class="panel" data-panel="overlays">
+						<section class="card">
+							<header>
+								<div>
+									<h3>Notifications</h3>
+									<p class="desc">Queued, counted, hover-paused. Same <code>Key</code> groups instead of stacking, and actions become buttons inside the toast.</p>
+								</div>
+								<span class="chev">▾</span>
+							</header>
+							<div class="body">
+								<div class="row">
+									<button class="btn secondary" data-toast="info|Preloading|Streaming 42 assets in the background.">Info</button>
+									<button class="btn secondary" data-toast="success|Saved|Region set to Europe West.">Success</button>
+									<button class="btn secondary" data-toast="warning|High ping|142 ms · some animations will be quantised.">Warning</button>
+									<button class="btn secondary" data-toast="danger|Upload failed|The request timed out after 3 attempts.">Danger</button>
+									<button class="btn outline" data-toast-group="Asset streamed|Same key: this bumps a counter instead of stacking.">Group by key</button>
+									<button class="btn primary" data-toast-actions="Checkpoint reached|Your progress is stored locally.|Undo|Restore">With actions</button>
+								</div>
+								<p class="note">Hover a toast and its countdown rail pauses; click it to dismiss. The rail is generated from the same duration the queue uses, not a hardcoded animation.</p>
+							</div>
+						</section>
+
+						<section class="card">
+							<header>
+								<div>
+									<h3>Modal</h3>
+									<p class="desc">Backdrop, Escape, result promise. Confirm and Alert are the two shapes you actually need.</p>
+								</div>
+								<span class="chev">▾</span>
+							</header>
+							<div class="body">
+								<div class="row">
+									<button class="btn secondary" data-modal="confirm">Confirm</button>
+									<button class="btn secondary" data-modal="alert">Alert</button>
+									<button class="btn danger" data-modal="danger">Destructive confirm</button>
+								</div>
+								<p class="note">The promise resolves <code>true</code> or <code>false</code> — dismissing with Escape or the backdrop is a <code>false</code>, never a hang.</p>
+							</div>
+						</section>
+
+						<section class="card">
+							<header>
+								<div>
+									<h3>Command palette</h3>
+									<p class="desc">Ctrl+K from anywhere, recents remembered, arrows to move, Enter to run.</p>
+								</div>
+								<span class="chev">▾</span>
+							</header>
+							<div class="body">
+								<div class="row">
+									<button class="btn primary" data-open-palette>Open palette · Ctrl+K</button>
+									<span class="note">Commands include switching the documentation theme, replaying the loading screen, and pushing a notification — so the palette is doing real work here, not a mock list.</span>
+								</div>
+							</div>
+						</section>
+					</div>
+
+					<!-- Motion -->
+					<div class="panel" data-panel="motion">
+						<section class="card">
+							<header>
+								<div>
+									<h3>One animation engine</h3>
+									<p class="desc">Tweens, springs and tickers share a single stepped scheduler. Property ownership means a newer tween on the same property supersedes the older one instead of fighting it.</p>
+								</div>
+								<span class="chev">▾</span>
+							</header>
+							<div class="body">
+								<div class="figure">
+									<div class="demo-lane"><div class="demo-square" data-motion-box></div></div>
+								</div>
+								<div class="row">
+									<span class="label"><strong>Easing</strong><span>Named, from the catalog</span></span>
+									<span class="control"><select class="theme-select" data-motion-easing></select></span>
+								</div>
+								<div class="row">
+									<span class="label"><strong>Duration</strong><span>Read by the tween, not by the demo</span></span>
+									<span class="control">
+										<span class="slider" data-min="0.1" data-max="2" data-step="0.05" data-value="0.45" data-decimals="2" data-suffix="s" role="slider" tabindex="0" data-motion-duration>
+											<i class="track"><i class="fill"></i></i>
+											<i class="knob"></i>
+										</span>
+										<code class="value" data-readout>0.45s</code>
+									</span>
+								</div>
+								<div class="row">
+									<button class="btn primary" data-motion-play>Animate</button>
+									<button class="btn secondary" data-motion-elastic>Elastic instead</button>
+									<span class="note">The duration readout is the slider's own value, which is what the tween is built from.</span>
+								</div>
+								<p class="note">In the library this is <code>Motion.tween(instance, { Position = goal, Time = 0.45, Easing = "emphasize" })</code>. Springs are a separate primitive that runs at a fixed 1/240 s sub-step, so stiffness stays stable regardless of frame rate.</p>
+							</div>
+						</section>
+
+						<section class="card">
+							<header>
+								<div>
+									<h3>Reduced motion</h3>
+									<p class="desc">When the player asks for less motion, the engine still runs — it quantises to endpoints instead of deleting feedback, so nothing becomes unresponsive.</p>
+								</div>
+								<span class="chev">▾</span>
+							</header>
+							<div class="body">
+								<div class="row">
+									<span class="label"><strong>Motion.setReducedMotion(true)</strong><span>Animations land instantly; presses, ripples and state changes remain.</span></span>
+									<span class="control"><button class="btn secondary" data-toast="info|Reduced motion|In the library this is read from the player's OS setting during Vantage.Setup().">Explain</button></span>
+								</div>
+							</div>
+						</section>
+					</div>
+
+					<!-- About -->
+					<div class="panel" data-panel="about">
+						<section class="card">
+							<header>
+								<div>
+									<h3>What actually ships</h3>
+									<p class="desc">Counted from the repository, not from ambition.</p>
+								</div>
+								<span class="chev">▾</span>
+							</header>
+							<div class="body">
+								<div class="stats">
+									<div><strong>30</strong><span>modules</span></div>
+									<div><strong>15,643</strong><span>lines of Luau</span></div>
+									<div><strong>44</strong><span>glyphs</span></div>
+									<div><strong>25</strong><span>tokens per theme</span></div>
+									<div><strong>0</strong><span>runtime deps</span></div>
+								</div>
+								<div class="divider"></div>
+								<p class="paragraph">
+									The mark above is drawn from frames when you do not supply an
+									asset: the wordmark in the title bar is text, not an image. Vantage
+									never ships its own logo inside the interface — the only place the
+									logo appears is the loading screen, and only from the asset you
+									hand it.
+								</p>
+								<div class="divider"></div>
+								<p class="overline">Verification</p>
+								<p class="paragraph">
+									<code>tools/analyze.sh</code> runs luau-lsp over every module and must
+									exit clean. <code>tools/test.mjs</code> runs the unit suite in a mock
+									Roblox runtime. <code>tools/verify-dist.mjs</code> takes the built
+									single file, feeds it through <code>loadstring</code> twice — once as a
+									chunk, once through a namespace shim — and asserts the public surface
+									plus a full window build. The same commands run in CI.
+								</p>
+							</div>
+						</section>
+					</div>
+
+				</div>
+			</div>
+
+			<div class="statusbar">
+				<span><i class="dot"></i>Mock runtime</span>
+				<span data-fps>60 fps</span>
+				<div class="right">
+					<span data-ping>42 ms</span>
+					<span data-mem>412.0 MB</span>
+				</div>
+			</div>
+		</div>
+	</section>
+
+	<!-- ── Loading screen ────────────────────────────────────────── -->
+	<section class="block" id="loading">
+		<div class="block-head">
+			<h2>The loading screen is the part players remember</h2>
+			<p>
+				The mark is sliced into bands and every band is offset by a travelling
+				sine wave — a moving filter over the image, not a fade. The bleed for each
+				band is computed from the amplitude and frequency, which is why the slices
+				never show seams. The mark is anchored to the bottom-right of the safe
+				area, above the interface, never inside it.
+			</p>
+		</div>
+
+		<div class="stage" data-loading-stage data-slices="34" data-amplitude="5.5" data-frequency="1.15" data-speed="0.42">
+			<div class="safe"></div>
+			<div class="left">
+				<p class="phase" data-phase>Preparing</p>
+				<h3>My Game</h3>
+				<p class="detail" data-detail>Reading configuration</p>
+				<div class="bar"><i class="fill" data-bar></i></div>
+				<p class="percent" data-percent>0%</p>								<p class="stage-tip" data-tip-text>Press {TOGGLE} at any time to show or hide the interface.</p>
+			</div>
+			<div class="logo-block">
+				<div class="logo-wave" data-wave></div>
+				<div class="wordmark"><strong>My Game</strong><span>v1.0.0</span></div>
+			</div>
+			<button class="btn primary continue" data-continue>Continue</button>
+		</div>
+
+		<div class="stage-controls">
+			<div class="field">
+				<label for="ctl-slices">Bands <span class="field-value" data-out="slices">34</span></label>
+				<input id="ctl-slices" type="range" min="8" max="72" step="1" value="34" data-loading-control="slices" />
+			</div>
+			<div class="field">
+				<label for="ctl-amplitude">Amplitude <span class="field-value" data-out="amplitude">5.5 px</span></label>
+				<input id="ctl-amplitude" type="range" min="0" max="14" step="0.5" value="5.5" data-loading-control="amplitude" />
+			</div>
+			<div class="field">
+				<label for="ctl-frequency">Frequency <span class="field-value" data-out="frequency">1.15</span></label>
+				<input id="ctl-frequency" type="range" min="0.2" max="3" step="0.05" value="1.15" data-loading-control="frequency" />
+			</div>
+			<div class="field">
+				<label for="ctl-speed">Wave speed <span class="field-value" data-out="speed">0.42</span></label>
+				<input id="ctl-speed" type="range" min="0" max="1.5" step="0.02" value="0.42" data-loading-control="speed" />
+			</div>
+		</div>
+
+		<div class="row" style="margin-top: 16px">
+			<button class="btn secondary" data-replay>Replay the screen</button>
+			<button class="toggle" role="switch" aria-checked="true" data-autocontinue aria-label="Auto continue"></button>
+			<span class="note">Auto-continue after preloading — in the library this is <code>AutoContinue = 2.4</code>; turn it off and the screen waits for the player.</span>
+		</div>
+
+		<p class="note" style="margin-top: 14px">
+			Honest note: in the browser there is no <code>ContentProvider</code>, so the
+			percentage here is simulated at a fixed rate. In Roblox the same bar is driven by
+			<code>ContentProvider:PreloadAsync</code> against the asset list you pass in, weighted
+			by phase, with stall detection when a request goes quiet.
+		</p>
+	</section>
+
+	<!-- ── Themes ────────────────────────────────────────────────── -->
+	<section class="block" id="themes">
+		<div class="block-head">
+			<h2>Ten themes, derived — not hand-picked</h2>
+			<p>
+				Each theme is a seed: an accent hue, a mode and a temperature. Surfaces,
+				borders, the four semantic colours and the shadow are derived from it with
+				contrast targets enforced in CI. The house theme is Obsidian — warm charcoal
+				with an amber accent, deliberately not blue.
+			</p>
+		</div>
+		<div class="theme-grid" data-theme-grid></div>
+		<div class="row" style="margin-top: 18px">
+			<span class="note">
+				Clicking a card rethemes this entire page, including the window above — the same
+				live token swap the library performs, which is why nothing flashes when you
+				switch.
+			</span>
+			<button class="btn outline" data-open-palette style="margin-left: auto">Switch via palette</button>
+		</div>
+	</section>
+
+	<!-- ── Easing ────────────────────────────────────────────────── -->
+	<section class="block" id="easing">
+		<div class="block-head">
+			<h2>The easing catalog, plotted from source</h2>
+			<p>
+				These curves are evaluated from a line-by-line port of
+				<code>src/Core/Easing.luau</code>, including its Newton-Raphson
+				cubic-bezier solver. Hover or click a card to run the dot along the
+				function the library would use.
+			</p>
+		</div>
+		<div class="ease-grid" data-ease-grid></div>
+	</section>
+
+	<!-- ── Reference ─────────────────────────────────────────────── -->
+	<section class="block" id="reference">
+		<div class="block-head">
+			<h2>Reference</h2>
+			<p>
+				The public surface, grouped the way the source is. Everything here is
+				exported from <code>src/init.luau</code>; nothing else is public, and nothing
+				here is a stub.
+			</p>
+		</div>
+
+		<div class="grid two">
+			<section class="card">
+				<header>
+					<div>
+						<h3>Window</h3>
+						<p class="desc">Chrome, sidebar, status bar, drag and resize with pointer capture.</p>
+					</div>
+					<span class="chev">▾</span>
+				</header>
+				<div class="body">
+					<code class="signature"><b>Vantage.Window.new</b>(spec) → Window</code>
+					<table class="props">
+						<tr><th>Field</th><th>Meaning</th></tr>
+						<tr><td>Name</td><td>Title text. Also used for the tab bar and as a default key.</td></tr>
+						<tr><td>Subtitle</td><td>Secondary title text, right of the wordmark.</td></tr>
+						<tr><td>Theme</td><td>Theme name or hex seed applied when the window opens.</td></tr>
+						<tr><td>Tabs</td><td>Optional initial tab specs, each with <code>Name</code>, <code>Icon</code>, <code>Badge</code>.</td></tr>
+						<tr><td>Size / Position</td><td><code>UDim2</code>; omitted values are centred in the safe area.</td></tr>
+						<tr><td>Resizable / Draggable</td><td>Defaults <code>true</code>. Dragging uses pointer capture, so a fast drag cannot drop the window.</td></tr>
+						<tr><td>Key</td><td>Stable identity used for persistence hooks and grouping.</td></tr>
+						<tr><td>OnClose / OnOpen</td><td>Called after the transition finishes, not before it starts.</td></tr>
+					</table>
+					<div class="divider"></div>
+					<code class="signature"><b>window</b>:Tab(spec) → Tab</code>
+					<code class="signature"><b>window</b>:SelectTab(name) · :GetTab(name) · :CurrentTab() · :CycleTab()</code>
+					<code class="signature"><b>window</b>:Show() · :Hide() · :Toggle() · :IsVisible()</code>
+					<code class="signature"><b>window</b>:Minimize() · :Maximize() · :IsMaximized()</code>
+					<code class="signature"><b>window</b>:SetTheme(name, options) · :GetTheme()</code>
+					<code class="signature"><b>window</b>:Close() · :Destroy()</code>
+				</div>
+			</section>
+
+			<section class="card">
+				<header>
+					<div>
+						<h3>Sections and tabs</h3>
+						<p class="desc">Every factory returns its own instance, so components compose without a window.</p>
+					</div>
+					<span class="chev">▾</span>
+				</header>
+				<div class="body">
+					<code class="signature"><b>tab</b>:Section(spec) → Section</code>
+					<code class="signature"><b>section</b>:Button · :Toggle · :Slider · :Dropdown · :Input · :Keybind · :Segmented · :Progress</code>
+					<code class="signature"><b>section</b>:Paragraph · :Heading · :Overline · :Divider · :Spacer · :Image · :Stats</code>
+					<code class="signature"><b>section</b>:Columns(n) · :ButtonRow(specs) · :Add(instance)</code>
+					<code class="signature"><b>section</b>:SetCollapsed(bool) · :IsCollapsed() · :Refresh() · :destroy()</code>
+					<div class="divider"></div>
+					<p class="paragraph">
+						On a narrow viewport the layout stops being a row and becomes
+						stacked — the label sits above the control and the control stretches.
+						That breakpoint lives in one place (<code>Field.STACK_BREAKPOINT</code>)
+						so a compact device never gets a squashed slider.
+					</p>
+				</div>
+			</section>
+
+			<section class="card">
+				<header>
+					<div>
+						<h3>Controls</h3>
+						<p class="desc">Every control takes a <code>Callback</code>, a <code>Key</code> and a <code>Parent</code>.</p>
+					</div>
+					<span class="chev">▾</span>
+				</header>
+				<div class="body">
+					<code class="signature"><b>Button</b>({ Text, Variant, Size, Icon, Shortcut, Confirm, Loading, Tooltip, Callback })</code>
+					<code class="signature"><b>Toggle</b>({ Name, Value, Description, Callback })</code>
+					<code class="signature"><b>Slider</b>({ Name, Min, Max, Step, Value, Suffix, Ticks, Editable, Callback })</code>
+					<code class="signature"><b>Dropdown</b>({ Name, Options, Value, Multi, Searchable, Callback })</code>
+					<code class="signature"><b>Input</b>({ Name, Value, Placeholder, MaxLength, Validate, Callback })</code>
+					<code class="signature"><b>Keybind</b>({ Name, Value, Callback }) · Keybind.format(chord) · Keybind.isModifier(key)</code>
+					<code class="signature"><b>Segmented</b>({ Name, Options, Value, Callback })</code>
+					<code class="signature"><b>Progress</b>({ Value, Indeterminate, Label }) · :SetValue(value)</code>
+				</div>
+			</section>
+
+			<section class="card">
+				<header>
+					<div>
+						<h3>Overlays</h3>
+						<p class="desc">Queueing, grouping, countdown rails, a keyboard model, and a result you can await.</p>
+					</div>
+					<span class="chev">▾</span>
+				</header>
+				<div class="body">
+					<code class="signature"><b>Notify.push</b>({ Title, Body, Tone, Duration, Key, Actions })</code>
+					<code class="signature"><b>Notify.dismiss</b>(handle) · :clear() · :count()</code>
+					<code class="signature"><b>Modal.Confirm</b>({ Title, Body, Confirm, Cancel }) → promise&lt;boolean&gt;</code>
+					<code class="signature"><b>Modal.Alert</b>({ Title, Body }) → promise&lt;true&gt;</code>
+					<code class="signature"><b>Tooltip</b>:attach(instance, { Title, Body, Side })</code>
+					<code class="signature"><b>CommandPalette</b>:Add({ Label, Hint, Run }) · :List()</code>
+					<div class="divider"></div>
+					<p class="paragraph">
+						Overlays are ordered by one stack, so escaping the palette cannot
+						close the modal underneath it by accident.
+					</p>
+				</div>
+			</section>
+
+			<section class="card">
+				<header>
+					<div>
+						<h3>Theme</h3>
+						<p class="desc">Derived, live, and exportable back to Luau source.</p>
+					</div>
+					<span class="chev">▾</span>
+				</header>
+				<div class="body">
+					<code class="signature"><b>Vantage.Setup</b>({ Theme, Animations, Config, Tagging }) → Vantage</code>
+					<code class="signature"><b>Vantage.SetTheme</b>(name, { transition, mode })</code>
+					<code class="signature"><b>Vantage.RegisterTheme</b>(name, { seed, mode, tokens })</code>
+					<code class="signature"><b>Vantage.ThemeFromSeed</b>(hex, mode) → definition</code>
+					<code class="signature"><b>Vantage.ExportTheme</b>(name) → Luau source</code>
+					<code class="signature"><b>Vantage.Themes()</b> → { name, label, mode, description }[]</code>
+					<code class="signature"><b>Theme.patch</b>(tokens) · <b>Theme.bind</b>(token) · <b>Theme.observe</b>(fn)</code>
+					<div class="divider"></div>
+					<p class="paragraph">
+						<code>Theme.export</code> emits a runnable theme table you can paste into
+						your own project, which is what makes a custom theme portable instead of
+						a screenshot of a colour picker.
+					</p>
+				</div>
+			</section>
+
+			<section class="card">
+				<header>
+					<div>
+						<h3>Motion, glyphs, diagnostics</h3>
+						<p class="desc">The engine is public surface too — components are built on it, and so can yours be.</p>
+					</div>
+					<span class="chev">▾</span>
+				</header>
+				<div class="body">
+					<code class="signature"><b>Motion.tween</b>(instance, { Time, Easing, ...props })</code>
+					<code class="signature"><b>Motion.spring</b>({ Stiffness, Damping, Goal })</code>
+					<code class="signature"><b>Motion.stagger</b>(instances, spec) · <b>Motion.sequence</b>(steps) · <b>Motion.delay</b>(t)</code>
+					<code class="signature"><b>Motion.ticker</b>(fn) · <b>Motion.breathe</b>(instance, spec) · <b>Motion.pulse</b>(instance)</code>
+					<code class="signature"><b>Motion.setReducedMotion</b>(bool) · <b>Motion.stats()</b> · <b>Motion.audit()</b></code>
+					<code class="signature"><b>Glyph.get</b>(name) → { id, segments, category } · <b>Glyph.names()</b> · <b>Glyph.has(name)</b></code>
+					<code class="signature"><b>Vantage.Diagnostics</b>() → { theme, motion, viewport, insets, breakpoint, ... }</code>
+					<code class="signature"><b>Vantage.GetInstances</b>() → instances tagged by the library</code>
+				</div>
+			</section>
+
+			<section class="card">
+				<header>
+					<div>
+						<h3>Glyphs</h3>
+						<p class="desc">Forty-four icons, all drawn from strokes on a 100×100 grid. No atlas, no upload budget, and each one inherits the theme colour live.</p>
+					</div>
+					<span class="chev">▾</span>
+				</header>
+				<div class="body">
+					<p class="paragraph">This page lists glyph names rather than pretending to draw them — they are frames in Roblox, not vector paths the browser can render. <code>Glyph.draw(parent, "wave")</code> builds one anywhere.</p>
+					<div class="badges" style="margin: 0">
+						<li>check</li><li>close</li><li>plus</li><li>minus</li><li>chevron-down</li><li>chevron-up</li>
+						<li>chevron-left</li><li>chevron-right</li><li>arrow-right</li><li>arrow-left</li><li>arrow-up</li><li>arrow-down</li>
+						<li>search</li><li>dot</li><li>sparkle</li><li>star</li><li>ellipsis</li><li>hamburger</li>
+						<li>sliders</li><li>wave</li><li>ring</li><li>loader</li><li>progress-ring</li><li>clock</li>
+						<li>refresh</li><li>trash</li><li>copy</li><li>lock</li><li>unlock</li><li>info</li>
+						<li>warning</li><li>sun</li><li>moon</li><li>chart</li><li>filter</li><li>bell</li>
+						<li>user</li><li>palette</li><li>grid</li><li>list</li><li>gear</li><li>layout</li>
+						<li>power</li><li>bolt</li>
+					</div>
+				</div>
+			</section>
+
+			<section class="card">
+				<header>
+					<div>
+						<h3>Loading screen and the wave mark</h3>
+						<p class="desc">The part of the library most people install it for.</p>
+					</div>
+					<span class="chev">▾</span>
+				</header>
+				<div class="body">
+					<code class="signature"><b>LoadingScreen.Run</b>(spec) → handle · handle:wait()</code>
+					<code class="signature"><b>LoadingScreen.new</b>(spec) · :Start() · :SetProgress(t, label) · :SetPhase(name) · :Continue() · :GetReport()</code>
+					<code class="signature"><b>LogoWave.new</b>({ Image, Amplitude, Frequency, Speed, Slices, Mode })</code>
+					<code class="signature"><b>LogoWave</b>:Configure(spec) · :SetOpacity(a) · :Pulse() · :Play() · :Pause() · :RefreshTheme()</code>
+					<table class="props">
+						<tr><th>Spec field</th><th>Meaning</th></tr>
+						<tr><td>Assets</td><td>Anything <code>PreloadAsync</code> accepts. Progress follows these, weighted by phase.</td></tr>
+						<tr><td>Logo.Image</td><td>Your mark. Omit it and the mark is drawn from frames instead — never a blank box.</td></tr>
+						<tr><td>Phases</td><td>Named steps with weights; the label tracks the true phase, not a timer.</td></tr>
+						<tr><td>Tips</td><td>Rotating lines of copy, used for onboarding hints and controls.</td></tr>
+						<tr><td>MinDuration / MaxDuration</td><td>Floor and ceiling, so the screen never flashes on a warm cache nor hangs on a cold one.</td></tr>
+						<tr><td>Continue</td><td><code>true</code>, <code>false</code>, or a number of seconds for the auto-continue countdown.</td></tr>
+					</table>
+				</div>
+			</section>
+		</div>
+	</section>
+
+	<!-- ── Install ───────────────────────────────────────────────── -->
+	<section class="block" id="install">
+		<div class="block-head">
+			<h2>Install</h2>
+			<p>
+				One file, three ways. The single-file build never dereferences the
+				<code>script</code> global — namespace aliases resolve through an internal
+				registry — so it behaves identically as a <code>ModuleScript</code>, as a
+				<code>loadstring</code> chunk, and inside a plugin. That is asserted by the
+				integration suite, not assumed.
+			</p>
+		</div>
+
+		<div class="grid two">
+			<div class="snippet">
+				<div class="snippet-head">
+					<span class="snippet-url">loadstring · 434 KB, annotated</span>
+					<button class="copy" data-copy="#install-loadstring">Copy</button>
+				</div>
+				<pre id="install-loadstring"><code>local Vantage = loadstring(game:HttpGet(
+	"https://raw.githubusercontent.com/Irakli17/Ui-Library-Test/main/Vantage.luau"
+))()</code></pre>
+			</div>
+
+			<div class="snippet">
+				<div class="snippet-head">
+					<span class="snippet-url">loadstring · 334 KB, minified</span>
+					<button class="copy" data-copy="#install-min">Copy</button>
+				</div>
+				<pre id="install-min"><code>local Vantage = loadstring(game:HttpGet(
+	"https://raw.githubusercontent.com/Irakli17/Ui-Library-Test/main/dist/Vantage.min.luau"
+))()</code></pre>
+			</div>
+
+			<div class="snippet">
+				<div class="snippet-head">
+					<span class="snippet-url">Rojo · default.project.json maps src/ into ReplicatedStorage</span>
+					<button class="copy" data-copy="#install-rojo">Copy</button>
+				</div>
+				<pre id="install-rojo"><code>git clone https://github.com/Irakli17/Ui-Library-Test
+cd Ui-Library-Test
+rojo serve
+
+-- in Studio
+local Vantage = require(game.ReplicatedStorage.Vantage)</code></pre>
+			</div>
+
+			<div class="snippet">
+				<div class="snippet-head">
+					<span class="snippet-url">jsDelivr mirror · if raw.githubusercontent throttles</span>
+					<button class="copy" data-copy="#install-cdn">Copy</button>
+				</div>
+				<pre id="install-cdn"><code>local Vantage = loadstring(game:HttpGet(
+	"https://cdn.jsdelivr.net/gh/Irakli17/Ui-Library-Test@main/Vantage.luau"
+))()</code></pre>
+			</div>
+		</div>
+
+		<div class="row" style="margin-top: 18px">
+			<span class="note">
+				Studio only allows <code>loadstring</code> with
+				<code>ServerScriptService.LoadStringEnabled</code> enabled; executors and
+				plugins have it by default.
+			</span>
+			<a class="btn outline" href="TUTORIAL.md">Read the five-minute tutorial</a>
+		</div>
+	</section>
+
+	<footer class="site">
+		<span>Vantage 1.0.0 · MIT licensed · built for Roblox</span>
+		<span class="right"><a href="https://github.com/Irakli17/Ui-Library-Test">Repository</a> · <a href="TUTORIAL.md">Tutorial</a> · <a href="#top">Back to top</a></span>
+	</footer>
+
+</main>
+
+<div class="toasts" data-toasts></div>
+<div class="tip" data-tooltip></div>
+
+<script type="module">
+	import { boot, pushToast, openModal, applyTheme } from "./assets/js/vantage.js";
+	import { THEMES } from "./assets/js/themes.js";
+	import { buildEaseGallery, CATALOG } from "./assets/js/easing.js";
+	import { createLoadingDemo } from "./assets/js/loading.js";
+
+	/* ── Theme gallery ------------------------------------------------- */
+
+	const grid = document.querySelector("[data-theme-grid]");
+	for (const theme of THEMES) {
+		const card = document.createElement("button");
+		card.className = "theme-card";
+		card.type = "button";
+		card.dataset.themeCard = theme.name;
+		card.setAttribute("aria-pressed", "false");
+
+		const swatches = document.createElement("div");
+		swatches.className = "swatches";
+		for (const token of ["canvas", "surface", "raised", "accent", "text"]) {
+			const chip = document.createElement("i");
+			chip.style.background = theme.colors[token];
+			swatches.appendChild(chip);
+		}
+
+		const label = document.createElement("strong");
+		label.textContent = theme.label;
+
+		const note = document.createElement("span");
+		note.textContent = `${theme.category} · ${theme.description}`;
+
+		card.append(swatches, label, note);
+		grid.appendChild(card);
+	}
+
+	/* ── Easing gallery ------------------------------------------------ */
+
+	buildEaseGallery(document.querySelector("[data-ease-grid]"));
+
+	/* ── Boot the interaction layer ------------------------------------ */
+
+	const api = boot();
+
+	/* ── Toasts -------------------------------------------------------- */
+
+	for (const button of document.querySelectorAll("[data-toast]")) {
+		button.addEventListener("click", () => {
+			const [tone, title, body] = button.dataset.toast.split("|");
+			pushToast({ title, body, tone });
+		});
+	}
+
+	const groupButton = document.querySelector("[data-toast-group]");
+	if (groupButton) {
+		const [title] = groupButton.dataset.toastGroup.split("|");
+		let count = 0;
+		groupButton.addEventListener("click", () => {
+			count += 1;
+			pushToast({ key: "asset", tone: "info", title, body: `${15 + count * 7} assets buffered` });
+		});
+	}
+
+	const actionsButton = document.querySelector("[data-toast-actions]");
+	if (actionsButton) {
+		const [title, body, undoLabel, restoreLabel] = actionsButton.dataset.toastActions.split("|");
+		actionsButton.addEventListener("click", () => {
+			pushToast({
+				title,
+				body,
+				tone: "success",
+				duration: 7,
+				actions: [
+					{ text: undoLabel, variant: "outline", run: () => pushToast({ title: "Undone", body: "Checkpoint removed.", tone: "warning" }) },
+					{ text: restoreLabel, variant: "ghost", run: () => pushToast({ title: "Restored", body: "Back to the checkpoint.", tone: "info" }) }
+				]
+			});
+		});
+	}
+
+	/* ── Modals -------------------------------------------------------- */
+
+	for (const button of document.querySelectorAll("[data-modal]")) {
+		button.addEventListener("click", () => {
+			const kind = button.dataset.modal;
+			const spec = kind === "alert"
+				? { title: "Asset budget", body: "You are using 42 of 60 streamed assets. Nothing is wrong — this is the alert shape.", confirm: "Understood", cancel: "Close" }
+				: kind === "danger"
+					? { title: "Delete this layout?", body: "The window keeps no history in this demo, but in-game this is a destructive confirm: the primary action is red because the outcome is.", tone: "danger", confirm: "Delete", cancel: "Keep" }
+					: { title: "Apply the new scale?", body: "Interface scale changes propagate through the layout pass, so sliders re-measure instead of clipping.", confirm: "Apply", cancel: "Cancel" };
+			openModal({
+				...spec,
+				onResult: (value) => pushToast({ title: "Modal closed", body: `Result: ${value} — the same value the promise resolves to.`, tone: value ? "success" : "info" })
+			});
+		});
+	}
+
+	/* ── Progress ------------------------------------------------------ */
+
+	const fill = document.querySelector("[data-progress-fill]");
+	const readout = document.querySelector("[data-progress-readout]");
+	let progressFrame = null;
+
+	const setProgress = (value) => {
+		const clamped = Math.min(1, Math.max(0, value));
+		fill.style.width = `${(clamped * 100).toFixed(2)}%`;
+		readout.textContent = `${Math.round(clamped * 100)}%`;
+	};
+
+	document.querySelector("[data-progress-run]").addEventListener("click", () => {
+		if (progressFrame) cancelAnimationFrame(progressFrame);
+		const start = performance.now();
+		setProgress(0);
+		const step = (now) => {
+			const t = Math.min(1, (now - start) / 1600);
+			setProgress(CATALOG.move(t));
+			if (t < 1) progressFrame = requestAnimationFrame(step);
+			else progressFrame = null;
+		};
+		progressFrame = requestAnimationFrame(step);
+	});
+	document.querySelector("[data-progress-reset]").addEventListener("click", () => {
+		if (progressFrame) cancelAnimationFrame(progressFrame);
+		setProgress(0.68);
+	});
+
+	/* ── Motion demo --------------------------------------------------- */
+
+	const box = document.querySelector("[data-motion-box]");
+	const lane = document.querySelector(".demo-lane");
+	const easingSelect = document.querySelector("[data-motion-easing]");
+	for (const name of Object.keys(CATALOG)) {
+		const option = document.createElement("option");
+		option.value = name;
+		option.textContent = name;
+		easingSelect.appendChild(option);
+	}
+	easingSelect.value = "move";
+
+	// The slider writes its own value into `aria-valuenow` every time it
+	// renders, so the demo reads the number the control actually holds
+	// instead of keeping a second copy that can drift.
+	const durationSlider = document.querySelector("[data-motion-duration]");
+	const duration = () => Number(durationSlider.getAttribute("aria-valuenow") ?? 0.45) || 0.45;
+
+	let motionFrame = null;
+	const animateBox = (easingName) => {
+		if (motionFrame) cancelAnimationFrame(motionFrame);
+		const width = Math.max(46, (lane?.clientWidth ?? 400) - 50);
+		const easing = CATALOG[easingName] ?? CATALOG.move;
+		const ms = Math.max(120, duration() * 1000);
+		const start = performance.now();
+
+		const step = (now) => {
+			const t = Math.min(1, (now - start) / ms);
+			const value = easing(t);
+			box.style.transform = `translateX(${(value * width).toFixed(2)}px) rotate(${(value * 90).toFixed(1)}deg)`;
+			motionFrame = t < 1 ? requestAnimationFrame(step) : null;
+		};
+		motionFrame = requestAnimationFrame(step);
+	};
+
+	document.querySelector("[data-motion-play]").addEventListener("click", () => animateBox(easingSelect.value));
+	document.querySelector("[data-motion-elastic]").addEventListener("click", () => animateBox("elastic"));
+
+	/* ── Loading screen ------------------------------------------------ */
+
+	const loading = createLoadingDemo(document.querySelector("[data-loading-stage]"));
+	window.vantageLoading = loading;
+
+	for (const control of document.querySelectorAll("[data-loading-control]")) {
+		control.addEventListener("input", () => {
+			const key = control.dataset.loadingControl;
+			const value = Number(control.value);
+			const output = document.querySelector(`[data-out="${key}"]`);
+			if (output) {
+				output.textContent = key === "amplitude" ? `${value.toFixed(1)} px` : key === "speed" ? value.toFixed(2) : key === "frequency" ? value.toFixed(2) : String(value);
+			}
+			loading.configure({ [key]: value });
+		});
+	}
+
+	// Expose a couple of things for the console, because a documentation page
+	// that can be poked at from the console is a better documentation page.
+	window.vantageDocs = { applyTheme, pushToast, openModal, api };
+</script>
+
+</body>
+</html>

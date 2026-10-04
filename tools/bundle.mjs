@@ -445,6 +445,19 @@ mkdirSync(DIST, { recursive: true });
 const targets = [
 	[join(DIST, "Vantage.luau"), bundle],
 	[join(DIST, "Vantage.min.luau"), minified],
+	// A copy at the repository root, so a loadstring URL stays short:
+	//
+	//     loadstring(game:HttpGet(
+	//         "https://raw.githubusercontent.com/<user>/<repo>/main/Vantage.luau"
+	//     ))()
+	//
+	// GitHub serves raw files with `text/plain`, which `game:HttpGet`
+	// returns verbatim. dist/ remains the canonical artifact.
+	[join(ROOT, "Vantage.luau"), bundle],
+	// The same bytes under a `.lua` name, because most loader snippets —
+	// and most people's muscle memory — expect `.lua` at the end of the
+	// URL. Both root names are verified by `tools/verify-http.mjs`.
+	[join(ROOT, "Vantage.lua"), bundle],
 ];
 
 let stale = false;

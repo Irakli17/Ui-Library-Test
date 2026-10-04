@@ -1,0 +1,50 @@
+# Vantage · continuous integration
+# ------------------------------------------------------------------
+# Four gates, in the order a regression would hit them:
+#
+#   audit        static checks the type checker cannot see
+#   bundle       committed artifacts are up to date with src/
+#   unit         the engine, headless, against the mock runtime
+#   verify-dist  the shipped bytes, loaded via `loadstring`, no `script`
+#
+# The last one is the gate that matters for the distribution model: it is
+# the only check that would fail if the file stopped working when fetched
+# from a URL.
+
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install the Luau CLI
+        run: bash tools/install-toolchain.sh
+
+      - name: Audit
+        run: node tools/audit.mjs
+
+      - name: Bundles are up to date
+        run: node tools/bundle.mjs --check
+
+      - name: Unit suite
+        run: node tools/test.mjs
+
+      - name: Loadstring integration (annotated and minified)
+        run: node tools/verify-dist.mjs
+
+      - name: The root bundle matches the canonical one
+        run: cmp Vantage.luau dist/Vantage.luau

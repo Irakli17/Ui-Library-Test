@@ -34,6 +34,7 @@ import { readFileSync, writeFileSync, mkdirSync, existsSync } from "node:fs";
 import { join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { spawnSync } from "node:child_process";
+import { buildIntegrationRun } from "./lib/integration-harness.mjs";
 
 const ROOT = resolve(fileURLToPath(new URL("..", import.meta.url)));
 const BUILD = join(ROOT, "tests", "build");
@@ -59,88 +60,14 @@ function read(...parts) {
 	return readFileSync(join(ROOT, ...parts), "utf8");
 }
 
-/**
- * Long-string level that the given source cannot terminate early. Luau
- * long strings are `[[ … ]]` with any number of `=` between the brackets.
- */
-function safeLevel(source) {
-	let level = 1;
-	for (;;) {
-		const closer = "]" + "=".repeat(level) + "]";
-		if (!source.includes(closer)) return level;
-		level += 1;
-	}
-}
-
-const prelude = read("tests", "Mock", "prelude.luau");
-const harness = read("tests", "Harness.luau");
-const spec = read("tests", "Integration.luau");
-
 mkdirSync(BUILD, { recursive: true });
 
 let failures = 0;
 
 for (const artifact of artifacts) {
 	const source = read("dist", artifact.file);
-	const level = safeLevel(source);
-	const opener = "[" + "=".repeat(level) + "[";
-	const closer = "]" + "=".repeat(level) + "]";
-
-	const parts = [
-		`-- GENERATED FILE — do not edit. Built by tools/verify-dist.mjs for ${artifact.label}.`,
-		"",
-		"-- ── mock Roblox runtime ─────────────────────────────────────────────",
-		prelude,
-		"",
-		"-- ── an executor has no `script` global ──────────────────────────────",
-		"-- The prelude defines one so the module tree can be resolved during",
-		"-- unit tests; here it is deleted on purpose. Anything the bundle does",
-		"-- with `script` would now fail loudly, exactly as it would in-game.",
-		"script = nil",
-		"assert(script == nil, \"verify-dist: the script global must be nil\")",
-		"",
-		"-- ── harness ─────────────────────────────────────────────────────────",
-		"local Harness = (function()",
-		harness,
-		"end)()",
-		"",
-		"-- ── the shipped bytes, handed to loadstring ─────────────────────────",
-		`local SOURCE = ${opener}`,
-		source,
-		`${closer}`,
-		`local chunk, compileError = loadstring(SOURCE, "@${artifact.label}")`,
-		"if not chunk then",
-		`\terror("loadstring could not compile ${artifact.label}: " .. tostring(compileError))`,
-		"end",
-		"",
-		"local Vantage = chunk()",
-		"if type(Vantage) ~= \"table\" then",
-		"\terror(\"loadstring returned \" .. type(Vantage) .. \", expected the Vantage namespace\")",
-		"end",
-		"",
-		"-- Hand the animation scheduler to the mock so Mock.advance drives the",
-		"-- same virtual clock the library animates on.",
-		"Mock.motion = Vantage.Motion",
-		"",
-		"-- ── integration spec ────────────────────────────────────────────────",
-		spec.trimEnd(),
-		"",
-		"-- ── report ──────────────────────────────────────────────────────────",
-		`print(string.format("\\n\\27[1mVantage %s · loadstring integration%s\\27[0m\\n\\n", Vantage.version, " · ${artifact.label}"))`,
-		'local failed = Harness.report("dist")',
-		// The Luau CLI has no `os.exit`, and an exit code is a weak signal
-		// anyway: the run prints a machine-readable result line that this
-		// script requires before it will call the artifact verified.
-		'print(string.format("RESULT fail=%d", failed))',
-		"if failed > 0 then",
-		'\terror(string.format("%d integration assertion(s) failed", failed), 0)',
-		"end",
-		"return 0",
-		"",
-	];
-
 	const out = join(BUILD, `integration-${artifact.file.replace(/\.luau$/, "")}.luau`);
-	writeFileSync(out, parts.join("\n"));
+	writeFileSync(out, buildIntegrationRun(ROOT, source, artifact.label));
 
 	const result = spawnSync(LUAU, ["-O2", out], { cwd: ROOT, encoding: "utf8" });
 
