@@ -2615,12 +2615,25 @@ end
 --- `properties` is assigned verbatim; `children` is an array.
 function Util.create(className: string, properties: { [string]: any }?, children: { any }?): any
 	local instance = Instance.new(className)
+	local fontKey: string? = nil
 	if properties then
 		for key, value in pairs(properties) do
 			if key ~= "Parent" and value ~= nil then
-				instance[key] = value
+				if key == "Font" and type(value) == "string" then
+					-- A `Font` in a spec is a key into the font stack, not an enum.
+					-- The engine's Font property only accepts an Enum.Font, and
+					-- assigning the key itself throws
+					-- `Invalid value "display" for enum Font` — so the key is
+					-- resolved through the stack instead of being forwarded.
+					fontKey = value
+				else
+					instance[key] = value
+				end
 			end
 		end
+	end
+	if fontKey then
+		Util.applyFont(instance, fontKey)
 	end
 	if children then
 		for _, child in ipairs(children) do
@@ -2648,6 +2661,24 @@ function Util.row(properties: { [string]: any }?, children: { any }?): any
 	local merged = Util.copy(properties or {})
 	merged.BackgroundTransparency = merged.BackgroundTransparency or 1
 	return Util.frame(merged, children)
+end
+
+--- A container that fades as a single object.
+---
+--- `GroupTransparency` is a `CanvasGroup` property: on a Frame the engine
+--- throws `GroupTransparency is not a valid member of Frame`, which is how a
+--- fade that looked fine in every offline test threw inside the loading
+--- screen's worker on a real client. Anything the library fades as a group —
+--- toast cards, the palette, modal panels, sections, the logo, the loading
+--- column — is therefore built as a CanvasGroup rather than a Frame with a
+--- property it does not have. Background stays transparent unless asked,
+--- matching `Util.row`, so a swap is geometry- and colour-neutral.
+function Util.group(properties: { [string]: any }?, children: { any }?): any
+	local merged = Util.copy(properties or {})
+	merged.BackgroundTransparency = merged.BackgroundTransparency or 1
+	local group = Util.create("CanvasGroup", merged, children)
+	group.BorderSizePixel = 0
+	return group
 end
 
 --- Text factory with the Vantage typography defaults applied.
@@ -2710,6 +2741,17 @@ end
 ---
 --- `keypoints` is a list of `{ Time?, Color, Transparency? }`. Time
 --- defaults to an even spread across the gradient.
+---
+--- The engine's keypoint arrays are strict: at least two keypoints, the first
+--- at exactly time 0, the last at exactly time 1, ordered by time, every entry
+--- a real keypoint. A `UIGradient` built any other way is not merely ugly —
+--- `ColorSequence.new` throws, and a throw inside a screen build strands the
+--- player on a half-painted backdrop, which is exactly how a single call with
+--- parallel colour/time arrays took down every entry point on the live client.
+--- So the times are normalised here, and every caller gets a legal sequence.
+--- A single keypoint is expressed through the two-keypoint overloads, because
+--- `ColorSequence.new({ keypoint })` is itself rejected (`requires at least 2
+--- keypoints`).
 function Util.gradient(instance: any, keypoints: { any }, rotation: number?, enabled: boolean?): any
 	local gradient = instance:FindFirstChildOfClass("UIGradient")
 	if not gradient then
@@ -2723,23 +2765,41 @@ function Util.gradient(instance: any, keypoints: { any }, rotation: number?, ena
 		return gradient
 	end
 
-	local colors = table.create(count)
-	local colorTimes = table.create(count)
-	local stops = table.create(count)
-
+	local times = table.create(count)
+	local previous = 0
 	for index, keypoint in ipairs(keypoints) do
 		local time = keypoint.Time
 		if time == nil then
 			time = count == 1 and 0 or (index - 1) / (count - 1)
 		end
-		colors[index] = keypoint.Color or Color3.new(1, 1, 1)
-		colorTimes[index] = time
-		stops[index] = NumberSequenceKeypoint.new(time, keypoint.Transparency or 0)
+		time = Util.clamp01(time)
+		if time < previous then
+			time = previous
+		end
+		previous = time
+		times[index] = time
 	end
 
-	gradient.Color = ColorSequence.new(colors, colorTimes)
-	gradient.Transparency = count == 1 and NumberSequence.new(stops[1].Value)
-		or NumberSequence.new(stops)
+	if count == 1 then
+		-- Flat gradient: the overloads the engine accepts for one colour.
+		gradient.Color = ColorSequence.new(keypoints[1].Color or Color3.new(1, 1, 1))
+		gradient.Transparency = NumberSequence.new(Util.clamp01(keypoints[1].Transparency or 0))
+	else
+		-- Anchor the ends, which every keypoint array has to touch exactly.
+		times[1] = 0
+		times[count] = 1
+
+		local colorStops = table.create(count)
+		local stops = table.create(count)
+		for index = 1, count do
+			colorStops[index] = ColorSequenceKeypoint.new(times[index], keypoints[index].Color or Color3.new(1, 1, 1))
+			stops[index] = NumberSequenceKeypoint.new(times[index], Util.clamp01(keypoints[index].Transparency or 0))
+		end
+
+		gradient.Color = ColorSequence.new(colorStops)
+		gradient.Transparency = NumberSequence.new(stops)
+	end
+
 	gradient.Rotation = rotation or 0
 	gradient.Enabled = enabled ~= false
 	return gradient
@@ -4986,7 +5046,11 @@ function LogoWave.new(spec: { [any]: any }, context: { [any]: any })
 		_maid = context.maid,
 	}, LogoWave)
 
-	local container = Util.frame({
+	-- A CanvasGroup, because this container is faded as one object: the mark
+	-- is composited from many slices, and only a CanvasGroup can fade them
+	-- together (its GroupTransparency is the property the fallback path below
+	-- writes).
+	local container = Util.group({
 		Name = "VantageLogoWave",
 		Size = UDim2.fromOffset(size, size),
 		BackgroundTransparency = 1,
@@ -5532,7 +5596,7 @@ function LoadingScreen.new(spec: { [any]: any }): any
 	self._vignette = vignette
 
 	-- Left column: percentage, phase, tip --------------------------------
-	local left = Util.row({
+	local left = Util.group({
 		Name = "LeftColumn",
 		AnchorPoint = Vector2.new(0, 1),
 		Position = UDim2.new(0, 0, 1, 0),
@@ -5658,7 +5722,7 @@ function LoadingScreen.new(spec: { [any]: any }): any
 	self._tipLabel = tipLabel
 
 	-- Right column: logo block --------------------------------------------
-	local logoBlock = Util.row({
+	local logoBlock = Util.group({
 		Name = "LogoBlock",
 		AnchorPoint = Vector2.new(1, 1),
 		Position = UDim2.new(1, 0, 1, 0),
@@ -5734,7 +5798,7 @@ function LoadingScreen.new(spec: { [any]: any }): any
 	local rail
 	local railFill
 	if options.ShowRail ~= false then
-		rail = Util.frame({
+		rail = Util.group({
 			Name = "Rail",
 			AnchorPoint = Vector2.new(0, 1),
 			Position = UDim2.new(0, 0, 1, 0),
@@ -5779,7 +5843,7 @@ function LoadingScreen.new(spec: { [any]: any }): any
 	self._railFill = railFill
 
 	-- Continue affordance ----------------------------------------------------
-	local continueHolder = Util.row({
+	local continueHolder = Util.group({
 		Name = "Continue",
 		AnchorPoint = Vector2.new(0.5, 1),
 		Position = UDim2.new(0.5, 0, 1, -34),
@@ -6680,8 +6744,12 @@ function Elements.image(spec: any, context: any): any
 			Parent = frame,
 		})
 		Util.gradient(caption, {
+			-- The scrim ramps to 0.6 and then holds: a keypoint array has to reach
+			-- time 1, so the hold is written as its own keypoint rather than left
+			-- implicit.
 			{ Time = 0, Color = Color3.new(0, 0, 0), Transparency = 0.35 },
 			{ Time = 0.6, Color = Color3.new(0, 0, 0), Transparency = 0.9 },
+			{ Time = 1, Color = Color3.new(0, 0, 0), Transparency = 0.9 },
 		}, 90)
 	end
 
@@ -10403,6 +10471,33 @@ function Keybind.format(input: any): string
 	return MOUSE_NAMES[input.UserInputType] or input.UserInputType.Name
 end
 
+--- Normalises a binding into the chord string the library stores.
+---
+--- The documented form is a string (`"LeftShift+T"`), but an
+--- `Enum.KeyCode` — and a list of them — is the natural Roblox spelling, and
+--- passing one used to throw `Unable to assign property Text. string expected,
+--- got EnumItem` the moment the label was written, because the enum reached
+--- `Text` unchanged. Both forms are accepted now.
+function Keybind.chordOf(value: any): string
+	if value == nil then
+		return ""
+	end
+	if typeof(value) == "EnumItem" then
+		return value.Name
+	end
+	if type(value) == "table" then
+		local parts = {}
+		for _, entry in ipairs(value) do
+			local part = Keybind.chordOf(entry)
+			if part ~= "" then
+				table.insert(parts, part)
+			end
+		end
+		return table.concat(parts, "+")
+	end
+	return tostring(value)
+end
+
 --- @param spec { Name, Description?, Icon?, Value?: string, Callback?, Disabled?, AllowMouse?, AllowGamepad?, Tooltip? }
 function Keybind.new(spec: { [any]: any }, context: { [any]: any })
 	local ctx = context or {}
@@ -10412,7 +10507,7 @@ function Keybind.new(spec: { [any]: any }, context: { [any]: any })
 		_spec = spec,
 		_maid = ctx.maid,
 		_tokens = tokens,
-		_value = spec.Value or "",
+		_value = Keybind.chordOf(spec.Value),
 		_capturing = false,
 		_enabled = spec.Disabled ~= true,
 	}, Keybind)
@@ -10628,8 +10723,10 @@ function Keybind:setLabelText(value: string)
 	self.Label.TextColor3 = self._tokens[bound and "text" or "textDim"]
 end
 
---- Binds a value. `fromUser` fires the callback.
-function Keybind:Set(value: string, fromUser: boolean?)
+--- Binds a value. `fromUser` fires the callback. Accepts a chord string, an
+--- `Enum.KeyCode`, or a list of key codes (see `Keybind.chordOf`).
+function Keybind:Set(value: any, fromUser: boolean?)
+	value = Keybind.chordOf(value)
 	if self._value == value and not fromUser then
 		return self
 	end
@@ -11385,7 +11482,9 @@ function Section.new(spec: { [any]: any }, context: { [any]: any })
 
 	self.Toggled = Signal.new("Section.Toggled")
 
-	local root = Util.row({
+	-- A CanvasGroup, because the window fades a whole section on tab switch
+	-- through the group's transparency.
+	local root = Util.group({
 		Name = "VantageSection",
 		Size = UDim2.new(1, 0, 0, 0),
 		AutomaticSize = Enum.AutomaticSize.Y,
@@ -14201,12 +14300,14 @@ function CommandPalette.new(context: { [any]: any })
 		self:Close()
 	end)
 
-	local panel = Util.frame({
+	-- A CanvasGroup: the palette fades in and out as one object.
+	local panel = Util.group({
 		Name = "Panel",
 		AnchorPoint = Vector2.new(0.5, 0),
 		Position = UDim2.new(0.5, 0, 0, 96),
 		Size = UDim2.fromOffset(440, 52),
 		BackgroundColor3 = tokens.elevated,
+		BackgroundTransparency = 0,
 		ClipsDescendants = true,
 		ZIndex = 810,
 		Parent = root,
@@ -14426,7 +14527,10 @@ function CommandPalette.new(context: { [any]: any })
 			end
 			row.frame.Visible = true
 			local active = index == self._highlight
-			row.label.Text = result.command.Name
+			-- `Label` is the documented field (`Add({ Label, Hint, Run })`);
+			-- `Name` is accepted as an alias. Reading `Name` alone left every
+			-- row blank and threw `string expected, got nil` on a live client.
+			row.label.Text = result.command.Label or result.command.Name or ""
 			row.section.Text = result.command.Section or ""
 			Motion.tween(row.frame, {
 				BackgroundTransparency = active and 0 or 1,
@@ -14465,7 +14569,7 @@ function CommandPalette.new(context: { [any]: any })
 			end
 		else
 			for _, command in ipairs(self._commands) do
-				local haystack = command.Name
+				local haystack = (command.Label or command.Name or "")
 					.. (command.Section and (" " .. command.Section) or "")
 					.. (command.Description and (" " .. command.Description) or "")
 				local score = Util.fuzzyMatch(query, haystack)
@@ -14755,13 +14859,15 @@ function Modal.new(spec: { [any]: any }, context: { [any]: any })
 
 	-- Panel ---------------------------------------------------------------
 	local width = spec.Width or 340
-	local panel = Util.frame({
+	-- A CanvasGroup: the dialog fades in and out as one object.
+	local panel = Util.group({
 		Name = "Panel",
 		AnchorPoint = Vector2.new(0.5, 0.5),
 		Position = UDim2.fromScale(0.5, 0.5),
 		Size = UDim2.fromOffset(width, 0),
 		AutomaticSize = Enum.AutomaticSize.Y,
 		BackgroundColor3 = tokens.elevated,
+		BackgroundTransparency = 0,
 		ZIndex = 510,
 		Parent = backdrop,
 	})
@@ -15133,13 +15239,16 @@ local function buildToast(self: any, spec: any): any
 	local tone = TONES[spec.Tone or spec.Type or "default"] or TONES.default
 
 	local toast = {}
-	toast.id = spec.Id or ("toast-" .. tostring(self._counter + 1))
+	-- The id is assigned by `push`, which is also what returns it to the
+	-- caller. Inventing a second id here meant the string `push` handed back
+	-- never matched the toast, so `dismiss(id)` silently did nothing.
 	toast.key = spec.Key
 	toast.count = 1
 	toast._spec = spec
 	toast._buttons = {}
 
-	local card = Util.frame({
+	-- A CanvasGroup: a toast fades in and out as one object.
+	local card = Util.group({
 		Name = "VantageToast",
 		Size = UDim2.new(1, 0, 0, 0),
 		AutomaticSize = Enum.AutomaticSize.Y,
@@ -15359,6 +15468,7 @@ function Notify:push(spec: { [any]: any }): string
 	end
 
 	local toast = buildToast(self, spec)
+	toast.id = id
 	table.insert(self._queue, toast)
 	self:_pump()
 

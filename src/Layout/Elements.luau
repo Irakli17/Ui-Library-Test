@@ -330,8 +330,12 @@ function Elements.image(spec: any, context: any): any
 			Parent = frame,
 		})
 		Util.gradient(caption, {
+			-- The scrim ramps to 0.6 and then holds: a keypoint array has to reach
+			-- time 1, so the hold is written as its own keypoint rather than left
+			-- implicit.
 			{ Time = 0, Color = Color3.new(0, 0, 0), Transparency = 0.35 },
 			{ Time = 0.6, Color = Color3.new(0, 0, 0), Transparency = 0.9 },
+			{ Time = 1, Color = Color3.new(0, 0, 0), Transparency = 0.9 },
 		}, 90)
 	end
 

@@ -75,12 +75,14 @@ function CommandPalette.new(context: { [any]: any })
 		self:Close()
 	end)
 
-	local panel = Util.frame({
+	-- A CanvasGroup: the palette fades in and out as one object.
+	local panel = Util.group({
 		Name = "Panel",
 		AnchorPoint = Vector2.new(0.5, 0),
 		Position = UDim2.new(0.5, 0, 0, 96),
 		Size = UDim2.fromOffset(440, 52),
 		BackgroundColor3 = tokens.elevated,
+		BackgroundTransparency = 0,
 		ClipsDescendants = true,
 		ZIndex = 810,
 		Parent = root,
@@ -300,7 +302,10 @@ function CommandPalette.new(context: { [any]: any })
 			end
 			row.frame.Visible = true
 			local active = index == self._highlight
-			row.label.Text = result.command.Name
+			-- `Label` is the documented field (`Add({ Label, Hint, Run })`);
+			-- `Name` is accepted as an alias. Reading `Name` alone left every
+			-- row blank and threw `string expected, got nil` on a live client.
+			row.label.Text = result.command.Label or result.command.Name or ""
 			row.section.Text = result.command.Section or ""
 			Motion.tween(row.frame, {
 				BackgroundTransparency = active and 0 or 1,
@@ -339,7 +344,7 @@ function CommandPalette.new(context: { [any]: any })
 			end
 		else
 			for _, command in ipairs(self._commands) do
-				local haystack = command.Name
+				local haystack = (command.Label or command.Name or "")
 					.. (command.Section and (" " .. command.Section) or "")
 					.. (command.Description and (" " .. command.Description) or "")
 				local score = Util.fuzzyMatch(query, haystack)

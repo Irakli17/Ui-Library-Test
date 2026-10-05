@@ -7,9 +7,17 @@
 #   unit         the engine, headless, against the mock runtime
 #   verify-dist  the shipped bytes, loaded via `loadstring`, no `script`
 #
-# The last one is the gate that matters for the distribution model: it is
-# the only check that would fail if the file stopped working when fetched
-# from a URL.
+# and three that guard the things that only break in real use:
+#
+#   verify-http  the artifacts served over HTTP, byte-identical, then run
+#   docs-check   the documentation's own contract with its scripts
+#   repo-audit   the repository is uploadable as-is and ships no `script`
+#
+# verify-dist is the gate that matters for the distribution model: it is the
+# only check that fails if the file stops working when fetched from a URL.
+# `npm run test:remote` complements it outside CI by comparing the published
+# URLs against this checkout — a stale upload passes every gate here and
+# still fails for every player.
 
 name: ci
 
@@ -48,3 +56,12 @@ jobs:
 
       - name: The root bundle matches the canonical one
         run: cmp Vantage.luau dist/Vantage.luau
+
+      - name: Loadstring over real HTTP
+        run: node tools/verify-http.mjs
+
+      - name: Documentation contract
+        run: node tools/docs-check.mjs
+
+      - name: Repository is uploadable as-is
+        run: node tools/repo-audit.mjs

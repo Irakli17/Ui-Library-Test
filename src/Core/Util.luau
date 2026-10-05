@@ -493,12 +493,25 @@ end
 --- `properties` is assigned verbatim; `children` is an array.
 function Util.create(className: string, properties: { [string]: any }?, children: { any }?): any
 	local instance = Instance.new(className)
+	local fontKey: string? = nil
 	if properties then
 		for key, value in pairs(properties) do
 			if key ~= "Parent" and value ~= nil then
-				instance[key] = value
+				if key == "Font" and type(value) == "string" then
+					-- A `Font` in a spec is a key into the font stack, not an enum.
+					-- The engine's Font property only accepts an Enum.Font, and
+					-- assigning the key itself throws
+					-- `Invalid value "display" for enum Font` — so the key is
+					-- resolved through the stack instead of being forwarded.
+					fontKey = value
+				else
+					instance[key] = value
+				end
 			end
 		end
+	end
+	if fontKey then
+		Util.applyFont(instance, fontKey)
 	end
 	if children then
 		for _, child in ipairs(children) do
@@ -526,6 +539,24 @@ function Util.row(properties: { [string]: any }?, children: { any }?): any
 	local merged = Util.copy(properties or {})
 	merged.BackgroundTransparency = merged.BackgroundTransparency or 1
 	return Util.frame(merged, children)
+end
+
+--- A container that fades as a single object.
+---
+--- `GroupTransparency` is a `CanvasGroup` property: on a Frame the engine
+--- throws `GroupTransparency is not a valid member of Frame`, which is how a
+--- fade that looked fine in every offline test threw inside the loading
+--- screen's worker on a real client. Anything the library fades as a group —
+--- toast cards, the palette, modal panels, sections, the logo, the loading
+--- column — is therefore built as a CanvasGroup rather than a Frame with a
+--- property it does not have. Background stays transparent unless asked,
+--- matching `Util.row`, so a swap is geometry- and colour-neutral.
+function Util.group(properties: { [string]: any }?, children: { any }?): any
+	local merged = Util.copy(properties or {})
+	merged.BackgroundTransparency = merged.BackgroundTransparency or 1
+	local group = Util.create("CanvasGroup", merged, children)
+	group.BorderSizePixel = 0
+	return group
 end
 
 --- Text factory with the Vantage typography defaults applied.
@@ -588,6 +619,17 @@ end
 ---
 --- `keypoints` is a list of `{ Time?, Color, Transparency? }`. Time
 --- defaults to an even spread across the gradient.
+---
+--- The engine's keypoint arrays are strict: at least two keypoints, the first
+--- at exactly time 0, the last at exactly time 1, ordered by time, every entry
+--- a real keypoint. A `UIGradient` built any other way is not merely ugly —
+--- `ColorSequence.new` throws, and a throw inside a screen build strands the
+--- player on a half-painted backdrop, which is exactly how a single call with
+--- parallel colour/time arrays took down every entry point on the live client.
+--- So the times are normalised here, and every caller gets a legal sequence.
+--- A single keypoint is expressed through the two-keypoint overloads, because
+--- `ColorSequence.new({ keypoint })` is itself rejected (`requires at least 2
+--- keypoints`).
 function Util.gradient(instance: any, keypoints: { any }, rotation: number?, enabled: boolean?): any
 	local gradient = instance:FindFirstChildOfClass("UIGradient")
 	if not gradient then
@@ -601,23 +643,41 @@ function Util.gradient(instance: any, keypoints: { any }, rotation: number?, ena
 		return gradient
 	end
 
-	local colors = table.create(count)
-	local colorTimes = table.create(count)
-	local stops = table.create(count)
-
+	local times = table.create(count)
+	local previous = 0
 	for index, keypoint in ipairs(keypoints) do
 		local time = keypoint.Time
 		if time == nil then
 			time = count == 1 and 0 or (index - 1) / (count - 1)
 		end
-		colors[index] = keypoint.Color or Color3.new(1, 1, 1)
-		colorTimes[index] = time
-		stops[index] = NumberSequenceKeypoint.new(time, keypoint.Transparency or 0)
+		time = Util.clamp01(time)
+		if time < previous then
+			time = previous
+		end
+		previous = time
+		times[index] = time
 	end
 
-	gradient.Color = ColorSequence.new(colors, colorTimes)
-	gradient.Transparency = count == 1 and NumberSequence.new(stops[1].Value)
-		or NumberSequence.new(stops)
+	if count == 1 then
+		-- Flat gradient: the overloads the engine accepts for one colour.
+		gradient.Color = ColorSequence.new(keypoints[1].Color or Color3.new(1, 1, 1))
+		gradient.Transparency = NumberSequence.new(Util.clamp01(keypoints[1].Transparency or 0))
+	else
+		-- Anchor the ends, which every keypoint array has to touch exactly.
+		times[1] = 0
+		times[count] = 1
+
+		local colorStops = table.create(count)
+		local stops = table.create(count)
+		for index = 1, count do
+			colorStops[index] = ColorSequenceKeypoint.new(times[index], keypoints[index].Color or Color3.new(1, 1, 1))
+			stops[index] = NumberSequenceKeypoint.new(times[index], Util.clamp01(keypoints[index].Transparency or 0))
+		end
+
+		gradient.Color = ColorSequence.new(colorStops)
+		gradient.Transparency = NumberSequence.new(stops)
+	end
+
 	gradient.Rotation = rotation or 0
 	gradient.Enabled = enabled ~= false
 	return gradient

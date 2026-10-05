@@ -39,7 +39,9 @@ function Section.new(spec: { [any]: any }, context: { [any]: any })
 
 	self.Toggled = Signal.new("Section.Toggled")
 
-	local root = Util.row({
+	-- A CanvasGroup, because the window fades a whole section on tab switch
+	-- through the group's transparency.
+	local root = Util.group({
 		Name = "VantageSection",
 		Size = UDim2.new(1, 0, 0, 0),
 		AutomaticSize = Enum.AutomaticSize.Y,

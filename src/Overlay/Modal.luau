@@ -84,13 +84,15 @@ function Modal.new(spec: { [any]: any }, context: { [any]: any })
 
 	-- Panel ---------------------------------------------------------------
 	local width = spec.Width or 340
-	local panel = Util.frame({
+	-- A CanvasGroup: the dialog fades in and out as one object.
+	local panel = Util.group({
 		Name = "Panel",
 		AnchorPoint = Vector2.new(0.5, 0.5),
 		Position = UDim2.fromScale(0.5, 0.5),
 		Size = UDim2.fromOffset(width, 0),
 		AutomaticSize = Enum.AutomaticSize.Y,
 		BackgroundColor3 = tokens.elevated,
+		BackgroundTransparency = 0,
 		ZIndex = 510,
 		Parent = backdrop,
 	})

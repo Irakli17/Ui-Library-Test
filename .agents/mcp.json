@@ -1,0 +1,12 @@
+{
+  "mcpServers": {
+    "real": {
+      "command": "C:\\Users\\irakl\\AppData\\Local\\Real\\data\\mcp\\real-mcp.exe",
+      "args": []
+    },
+    "context7": {
+      "type": "http",
+      "url": "https://mcp.context7.com/mcp"
+    }
+  }
+}

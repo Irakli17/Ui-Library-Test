@@ -89,13 +89,16 @@ local function buildToast(self: any, spec: any): any
 	local tone = TONES[spec.Tone or spec.Type or "default"] or TONES.default
 
 	local toast = {}
-	toast.id = spec.Id or ("toast-" .. tostring(self._counter + 1))
+	-- The id is assigned by `push`, which is also what returns it to the
+	-- caller. Inventing a second id here meant the string `push` handed back
+	-- never matched the toast, so `dismiss(id)` silently did nothing.
 	toast.key = spec.Key
 	toast.count = 1
 	toast._spec = spec
 	toast._buttons = {}
 
-	local card = Util.frame({
+	-- A CanvasGroup: a toast fades in and out as one object.
+	local card = Util.group({
 		Name = "VantageToast",
 		Size = UDim2.new(1, 0, 0, 0),
 		AutomaticSize = Enum.AutomaticSize.Y,
@@ -315,6 +318,7 @@ function Notify:push(spec: { [any]: any }): string
 	end
 
 	local toast = buildToast(self, spec)
+	toast.id = id
 	table.insert(self._queue, toast)
 	self:_pump()
 

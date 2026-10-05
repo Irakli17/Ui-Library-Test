@@ -82,6 +82,33 @@ function Keybind.format(input: any): string
 	return MOUSE_NAMES[input.UserInputType] or input.UserInputType.Name
 end
 
+--- Normalises a binding into the chord string the library stores.
+---
+--- The documented form is a string (`"LeftShift+T"`), but an
+--- `Enum.KeyCode` — and a list of them — is the natural Roblox spelling, and
+--- passing one used to throw `Unable to assign property Text. string expected,
+--- got EnumItem` the moment the label was written, because the enum reached
+--- `Text` unchanged. Both forms are accepted now.
+function Keybind.chordOf(value: any): string
+	if value == nil then
+		return ""
+	end
+	if typeof(value) == "EnumItem" then
+		return value.Name
+	end
+	if type(value) == "table" then
+		local parts = {}
+		for _, entry in ipairs(value) do
+			local part = Keybind.chordOf(entry)
+			if part ~= "" then
+				table.insert(parts, part)
+			end
+		end
+		return table.concat(parts, "+")
+	end
+	return tostring(value)
+end
+
 --- @param spec { Name, Description?, Icon?, Value?: string, Callback?, Disabled?, AllowMouse?, AllowGamepad?, Tooltip? }
 function Keybind.new(spec: { [any]: any }, context: { [any]: any })
 	local ctx = context or {}
@@ -91,7 +118,7 @@ function Keybind.new(spec: { [any]: any }, context: { [any]: any })
 		_spec = spec,
 		_maid = ctx.maid,
 		_tokens = tokens,
-		_value = spec.Value or "",
+		_value = Keybind.chordOf(spec.Value),
 		_capturing = false,
 		_enabled = spec.Disabled ~= true,
 	}, Keybind)
@@ -307,8 +334,10 @@ function Keybind:setLabelText(value: string)
 	self.Label.TextColor3 = self._tokens[bound and "text" or "textDim"]
 end
 
---- Binds a value. `fromUser` fires the callback.
-function Keybind:Set(value: string, fromUser: boolean?)
+--- Binds a value. `fromUser` fires the callback. Accepts a chord string, an
+--- `Enum.KeyCode`, or a list of key codes (see `Keybind.chordOf`).
+function Keybind:Set(value: any, fromUser: boolean?)
+	value = Keybind.chordOf(value)
 	if self._value == value and not fromUser then
 		return self
 	end

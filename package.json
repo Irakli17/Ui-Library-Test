@@ -17,9 +17,13 @@
     "test:unit": "node tools/test.mjs",
     "test:dist": "node tools/verify-dist.mjs",
     "test:dist:min": "node tools/verify-dist.mjs --min",
+    "test:http": "node tools/verify-http.mjs",
+    "test:remote": "node tools/verify-remote.mjs",
+    "check:docs": "node tools/docs-check.mjs",
+    "check:repo": "node tools/repo-audit.mjs",
     "analyze": "bash tools/analyze.sh",
     "sourcemap": "node tools/sourcemap.mjs",
     "toolchain": "bash tools/install-toolchain.sh",
-    "verify": "npm run audit && npm run check:bundle && npm run test && npm run test:dist"
+    "verify": "npm run audit && npm run check:bundle && npm run test && npm run test:dist && npm run test:http && npm run check:docs && npm run check:repo"
   }
 }

@@ -43,14 +43,15 @@ function read(path) {
 	return readFileSync(path, "utf8");
 }
 
-/* Ensure the bundle is current. */
-if (!existsSync(join(ROOT, "dist", "Vantage.luau"))) {
-	const bundle = spawnSync(process.execPath, [join(ROOT, "tools", "bundle.mjs")], {
-		cwd: ROOT,
-		stdio: "inherit",
-	});
-	if (bundle.status !== 0) process.exit(bundle.status ?? 1);
-}
+/* The suite executes dist/Vantage.luau, so that artifact is rebuilt from src/
+ * on every run. Building it only when it is missing means a run after an edit
+ * tests the previous build — a stale artifact can pass while the current
+ * source is broken, which is precisely how a live-only failure hides. */
+const bundle = spawnSync(process.execPath, [join(ROOT, "tools", "bundle.mjs")], {
+	cwd: ROOT,
+	stdio: "inherit",
+});
+if (bundle.status !== 0) process.exit(bundle.status ?? 1);
 
 const specs = readdirSync(join(ROOT, "tests", "Specs"))
 	.filter((name) => name.endsWith(".luau"))

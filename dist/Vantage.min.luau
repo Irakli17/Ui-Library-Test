@@ -2258,12 +2258,21 @@ end
 
 function Util.create(className: string, properties: { [string]: any }?, children: { any }?): any
 local instance = Instance.new(className)
+local fontKey: string? = nil
 if properties then
 for key, value in pairs(properties) do
 if key ~= "Parent" and value ~= nil then
+if key == "Font" and type(value) == "string" then
+
+fontKey = value
+else
 instance[key] = value
 end
 end
+end
+end
+if fontKey then
+Util.applyFont(instance, fontKey)
 end
 if children then
 for _, child in ipairs(children) do
@@ -2289,6 +2298,14 @@ function Util.row(properties: { [string]: any }?, children: { any }?): any
 local merged = Util.copy(properties or {})
 merged.BackgroundTransparency = merged.BackgroundTransparency or 1
 return Util.frame(merged, children)
+end
+
+function Util.group(properties: { [string]: any }?, children: { any }?): any
+local merged = Util.copy(properties or {})
+merged.BackgroundTransparency = merged.BackgroundTransparency or 1
+local group = Util.create("CanvasGroup", merged, children)
+group.BorderSizePixel = 0
+return group
 end
 
 function Util.text(properties: { [string]: any }?, children: { any }?): any
@@ -2355,23 +2372,41 @@ gradient.Enabled = false
 return gradient
 end
 
-local colors = table.create(count)
-local colorTimes = table.create(count)
-local stops = table.create(count)
-
+local times = table.create(count)
+local previous = 0
 for index, keypoint in ipairs(keypoints) do
 local time = keypoint.Time
 if time == nil then
 time = count == 1 and 0 or (index - 1) / (count - 1)
 end
-colors[index] = keypoint.Color or Color3.new(1, 1, 1)
-colorTimes[index] = time
-stops[index] = NumberSequenceKeypoint.new(time, keypoint.Transparency or 0)
+time = Util.clamp01(time)
+if time < previous then
+time = previous
+end
+previous = time
+times[index] = time
 end
 
-gradient.Color = ColorSequence.new(colors, colorTimes)
-gradient.Transparency = count == 1 and NumberSequence.new(stops[1].Value)
-or NumberSequence.new(stops)
+if count == 1 then
+
+gradient.Color = ColorSequence.new(keypoints[1].Color or Color3.new(1, 1, 1))
+gradient.Transparency = NumberSequence.new(Util.clamp01(keypoints[1].Transparency or 0))
+else
+
+times[1] = 0
+times[count] = 1
+
+local colorStops = table.create(count)
+local stops = table.create(count)
+for index = 1, count do
+colorStops[index] = ColorSequenceKeypoint.new(times[index], keypoints[index].Color or Color3.new(1, 1, 1))
+stops[index] = NumberSequenceKeypoint.new(times[index], Util.clamp01(keypoints[index].Transparency or 0))
+end
+
+gradient.Color = ColorSequence.new(colorStops)
+gradient.Transparency = NumberSequence.new(stops)
+end
+
 gradient.Rotation = rotation or 0
 gradient.Enabled = enabled ~= false
 return gradient
@@ -4304,7 +4339,7 @@ _opacity = 1,
 _maid = context.maid,
 }, LogoWave)
 
-local container = Util.frame({
+local container = Util.group({
 Name = "VantageLogoWave",
 Size = UDim2.fromOffset(size, size),
 BackgroundTransparency = 1,
@@ -4778,7 +4813,7 @@ Util.gradient(vignette, {
 }, 90)
 self._vignette = vignette
 
-local left = Util.row({
+local left = Util.group({
 Name = "LeftColumn",
 AnchorPoint = Vector2.new(0, 1),
 Position = UDim2.new(0, 0, 1, 0),
@@ -4903,7 +4938,7 @@ Parent = tipHolder,
 })
 self._tipLabel = tipLabel
 
-local logoBlock = Util.row({
+local logoBlock = Util.group({
 Name = "LogoBlock",
 AnchorPoint = Vector2.new(1, 1),
 Position = UDim2.new(1, 0, 1, 0),
@@ -4977,7 +5012,7 @@ self.Logo = wave
 local rail
 local railFill
 if options.ShowRail ~= false then
-rail = Util.frame({
+rail = Util.group({
 Name = "Rail",
 AnchorPoint = Vector2.new(0, 1),
 Position = UDim2.new(0, 0, 1, 0),
@@ -5019,7 +5054,7 @@ end
 self._rail = rail
 self._railFill = railFill
 
-local continueHolder = Util.row({
+local continueHolder = Util.group({
 Name = "Continue",
 AnchorPoint = Vector2.new(0.5, 1),
 Position = UDim2.new(0.5, 0, 1, -34),
@@ -5859,8 +5894,10 @@ Position = UDim2.fromOffset(12, 0),
 Parent = frame,
 })
 Util.gradient(caption, {
+
 { Time = 0, Color = Color3.new(0, 0, 0), Transparency = 0.35 },
 { Time = 0.6, Color = Color3.new(0, 0, 0), Transparency = 0.9 },
+{ Time = 1, Color = Color3.new(0, 0, 0), Transparency = 0.9 },
 }, 90)
 end
 
@@ -9334,6 +9371,26 @@ end
 return MOUSE_NAMES[input.UserInputType] or input.UserInputType.Name
 end
 
+function Keybind.chordOf(value: any): string
+if value == nil then
+return ""
+end
+if typeof(value) == "EnumItem" then
+return value.Name
+end
+if type(value) == "table" then
+local parts = {}
+for _, entry in ipairs(value) do
+local part = Keybind.chordOf(entry)
+if part ~= "" then
+table.insert(parts, part)
+end
+end
+return table.concat(parts, "+")
+end
+return tostring(value)
+end
+
 function Keybind.new(spec: { [any]: any }, context: { [any]: any })
 local ctx = context or {}
 local tokens = Theme.current()
@@ -9342,7 +9399,7 @@ local self = setmetatable({
 _spec = spec,
 _maid = ctx.maid,
 _tokens = tokens,
-_value = spec.Value or "",
+_value = Keybind.chordOf(spec.Value),
 _capturing = false,
 _enabled = spec.Disabled ~= true,
 }, Keybind)
@@ -9556,7 +9613,8 @@ self.Label.Text = bound and value or "Unbound"
 self.Label.TextColor3 = self._tokens[bound and "text" or "textDim"]
 end
 
-function Keybind:Set(value: string, fromUser: boolean?)
+function Keybind:Set(value: any, fromUser: boolean?)
+value = Keybind.chordOf(value)
 if self._value == value and not fromUser then
 return self
 end
@@ -10252,7 +10310,7 @@ _tab = context.tab,
 
 self.Toggled = Signal.new("Section.Toggled")
 
-local root = Util.row({
+local root = Util.group({
 Name = "VantageSection",
 Size = UDim2.new(1, 0, 0, 0),
 AutomaticSize = Enum.AutomaticSize.Y,
@@ -12874,12 +12932,13 @@ blocker.Activated:Connect(function()
 self:Close()
 end)
 
-local panel = Util.frame({
+local panel = Util.group({
 Name = "Panel",
 AnchorPoint = Vector2.new(0.5, 0),
 Position = UDim2.new(0.5, 0, 0, 96),
 Size = UDim2.fromOffset(440, 52),
 BackgroundColor3 = tokens.elevated,
+BackgroundTransparency = 0,
 ClipsDescendants = true,
 ZIndex = 810,
 Parent = root,
@@ -13091,7 +13150,8 @@ continue
 end
 row.frame.Visible = true
 local active = index == self._highlight
-row.label.Text = result.command.Name
+
+row.label.Text = result.command.Label or result.command.Name or ""
 row.section.Text = result.command.Section or ""
 Motion.tween(row.frame, {
 BackgroundTransparency = active and 0 or 1,
@@ -13130,7 +13190,7 @@ end
 end
 else
 for _, command in ipairs(self._commands) do
-local haystack = command.Name
+local haystack = (command.Label or command.Name or "")
 .. (command.Section and (" " .. command.Section) or "")
 .. (command.Description and (" " .. command.Description) or "")
 local score = Util.fuzzyMatch(query, haystack)
@@ -13391,13 +13451,15 @@ end
 end)
 
 local width = spec.Width or 340
-local panel = Util.frame({
+
+local panel = Util.group({
 Name = "Panel",
 AnchorPoint = Vector2.new(0.5, 0.5),
 Position = UDim2.fromScale(0.5, 0.5),
 Size = UDim2.fromOffset(width, 0),
 AutomaticSize = Enum.AutomaticSize.Y,
 BackgroundColor3 = tokens.elevated,
+BackgroundTransparency = 0,
 ZIndex = 510,
 Parent = backdrop,
 })
@@ -13736,13 +13798,13 @@ local tokens = self._tokens
 local tone = TONES[spec.Tone or spec.Type or "default"] or TONES.default
 
 local toast = {}
-toast.id = spec.Id or ("toast-" .. tostring(self._counter + 1))
+
 toast.key = spec.Key
 toast.count = 1
 toast._spec = spec
 toast._buttons = {}
 
-local card = Util.frame({
+local card = Util.group({
 Name = "VantageToast",
 Size = UDim2.new(1, 0, 0, 0),
 AutomaticSize = Enum.AutomaticSize.Y,
@@ -13955,6 +14017,7 @@ return existing.id
 end
 
 local toast = buildToast(self, spec)
+toast.id = id
 table.insert(self._queue, toast)
 self:_pump()
 

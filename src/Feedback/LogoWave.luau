@@ -105,7 +105,11 @@ function LogoWave.new(spec: { [any]: any }, context: { [any]: any })
 		_maid = context.maid,
 	}, LogoWave)
 
-	local container = Util.frame({
+	-- A CanvasGroup, because this container is faded as one object: the mark
+	-- is composited from many slices, and only a CanvasGroup can fade them
+	-- together (its GroupTransparency is the property the fallback path below
+	-- writes).
+	local container = Util.group({
 		Name = "VantageLogoWave",
 		Size = UDim2.fromOffset(size, size),
 		BackgroundTransparency = 1,

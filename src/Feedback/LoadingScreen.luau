@@ -223,7 +223,7 @@ function LoadingScreen.new(spec: { [any]: any }): any
 	self._vignette = vignette
 
 	-- Left column: percentage, phase, tip --------------------------------
-	local left = Util.row({
+	local left = Util.group({
 		Name = "LeftColumn",
 		AnchorPoint = Vector2.new(0, 1),
 		Position = UDim2.new(0, 0, 1, 0),
@@ -349,7 +349,7 @@ function LoadingScreen.new(spec: { [any]: any }): any
 	self._tipLabel = tipLabel
 
 	-- Right column: logo block --------------------------------------------
-	local logoBlock = Util.row({
+	local logoBlock = Util.group({
 		Name = "LogoBlock",
 		AnchorPoint = Vector2.new(1, 1),
 		Position = UDim2.new(1, 0, 1, 0),
@@ -425,7 +425,7 @@ function LoadingScreen.new(spec: { [any]: any }): any
 	local rail
 	local railFill
 	if options.ShowRail ~= false then
-		rail = Util.frame({
+		rail = Util.group({
 			Name = "Rail",
 			AnchorPoint = Vector2.new(0, 1),
 			Position = UDim2.new(0, 0, 1, 0),
@@ -470,7 +470,7 @@ function LoadingScreen.new(spec: { [any]: any }): any
 	self._railFill = railFill
 
 	-- Continue affordance ----------------------------------------------------
-	local continueHolder = Util.row({
+	local continueHolder = Util.group({
 		Name = "Continue",
 		AnchorPoint = Vector2.new(0.5, 1),
 		Position = UDim2.new(0.5, 0, 1, -34),

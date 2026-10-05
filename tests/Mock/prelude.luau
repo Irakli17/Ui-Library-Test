@@ -186,52 +186,101 @@ CFrame.identity = CFrame.new(0, 0, 0)
 
 --[[ Sequences ------------------------------------------------------ ]]
 
+-- The rules below are the engine's own, measured on a live client instead of
+-- assumed. Both sequences accept a scalar (or two), or an array of keypoints:
+--
+--   ColorSequence.new(color) / (colorA, colorB) / ({ keypoint, keypoint })
+--   NumberSequence.new(value) / (valueA, valueB) / ({ keypoint, keypoint })
+--
+-- and the array form is strict: at least two entries, every entry a real
+-- keypoint, times ordered, the first at exactly 0 and the last at exactly 1.
+-- There is no (colors, times) overload -- parallel arrays throw
+-- `expected 'ColorSequenceKeypoint' at index 1`, and that is the call the old,
+-- lenient mock waved through while it killed every load method on the real
+-- client. Extra arguments after the first table are ignored by the engine, and
+-- are ignored here, so the mock stays honest in both directions.
+
 local ColorSequenceKeypointMT = class("ColorSequenceKeypoint", { "Time", "Value" })
 ColorSequenceKeypoint = {}
 function ColorSequenceKeypoint.new(t, value)
+	if type(t) ~= "number" then
+		error("invalid argument #1 to 'new' (number expected)", 2)
+	end
+	if type(value) ~= "table" or getmetatable(value) ~= Color3MT then
+		error("could not parse arg #2 to ColorSequenceKeypoint.new(), Color3 expected.", 2)
+	end
 	return setmetatable({ Time = t, Value = value }, ColorSequenceKeypointMT)
-end
-
-local ColorSequenceMT = class("ColorSequence", { "Keypoints" })
-ColorSequence = {}
-function ColorSequence.new(a, b)
-	if type(a) == "table" and a.R then
-		return setmetatable({
-			Keypoints = {
-				ColorSequenceKeypoint.new(0, a),
-				ColorSequenceKeypoint.new(1, b or a),
-			},
-		}, ColorSequenceMT)
-	end
-	local points = {}
-	for index, color in ipairs(a) do
-		points[index] = ColorSequenceKeypoint.new(b and b[index] or (index - 1) / (#a - 1), color)
-	end
-	return setmetatable({ Keypoints = points }, ColorSequenceMT)
 end
 
 local NumberSequenceKeypointMT = class("NumberSequenceKeypoint", { "Time", "Value", "Envelope" })
 NumberSequenceKeypoint = {}
 function NumberSequenceKeypoint.new(t, value, envelope)
+	if type(t) ~= "number" then
+		error("invalid argument #1 to 'new' (number expected)", 2)
+	end
+	if type(value) ~= "number" then
+		error("could not parse arg #2 to NumberSequenceKeypoint.new(), number expected.", 2)
+	end
 	return setmetatable({ Time = t, Value = value, Envelope = envelope or 0 }, NumberSequenceKeypointMT)
+end
+
+--- Validates a keypoint array the way the engine does, and returns a copy.
+local function keypointArray(value, keypointMT, keypointName, sequenceName)
+	if type(value) ~= "table" then
+		error("table expected.", 2)
+	end
+	local points = {}
+	for index, keypoint in ipairs(value) do
+		if type(keypoint) ~= "table" or getmetatable(keypoint) ~= keypointMT then
+			error(string.format("%s.new(): expected '%s' at index %d.", sequenceName, keypointName, index), 2)
+		end
+		points[index] = keypoint
+	end
+	if #points < 2 then
+		error(string.format("%s.new(): requires at least 2 keypoints", sequenceName), 2)
+	end
+	for index = 2, #points do
+		if points[index].Time < points[index - 1].Time then
+			error(string.format("%s.new(): all keypoints must be ordered by time", sequenceName), 2)
+		end
+	end
+	if points[1].Time ~= 0 then
+		error(string.format("%s must start at time=0.0", sequenceName), 2)
+	end
+	if points[#points].Time ~= 1 then
+		error(string.format("%s must end at time=1.0", sequenceName), 2)
+	end
+	return points
+end
+
+local ColorSequenceMT = class("ColorSequence", { "Keypoints" })
+ColorSequence = {}
+function ColorSequence.new(a, b)
+	if type(a) == "table" and getmetatable(a) == Color3MT then
+		local second = b ~= nil and getmetatable(b) == Color3MT and b or a
+		return setmetatable({
+			Keypoints = { ColorSequenceKeypoint.new(0, a), ColorSequenceKeypoint.new(1, second) },
+		}, ColorSequenceMT)
+	end
+	return setmetatable(
+		{ Keypoints = keypointArray(a, ColorSequenceKeypointMT, "ColorSequenceKeypoint", "ColorSequence") },
+		ColorSequenceMT
+	)
 end
 
 local NumberSequenceMT = class("NumberSequence", { "Keypoints" })
 NumberSequence = {}
 function NumberSequence.new(a, b)
 	if type(a) == "number" then
+		local second = type(b) == "number" and b or a
 		return setmetatable({
-			Keypoints = {
-				NumberSequenceKeypoint.new(0, a),
-				NumberSequenceKeypoint.new(1, b or a),
-			},
+			Keypoints = { NumberSequenceKeypoint.new(0, a), NumberSequenceKeypoint.new(1, second) },
 		}, NumberSequenceMT)
 	end
-	local points = {}
-	for index, point in ipairs(a) do
-		points[index] = point
-	end
-	return setmetatable({ Keypoints = points }, NumberSequenceMT)
+	return setmetatable(
+		{ Keypoints = keypointArray(a, NumberSequenceKeypointMT, "NumberSequenceKeypoint", "NumberSequence") },
+		NumberSequenceMT
+	)
 end
 
 --[[ Enums ---------------------------------------------------------- ]]
@@ -352,7 +401,7 @@ for _, spec in ipairs({
 	{ "ZIndexBehavior", "Global Sibling" },
 	{ "ScrollingDirection", "X Y XY" },
 	{ "ElasticBehavior", "Never WhenScrollable Always" },
-	{ "AssetFetchStatus", "Success Failure TimedOut Unknown" },
+	{ "AssetFetchStatus", "None Success Loading Failed TimedOut" },
 	{ "UIFlexMode", "None Grow Shrink Fill Custom" },
 	{ "HumanoidRigType", "R6 R15" },
 	{ "RunContext", "Legacy Client Server Plugin" },
@@ -665,6 +714,15 @@ local DEFAULTS = {
 		Size = UDim2.fromOffset(100, 100), Position = UDim2.fromOffset(0, 0),
 	},
 	ScreenGui = { Enabled = true, DisplayOrder = 0, IgnoreGuiInset = false, ResetOnSpawn = true, Visible = true },
+	-- The one class with GroupTransparency. A Frame does not have the
+	-- property, and the mock setter below enforces that, because a fade that
+	-- silently writes it to a Frame is invisible here and fatal on the client.
+	CanvasGroup = {
+		GroupTransparency = 0, BackgroundTransparency = 0, BackgroundColor3 = Color3.new(1, 1, 1),
+		Size = UDim2.fromOffset(100, 100), Position = UDim2.fromOffset(0, 0),
+		AnchorPoint = Vector2.new(0, 0), Visible = true, ZIndex = 1,
+		ClipsDescendants = false, AutomaticSize = Enum.AutomaticSize.None,
+	},
 	UICorner = { CornerRadius = UDim.new(0, 0) },
 	UIStroke = { Color = Color3.new(0, 0, 0), Thickness = 1, Transparency = 0, ApplyStrokeMode = Enum.ApplyStrokeMode.Border, LineJoinMode = Enum.LineJoinMode.Round },
 	UIGradient = { Enabled = true, Rotation = 0, Offset = Vector2.new(0, 0) },
@@ -790,6 +848,60 @@ instanceMT.__newindex = function(self, key, value)
 			ancestry:Fire(self, value)
 		end
 		return
+	end
+
+	-- Enum-typed properties are checked the way the engine checks them: the
+	-- value has to be an EnumItem of the enum the class declares, or the write
+	-- throws `Unable to assign property Font. Invalid value "display" for enum
+	-- Font`. This is where a lenient mock does its worst damage — the spec's
+	-- font-stack key reached a real screen build and killed it, while every
+	-- offline test stayed green. The rule is derived from the class defaults
+	-- above, so it applies to every enum property the same way.
+	-- GroupTransparency only exists on CanvasGroup. Assigning it to a Frame
+	-- throws `GroupTransparency is not a valid member of Frame` on the live
+	-- client — inside the loading screen's worker, where it took the fade with
+	-- it — and the old setter accepted the write for any class.
+	if key == "GroupTransparency" and rawget(self, "_className") ~= "CanvasGroup" then
+		error(
+			string.format("GroupTransparency is not a valid member of %s", tostring(rawget(self, "_className"))),
+			2
+		)
+	end
+
+	local declared = DEFAULTS[rawget(self, "_className")]
+	local expected = declared and declared[key]
+
+	-- String-typed properties (Text, Image, Name …) take a string and nothing
+	-- else — not an enum, and not nil. The engine throws
+	-- `Unable to assign property Text. string expected, got EnumItem` (a
+	-- binding whose key reached a label) and `... got nil` (a command row
+	-- whose documented field was read by the wrong name). Both are invisible
+	-- on a permissive mock and fatal on a live client.
+	if type(expected) == "string" and type(value) ~= "string" then
+		error(
+			string.format("Unable to assign property %s. string expected, got %s", key, typeof(value)),
+			2
+		)
+	end
+
+	if value ~= nil then
+		if typeof(expected) == "EnumItem" then
+			local matches = false
+			if typeof(value) == "EnumItem" then
+				matches = enumTypeName(rawget(value, "EnumType")) == enumTypeName(rawget(expected, "EnumType"))
+			end
+			if not matches then
+				error(
+					string.format(
+						"Unable to assign property %s. Invalid value %q for enum %s",
+						key,
+						tostring(value),
+						enumTypeName(rawget(expected, "EnumType"))
+					),
+					2
+				)
+			end
+		end
 	end
 
 	local previous = props[key]
