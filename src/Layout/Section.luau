@@ -69,22 +69,27 @@ function Section.new(spec: { [any]: any }, context: { [any]: any })
 	self.Card = card
 
 	-- Header ------------------------------------------------------------
+	-- Placed by hand, not by a list layout. A header is three things stacked
+	-- in a fixed-height band: the title row, an optional description, and a
+	-- click target that must cover both. A UIListLayout cannot express that
+	-- (it has no overlay child), and with one the chevron, the hit target and
+	-- the title all became siblings in the flow — which is why the section
+	-- name used to print across its own first control.
+	local headerHeight = spec.Description and 54 or 44
 	local header = Util.row({
 		Name = "Header",
-		Size = UDim2.new(1, 0, 0, spec.Description and 52 or 42),
+		Size = UDim2.new(1, 0, 0, headerHeight),
 		LayoutOrder = 1,
 		Parent = card,
 	})
-	Util.pad(header, { Left = 16, Right = 12, Top = 10, Bottom = 10 })
 	self.Header = header
-
-	local headerStack = Util.stack(header, 2)
-	headerStack.HorizontalAlignment = Enum.HorizontalAlignment.Left
 
 	local titleRow = Util.row({
 		Name = "TitleRow",
-		Size = UDim2.new(1, 0, 0, 20),
-		LayoutOrder = 1,
+		AnchorPoint = Vector2.new(0, 0),
+		Position = UDim2.fromOffset(16, spec.Description and 11 or 12),
+		Size = UDim2.new(1, -56, 0, 22),
+		ZIndex = 4,
 		Parent = header,
 	})
 	Util.list(titleRow, {
@@ -151,9 +156,10 @@ function Section.new(spec: { [any]: any }, context: { [any]: any })
 			TextXAlignment = Enum.TextXAlignment.Left,
 			TextYAlignment = Enum.TextYAlignment.Top,
 			TextWrapped = true,
-			Size = UDim2.new(1, 0, 0, 0),
+			Position = UDim2.fromOffset(16, 34),
+			Size = UDim2.new(1, -56, 0, 0),
 			AutomaticSize = Enum.AutomaticSize.Y,
-			LayoutOrder = 2,
+			ZIndex = 4,
 			Parent = header,
 		})
 		self.Description = description
@@ -162,7 +168,7 @@ function Section.new(spec: { [any]: any }, context: { [any]: any })
 	local chevronHolder = Util.row({
 		Name = "Chevron",
 		AnchorPoint = Vector2.new(1, 0.5),
-		Position = UDim2.new(1, -12, 0, spec.Description and 26 or 21),
+		Position = UDim2.new(1, -14, 0, spec.Description and 27 or 22),
 		Size = UDim2.fromOffset(14, 14),
 		ZIndex = 5,
 		Parent = header,

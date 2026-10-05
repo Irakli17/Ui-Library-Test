@@ -70,6 +70,7 @@ function Input.new(spec: { [any]: any }, context: { [any]: any })
 		Icon = spec.Icon,
 		Disabled = spec.Disabled,
 		ControlWidth = controlWidth,
+		ControlHeight = multiline and 76 or 32,
 	}, { maid = ctx.maid, parent = ctx.parent })
 	self.Field = field
 	self.Instance = field.Instance

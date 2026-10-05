@@ -68,19 +68,21 @@ Config.persistence = {
 	save = nil :: ((key: string, value: any) -> ())?,
 }
 
---- Hosting defaults applied to every `Window` unless overridden.
+--- Hosting defaults applied to every `Window` unless overridden. The
+--- window opens at a size that reads as a real application on the
+--- reference client, and never wider than the viewport allows.
 Config.defaults = {
 	theme = "obsidian",
-	size = UDim2.fromOffset(680, 440),
+	size = UDim2.fromOffset(880, 560),
 	position = UDim2.fromScale(0.5, 0.5),
 	anchor = Vector2.new(0.5, 0.5),
-	minSize = Vector2.new(420, 300),
+	minSize = Vector2.new(620, 420),
 	resizable = true,
 	draggable = true,
 	closeOnEscape = true,
-	sidebarWidth = 168,
-	titleBarHeight = 40,
-	statusBarHeight = 24,
+	sidebarWidth = 196,
+	titleBarHeight = 48,
+	statusBarHeight = 26,
 	uiScale = nil :: number?,
 }
 

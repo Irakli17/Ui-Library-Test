@@ -182,16 +182,29 @@ function Field.new(spec: { [any]: any }, context: { [any]: any })
 	})
 	self.Status = status
 
+	-- The control's box is declared by the control, never measured back into
+	-- itself: a host sized from its own AbsoluteSize is a feedback loop that
+	-- collapses to 0x0 on the first frame, which is how a switch ends up
+	-- drawn straight through its own label.
+	local declaredWidth = tonumber(spec.ControlWidth) or 0
+	local declaredHeight = tonumber(spec.ControlHeight) or tokens.controlMd
+
 	local controlHost = Util.row({
 		Name = "Control",
 		AnchorPoint = Vector2.new(1, 0),
 		Position = UDim2.new(1, 0, 0, 0),
-		Size = UDim2.new(0, spec.ControlWidth or 0, 0, 0),
-		AutomaticSize = Enum.AutomaticSize.XY,
+		Size = UDim2.fromOffset(declaredWidth, declaredHeight),
 		Parent = root,
 	})
 	controlHost.ZIndex = 3
 	self.Control = controlHost
+
+	-- Reserve the control's column immediately, from the declared width, so
+	-- the label can never be laid out under the control — not on the first
+	-- frame, and not for as long as the control reports an unmeasured size.
+	if declaredWidth > 0 then
+		infoPadding.PaddingRight = UDim.new(0, declaredWidth + Field.GAP)
+	end
 
 	-- Label hit zone: activates the control.
 	local hit = Util.create("TextButton", {
@@ -213,8 +226,11 @@ function Field.new(spec: { [any]: any }, context: { [any]: any })
 		local available = root.AbsoluteSize.X
 		local controlSize = controlHost.AbsoluteSize
 		local stacked = available > 0 and available < Field.STACK_BREAKPOINT
-		local controlWidth = controlSize.X
-		local controlHeight = controlSize.Y
+		-- Never smaller than what the control declared: a freshly parented
+		-- control reports 0x0 for a frame, and a reserve of zero is a reserve
+		-- that lets the two columns collide.
+		local controlWidth = math.max(controlSize.X, declaredWidth)
+		local controlHeight = math.max(controlSize.Y, declaredHeight)
 
 		if controlHeight <= 0 and controlWidth <= 0 then
 			return

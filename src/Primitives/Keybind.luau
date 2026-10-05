@@ -131,6 +131,7 @@ function Keybind.new(spec: { [any]: any }, context: { [any]: any })
 		Icon = spec.Icon or "gear",
 		Disabled = spec.Disabled,
 		ControlWidth = 104,
+		ControlHeight = 32,
 	}, { maid = ctx.maid, parent = ctx.parent })
 	self.Field = field
 	self.Instance = field.Instance

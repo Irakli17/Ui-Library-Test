@@ -74,17 +74,26 @@ function Tab.new(spec: { [any]: any }, context: { [any]: any })
 		Parent = root,
 	})
 	self.Scroll = scroll
-	Util.pad(scroll, { Right = 4 })
+	Util.pad(scroll, { Left = 2, Right = 2 })
 
 	local content = Util.row({
 		Name = "Content",
+		AnchorPoint = Vector2.new(0.5, 0),
+		Position = UDim2.new(0.5, 0, 0, 0),
 		Size = UDim2.new(1, 0, 0, 0),
 		AutomaticSize = Enum.AutomaticSize.Y,
-		Position = UDim2.fromOffset(0, 0),
 		Parent = scroll,
 	})
-	Util.stack(content, 14)
-	Util.pad(content, { Top = 4, Bottom = 20, Left = 0, Right = 6 })
+	Util.stack(content, 16)
+	Util.pad(content, { Top = 18, Bottom = 28, Left = 20, Right = 20 })
+	-- A settings pane stretched across 1200px loses the label/control
+	-- relationship the eye needs. The measure is capped and centred instead,
+	-- which is what makes the same section look deliberate on any window.
+	Util.create("UISizeConstraint", {
+		Name = "Measure",
+		MaxSize = Vector2.new(760, 100000),
+		Parent = content,
+	})
 	self.Content = content
 
 	self._layer = context.layer or root
@@ -120,25 +129,31 @@ function Tab:_activate(animated: boolean?)
 		self.Instance.BackgroundTransparency = 1
 		return
 	end
-	-- A short fade plus a small upward settle. Deliberately tiny: the
-	-- content is already in the right place, it just needs to land.
-	self.Instance.BackgroundTransparency = 1
-	Motion.setScale(self.Content, 1)
-	for index, section in ipairs(self._sections) do
-		local root = section.Instance
-		root.GroupTransparency = 1
-		Motion.tween(root, { GroupTransparency = 0 }, {
-			duration = 0.3,
-			easing = "enterSnap",
-			delay = math.min(index - 1, 5) * 0.035,
-		})
-		root.Position = UDim2.fromOffset(0, 8)
-		Motion.tween(root, { Position = UDim2.fromOffset(0, 0) }, {
-			duration = 0.34,
-			easing = "enterSnap",
-			delay = math.min(index - 1, 5) * 0.035,
-		})
+	-- Sections arrive in reading order, 45ms apart, each settling on an
+	-- emphasised curve rather than a linear ramp. The offset is the whole
+	-- point: a queue of identical fades reads as a slideshow, an offset
+	-- queue reads as choreography.
+	local roots = {}
+	for _, section in ipairs(self._sections) do
+		table.insert(roots, section.Instance)
 	end
+
+	Motion.stagger(roots, 0.045, function(root, index)
+		root.GroupTransparency = 1
+		root.Position = UDim2.fromOffset(0, 12)
+		if index > 7 then
+			-- Past the visible viewport, anyway: place it instead of animating
+			-- it, so a long tab does not queue thirty invisible tweens.
+			root.GroupTransparency = 0
+			root.Position = UDim2.fromOffset(0, 0)
+			return nil
+		end
+		return {
+			props = { GroupTransparency = 0, Position = UDim2.fromOffset(0, 0) },
+			duration = 0.44,
+			easing = "emphasize",
+		}
+	end)
 end
 
 function Tab:_deactivate()

@@ -14,10 +14,11 @@
 	-----------
 	    local Vantage = require(game.ReplicatedStorage.Vantage)
 
+	    -- The wave mark in the corner of the safe area while assets stream in.
 	    Vantage.LoadingScreen.Run({
 	        Assets = { "rbxassetid://0" },
 	        Logo = { Image = "rbxassetid://0" },
-	    })
+	    }).wait()
 
 	    local window = Vantage.Window.new({
 	        Name = "My Game",
@@ -225,6 +226,42 @@ function Vantage.Diagnostics()
 		breakpoint = Util.breakpoint(),
 		loadedAt = os.clock(),
 	}
+end
+
+--- The window currently on screen, if any. Vantage keeps one interface at a
+--- time: creating a second window replaces the first rather than stacking it,
+--- and re-running the same loadstring therefore never leaves two shells on
+--- top of each other.
+function Vantage.GetWindow()
+	return Window.Current()
+end
+
+--- The loading screen currently on screen, if any.
+function Vantage.GetLoadingScreen()
+	return LoadingScreen.Current()
+end
+
+--- Destroys every Vantage interface on screen — window and loading screen —
+--- whichever copy of the library created it. Safe to call more than once, and
+--- safe to call when nothing is on screen.
+function Vantage.Destroy()
+	local registry = Util.registry()
+
+	local window = registry.window
+	if window and type(window.Destroy) == "function" then
+		pcall(function()
+			window:Destroy()
+		end)
+	end
+	registry.window = nil
+
+	local loading = registry.loadingScreen
+	if loading and type(loading.Destroy) == "function" then
+		pcall(function()
+			loading:Destroy()
+		end)
+	end
+	registry.loadingScreen = nil
 end
 
 --- Every instance Vantage has tagged. Requires

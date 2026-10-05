@@ -90,6 +90,7 @@ function Slider.new(spec: { [any]: any }, context: { [any]: any })
 		Icon = spec.Icon,
 		Disabled = spec.Disabled,
 		ControlWidth = controlWidth,
+		ControlHeight = 26,
 		Align = "right",
 	}, { maid = ctx.maid, parent = ctx.parent })
 	self.Field = field

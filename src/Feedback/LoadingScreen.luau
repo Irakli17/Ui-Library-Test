@@ -2,36 +2,37 @@
 --[[
 	Vantage 1.0.0 · Feedback/LoadingScreen
 	------------------------------------------------------------------
-	A preloading screen that reports the truth and looks like it costs
-	money.
+	Preloading, without a takeover.
 
-	What it actually does:
+	This screen is one thing: the wave mark, in the bottom-right corner
+	of the safe area, moving while your assets stream in. No backdrop,
+	no full-screen panel, no progress bar across the join, no rotating
+	tips. The player's view of the world stays visible, and the screen
+	never swallows a click, because everything it draws is a passive
+	mark in a corner.
+
+	What it still does behind that mark:
 
 	· Real progress. `Spec.Assets` are streamed through
-	  `ContentProvider:PreloadAsync`, and the bar is driven by the
-	  per-asset callback rather than a timer. A fake progress bar is the
-	  single most obvious tell that an interface was not finished.
+	  `ContentProvider:PreloadAsync` and the progress is driven by the
+	  per-asset callback rather than a timer, so `OnProgress` and
+	  `Progress` report the truth even though nothing numeric is drawn.
 	· Phase reporting. Work is split into named phases with weights, so
-	  the readout says "Compiling shaders" rather than "Loading..." for
-	  four minutes.
-	· A spring-smoothed bar. Raw progress jumps in steps; the spring
-	  turns each step into a sweep, and it can never move backwards.
+	  `OnPhase` can say "Streaming assets" instead of "Loading…".
 	· Stall protection. If preloading goes quiet for `StallTimeout` the
-	  screen says so instead of freezing at 68% forever, and
-	  `MaxDuration` guarantees the player eventually reaches the game.
-	· A minimum display time. A cached join that finishes in 90ms would
-	  otherwise flash the screen for one frame, which reads as a glitch.
-	· Failures are counted, not hidden. If assets fail, the screen says
-	  how many and continues.
-	· The wave logo sits bottom-right, aligned to the safe area, so it
-	  clears notches, the Roblox topbar and the mobile home indicator on
-	  every aspect ratio.
-	· Reduced-motion collapses the wave to a still mark. The screen still
-	  works, it just stops moving.
+	  phase is re-announced as still-working instead of the screen
+	  hanging silently, and `MaxDuration` guarantees the player gets in.
+	· A minimum display time, so a cached join does not flash the mark
+	  for a single frame.
+	· Failures are counted, not hidden — `GetReport()` says how many
+	  assets failed and what the loader said.
+	· The mark rises as progress completes, so the corner still reads as
+	  "something is happening" without a number to stare at.
+	· Reduced motion keeps the mark still and honest: it appears, it
+	  stays, it 'leaves on completion, without the wave.
 
-	Cleanup is total: destroy releases the ScreenGui, every connection
-	and the rendering stack, and restores the mouse and camera state the
-	game had before the screen appeared.
+	Cleanup is total: `destroy()` releases the ScreenGui, every
+	connection and the rendering stack.
 ]]
 
 local Util = require(script.Parent.Parent.Core.Util)
@@ -45,39 +46,34 @@ local LogoWave = require(script.Parent.LogoWave)
 local LoadingScreen = {}
 LoadingScreen.__index = LoadingScreen
 
---- Where the mark comes from by default. Ship an empty string and the
---- screen draws the procedural mark instead of an empty frame — the
---- screen never shows a blank image.
+--- Where the mark comes from by default. Leave it empty and the screen
+--- draws the procedural mark instead of an empty frame — the corner is
+--- never blank.
 LoadingScreen.LogoImage = ""
 
 LoadingScreen.defaults = {
-	Title = "Vantage",
-	Version = "v" .. Config.version,
-	Tagline = "Interface, engineered.",
 	--- Assets handed to ContentProvider. Supply your own.
 	Assets = {},
 	--- Phases run in order. `Weight` controls how much of the bar each
-	--- phase owns; `Run` is an optional function called with a
-	--- progress reporter.
+	--- phase owns; `Run` is an optional function called with a progress
+	--- reporter.
 	Phases = nil,
-	MinDuration = 1.6,
+	MinDuration = 1.4,
 	MaxDuration = 25,
 	StallTimeout = 6,
-	TipInterval = 4.6,
-	Tips = {
-		"Press {TOGGLE} at any time to show or hide the interface.",
-		"Every control in Vantage supports keyboard navigation.",
-		"Theme changes morph rather than cut, so nothing flashes.",
-		"Hold Shift on a slider for fine adjustment.",
-		"Right-click a keybind to clear it.",
-		"ContentProvider preloading happens in parallel with your gameplay setup.",
-	},
+	--- Pixels the mark travels upward across the whole load. Set 0 to
+	--- keep it perfectly still.
+	Rise = 10,
+	--- Seconds the settled mark is held before it leaves on its own.
+	--- `false` waits for `handle.continue()` instead.
+	AutoContinue = 1.1,
+	--- When true the screen waits for `handle.continue()` (or an input of
+	--- any kind) instead of leaving on its own.
+	RequireInput = false,
 	Logo = {
 		Image = nil :: string?,
-		Size = 92,
-		Position = "bottom-right",
+		Size = 104,
 		Padding = 26,
-		ShowWordmark = true,
 		Amplitude = 5.5,
 		Frequency = 1.15,
 		Speed = 0.42,
@@ -86,28 +82,13 @@ LoadingScreen.defaults = {
 		TintStrength = 0.34,
 		Glow = true,
 	},
-	ShowTips = true,
-	ShowRail = true,
-	ShowPercentage = true,
-	--- Seconds to wait after finishing before continuing on its own,
-	--- counted down on the Continue affordance. Pass `false` to wait for
-	--- the player instead, or `RequireInput = true` for "press any key".
-	AutoContinue = 2.4,
-	RequireInput = false,
 	Parent = nil,
 	OnProgress = nil,
 	OnPhase = nil,
 	OnComplete = nil,
+	OnReady = nil,
 	OnContinue = nil,
-	BlurBackground = true,
 }
-
---- Wraps a tip so `{TOGGLE}` becomes the actual bound key name.
-local function formatTip(text: string): string
-	local toggle = Config.keybinds.toggleInterface
-	local name = toggle and toggle.Name or "RightShift"
-	return (text:gsub("{TOGGLE}", name):gsub("{VERSION}", Config.version))
-end
 
 local function resolveParent(explicit: any): any
 	if explicit then
@@ -143,13 +124,11 @@ function LoadingScreen.new(spec: { [any]: any }): any
 		_displayed = 0,
 		_complete = false,
 		_destroyed = false,
+		_continued = false,
+		_revealed = false,
 		_failures = 0,
 		_startedAt = os.clock(),
 		_lastAssetAt = os.clock(),
-		_tipIndex = 1,
-		_settings = {
-			mouseIconEnabled = nil,
-		},
 	}, LoadingScreen)
 
 	self.Progress = Signal.new("LoadingScreen.Progress")
@@ -158,420 +137,106 @@ function LoadingScreen.new(spec: { [any]: any }): any
 	self.Continued = Signal.new("LoadingScreen.Continued")
 
 	-- Screen ------------------------------------------------------------
-	-- Remembered so the screen can put the game back exactly as it found it.
-	local camera = workspace and workspace.CurrentCamera
-
 	local parent = resolveParent(options.Parent)
 	local screen = Util.create("ScreenGui", {
 		Name = "VantageLoadingScreen",
 		ResetOnSpawn = false,
 		IgnoreGuiInset = true,
-		DisplayOrder = 2000,
+		DisplayOrder = 250,
 		ZIndexBehavior = Enum.ZIndexBehavior.Sibling,
 		Parent = parent,
 	})
 	Util.tag(screen, "Vantage")
 	self.ScreenGui = screen
 
+	-- A transparent, non-interactive frame: it exists only to give the mark
+	-- a coordinate space that ignores the Roblox topbar. Nothing here is a
+	-- button, so gameplay input passes straight through to the game.
 	local root = Util.frame({
 		Name = "Root",
 		Size = UDim2.fromScale(1, 1),
-		BackgroundColor3 = tokens.canvas,
+		BackgroundTransparency = 1,
+		Active = false,
 		Parent = screen,
 	})
 	self.Root = root
 
-	-- A vertical gradient gives the flat canvas some depth; the second
-	-- layer is a warm accent wash from the bottom-left corner, which is
-	-- what makes the composition feel lit rather than filled.
-	local canvasGradient = Util.gradient(root, {
-		{ Time = 0, Color = Util.lighten(tokens.canvas, 0.045) },
-		{ Time = 0.55, Color = tokens.canvas },
-		{ Time = 1, Color = Util.darken(tokens.canvas, 0.35) },
-	}, 90)
-	self._canvasGradient = canvasGradient
-
-	local wash = Util.frame({
-		Name = "Wash",
-		Size = UDim2.fromScale(1, 1),
-		BackgroundColor3 = tokens.accent,
-		BackgroundTransparency = 0.94,
-		ZIndex = 1,
-		Parent = root,
-	})
-	Util.gradient(wash, {
-		{ Time = 0, Color = tokens.accent, Transparency = 1 },
-		{ Time = 0.45, Color = tokens.accent, Transparency = 0.85 },
-		{ Time = 1, Color = tokens.accent, Transparency = 1 },
-	}, 90)
-	self._wash = wash
-
-	-- Vignette: darker toward the edges.
-	local vignette = Util.frame({
-		Name = "Vignette",
-		Size = UDim2.fromScale(1, 1),
-		BackgroundColor3 = tokens.shadow,
-		BackgroundTransparency = 0.78,
-		ZIndex = 2,
-		Parent = root,
-	})
-	Util.gradient(vignette, {
-		{ Time = 0, Color = tokens.shadow, Transparency = 0.35 },
-		{ Time = 0.5, Color = tokens.shadow, Transparency = 1 },
-		{ Time = 1, Color = tokens.shadow, Transparency = 0.35 },
-	}, 90)
-	self._vignette = vignette
-
-	-- Left column: percentage, phase, tip --------------------------------
-	local left = Util.group({
-		Name = "LeftColumn",
-		AnchorPoint = Vector2.new(0, 1),
-		Position = UDim2.new(0, 0, 1, 0),
-		Size = UDim2.new(0.62, 0, 0, 0),
-		AutomaticSize = Enum.AutomaticSize.Y,
-		ZIndex = 5,
-		Parent = root,
-	})
-	Util.stack(left, 6)
-	self._left = left
-
-	local percentage = Util.text({
-		Name = "Percentage",
-		Text = "0",
-		TextSize = 62,
-		Font = "display",
-		TextColor3 = tokens.text,
-		TextXAlignment = Enum.TextXAlignment.Left,
-		TextYAlignment = Enum.TextYAlignment.Bottom,
-		Size = UDim2.new(1, 0, 0, 66),
-		Visible = options.ShowPercentage ~= false,
-		LayoutOrder = 1,
-		Parent = left,
-	})
-	self._percentage = percentage
-
-	local phaseRow = Util.row({
-		Name = "PhaseRow",
-		Size = UDim2.new(1, 0, 0, 16),
-		AutomaticSize = Enum.AutomaticSize.X,
-		LayoutOrder = 2,
-		Parent = left,
-	})
-	Util.list(phaseRow, {
-		FillDirection = Enum.FillDirection.Horizontal,
-		SortOrder = Enum.SortOrder.LayoutOrder,
-		Padding = UDim.new(0, 8),
-		VerticalAlignment = Enum.VerticalAlignment.Center,
-	})
-
-	local phaseDotHolder = Util.row({
-		Name = "Dot",
-		Size = UDim2.fromOffset(7, 7),
-		LayoutOrder = 1,
-		Parent = phaseRow,
-	})
-	local phaseDot = Util.frame({
-		Name = "DotFrame",
-		Size = UDim2.fromScale(1, 1),
-		BackgroundColor3 = tokens.accent,
-		Parent = phaseDotHolder,
-	})
-	Util.pill(phaseDot)
-	self._phaseDot = phaseDot
-
-	local phaseLabel = Util.text({
-		Name = "Phase",
-		Text = "Preparing",
-		TextSize = tokens.fontSizeMd,
-		Font = "subheading",
-		TextColor3 = tokens.accent,
-		TextXAlignment = Enum.TextXAlignment.Left,
-		TextYAlignment = Enum.TextYAlignment.Center,
-		Size = UDim2.new(0, 0, 1, 0),
-		AutomaticSize = Enum.AutomaticSize.X,
-		LayoutOrder = 2,
-		Parent = phaseRow,
-	})
-	self._phaseLabel = phaseLabel
-
-	local detail = Util.text({
-		Name = "Detail",
-		Text = "",
-		TextSize = tokens.fontSizeSm,
-		Font = "body",
-		TextColor3 = tokens.textDim,
-		TextXAlignment = Enum.TextXAlignment.Left,
-		TextYAlignment = Enum.TextYAlignment.Top,
-		TextWrapped = true,
-		Size = UDim2.new(1, 0, 0, 0),
-		AutomaticSize = Enum.AutomaticSize.Y,
-		LayoutOrder = 3,
-		Parent = left,
-	})
-	self._detail = detail
-
-	local tipHolder = Util.row({
-		Name = "Tip",
-		Size = UDim2.new(1, 0, 0, 0),
-		AutomaticSize = Enum.AutomaticSize.Y,
-		LayoutOrder = 4,
-		Visible = options.ShowTips ~= false,
-		Parent = left,
-	})
-	Util.stack(tipHolder, 4)
-	self._tipHolder = tipHolder
-
-	local tipOverline = Util.text({
-		Name = "Overline",
-		Text = "DID YOU KNOW",
-		TextSize = tokens.fontSizeXs,
-		Font = "bodyBold",
-		TextColor3 = tokens.textDim,
-		TextXAlignment = Enum.TextXAlignment.Left,
-		Size = UDim2.new(1, 0, 0, 12),
-		LayoutOrder = 1,
-		Parent = tipHolder,
-	})
-	local tipLabel = Util.text({
-		Name = "TipText",
-		Text = formatTip(options.Tips[1] or ""),
-		TextSize = tokens.fontSizeSm,
-		Font = "body",
-		TextColor3 = tokens.textMuted,
-		TextXAlignment = Enum.TextXAlignment.Left,
-		TextYAlignment = Enum.TextYAlignment.Top,
-		TextWrapped = true,
-		Size = UDim2.new(1, 0, 0, 0),
-		AutomaticSize = Enum.AutomaticSize.Y,
-		LayoutOrder = 2,
-		Parent = tipHolder,
-	})
-	self._tipLabel = tipLabel
-
-	-- Right column: logo block --------------------------------------------
-	local logoBlock = Util.group({
-		Name = "LogoBlock",
+	local logoBlock = Util.frame({
+		Name = "Logo",
 		AnchorPoint = Vector2.new(1, 1),
-		Position = UDim2.new(1, 0, 1, 0),
-		Size = UDim2.new(0, options.Logo.Size, 0, 0),
-		AutomaticSize = Enum.AutomaticSize.Y,
-		ZIndex = 6,
+		Size = UDim2.fromOffset(options.Logo.Size, options.Logo.Size),
+		BackgroundTransparency = 1,
 		Parent = root,
 	})
-	Util.stack(logoBlock, 10)
 	self._logoBlock = logoBlock
 
-	local waveHolder = Util.row({
-		Name = "Wave",
-		Size = UDim2.fromOffset(options.Logo.Size, options.Logo.Size),
-		LayoutOrder = 1,
-		Parent = logoBlock,
-	})
-	self._waveHolder = waveHolder
+	local logo = LogoWave.new({
+		Image = options.Logo.Image,
+		Size = options.Logo.Size,
+		-- The screen owns the entrance: the mark fades in on a spring here, so
+		-- the wave must not run a second entrance of its own underneath it.
+		Entrance = false,
+		Amplitude = options.Logo.Amplitude,
+		Frequency = options.Logo.Frequency,
+		Speed = options.Logo.Speed,
+		Slices = options.Logo.Slices,
+		Tint = options.Logo.Tint,
+		TintStrength = options.Logo.TintStrength,
+		Glow = options.Logo.Glow,
+	}, { parent = logoBlock, maid = self._maid })
+	self.Logo = logo
 
-	local wordmark
-	local wordmarkSub
-	if options.Logo.ShowWordmark ~= false then
-		local wordmarkHolder = Util.row({
-			Name = "Wordmark",
-			Size = UDim2.new(1, 0, 0, 0),
-			AutomaticSize = Enum.AutomaticSize.Y,
-			LayoutOrder = 2,
-			Parent = logoBlock,
-		})
-		Util.stack(wordmarkHolder, 2)
-
-		wordmark = Util.text({
-			Name = "Name",
-			Text = string.upper(options.Title or "Vantage"),
-			TextSize = 15,
-			Font = "display",
-			TextColor3 = tokens.text,
-			TextXAlignment = Enum.TextXAlignment.Right,
-			Size = UDim2.new(1, 0, 0, 18),
-			LayoutOrder = 1,
-			Parent = wordmarkHolder,
-		})
-		wordmarkSub = Util.text({
-			Name = "Tagline",
-			Text = options.Tagline or "",
-			TextSize = tokens.fontSizeSm,
-			Font = "body",
-			TextColor3 = tokens.textDim,
-			TextXAlignment = Enum.TextXAlignment.Right,
-			Size = UDim2.new(1, 0, 0, 14),
-			Visible = (options.Tagline or "") ~= "",
-			LayoutOrder = 2,
-			Parent = wordmarkHolder,
-		})
-	end
-
-	-- The mark itself.
-	local waveSpec = table.clone(options.Logo)
-	waveSpec.Size = options.Logo.Size
-	waveSpec.Entrance = false
-	if Motion.getReducedMotion() then
-		waveSpec.Amplitude = 0
-		waveSpec.TintStrength = 0
-	end
-
-	local wave = LogoWave.new(waveSpec, {
-		parent = waveHolder,
-		maid = self._maid,
-	})
-	self.Logo = wave
-
-	-- Bottom rail -----------------------------------------------------------
-	local rail
-	local railFill
-	if options.ShowRail ~= false then
-		rail = Util.group({
-			Name = "Rail",
-			AnchorPoint = Vector2.new(0, 1),
-			Position = UDim2.new(0, 0, 1, 0),
-			Size = UDim2.new(1, 0, 0, 3),
-			BackgroundColor3 = tokens.border,
-			BackgroundTransparency = 0.6,
-			ZIndex = 7,
-			Parent = root,
-		})
-		railFill = Util.frame({
-			Name = "Fill",
-			Size = UDim2.new(0, 0, 1, 0),
-			BackgroundColor3 = tokens.accent,
-			ZIndex = 8,
-			Parent = rail,
-		})
-		Util.gradient(railFill, {
-			{ Time = 0, Color = tokens.accent },
-			{ Time = 0.65, Color = tokens.accentHover },
-			{ Time = 1, Color = Util.lighten(tokens.accent, 0.35) },
-		}, 0)
-
-		-- A soft leading edge so the front of the bar reads as a light
-		-- source rather than a hard cut.
-		local head = Util.frame({
-			Name = "Head",
-			AnchorPoint = Vector2.new(1, 0.5),
-			Position = UDim2.new(1, 0, 0.5, 0),
-			Size = UDim2.fromOffset(52, 3),
-			BackgroundColor3 = Util.lighten(tokens.accent, 0.5),
-			BackgroundTransparency = 0.35,
-			ZIndex = 9,
-			Parent = railFill,
-		})
-		Util.gradient(head, {
-			{ Time = 0, Color = Util.lighten(tokens.accent, 0.5), Transparency = 1 },
-			{ Time = 1, Color = Util.lighten(tokens.accent, 0.55), Transparency = 0 },
-		}, 0)
-		self._railHead = head
-	end
-	self._rail = rail
-	self._railFill = railFill
-
-	-- Continue affordance ----------------------------------------------------
-	local continueHolder = Util.group({
-		Name = "Continue",
-		AnchorPoint = Vector2.new(0.5, 1),
-		Position = UDim2.new(0.5, 0, 1, -34),
-		Size = UDim2.new(0, 0, 0, 0),
-		AutomaticSize = Enum.AutomaticSize.XY,
-		BackgroundColor3 = tokens.accent,
-		BackgroundTransparency = 1,
-		Visible = false,
-		ZIndex = 12,
-		Parent = root,
-	})
-	Util.corner(continueHolder, tokens.radiusPill)
-	Util.pad(continueHolder, { Left = 18, Right = 18, Top = 9, Bottom = 9 })
-	local continueLabel = Util.text({
-		Name = "Label",
-		Text = "Continue",
-		TextSize = tokens.fontSizeMd,
-		Font = "bodyBold",
-		TextColor3 = tokens.onAccent,
-		TextXAlignment = Enum.TextXAlignment.Center,
-		TextYAlignment = Enum.TextYAlignment.Center,
-		Size = UDim2.new(0, 0, 0, 18),
-		AutomaticSize = Enum.AutomaticSize.X,
-		Parent = continueHolder,
-	})
-	self._continueHit = Util.create("TextButton", {
-		Name = "Hit",
-		Text = "",
-		BackgroundTransparency = 1,
-		AutoButtonColor = false,
-		Size = UDim2.fromScale(1, 1),
-		ZIndex = 13,
-		Parent = continueHolder,
-	})
-	self._continueHolder = continueHolder
-	self._continueLabel = continueLabel
-
-	-- Layout: apply safe-area insets ------------------------------------------
+	-- Placement ---------------------------------------------------------
+	-- Bottom-right of the *safe* area: notches, the topbar, the mobile home
+	-- indicator and any host UI all shift the corner, and the mark has to
+	-- land in the corner that is actually usable.
 	local function layout()
 		local insets = Util.insets()
 		local pad = options.Logo.Padding
-		local bottom = insets.bottom + pad
-		local side = insets.left + pad
 		local right = insets.right + pad
-
-		left.Position = UDim2.new(0, side, 1, -(bottom + 42))
-		left.Size = UDim2.new(0.56, -side, 0, 0)
-
-		logoBlock.Position = UDim2.new(1, -right, 1, -bottom)
-		if options.Logo.ShowWordmark == false then
-			logoBlock.Size = UDim2.new(0, options.Logo.Size, 0, options.Logo.Size)
-		else
-			logoBlock.Size = UDim2.new(0, math.max(options.Logo.Size, 150), 0, 0)
-		end
-
-		if rail then
-			rail.Position = UDim2.new(0, 0, 1, -insets.bottom)
-		end
-
-		continueHolder.Position = UDim2.new(0.5, 0, 1, -(bottom + 8))
+		local bottom = insets.bottom + pad
+		local rise = (1 - Util.clamp01(self._displayed)) * (options.Rise or 0)
+		logoBlock.Position = UDim2.new(1, -right, 1, -(bottom + rise))
 	end
 	self._layout = layout
 	layout()
-	self._maid:add(Theme.Changed:connect(function(next)
-		tokens = next
-		self._tokens = next
-		root.BackgroundColor3 = next.canvas
-		percentage.TextColor3 = next.text
-		phaseLabel.TextColor3 = next.accent
-		phaseDot.BackgroundColor3 = next.accent
-		detail.TextColor3 = next.textDim
-		tipLabel.TextColor3 = next.textMuted
-		tipOverline.TextColor3 = next.textDim
-		if wordmark then
-			wordmark.TextColor3 = next.text
-		end
-		if wordmarkSub then
-			wordmarkSub.TextColor3 = next.textDim
-		end
-		if rail then
-			rail.BackgroundColor3 = next.border
-			Util.gradient(railFill, {
-				{ Time = 0, Color = next.accent },
-				{ Time = 0.65, Color = next.accentHover },
-				{ Time = 1, Color = Util.lighten(next.accent, 0.35) },
-			}, 0)
-		end
-		Util.gradient(root, {
-			{ Time = 0, Color = Util.lighten(next.canvas, 0.045) },
-			{ Time = 0.55, Color = next.canvas },
-			{ Time = 1, Color = Util.darken(next.canvas, 0.35) },
-		}, 90)
-		wave:RefreshTheme()
-		layout()
-	end))
-	if camera and camera.GetPropertyChangedSignal then
+
+	local camera = workspace and workspace.CurrentCamera
+	if camera then
 		pcall(function()
 			self._maid:add(camera:GetPropertyChangedSignal("ViewportSize"):Connect(function()
 				task.defer(layout)
 			end))
 		end)
+	end
+	self._maid:add(Theme.Changed:connect(function(next)
+		tokens = next
+		self._tokens = next
+		logo:RefreshTheme()
+	end))
+
+	-- Entrance ----------------------------------------------------------
+	self._maid:add(function()
+		Motion.cancelAll(logoBlock)
+	end)
+
+	if Motion.getReducedMotion() then
+		logo:SetOpacity(1)
+	else
+		-- A spring rather than a tween: the mark settles with a little
+		-- momentum instead of arriving on rails.
+		logo:SetOpacity(0)
+		local fadeIn = Motion.springFrom("standard", 0)
+		self._maid:add(function()
+			fadeIn:destroy()
+		end)
+		fadeIn:observe(function(value)
+			logo:SetOpacity(value)
+		end)
+		fadeIn:setGoal(1)
+
+		Motion.setScale(logoBlock, 0.9)
+		Motion.scale(logoBlock, 1, Motion.options("enter", { duration = 0.5 }))
 	end
 
 	return self
@@ -579,9 +244,10 @@ end
 
 --[[ Progress ------------------------------------------------------- ]]
 
---- Sets the smoothed progress target and the secondary readout line.
+--- Reports work progress. Nothing numeric is drawn — the mark's rise and
+--- the `OnProgress` callback are what carry it.
 --- Progress never moves backwards: a phase that reports less than the
---- previous one is clamped, because a bar that rewinds destroys trust.
+--- previous one is clamped, because a readout that rewinds destroys trust.
 function LoadingScreen:SetProgress(value: number, detailText: string?)
 	value = Util.clamp01(value)
 	if value < self._progress then
@@ -590,27 +256,20 @@ function LoadingScreen:SetProgress(value: number, detailText: string?)
 	self._progress = value
 
 	if not self._progressSpring then
-		local spring = Motion.springFrom("gentle", 0)
+		local spring = Motion.springFrom("gentle", self._displayed)
 		self._progressSpring = spring
 		self._maid:add(function()
 			spring:destroy()
 		end)
 		spring:observe(function(displayed)
 			self._displayed = displayed
-			local fraction = Util.clamp01(displayed)
-			if self._railFill then
-				self._railFill.Size = UDim2.new(fraction, 0, 1, 0)
-			end
-			local rounded = math.floor(fraction * 100 + 0.5)
-			if self._percentage and self._percentage.Text ~= tostring(rounded) then
-				self._percentage.Text = tostring(rounded)
-			end
+			self._layout()
 		end)
 	end
 	self._progressSpring:setGoal(value)
 
-	if detailText ~= nil and self._detail and self._detail.Text ~= detailText then
-		self._detail.Text = detailText
+	if detailText ~= nil then
+		self._detailText = detailText
 	end
 
 	self.Progress:fire(value, detailText, self)
@@ -618,16 +277,12 @@ function LoadingScreen:SetProgress(value: number, detailText: string?)
 	return self
 end
 
---- Announces a new phase. The dot pulses so a phase that takes a while
---- still looks alive.
+--- Announces a new phase. Fires `PhaseChanged` and `OnPhase`; the screen
+--- itself stays quiet.
 function LoadingScreen:SetPhase(name: string, detailText: string?)
-	if self._phaseLabel.Text ~= name then
-		self._phaseLabel.Text = name
-		Motion.setScale(self._phaseLabel, 0.94)
-		Motion.scale(self._phaseLabel, 1, { duration = 0.3, easing = "settle" })
-	end
-	if detailText ~= nil and self._detail then
-		self._detail.Text = detailText
+	self._phaseIndex += 1
+	if detailText ~= nil then
+		self._detailText = detailText
 	end
 	self.PhaseChanged:fire(name, detailText, self)
 	Util.safeCall(self._spec.OnPhase, name, detailText, self)
@@ -707,14 +362,39 @@ local function defaultPhases(self: any): { any }
 	}
 end
 
---- Runs the screen. Yields until the screen is finished and the player
---- has continued, or returns immediately when `run == false`.
+--- Runs the screen. Yields until the screen has finished and left, or
+--- returns immediately when `run == false`.
 ---
 --- `LoadingScreen.Run(spec)` is the one-call entry point;
 --- `screen:Start()` exists for hosts that want the instance first.
 function LoadingScreen:Start()
 	local spec = self._spec
 	local phases = spec.Phases or defaultPhases(self)
+
+	-- Minimum display time: a join that finishes from cache would otherwise
+	-- flash the mark for one frame, which reads as a glitch.
+	if (spec.MinDuration or 0) > 0 then
+		task.delay(spec.MinDuration, function()
+			self._minDurationElapsed = true
+			self:_maybeFinish()
+		end)
+	else
+		self._minDurationElapsed = true
+	end
+
+	-- Nothing may strand the player: after `MaxDuration` the screen finishes
+	-- itself and the report says it timed out.
+	if spec.MaxDuration and spec.MaxDuration > 0 then
+		task.delay(spec.MaxDuration, function()
+			if self._destroyed or self._complete then
+				return
+			end
+			self._timedOut = true
+			self:_finish()
+		end)
+	end
+
+	self:_watchForStalls()
 
 	task.spawn(function()
 		local totalWeight = 0
@@ -739,15 +419,12 @@ function LoadingScreen:Start()
 			local phaseSpan = weight * (1 - startingProgress)
 			consumed += weight
 
-			local reported = 0
 			local function report(fraction: number, detailText: string?)
-				reported = Util.clamp01(fraction)
-				self:SetProgress(phaseBase + reported * phaseSpan, detailText)
+				self:SetProgress(phaseBase + Util.clamp01(fraction) * phaseSpan, detailText)
 			end
 
 			if type(phase.Run) == "function" then
-				-- Wrap so one failing phase cannot strand the player on a
-				-- loading screen forever.
+				-- Wrapped so one failing phase cannot strand the player.
 				local ok, err = pcall(phase.Run, report, self)
 				if not ok then
 					self._loadError = tostring(err)
@@ -765,79 +442,27 @@ function LoadingScreen:Start()
 			end
 		end
 
-		self:SetProgress(1, self._loadError and "Finished with warnings" or nil)
-		self:_finish()
-	end)
-
-	-- Minimum display time, held in parallel so a fast load still shows
-	-- the wordmark settling rather than a single frame of it.
-	self._maid:add(task.delay((spec.MinDuration or 0), function()
-		self._minDurationElapsed = true
-		self:_maybeFinish()
-	end))
-
-	-- Hard ceiling. Nothing keeps the player on a loading screen.
-	self._maid:add(task.delay(spec.MaxDuration or 25, function()
-		if not self._complete then
-			self._timedOut = true
-			self:SetProgress(1, "Taking longer than expected; continuing")
+		if not self._destroyed then
+			self:SetProgress(1)
 			self:_finish()
 		end
-	end))
+	end)
 
-	self:_startTips()
-	self:_watchForStalls()
 	return self
 end
 
-function LoadingScreen:_startTips()
-	local tips = self._spec.Tips
-	if self._spec.ShowTips == false or not tips or #tips <= 1 then
-		return
-	end
-	self._maid:add(function()
-		self._tipToken = (self._tipToken or 0) + 1
-	end)
-	local function cycle()
-		self._tipToken = (self._tipToken or 0) + 1
-		local token = self._tipToken
-		task.delay(self._spec.TipInterval or 4.6, function()
-			if token ~= self._tipToken or self._destroyed then
-				return
-			end
-			self._tipIndex = (self._tipIndex % #tips) + 1
-			local label = self._tipLabel
-			if not label then
-				return
-			end
-			Motion.tween(label, { TextTransparency = 1 }, Motion.options("exit", {
-				duration = 0.2,
-				onComplete = function()
-					label.Text = formatTip(tips[self._tipIndex])
-					Motion.tween(label, { TextTransparency = 0 }, Motion.options("enter", { duration = 0.26 }))
-				end,
-			}))
-			cycle()
-		end)
-	end
-	cycle()
-end
-
---- If asset streaming goes quiet for too long, say so. A bar frozen at
---- 68% with no explanation is the worst possible failure mode.
+--- If asset streaming goes quiet for too long, say so rather than stalling
+--- silently. The phase is re-announced so `OnPhase` listeners can react.
 function LoadingScreen:_watchForStalls()
 	self._maid:add(Motion.ticker(function()
-		if self._destroyed or self._complete then
+		if self._destroyed or self._complete or self._stallNoted then
 			return
 		end
 		local quietFor = os.clock() - (self._lastAssetAt or os.clock())
-		if quietFor > (self._spec.StallTimeout or 6) and not self._stallNoted then
+		if quietFor > (self._spec.StallTimeout or 6) then
 			self._stallNoted = true
-			self._detail.Text = "Still working — this can take a moment on a slow connection"
+			self:SetPhase("Still working", "Waiting on a slow asset")
 		end
-		-- A gentle breathing pulse on the phase dot while work is pending.
-		local pulse = 0.5 + 0.5 * math.sin(os.clock() * 2.2)
-		self._phaseDot.BackgroundTransparency = 0.15 + pulse * 0.35
 	end))
 end
 
@@ -845,7 +470,7 @@ end
 --- because `self._complete` is the boolean the rest of the class reads:
 --- one name, one meaning.
 function LoadingScreen:_finish()
-	if self._complete then
+	if self._complete or self._destroyed then
 		return
 	end
 	self._complete = true
@@ -855,8 +480,8 @@ function LoadingScreen:_finish()
 	self:_maybeFinish()
 end
 
---- Reveals the Continue affordance once both the work and the minimum
---- display time are satisfied.
+--- Settles the mark, then leaves — either on its own after `AutoContinue`
+--- or when the host calls `handle.continue()`.
 function LoadingScreen:_maybeFinish()
 	if self._revealed or self._destroyed then
 		return
@@ -867,31 +492,19 @@ function LoadingScreen:_maybeFinish()
 	if not self._minDurationElapsed and (self._spec.MinDuration or 0) > 0 then
 		return
 	end
+
 	self._revealed = true
 
+	-- One pulse of accent as the work lands: the only "done" signal the
+	-- screen gives, and it is enough.
 	self.Logo:Pulse({ Color = self._tokens.accent })
-	self._continueHolder.Visible = true
-	Motion.setScale(self._continueHolder, 0.9)
-	Motion.scale(self._continueHolder, 1, { duration = 0.42, easing = "emphasize" })
-	Motion.tween(self._continueHolder, { BackgroundTransparency = 0 }, Motion.options("enter"))
-
-	self._maid:add(self._continueHit.Activated:Connect(function()
-		self:Continue()
-	end))
+	Util.safeCall(self._spec.OnReady, self)
 
 	if self._spec.RequireInput then
-		self._continueLabel.Text = "Press any key"
-		self._maid:add(game:GetService("UserInputService").InputBegan:Connect(function(input)
-			if input.UserInputType == Enum.UserInputType.Keyboard
-				or input.UserInputType == Enum.UserInputType.MouseButton1
-				or input.UserInputType == Enum.UserInputType.Touch
-				then
-				self:Continue()
-			end
-		end))
-	elseif self._spec.AutoContinue then
-		-- A visible countdown, so continuing on its own is never a
-		-- surprise.
+		return
+	end
+
+	if self._spec.AutoContinue then
 		local remaining = self._spec.AutoContinue
 		local token = (self._autoToken or 0) + 1
 		self._autoToken = token
@@ -904,16 +517,10 @@ function LoadingScreen:_maybeFinish()
 				self:Continue()
 				return
 			end
-			self._continueLabel.Text = string.format("Continue  ·  %.1fs", remaining)
 			task.delay(0.1, tick)
 		end
-		self._continueLabel.Text = string.format("Continue  ·  %.1fs", remaining)
 		task.delay(0.1, tick)
-	else
-		self._continueLabel.Text = "Continue"
 	end
-
-	Util.safeCall(self._spec.OnReady, self)
 end
 
 --- Dismisses the screen. Safe to call more than once.
@@ -922,6 +529,7 @@ function LoadingScreen:Continue(instant: boolean?)
 		return self
 	end
 	self._continued = true
+
 	self.Continued:fire(self)
 	Util.safeCall(self._spec.OnContinue, self)
 
@@ -930,25 +538,27 @@ function LoadingScreen:Continue(instant: boolean?)
 		return self
 	end
 
-	-- Mark first, then let the rest of the composition follow it out.
-	Motion.tween(self._logoBlock, { GroupTransparency = 1 }, Motion.options("exit", { duration = 0.36 }))
-	task.delay(0.1, function()
+	-- The mark lifts a little as it fades, which is what makes the exit read
+	-- as leaving rather than blinking out.
+	local block = self._logoBlock
+	if block then
+		Motion.tween(block, {
+			Position = UDim2.new(block.Position.X.Scale, block.Position.X.Offset, block.Position.Y.Scale, block.Position.Y.Offset - 8),
+		}, { duration = 0.4, easing = "exitSoft" })
+	end
+	local fade = Motion.springFrom("gentle", 1)
+	self._maid:add(function()
+		fade:destroy()
+	end)
+	fade:observe(function(value)
 		if not self._destroyed and self.Logo then
-			self.Logo:SetOpacity(0)
+			self.Logo:SetOpacity(value)
 		end
 	end)
-	Motion.tween(self._left, { GroupTransparency = 1 }, Motion.options("exit", { duration = 0.32 }))
-	if self._rail then
-		Motion.tween(self._rail, { GroupTransparency = 1, BackgroundTransparency = 1 }, Motion.options("exit"))
-	end
-	Motion.tween(self._continueHolder, { GroupTransparency = 1 }, Motion.options("exit", { duration = 0.24 }))
-	Motion.tween(self.Root, { BackgroundTransparency = 1 }, {
-		duration = 0.46,
-		easing = "exitSoft",
-		onComplete = function()
-			self:Destroy()
-		end,
-	})
+	fade:setGoal(0)
+	task.delay(0.42, function()
+		self:Destroy()
+	end)
 	return self
 end
 
@@ -956,8 +566,17 @@ function LoadingScreen:GetProgress(): number
 	return self._displayed
 end
 
+--- The reported progress target, 0..1, independent of the smoothed value.
+function LoadingScreen:GetTarget(): number
+	return self._progress
+end
+
 function LoadingScreen:IsComplete(): boolean
 	return self._complete
+end
+
+function LoadingScreen:IsDestroyed(): boolean
+	return self._destroyed == true
 end
 
 --- Diagnostics for the harness and for bug reports.
@@ -966,10 +585,13 @@ function LoadingScreen:GetReport()
 		progress = self._progress,
 		displayed = self._displayed,
 		complete = self._complete,
+		continued = self._continued == true,
 		failures = self._failures,
 		loadError = self._loadError,
 		timedOut = self._timedOut == true,
 		stalled = self._stallNoted == true,
+		phase = self._phaseIndex,
+		detail = self._detailText,
 		duration = os.clock() - self._startedAt,
 		mode = self.Logo and self.Logo._mode or "unknown",
 		slices = self.Logo and self.Logo._sliceCount or 0,
@@ -989,6 +611,10 @@ function LoadingScreen:Destroy()
 
 	self._maid:destroy()
 
+	if self.Logo then
+		self.Logo:destroy()
+		self.Logo = nil
+	end
 	if self.ScreenGui then
 		self.ScreenGui:Destroy()
 		self.ScreenGui = nil
@@ -997,15 +623,27 @@ end
 
 --- One-call entry point.
 ---
----     local done = Vantage.LoadingScreen.Run({
+---     local loading = Vantage.LoadingScreen.Run({
 ---         Assets = { "rbxassetid://1" },
 ---         Logo = { Image = "rbxassetid://123" },
 ---     })
----     done.wait()  -- optional
+---     loading.wait()          -- wait until it has left
+---     loading.wait(3)         -- or give up after three seconds
 ---
---- Returns a handle with `:wait()`, `:continue()` and the screen itself.
+--- Returns a handle with `:wait(timeout?)`, `:continue()` and `:destroy()`.
+--- Every load method is safe to call twice: a second `Run` while a screen is
+--- already up replaces it rather than stacking a second mark in the corner.
 function LoadingScreen.Run(spec: { [any]: any })
+	-- One screen at a time, across every copy of the library that may be
+	-- loaded in this client.
+	local registry = Util.registry()
+	local previous = registry.loadingScreen
+	if previous and not previous:IsDestroyed() then
+		previous:Destroy()
+	end
+
 	local screen = LoadingScreen.new(spec)
+	registry.loadingScreen = screen
 	screen:Start()
 
 	local handle = {
@@ -1033,6 +671,16 @@ function LoadingScreen.Run(spec: { [any]: any })
 	end
 
 	return handle
+end
+
+--- The screen currently on display, if any. `nil` once it has left.
+function LoadingScreen.Current()
+	local registry = Util.registry()
+	local screen = registry.loadingScreen
+	if screen and not screen:IsDestroyed() then
+		return screen
+	end
+	return nil
 end
 
 return LoadingScreen

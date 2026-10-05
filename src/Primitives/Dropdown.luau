@@ -103,6 +103,7 @@ function Dropdown.new(spec: { [any]: any }, context: { [any]: any })
 		Icon = spec.Icon,
 		Disabled = spec.Disabled,
 		ControlWidth = controlWidth,
+		ControlHeight = 32,
 	}, { maid = ctx.maid, parent = ctx.parent })
 	self.Field = field
 	self.Instance = field.Instance

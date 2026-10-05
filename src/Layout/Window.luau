@@ -163,12 +163,15 @@ function Window.new(spec: { [any]: any }): any
 		BackgroundTransparency = 1,
 		Parent = screen,
 	})
-	Util.list(root, {
-		FillDirection = Enum.FillDirection.Vertical,
-		SortOrder = Enum.SortOrder.LayoutOrder,
-		Padding = UDim.new(0, 0),
-	})
+	-- No list layout here on purpose. The root is a stack of full-viewport
+	-- layers (scrim, shell, overlays, notifications, tooltips) and every one
+	-- of them positions itself. A UIListLayout on this frame used to re-flow
+	-- all of them into a column, which is what pushed the shell off the top
+	-- of the screen and stacked the overlay hosts underneath it.
 	self.Root = root
+	-- `Instance` is the name every other component in the library exposes for
+	-- "the GuiObject I own", so the window answers to it as well.
+	self.Instance = root
 
 	-- Scrim --------------------------------------------------------------
 	local scrim = Util.frame({
@@ -190,10 +193,8 @@ function Window.new(spec: { [any]: any }): any
 		ZIndex = 2,
 		Parent = root,
 	})
-	Util.list(shellHolder, {
-		FillDirection = Enum.FillDirection.Vertical,
-		SortOrder = Enum.SortOrder.LayoutOrder,
-	})
+	-- Also deliberately layout-free: the shell and its shadow are anchored
+	-- and centred by hand, and a list layout would override that position.
 	self.ShellHolder = shellHolder
 
 	local minSize = Vector2.new(config.minSize.X, config.minSize.Y)
@@ -202,7 +203,7 @@ function Window.new(spec: { [any]: any }): any
 		Name = "Shell",
 		AnchorPoint = config.anchor or Vector2.new(0.5, 0.5),
 		Position = config.position or UDim2.fromScale(0.5, 0.5),
-		Size = config.size or UDim2.fromOffset(680, 440),
+		Size = config.size or UDim2.fromOffset(880, 560),
 		BackgroundColor3 = tokens.surface,
 		BackgroundTransparency = 0.02,
 		ClipsDescendants = false,
@@ -224,7 +225,7 @@ function Window.new(spec: { [any]: any }): any
 			(config.position or UDim2.fromScale(0.5, 0.5)).Y.Scale,
 			(config.position or UDim2.fromScale(0.5, 0.5)).Y.Offset + 10
 		),
-		Size = config.size or UDim2.fromOffset(680, 440),
+		Size = config.size or UDim2.fromOffset(880, 560),
 		BackgroundColor3 = tokens.shadow,
 		BackgroundTransparency = 0.72,
 		ZIndex = 1,
@@ -259,21 +260,20 @@ function Window.new(spec: { [any]: any }): any
 		Parent = inner,
 	})
 	Util.corner(titleBar, tokens.radiusXl)
-	Util.pad(titleBar, { Left = 14, Right = 8 })
 	self.TitleBar = titleBar
 
-	Util.list(titleBar, {
-		FillDirection = Enum.FillDirection.Horizontal,
-		SortOrder = Enum.SortOrder.LayoutOrder,
-		Padding = UDim.new(0, 8),
-		VerticalAlignment = Enum.VerticalAlignment.Center,
-	})
+	-- Placed by hand, not by a list layout. A title bar is two clusters at
+	-- opposite ends with a drag area behind them, and a UIListLayout cannot
+	-- express "this child is behind the others" — with one, the logo and the
+	-- window title ended up queued after the window buttons on the far right.
 
 	-- The wordmark is text, never the logo asset.
 	local markGlyphHolder = Util.row({
 		Name = "Mark",
+		AnchorPoint = Vector2.new(0, 0.5),
+		Position = UDim2.new(0, 16, 0.5, 0),
 		Size = UDim2.fromOffset(18, 18),
-		LayoutOrder = 1,
+		ZIndex = 3,
 		Parent = titleBar,
 	})
 	local markGlyph = Glyph.draw(markGlyphHolder, "ring", {
@@ -287,9 +287,11 @@ function Window.new(spec: { [any]: any }): any
 
 	local titleBlock = Util.row({
 		Name = "TitleBlock",
-		Size = UDim2.new(0, 0, 1, 0),
+		AnchorPoint = Vector2.new(0, 0.5),
+		Position = UDim2.new(0, 42, 0.5, 0),
+		Size = UDim2.new(0, 0, 0, 20),
 		AutomaticSize = Enum.AutomaticSize.X,
-		LayoutOrder = 2,
+		ZIndex = 3,
 		Parent = titleBar,
 	})
 	Util.list(titleBlock, {
@@ -344,7 +346,8 @@ function Window.new(spec: { [any]: any }): any
 	}, { parent = versionBadgeHolder, maid = self._maid })
 	self._versionBadge = versionBadge
 
-	-- Drag surface: sits under the controls so they stay clickable.
+	-- Drag surface: the whole bar is one grab handle, sitting under the
+	-- controls and the wordmark in ZIndex so those stay clickable.
 	local dragSurface = Util.create("TextButton", {
 		Name = "DragSurface",
 		Text = "",
@@ -352,7 +355,7 @@ function Window.new(spec: { [any]: any }): any
 		AutoButtonColor = false,
 		AnchorPoint = Vector2.new(0, 0),
 		Position = UDim2.fromOffset(0, 0),
-		Size = UDim2.new(1, -132, 1, 0),
+		Size = UDim2.fromScale(1, 1),
 		ZIndex = 2,
 		Parent = titleBar,
 	})
@@ -362,7 +365,7 @@ function Window.new(spec: { [any]: any }): any
 	local controls = Util.row({
 		Name = "Controls",
 		AnchorPoint = Vector2.new(1, 0.5),
-		Position = UDim2.new(1, -6, 0.5, 0),
+		Position = UDim2.new(1, -10, 0.5, 0),
 		Size = UDim2.new(0, 0, 1, 0),
 		AutomaticSize = Enum.AutomaticSize.X,
 		ZIndex = 3,
@@ -454,17 +457,27 @@ function Window.new(spec: { [any]: any }): any
 		Visible = config.sidebar ~= false,
 		Parent = body,
 	})
-	Util.stack(sidebar, 2)
-	Util.pad(sidebar, { Left = 10, Right = 6, Top = 2, Bottom = 10 })
 	self.Sidebar = sidebar
+
+	-- The sidebar itself carries no layout: it holds the scrolling rail and the
+	-- indicator layer, and a layout on this frame would drag the indicator into
+	-- the flow. The rail owns the stack and the gutters.
+	local rail = Util.row({
+		Name = "Rail",
+		Size = UDim2.fromScale(1, 1),
+		Parent = sidebar,
+	})
+	Util.stack(rail, 2)
+	Util.pad(rail, { Left = 12, Right = 8, Top = 10, Bottom = 10 })
+	self._rail = rail
 
 	self._sidebarSearch = nil
 	local sidebarSearchHolder = Util.row({
 		Name = "Search",
-		Size = UDim2.new(1, 0, 0, 28),
+		Size = UDim2.new(1, 0, 0, 30),
 		LayoutOrder = 0,
 		Visible = false,
-		Parent = sidebar,
+		Parent = rail,
 	})
 	local sidebarSearchShell = Util.frame({
 		Name = "Shell",
@@ -510,21 +523,37 @@ function Window.new(spec: { [any]: any }): any
 		Size = UDim2.new(1, 0, 0, 0),
 		AutomaticSize = Enum.AutomaticSize.Y,
 		LayoutOrder = 1,
-		Parent = sidebar,
+		Parent = rail,
 	})
-	Util.stack(tabList, 2)
+	Util.stack(tabList, 3)
 	self._tabList = tabList
 
 	-- The active-tab indicator slides between rows.
+	-- The indicator is an overlay, so it lives in a layout-free layer inside
+	-- the sidebar: as a direct child of the stacked sidebar it took part in
+	-- the flow and parked itself on top of the search field.
+	local sidebarOverlay = Util.frame({
+		Name = "SidebarOverlay",
+		Size = UDim2.fromScale(1, 1),
+		BackgroundTransparency = 1,
+		-- Below the rail: the sliding pill is painted first and the tab rows
+		-- draw on top of it, so the label is never hidden by its own marker.
+		ZIndex = 0,
+		Parent = sidebar,
+	})
+	self._sidebarOverlay = sidebarOverlay
+
+	-- 12 from the sidebar edge and 16 narrower: the same measure as a tab row
+	-- inside the rail, so the pill lands exactly on the row it marks.
 	local tabIndicator = Util.frame({
 		Name = "Indicator",
 		AnchorPoint = Vector2.new(0, 0),
-		Position = UDim2.fromOffset(0, 0),
-		Size = UDim2.new(1, 0, 0, 34),
+		Position = UDim2.fromOffset(12, 0),
+		Size = UDim2.new(1, -20, 0, 38),
 		BackgroundColor3 = tokens.selected,
 		Visible = false,
 		ZIndex = 1,
-		Parent = sidebar,
+		Parent = sidebarOverlay,
 	})
 	Util.corner(tabIndicator, tokens.radiusMd)
 	Util.stroke(tabIndicator, tokens.accentBorder, 1, 0.7)
@@ -535,7 +564,7 @@ function Window.new(spec: { [any]: any }): any
 		Size = UDim2.new(1, 0, 0, 0),
 		AutomaticSize = Enum.AutomaticSize.Y,
 		LayoutOrder = 99,
-		Parent = sidebar,
+		Parent = rail,
 	})
 	Util.stack(sidebarFooter, 4)
 	self._sidebarFooter = sidebarFooter
@@ -700,19 +729,45 @@ function Window.new(spec: { [any]: any }): any
 	})
 	self.UIScale = uiScale
 
+	--- The shell's own coordinate space: the viewport divided by the
+	--- interface scale. `shell.Position` offsets live here, so every clamp
+	--- has to be computed here too. Mixing screen pixels with pre-scale
+	--- offsets is what let the window drift off the top of the screen.
+	local function shellSpace(): Vector2
+		local viewport = Util.viewport()
+		return Vector2.new(viewport.X, viewport.Y) / math.max(uiScale.Scale, 0.01)
+	end
+	self._shellSpace = shellSpace
+
+	--- Keeps the shell inside the viewport on every screen: a window that
+	--- fits on a 1440p monitor must still fit on a 1280x720 laptop, so the
+	--- size is capped against the available area rather than trusted.
+	local function fitToViewport()
+		local space = shellSpace()
+		local availableX = math.max(minSize.X, space.X - 40)
+		local availableY = math.max(minSize.Y, space.Y - 96)
+		local current = shell.Size
+		local width = math.clamp(current.X.Offset, math.min(minSize.X, availableX), availableX)
+		local height = math.clamp(current.Y.Offset, math.min(minSize.Y, availableY), availableY)
+		if width ~= current.X.Offset or height ~= current.Y.Offset then
+			shell.Size = UDim2.fromOffset(width, height)
+			shadow.Size = UDim2.fromOffset(width, height)
+		end
+	end
+	self._fitToViewport = fitToViewport
+
 	local function applyScale()
 		local width = Util.viewport().X
 		local raw
 		if config.uiScale then
 			raw = config.uiScale
 		elseif width < 620 then
-			raw = 0.86
-		elseif width < 1000 then
-			raw = 0.94
+			raw = 0.9
 		else
-			raw = Util.uiScale(1920)
+			raw = Util.uiScale()
 		end
 		uiScale.Scale = raw
+		fitToViewport()
 	end
 	applyScale()
 
@@ -740,22 +795,29 @@ function Window.new(spec: { [any]: any }): any
 	local dragConnection
 	local dragEndConnection
 
-	local function clampPosition(position: UDim2): UDim2
-		local viewport = Util.viewport()
-		local size = shell.AbsoluteSize
+	--- Converts a position into the top-left corner the shell would sit at.
+	local function cornerOf(position: UDim2, size: Vector2): Vector2
+		local space = shellSpace()
 		local anchor = shell.AnchorPoint
-		local x = position.X.Scale * viewport.X + position.X.Offset
-		local y = position.Y.Scale * viewport.Y + position.Y.Offset
-		local left = x - size.X * anchor.X
-		local top = y - size.Y * anchor.Y
+		return Vector2.new(
+			position.X.Scale * space.X + position.X.Offset - size.X * anchor.X,
+			position.Y.Scale * space.Y + position.Y.Offset - size.Y * anchor.Y
+		)
+	end
+
+	local function clampPosition(position: UDim2): UDim2
+		local space = shellSpace()
+		local size = Vector2.new(shell.Size.X.Offset, shell.Size.Y.Offset)
+		local anchor = shell.AnchorPoint
+		local corner = cornerOf(position, size)
 		-- Always leave a comfortable strip on screen so the window can
 		-- never be dragged out of reach.
 		local minLeft = -size.X + 120
-		local maxLeft = viewport.X - 60
+		local maxLeft = space.X - 60
 		local minTop = 0
-		local maxTop = viewport.Y - 40
-		local clampedLeft = Util.clamp(left, minLeft, math.max(minLeft, maxLeft))
-		local clampedTop = Util.clamp(top, minTop, math.max(minTop, maxTop))
+		local maxTop = space.Y - 40
+		local clampedLeft = Util.clamp(corner.X, minLeft, math.max(minLeft, maxLeft))
+		local clampedTop = Util.clamp(corner.Y, minTop, math.max(minTop, maxTop))
 		return UDim2.fromOffset(
 			clampedLeft + size.X * anchor.X,
 			clampedTop + size.Y * anchor.Y
@@ -778,8 +840,12 @@ function Window.new(spec: { [any]: any }): any
 			return
 		end
 		dragging = true
-		dragStart = Vector2.new(inputX, inputY)
-		dragOrigin = Vector2.new(shell.AbsolutePosition.X, shell.AbsolutePosition.Y)
+		local scale = math.max(uiScale.Scale, 0.01)
+		-- Pointer coordinates arrive in screen pixels; the shell moves in
+		-- pre-scale offsets, so both sides of the drag are normalised once
+		-- here instead of drifting apart when the interface is scaled.
+		dragStart = Vector2.new(inputX / scale, inputY / scale)
+		dragOrigin = Vector2.new(shell.AbsolutePosition.X / scale, shell.AbsolutePosition.Y / scale)
 		Motion.tween(shell, {
 			BackgroundTransparency = 0.05,
 		}, Motion.options("hover"))
@@ -792,14 +858,16 @@ function Window.new(spec: { [any]: any }): any
 		if not dragging then
 			return
 		end
-		local delta = Vector2.new(inputX - dragStart.X, inputY - dragStart.Y)
-		local viewport = Util.viewport()
-		local size = shell.AbsoluteSize
+		local scale = math.max(uiScale.Scale, 0.01)
+		local pointer = Vector2.new(inputX / scale, inputY / scale)
+		local delta = pointer - dragStart
+		local space = shellSpace()
+		local size = Vector2.new(shell.Size.X.Offset, shell.Size.Y.Offset)
 		local anchor = shell.AnchorPoint
 		local targetLeft = dragOrigin.X + delta.X
 		local targetTop = dragOrigin.Y + delta.Y
-		targetLeft = Util.clamp(targetLeft, -size.X + 120, viewport.X - 60)
-		targetTop = Util.clamp(targetTop, 0, viewport.Y - 40)
+		targetLeft = Util.clamp(targetLeft, -size.X + 120, space.X - 60)
+		targetTop = Util.clamp(targetTop, 0, space.Y - 40)
 		local position = UDim2.fromOffset(targetLeft + size.X * anchor.X, targetTop + size.Y * anchor.Y)
 		shell.Position = position
 		shadow.Position = UDim2.new(position.X.Scale, position.X.Offset, position.Y.Scale, position.Y.Offset + 10)
@@ -974,8 +1042,46 @@ function Window.new(spec: { [any]: any }): any
 	-- Restore persisted geometry ---------------------------------------------------
 	self:_restore()
 
+	-- One window at a time ----------------------------------------------------
+	-- A second `Window.new` (a re-run of the same script, a second copy of the
+	-- bundle loaded with `loadstring`) replaces the window on screen instead of
+	-- stacking a second identical shell on top of the first.
+	local registry = Util.registry()
+	local previous = registry.window
+	if previous and previous ~= self then
+		-- A previous copy of the library may predate `IsAlive`; when it does,
+		-- it is still ours to replace.
+		local alive = true
+		if type(previous.IsAlive) == "function" then
+			local ok, result = pcall(previous.IsAlive, previous)
+			alive = not ok or result == true
+		end
+		if alive then
+			pcall(function()
+				previous:Destroy()
+			end)
+		end
+	end
+	registry.window = self
+
 	self._ready = true
 	return self
+end
+
+--- True while this window is still on screen.
+function Window:IsAlive(): boolean
+	return self.ScreenGui ~= nil and self.ScreenGui.Parent ~= nil
+end
+
+--- The window currently on screen, if any. Lets a host re-open or re-theme
+--- the interface without holding on to the reference it got at startup.
+function Window.Current()
+	local registry = Util.registry()
+	local window = registry.window
+	if window and window:IsAlive() then
+		return window
+	end
+	return nil
 end
 
 --[[ Geometry --------------------------------------------------------- ]]
@@ -1074,20 +1180,24 @@ function Window:Tab(spec: { [any]: any }): any
 	})
 
 	-- Sidebar row ---------------------------------------------------------
-	local row = Util.frame({
+	local row = Util.group({
 		Name = "Tab_" .. tostring(tabSpec.Name),
-		Size = UDim2.new(1, 0, 0, 34),
-		BackgroundColor3 = self._tokens.hover,
+		Size = UDim2.new(1, 0, 0, 36),
 		BackgroundTransparency = 1,
 		LayoutOrder = tabSpec.Order,
 		Parent = self._tabList,
 	})
+	row.BackgroundColor3 = self._tokens.hover
 	Util.corner(row, self._tokens.radiusMd)
 	Util.pad(row, { Left = 10, Right = 8 })
 
 	local rowContent = Util.row({
 		Name = "Content",
 		Size = UDim2.fromScale(1, 1),
+		-- Slides in from the left as the rail builds, which is why it is a
+		-- child of the row rather than the row itself: the row's position
+		-- belongs to the list layout.
+		Position = UDim2.fromOffset(-10, 0),
 		Parent = row,
 	})
 	Util.list(rowContent, {
@@ -1254,19 +1364,20 @@ function Window:SelectTab(target: any, options: { [any]: any }?)
 	-- Slide the indicator to the active row. The row's top edge is
 	-- expressed in the sidebar's own coordinate space so it survives
 	-- window moves and UI scaling.
-	local sidebarOrigin = self._tabList.AbsolutePosition.Y
+	-- Measured against the indicator's own parent, which carries no padding,
+	-- so this holds for any sidebar width and UI scale.
+	local sidebarOrigin = self._tabIndicator.Parent.AbsolutePosition.Y
 	local offset = entry.row.AbsolutePosition.Y - sidebarOrigin
-	self._tabIndicator.Size = UDim2.new(1, 0, 0, entry.row.AbsoluteSize.Y)
+	self._tabIndicator.Size = UDim2.new(1, -20, 0, entry.row.AbsoluteSize.Y)
 
 	if not self._indicatorSpring then
 		local spring = Motion.springFrom("snappy", offset)
 		self._indicatorSpring = spring
 		self._maid:add(function()
 			spring:destroy()
-		end)
-		spring:observe(function(value)
-			self._tabIndicator.Position = UDim2.fromOffset(0, value)
-		end)
+		end)			spring:observe(function(value)
+				self._tabIndicator.Position = UDim2.fromOffset(12, value)
+			end)
 	end
 
 	if self._tabIndicatorVisible then
@@ -1492,6 +1603,11 @@ function Window:Destroy()
 	if self.ScreenGui then
 		self.ScreenGui:Destroy()
 		self.ScreenGui = nil
+	end
+
+	local registry = Util.registry()
+	if registry.window == self then
+		registry.window = nil
 	end
 end
 

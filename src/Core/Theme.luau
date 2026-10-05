@@ -252,10 +252,10 @@ function Theme.derive(definition: { [any]: any }): { [any]: any }
 	end
 
 	-- Metrics ------------------------------------------------------
-	tokens.radiusXs = 4
-	tokens.radiusSm = 6
-	tokens.radiusMd = 10
-	tokens.radiusLg = 14
+	tokens.radiusXs = 5
+	tokens.radiusSm = 8
+	tokens.radiusMd = 12
+	tokens.radiusLg = 16
 	tokens.radiusXl = 20
 	tokens.radiusPill = 999
 	tokens.borderWidth = 1
@@ -268,15 +268,17 @@ function Theme.derive(definition: { [any]: any }): { [any]: any }
 	tokens.space6 = 24
 	tokens.space7 = 32
 	tokens.space8 = 40
-	tokens.controlSm = 26
-	tokens.controlMd = 32
-	tokens.controlLg = 40
-	tokens.fontSizeXs = 10
-	tokens.fontSizeSm = 11
-	tokens.fontSizeMd = 13
-	tokens.fontSizeLg = 15
-	tokens.fontSizeXl = 18
-	tokens.fontSizeDisplay = 24
+	tokens.controlSm = 28
+	tokens.controlMd = 34
+	tokens.controlLg = 42
+	-- Type scale, tuned for the reference client at 1.0 scale: body text has
+	-- to be comfortably readable before any scaling is applied, not after.
+	tokens.fontSizeXs = 11
+	tokens.fontSizeSm = 12
+	tokens.fontSizeMd = 14
+	tokens.fontSizeLg = 16
+	tokens.fontSizeXl = 20
+	tokens.fontSizeDisplay = 28
 	tokens.lineHeight = 1.35
 	tokens.letterWide = 0
 

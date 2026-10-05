@@ -948,14 +948,52 @@ function Util.breakpoint(width: number?): string
 	return "desktop"
 end
 
+--- The client the interface is drawn for. Every metric is tuned at this
+--- size, so it is also the scale reference: 1536x792 renders at 1.0.
+Util.referenceViewport = Vector2.new(1536, 792)
+
+--- The one table every copy of the library in this client can see.
+---
+--- `loadstring` hands each run its own module tables, so anything that must
+--- hold across loads — "only one Vantage interface exists" — cannot live in
+--- a module field. It lives in `shared` when the environment has one, and in
+--- a process-local table when it does not (headless hosts and tests).
+function Util.registry(): { [any]: any }
+	if Util._registry then
+		return Util._registry
+	end
+
+	local ok, host = pcall(function()
+		return shared
+	end)
+	if ok and type(host) == "table" then
+		if type(host.__Vantage) ~= "table" then
+			host.__Vantage = {}
+		end
+		Util._registry = host.__Vantage
+	else
+		Util._registry = {}
+	end
+	return Util._registry
+end
+
 --- A UI scale that keeps the interface physically consistent across
---- resolutions: 1.0 at 1920x1080, smaller on laptops, larger on 4K.
-function Util.uiScale(baseWidth: number?): number
-	local width = Util.viewport().X
-	local reference = baseWidth or 1920
-	-- Damped rather than linear so ultrawide screens stay usable.
-	local raw = width / reference
-	return Util.clamp(0.78 + (raw - 0.78) * 0.62, 0.72, 1.35)
+--- resolutions. 1.0 on the reference client (1536x792), damped by the
+--- square-root of the deviation either way, so a small window shrinks a
+--- little rather than collapsing and a 4K screen grows a little rather
+--- than turning a settings panel into a billboard.
+---
+--- The old linear form scaled a 1536-wide client to 0.79, which made body
+--- text render around 10px — legible only if you leaned in.
+function Util.uiScale(baseWidth: number?, baseHeight: number?): number
+	local viewport = Util.viewport()
+	local referenceX = baseWidth or Util.referenceViewport.X
+	local referenceY = baseHeight or Util.referenceViewport.Y
+	local fit = math.min(viewport.X / referenceX, viewport.Y / referenceY)
+	if fit <= 0 then
+		return 1
+	end
+	return Util.clamp(0.5 + 0.5 * math.pow(fit, 0.35), 0.85, 1.25)
 end
 
 --- True when the player is on a touch-only device.

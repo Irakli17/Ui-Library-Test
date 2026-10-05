@@ -2651,12 +2651,36 @@ end
 return "desktop"
 end
 
-function Util.uiScale(baseWidth: number?): number
-local width = Util.viewport().X
-local reference = baseWidth or 1920
+Util.referenceViewport = Vector2.new(1536, 792)
 
-local raw = width / reference
-return Util.clamp(0.78 + (raw - 0.78) * 0.62, 0.72, 1.35)
+function Util.registry(): { [any]: any }
+if Util._registry then
+return Util._registry
+end
+
+local ok, host = pcall(function()
+return shared
+end)
+if ok and type(host) == "table" then
+if type(host.__Vantage) ~= "table" then
+host.__Vantage = {}
+end
+Util._registry = host.__Vantage
+else
+Util._registry = {}
+end
+return Util._registry
+end
+
+function Util.uiScale(baseWidth: number?, baseHeight: number?): number
+local viewport = Util.viewport()
+local referenceX = baseWidth or Util.referenceViewport.X
+local referenceY = baseHeight or Util.referenceViewport.Y
+local fit = math.min(viewport.X / referenceX, viewport.Y / referenceY)
+if fit <= 0 then
+return 1
+end
+return Util.clamp(0.5 + 0.5 * math.pow(fit, 0.35), 0.85, 1.25)
 end
 
 function Util.isTouch(): boolean
@@ -2755,16 +2779,16 @@ save = nil :: ((key: string, value: any) -> ())?,
 
 Config.defaults = {
 theme = "obsidian",
-size = UDim2.fromOffset(680, 440),
+size = UDim2.fromOffset(880, 560),
 position = UDim2.fromScale(0.5, 0.5),
 anchor = Vector2.new(0.5, 0.5),
-minSize = Vector2.new(420, 300),
+minSize = Vector2.new(620, 420),
 resizable = true,
 draggable = true,
 closeOnEscape = true,
-sidebarWidth = 168,
-titleBarHeight = 40,
-statusBarHeight = 24,
+sidebarWidth = 196,
+titleBarHeight = 48,
+statusBarHeight = 26,
 uiScale = nil :: number?,
 }
 
@@ -3636,10 +3660,10 @@ tokens["on" .. name:sub(1, 1):upper() .. name:sub(2)] =
 Util.contrastText(base, tokens.textInverted, tokens.knob)
 end
 
-tokens.radiusXs = 4
-tokens.radiusSm = 6
-tokens.radiusMd = 10
-tokens.radiusLg = 14
+tokens.radiusXs = 5
+tokens.radiusSm = 8
+tokens.radiusMd = 12
+tokens.radiusLg = 16
 tokens.radiusXl = 20
 tokens.radiusPill = 999
 tokens.borderWidth = 1
@@ -3652,15 +3676,16 @@ tokens.space5 = 20
 tokens.space6 = 24
 tokens.space7 = 32
 tokens.space8 = 40
-tokens.controlSm = 26
-tokens.controlMd = 32
-tokens.controlLg = 40
-tokens.fontSizeXs = 10
-tokens.fontSizeSm = 11
-tokens.fontSizeMd = 13
-tokens.fontSizeLg = 15
-tokens.fontSizeXl = 18
-tokens.fontSizeDisplay = 24
+tokens.controlSm = 28
+tokens.controlMd = 34
+tokens.controlLg = 42
+
+tokens.fontSizeXs = 11
+tokens.fontSizeSm = 12
+tokens.fontSizeMd = 14
+tokens.fontSizeLg = 16
+tokens.fontSizeXl = 20
+tokens.fontSizeDisplay = 28
 tokens.lineHeight = 1.35
 tokens.letterWide = 0
 
@@ -4654,31 +4679,23 @@ LoadingScreen.__index = LoadingScreen
 LoadingScreen.LogoImage = ""
 
 LoadingScreen.defaults = {
-Title = "Vantage",
-Version = "v" .. Config.version,
-Tagline = "Interface, engineered.",
 
 Assets = {},
 
 Phases = nil,
-MinDuration = 1.6,
+MinDuration = 1.4,
 MaxDuration = 25,
 StallTimeout = 6,
-TipInterval = 4.6,
-Tips = {
-"Press {TOGGLE} at any time to show or hide the interface.",
-"Every control in Vantage supports keyboard navigation.",
-"Theme changes morph rather than cut, so nothing flashes.",
-"Hold Shift on a slider for fine adjustment.",
-"Right-click a keybind to clear it.",
-"ContentProvider preloading happens in parallel with your gameplay setup.",
-},
+
+Rise = 10,
+
+AutoContinue = 1.1,
+
+RequireInput = false,
 Logo = {
 Image = nil :: string?,
-Size = 92,
-Position = "bottom-right",
+Size = 104,
 Padding = 26,
-ShowWordmark = true,
 Amplitude = 5.5,
 Frequency = 1.15,
 Speed = 0.42,
@@ -4687,25 +4704,13 @@ Tint = Color3.fromRGB(255, 255, 255),
 TintStrength = 0.34,
 Glow = true,
 },
-ShowTips = true,
-ShowRail = true,
-ShowPercentage = true,
-
-AutoContinue = 2.4,
-RequireInput = false,
 Parent = nil,
 OnProgress = nil,
 OnPhase = nil,
 OnComplete = nil,
+OnReady = nil,
 OnContinue = nil,
-BlurBackground = true,
 }
-
-local function formatTip(text: string): string
-local toggle = Config.keybinds.toggleInterface
-local name = toggle and toggle.Name or "RightShift"
-return (text:gsub("{TOGGLE}", name):gsub("{VERSION}", Config.version))
-end
 
 local function resolveParent(explicit: any): any
 if explicit then
@@ -4740,13 +4745,11 @@ _progress = 0,
 _displayed = 0,
 _complete = false,
 _destroyed = false,
+_continued = false,
+_revealed = false,
 _failures = 0,
 _startedAt = os.clock(),
 _lastAssetAt = os.clock(),
-_tipIndex = 1,
-_settings = {
-mouseIconEnabled = nil,
-},
 }, LoadingScreen)
 
 self.Progress = Signal.new("LoadingScreen.Progress")
@@ -4754,14 +4757,12 @@ self.PhaseChanged = Signal.new("LoadingScreen.Phase")
 self.Completed = Signal.new("LoadingScreen.Completed")
 self.Continued = Signal.new("LoadingScreen.Continued")
 
-local camera = workspace and workspace.CurrentCamera
-
 local parent = resolveParent(options.Parent)
 local screen = Util.create("ScreenGui", {
 Name = "VantageLoadingScreen",
 ResetOnSpawn = false,
 IgnoreGuiInset = true,
-DisplayOrder = 2000,
+DisplayOrder = 250,
 ZIndexBehavior = Enum.ZIndexBehavior.Sibling,
 Parent = parent,
 })
@@ -4771,390 +4772,79 @@ self.ScreenGui = screen
 local root = Util.frame({
 Name = "Root",
 Size = UDim2.fromScale(1, 1),
-BackgroundColor3 = tokens.canvas,
+BackgroundTransparency = 1,
+Active = false,
 Parent = screen,
 })
 self.Root = root
 
-local canvasGradient = Util.gradient(root, {
-{ Time = 0, Color = Util.lighten(tokens.canvas, 0.045) },
-{ Time = 0.55, Color = tokens.canvas },
-{ Time = 1, Color = Util.darken(tokens.canvas, 0.35) },
-}, 90)
-self._canvasGradient = canvasGradient
-
-local wash = Util.frame({
-Name = "Wash",
-Size = UDim2.fromScale(1, 1),
-BackgroundColor3 = tokens.accent,
-BackgroundTransparency = 0.94,
-ZIndex = 1,
-Parent = root,
-})
-Util.gradient(wash, {
-{ Time = 0, Color = tokens.accent, Transparency = 1 },
-{ Time = 0.45, Color = tokens.accent, Transparency = 0.85 },
-{ Time = 1, Color = tokens.accent, Transparency = 1 },
-}, 90)
-self._wash = wash
-
-local vignette = Util.frame({
-Name = "Vignette",
-Size = UDim2.fromScale(1, 1),
-BackgroundColor3 = tokens.shadow,
-BackgroundTransparency = 0.78,
-ZIndex = 2,
-Parent = root,
-})
-Util.gradient(vignette, {
-{ Time = 0, Color = tokens.shadow, Transparency = 0.35 },
-{ Time = 0.5, Color = tokens.shadow, Transparency = 1 },
-{ Time = 1, Color = tokens.shadow, Transparency = 0.35 },
-}, 90)
-self._vignette = vignette
-
-local left = Util.group({
-Name = "LeftColumn",
-AnchorPoint = Vector2.new(0, 1),
-Position = UDim2.new(0, 0, 1, 0),
-Size = UDim2.new(0.62, 0, 0, 0),
-AutomaticSize = Enum.AutomaticSize.Y,
-ZIndex = 5,
-Parent = root,
-})
-Util.stack(left, 6)
-self._left = left
-
-local percentage = Util.text({
-Name = "Percentage",
-Text = "0",
-TextSize = 62,
-Font = "display",
-TextColor3 = tokens.text,
-TextXAlignment = Enum.TextXAlignment.Left,
-TextYAlignment = Enum.TextYAlignment.Bottom,
-Size = UDim2.new(1, 0, 0, 66),
-Visible = options.ShowPercentage ~= false,
-LayoutOrder = 1,
-Parent = left,
-})
-self._percentage = percentage
-
-local phaseRow = Util.row({
-Name = "PhaseRow",
-Size = UDim2.new(1, 0, 0, 16),
-AutomaticSize = Enum.AutomaticSize.X,
-LayoutOrder = 2,
-Parent = left,
-})
-Util.list(phaseRow, {
-FillDirection = Enum.FillDirection.Horizontal,
-SortOrder = Enum.SortOrder.LayoutOrder,
-Padding = UDim.new(0, 8),
-VerticalAlignment = Enum.VerticalAlignment.Center,
-})
-
-local phaseDotHolder = Util.row({
-Name = "Dot",
-Size = UDim2.fromOffset(7, 7),
-LayoutOrder = 1,
-Parent = phaseRow,
-})
-local phaseDot = Util.frame({
-Name = "DotFrame",
-Size = UDim2.fromScale(1, 1),
-BackgroundColor3 = tokens.accent,
-Parent = phaseDotHolder,
-})
-Util.pill(phaseDot)
-self._phaseDot = phaseDot
-
-local phaseLabel = Util.text({
-Name = "Phase",
-Text = "Preparing",
-TextSize = tokens.fontSizeMd,
-Font = "subheading",
-TextColor3 = tokens.accent,
-TextXAlignment = Enum.TextXAlignment.Left,
-TextYAlignment = Enum.TextYAlignment.Center,
-Size = UDim2.new(0, 0, 1, 0),
-AutomaticSize = Enum.AutomaticSize.X,
-LayoutOrder = 2,
-Parent = phaseRow,
-})
-self._phaseLabel = phaseLabel
-
-local detail = Util.text({
-Name = "Detail",
-Text = "",
-TextSize = tokens.fontSizeSm,
-Font = "body",
-TextColor3 = tokens.textDim,
-TextXAlignment = Enum.TextXAlignment.Left,
-TextYAlignment = Enum.TextYAlignment.Top,
-TextWrapped = true,
-Size = UDim2.new(1, 0, 0, 0),
-AutomaticSize = Enum.AutomaticSize.Y,
-LayoutOrder = 3,
-Parent = left,
-})
-self._detail = detail
-
-local tipHolder = Util.row({
-Name = "Tip",
-Size = UDim2.new(1, 0, 0, 0),
-AutomaticSize = Enum.AutomaticSize.Y,
-LayoutOrder = 4,
-Visible = options.ShowTips ~= false,
-Parent = left,
-})
-Util.stack(tipHolder, 4)
-self._tipHolder = tipHolder
-
-local tipOverline = Util.text({
-Name = "Overline",
-Text = "DID YOU KNOW",
-TextSize = tokens.fontSizeXs,
-Font = "bodyBold",
-TextColor3 = tokens.textDim,
-TextXAlignment = Enum.TextXAlignment.Left,
-Size = UDim2.new(1, 0, 0, 12),
-LayoutOrder = 1,
-Parent = tipHolder,
-})
-local tipLabel = Util.text({
-Name = "TipText",
-Text = formatTip(options.Tips[1] or ""),
-TextSize = tokens.fontSizeSm,
-Font = "body",
-TextColor3 = tokens.textMuted,
-TextXAlignment = Enum.TextXAlignment.Left,
-TextYAlignment = Enum.TextYAlignment.Top,
-TextWrapped = true,
-Size = UDim2.new(1, 0, 0, 0),
-AutomaticSize = Enum.AutomaticSize.Y,
-LayoutOrder = 2,
-Parent = tipHolder,
-})
-self._tipLabel = tipLabel
-
-local logoBlock = Util.group({
-Name = "LogoBlock",
+local logoBlock = Util.frame({
+Name = "Logo",
 AnchorPoint = Vector2.new(1, 1),
-Position = UDim2.new(1, 0, 1, 0),
-Size = UDim2.new(0, options.Logo.Size, 0, 0),
-AutomaticSize = Enum.AutomaticSize.Y,
-ZIndex = 6,
+Size = UDim2.fromOffset(options.Logo.Size, options.Logo.Size),
+BackgroundTransparency = 1,
 Parent = root,
 })
-Util.stack(logoBlock, 10)
 self._logoBlock = logoBlock
 
-local waveHolder = Util.row({
-Name = "Wave",
-Size = UDim2.fromOffset(options.Logo.Size, options.Logo.Size),
-LayoutOrder = 1,
-Parent = logoBlock,
-})
-self._waveHolder = waveHolder
-
-local wordmark
-local wordmarkSub
-if options.Logo.ShowWordmark ~= false then
-local wordmarkHolder = Util.row({
-Name = "Wordmark",
-Size = UDim2.new(1, 0, 0, 0),
-AutomaticSize = Enum.AutomaticSize.Y,
-LayoutOrder = 2,
-Parent = logoBlock,
-})
-Util.stack(wordmarkHolder, 2)
-
-wordmark = Util.text({
-Name = "Name",
-Text = string.upper(options.Title or "Vantage"),
-TextSize = 15,
-Font = "display",
-TextColor3 = tokens.text,
-TextXAlignment = Enum.TextXAlignment.Right,
-Size = UDim2.new(1, 0, 0, 18),
-LayoutOrder = 1,
-Parent = wordmarkHolder,
-})
-wordmarkSub = Util.text({
-Name = "Tagline",
-Text = options.Tagline or "",
-TextSize = tokens.fontSizeSm,
-Font = "body",
-TextColor3 = tokens.textDim,
-TextXAlignment = Enum.TextXAlignment.Right,
-Size = UDim2.new(1, 0, 0, 14),
-Visible = (options.Tagline or "") ~= "",
-LayoutOrder = 2,
-Parent = wordmarkHolder,
-})
-end
-
-local waveSpec = table.clone(options.Logo)
-waveSpec.Size = options.Logo.Size
-waveSpec.Entrance = false
-if Motion.getReducedMotion() then
-waveSpec.Amplitude = 0
-waveSpec.TintStrength = 0
-end
-
-local wave = LogoWave.new(waveSpec, {
-parent = waveHolder,
-maid = self._maid,
-})
-self.Logo = wave
-
-local rail
-local railFill
-if options.ShowRail ~= false then
-rail = Util.group({
-Name = "Rail",
-AnchorPoint = Vector2.new(0, 1),
-Position = UDim2.new(0, 0, 1, 0),
-Size = UDim2.new(1, 0, 0, 3),
-BackgroundColor3 = tokens.border,
-BackgroundTransparency = 0.6,
-ZIndex = 7,
-Parent = root,
-})
-railFill = Util.frame({
-Name = "Fill",
-Size = UDim2.new(0, 0, 1, 0),
-BackgroundColor3 = tokens.accent,
-ZIndex = 8,
-Parent = rail,
-})
-Util.gradient(railFill, {
-{ Time = 0, Color = tokens.accent },
-{ Time = 0.65, Color = tokens.accentHover },
-{ Time = 1, Color = Util.lighten(tokens.accent, 0.35) },
-}, 0)
-
-local head = Util.frame({
-Name = "Head",
-AnchorPoint = Vector2.new(1, 0.5),
-Position = UDim2.new(1, 0, 0.5, 0),
-Size = UDim2.fromOffset(52, 3),
-BackgroundColor3 = Util.lighten(tokens.accent, 0.5),
-BackgroundTransparency = 0.35,
-ZIndex = 9,
-Parent = railFill,
-})
-Util.gradient(head, {
-{ Time = 0, Color = Util.lighten(tokens.accent, 0.5), Transparency = 1 },
-{ Time = 1, Color = Util.lighten(tokens.accent, 0.55), Transparency = 0 },
-}, 0)
-self._railHead = head
-end
-self._rail = rail
-self._railFill = railFill
-
-local continueHolder = Util.group({
-Name = "Continue",
-AnchorPoint = Vector2.new(0.5, 1),
-Position = UDim2.new(0.5, 0, 1, -34),
-Size = UDim2.new(0, 0, 0, 0),
-AutomaticSize = Enum.AutomaticSize.XY,
-BackgroundColor3 = tokens.accent,
-BackgroundTransparency = 1,
-Visible = false,
-ZIndex = 12,
-Parent = root,
-})
-Util.corner(continueHolder, tokens.radiusPill)
-Util.pad(continueHolder, { Left = 18, Right = 18, Top = 9, Bottom = 9 })
-local continueLabel = Util.text({
-Name = "Label",
-Text = "Continue",
-TextSize = tokens.fontSizeMd,
-Font = "bodyBold",
-TextColor3 = tokens.onAccent,
-TextXAlignment = Enum.TextXAlignment.Center,
-TextYAlignment = Enum.TextYAlignment.Center,
-Size = UDim2.new(0, 0, 0, 18),
-AutomaticSize = Enum.AutomaticSize.X,
-Parent = continueHolder,
-})
-self._continueHit = Util.create("TextButton", {
-Name = "Hit",
-Text = "",
-BackgroundTransparency = 1,
-AutoButtonColor = false,
-Size = UDim2.fromScale(1, 1),
-ZIndex = 13,
-Parent = continueHolder,
-})
-self._continueHolder = continueHolder
-self._continueLabel = continueLabel
+local logo = LogoWave.new({
+Image = options.Logo.Image,
+Size = options.Logo.Size,
+Amplitude = options.Logo.Amplitude,
+Frequency = options.Logo.Frequency,
+Speed = options.Logo.Speed,
+Slices = options.Logo.Slices,
+Tint = options.Logo.Tint,
+TintStrength = options.Logo.TintStrength,
+Glow = options.Logo.Glow,
+}, { parent = logoBlock, maid = self._maid })
+self.Logo = logo
 
 local function layout()
 local insets = Util.insets()
 local pad = options.Logo.Padding
-local bottom = insets.bottom + pad
-local side = insets.left + pad
 local right = insets.right + pad
-
-left.Position = UDim2.new(0, side, 1, -(bottom + 42))
-left.Size = UDim2.new(0.56, -side, 0, 0)
-
-logoBlock.Position = UDim2.new(1, -right, 1, -bottom)
-if options.Logo.ShowWordmark == false then
-logoBlock.Size = UDim2.new(0, options.Logo.Size, 0, options.Logo.Size)
-else
-logoBlock.Size = UDim2.new(0, math.max(options.Logo.Size, 150), 0, 0)
-end
-
-if rail then
-rail.Position = UDim2.new(0, 0, 1, -insets.bottom)
-end
-
-continueHolder.Position = UDim2.new(0.5, 0, 1, -(bottom + 8))
+local bottom = insets.bottom + pad
+local rise = (1 - Util.clamp01(self._displayed)) * (options.Rise or 0)
+logoBlock.Position = UDim2.new(1, -right, 1, -(bottom + rise))
 end
 self._layout = layout
 layout()
-self._maid:add(Theme.Changed:connect(function(next)
-tokens = next
-self._tokens = next
-root.BackgroundColor3 = next.canvas
-percentage.TextColor3 = next.text
-phaseLabel.TextColor3 = next.accent
-phaseDot.BackgroundColor3 = next.accent
-detail.TextColor3 = next.textDim
-tipLabel.TextColor3 = next.textMuted
-tipOverline.TextColor3 = next.textDim
-if wordmark then
-wordmark.TextColor3 = next.text
-end
-if wordmarkSub then
-wordmarkSub.TextColor3 = next.textDim
-end
-if rail then
-rail.BackgroundColor3 = next.border
-Util.gradient(railFill, {
-{ Time = 0, Color = next.accent },
-{ Time = 0.65, Color = next.accentHover },
-{ Time = 1, Color = Util.lighten(next.accent, 0.35) },
-}, 0)
-end
-Util.gradient(root, {
-{ Time = 0, Color = Util.lighten(next.canvas, 0.045) },
-{ Time = 0.55, Color = next.canvas },
-{ Time = 1, Color = Util.darken(next.canvas, 0.35) },
-}, 90)
-wave:RefreshTheme()
-layout()
-end))
-if camera and camera.GetPropertyChangedSignal then
+
+local camera = workspace and workspace.CurrentCamera
+if camera then
 pcall(function()
 self._maid:add(camera:GetPropertyChangedSignal("ViewportSize"):Connect(function()
 task.defer(layout)
 end))
 end)
+end
+self._maid:add(Theme.Changed:connect(function(next)
+tokens = next
+self._tokens = next
+logo:RefreshTheme()
+end))
+
+self._maid:add(function()
+Motion.cancelAll(logoBlock)
+end)
+
+if Motion.getReducedMotion() then
+logo:SetOpacity(1)
+else
+
+logo:SetOpacity(0)
+local fadeIn = Motion.springFrom("standard", 0)
+self._maid:add(function()
+fadeIn:destroy()
+end)
+fadeIn:observe(function(value)
+logo:SetOpacity(value)
+end)
+fadeIn:setGoal(1)
+
+Motion.setScale(logoBlock, 0.9)
+Motion.scale(logoBlock, 1, Motion.options("enter", { duration = 0.5 }))
 end
 
 return self
@@ -5168,27 +4858,20 @@ end
 self._progress = value
 
 if not self._progressSpring then
-local spring = Motion.springFrom("gentle", 0)
+local spring = Motion.springFrom("gentle", self._displayed)
 self._progressSpring = spring
 self._maid:add(function()
 spring:destroy()
 end)
 spring:observe(function(displayed)
 self._displayed = displayed
-local fraction = Util.clamp01(displayed)
-if self._railFill then
-self._railFill.Size = UDim2.new(fraction, 0, 1, 0)
-end
-local rounded = math.floor(fraction * 100 + 0.5)
-if self._percentage and self._percentage.Text ~= tostring(rounded) then
-self._percentage.Text = tostring(rounded)
-end
+self._layout()
 end)
 end
 self._progressSpring:setGoal(value)
 
-if detailText ~= nil and self._detail and self._detail.Text ~= detailText then
-self._detail.Text = detailText
+if detailText ~= nil then
+self._detailText = detailText
 end
 
 self.Progress:fire(value, detailText, self)
@@ -5197,13 +4880,9 @@ return self
 end
 
 function LoadingScreen:SetPhase(name: string, detailText: string?)
-if self._phaseLabel.Text ~= name then
-self._phaseLabel.Text = name
-Motion.setScale(self._phaseLabel, 0.94)
-Motion.scale(self._phaseLabel, 1, { duration = 0.3, easing = "settle" })
-end
-if detailText ~= nil and self._detail then
-self._detail.Text = detailText
+self._phaseIndex += 1
+if detailText ~= nil then
+self._detailText = detailText
 end
 self.PhaseChanged:fire(name, detailText, self)
 Util.safeCall(self._spec.OnPhase, name, detailText, self)
@@ -5286,6 +4965,27 @@ function LoadingScreen:Start()
 local spec = self._spec
 local phases = spec.Phases or defaultPhases(self)
 
+if (spec.MinDuration or 0) > 0 then
+task.delay(spec.MinDuration, function()
+self._minDurationElapsed = true
+self:_maybeFinish()
+end)
+else
+self._minDurationElapsed = true
+end
+
+if spec.MaxDuration and spec.MaxDuration > 0 then
+task.delay(spec.MaxDuration, function()
+if self._destroyed or self._complete then
+return
+end
+self._timedOut = true
+self:_finish()
+end)
+end
+
+self:_watchForStalls()
+
 task.spawn(function()
 local totalWeight = 0
 for _, phase in ipairs(phases) do
@@ -5309,10 +5009,8 @@ local phaseBase = startingProgress + consumed * (1 - startingProgress)
 local phaseSpan = weight * (1 - startingProgress)
 consumed += weight
 
-local reported = 0
 local function report(fraction: number, detailText: string?)
-reported = Util.clamp01(fraction)
-self:SetProgress(phaseBase + reported * phaseSpan, detailText)
+self:SetProgress(phaseBase + Util.clamp01(fraction) * phaseSpan, detailText)
 end
 
 if type(phase.Run) == "function" then
@@ -5334,79 +5032,30 @@ report(1, phase.Detail)
 end
 end
 
-self:SetProgress(1, self._loadError and "Finished with warnings" or nil)
-self:_finish()
-end)
-
-self._maid:add(task.delay((spec.MinDuration or 0), function()
-self._minDurationElapsed = true
-self:_maybeFinish()
-end))
-
-self._maid:add(task.delay(spec.MaxDuration or 25, function()
-if not self._complete then
-self._timedOut = true
-self:SetProgress(1, "Taking longer than expected; continuing")
+if not self._destroyed then
+self:SetProgress(1)
 self:_finish()
 end
-end))
+end)
 
-self:_startTips()
-self:_watchForStalls()
 return self
-end
-
-function LoadingScreen:_startTips()
-local tips = self._spec.Tips
-if self._spec.ShowTips == false or not tips or #tips <= 1 then
-return
-end
-self._maid:add(function()
-self._tipToken = (self._tipToken or 0) + 1
-end)
-local function cycle()
-self._tipToken = (self._tipToken or 0) + 1
-local token = self._tipToken
-task.delay(self._spec.TipInterval or 4.6, function()
-if token ~= self._tipToken or self._destroyed then
-return
-end
-self._tipIndex = (self._tipIndex % #tips) + 1
-local label = self._tipLabel
-if not label then
-return
-end
-Motion.tween(label, { TextTransparency = 1 }, Motion.options("exit", {
-duration = 0.2,
-onComplete = function()
-label.Text = formatTip(tips[self._tipIndex])
-Motion.tween(label, { TextTransparency = 0 }, Motion.options("enter", { duration = 0.26 }))
-end,
-}))
-cycle()
-end)
-end
-cycle()
 end
 
 function LoadingScreen:_watchForStalls()
 self._maid:add(Motion.ticker(function()
-if self._destroyed or self._complete then
+if self._destroyed or self._complete or self._stallNoted then
 return
 end
 local quietFor = os.clock() - (self._lastAssetAt or os.clock())
-if quietFor > (self._spec.StallTimeout or 6) and not self._stallNoted then
+if quietFor > (self._spec.StallTimeout or 6) then
 self._stallNoted = true
-self._detail.Text = "Still working — this can take a moment on a slow connection"
+self:SetPhase("Still working", "Waiting on a slow asset")
 end
-
-local pulse = 0.5 + 0.5 * math.sin(os.clock() * 2.2)
-self._phaseDot.BackgroundTransparency = 0.15 + pulse * 0.35
 end))
 end
 
 function LoadingScreen:_finish()
-if self._complete then
+if self._complete or self._destroyed then
 return
 end
 self._complete = true
@@ -5426,30 +5075,17 @@ end
 if not self._minDurationElapsed and (self._spec.MinDuration or 0) > 0 then
 return
 end
+
 self._revealed = true
 
 self.Logo:Pulse({ Color = self._tokens.accent })
-self._continueHolder.Visible = true
-Motion.setScale(self._continueHolder, 0.9)
-Motion.scale(self._continueHolder, 1, { duration = 0.42, easing = "emphasize" })
-Motion.tween(self._continueHolder, { BackgroundTransparency = 0 }, Motion.options("enter"))
-
-self._maid:add(self._continueHit.Activated:Connect(function()
-self:Continue()
-end))
+Util.safeCall(self._spec.OnReady, self)
 
 if self._spec.RequireInput then
-self._continueLabel.Text = "Press any key"
-self._maid:add(game:GetService("UserInputService").InputBegan:Connect(function(input)
-if input.UserInputType == Enum.UserInputType.Keyboard
-or input.UserInputType == Enum.UserInputType.MouseButton1
-or input.UserInputType == Enum.UserInputType.Touch
-then
-self:Continue()
+return
 end
-end))
-elseif self._spec.AutoContinue then
 
+if self._spec.AutoContinue then
 local remaining = self._spec.AutoContinue
 local token = (self._autoToken or 0) + 1
 self._autoToken = token
@@ -5462,16 +5098,10 @@ if remaining <= 0 then
 self:Continue()
 return
 end
-self._continueLabel.Text = string.format("Continue  ·  %.1fs", remaining)
 task.delay(0.1, tick)
 end
-self._continueLabel.Text = string.format("Continue  ·  %.1fs", remaining)
 task.delay(0.1, tick)
-else
-self._continueLabel.Text = "Continue"
 end
-
-Util.safeCall(self._spec.OnReady, self)
 end
 
 function LoadingScreen:Continue(instant: boolean?)
@@ -5479,6 +5109,7 @@ if self._continued then
 return self
 end
 self._continued = true
+
 self.Continued:fire(self)
 Util.safeCall(self._spec.OnContinue, self)
 
@@ -5487,24 +5118,25 @@ self:Destroy()
 return self
 end
 
-Motion.tween(self._logoBlock, { GroupTransparency = 1 }, Motion.options("exit", { duration = 0.36 }))
-task.delay(0.1, function()
+local block = self._logoBlock
+if block then
+Motion.tween(block, {
+Position = UDim2.new(block.Position.X.Scale, block.Position.X.Offset, block.Position.Y.Scale, block.Position.Y.Offset - 8),
+}, { duration = 0.4, easing = "exitSoft" })
+end
+local fade = Motion.springFrom("gentle", 1)
+self._maid:add(function()
+fade:destroy()
+end)
+fade:observe(function(value)
 if not self._destroyed and self.Logo then
-self.Logo:SetOpacity(0)
+self.Logo:SetOpacity(value)
 end
 end)
-Motion.tween(self._left, { GroupTransparency = 1 }, Motion.options("exit", { duration = 0.32 }))
-if self._rail then
-Motion.tween(self._rail, { GroupTransparency = 1, BackgroundTransparency = 1 }, Motion.options("exit"))
-end
-Motion.tween(self._continueHolder, { GroupTransparency = 1 }, Motion.options("exit", { duration = 0.24 }))
-Motion.tween(self.Root, { BackgroundTransparency = 1 }, {
-duration = 0.46,
-easing = "exitSoft",
-onComplete = function()
+fade:setGoal(0)
+task.delay(0.42, function()
 self:Destroy()
-end,
-})
+end)
 return self
 end
 
@@ -5512,8 +5144,16 @@ function LoadingScreen:GetProgress(): number
 return self._displayed
 end
 
+function LoadingScreen:GetTarget(): number
+return self._progress
+end
+
 function LoadingScreen:IsComplete(): boolean
 return self._complete
+end
+
+function LoadingScreen:IsDestroyed(): boolean
+return self._destroyed == true
 end
 
 function LoadingScreen:GetReport()
@@ -5521,10 +5161,13 @@ return {
 progress = self._progress,
 displayed = self._displayed,
 complete = self._complete,
+continued = self._continued == true,
 failures = self._failures,
 loadError = self._loadError,
 timedOut = self._timedOut == true,
 stalled = self._stallNoted == true,
+phase = self._phaseIndex,
+detail = self._detailText,
 duration = os.clock() - self._startedAt,
 mode = self.Logo and self.Logo._mode or "unknown",
 slices = self.Logo and self.Logo._sliceCount or 0,
@@ -5544,6 +5187,10 @@ self.Continued:destroy()
 
 self._maid:destroy()
 
+if self.Logo then
+self.Logo:destroy()
+self.Logo = nil
+end
 if self.ScreenGui then
 self.ScreenGui:Destroy()
 self.ScreenGui = nil
@@ -5551,7 +5198,15 @@ end
 end
 
 function LoadingScreen.Run(spec: { [any]: any })
+
+local registry = Util.registry()
+local previous = registry.loadingScreen
+if previous and not previous:IsDestroyed() then
+previous:Destroy()
+end
+
 local screen = LoadingScreen.new(spec)
+registry.loadingScreen = screen
 screen:Start()
 
 local handle = {
@@ -5579,6 +5234,15 @@ screen:Destroy()
 end
 
 return handle
+end
+
+function LoadingScreen.Current()
+local registry = Util.registry()
+local screen = registry.loadingScreen
+if screen and not screen:IsDestroyed() then
+return screen
+end
+return nil
 end
 
 return LoadingScreen
@@ -6162,16 +5826,22 @@ Parent = info,
 })
 self.Status = status
 
+local declaredWidth = tonumber(spec.ControlWidth) or 0
+local declaredHeight = tonumber(spec.ControlHeight) or tokens.controlMd
+
 local controlHost = Util.row({
 Name = "Control",
 AnchorPoint = Vector2.new(1, 0),
 Position = UDim2.new(1, 0, 0, 0),
-Size = UDim2.new(0, spec.ControlWidth or 0, 0, 0),
-AutomaticSize = Enum.AutomaticSize.XY,
+Size = UDim2.fromOffset(declaredWidth, declaredHeight),
 Parent = root,
 })
 controlHost.ZIndex = 3
 self.Control = controlHost
+
+if declaredWidth > 0 then
+infoPadding.PaddingRight = UDim.new(0, declaredWidth + Field.GAP)
+end
 
 local hit = Util.create("TextButton", {
 Name = "LabelHit",
@@ -6192,8 +5862,9 @@ local function measure()
 local available = root.AbsoluteSize.X
 local controlSize = controlHost.AbsoluteSize
 local stacked = available > 0 and available < Field.STACK_BREAKPOINT
-local controlWidth = controlSize.X
-local controlHeight = controlSize.Y
+
+local controlWidth = math.max(controlSize.X, declaredWidth)
+local controlHeight = math.max(controlSize.Y, declaredHeight)
 
 if controlHeight <= 0 and controlWidth <= 0 then
 return
@@ -7248,6 +6919,7 @@ Description = spec.Description,
 Icon = spec.Icon or "power",
 Disabled = spec.Disabled,
 ControlWidth = TRACK_WIDTH,
+ControlHeight = TRACK_HEIGHT,
 MinHeight = TRACK_HEIGHT + 4,
 }, { maid = ctx.maid, parent = ctx.parent })
 self.Field = field
@@ -7510,6 +7182,7 @@ Description = spec.Description,
 Icon = spec.Icon,
 Disabled = spec.Disabled,
 ControlWidth = controlWidth,
+ControlHeight = 26,
 Align = "right",
 }, { maid = ctx.maid, parent = ctx.parent })
 self.Field = field
@@ -8049,6 +7722,7 @@ Description = spec.Description,
 Icon = spec.Icon,
 Disabled = spec.Disabled,
 ControlWidth = controlWidth,
+ControlHeight = 32,
 }, { maid = ctx.maid, parent = ctx.parent })
 self.Field = field
 self.Instance = field.Instance
@@ -8941,6 +8615,7 @@ Description = spec.Description,
 Icon = spec.Icon,
 Disabled = spec.Disabled,
 ControlWidth = controlWidth,
+ControlHeight = multiline and 76 or 32,
 }, { maid = ctx.maid, parent = ctx.parent })
 self.Field = field
 self.Instance = field.Instance
@@ -9412,6 +9087,7 @@ Description = spec.Description,
 Icon = spec.Icon or "gear",
 Disabled = spec.Disabled,
 ControlWidth = 104,
+ControlHeight = 32,
 }, { maid = ctx.maid, parent = ctx.parent })
 self.Field = field
 self.Instance = field.Instance
@@ -9735,6 +9411,7 @@ Description = spec.Description,
 Icon = spec.Icon,
 Disabled = spec.Disabled,
 ControlWidth = controlWidth,
+ControlHeight = height,
 Align = "right",
 }, { maid = ctx.maid, parent = ctx.parent })
 self.Field = field
@@ -10337,22 +10014,21 @@ local cardStack = Util.stack(card, 0)
 cardStack.Padding = UDim.new(0, 0)
 self.Card = card
 
+local headerHeight = spec.Description and 54 or 44
 local header = Util.row({
 Name = "Header",
-Size = UDim2.new(1, 0, 0, spec.Description and 52 or 42),
+Size = UDim2.new(1, 0, 0, headerHeight),
 LayoutOrder = 1,
 Parent = card,
 })
-Util.pad(header, { Left = 16, Right = 12, Top = 10, Bottom = 10 })
 self.Header = header
-
-local headerStack = Util.stack(header, 2)
-headerStack.HorizontalAlignment = Enum.HorizontalAlignment.Left
 
 local titleRow = Util.row({
 Name = "TitleRow",
-Size = UDim2.new(1, 0, 0, 20),
-LayoutOrder = 1,
+AnchorPoint = Vector2.new(0, 0),
+Position = UDim2.fromOffset(16, spec.Description and 11 or 12),
+Size = UDim2.new(1, -56, 0, 22),
+ZIndex = 4,
 Parent = header,
 })
 Util.list(titleRow, {
@@ -10419,9 +10095,10 @@ TextColor3 = tokens.textDim,
 TextXAlignment = Enum.TextXAlignment.Left,
 TextYAlignment = Enum.TextYAlignment.Top,
 TextWrapped = true,
-Size = UDim2.new(1, 0, 0, 0),
+Position = UDim2.fromOffset(16, 34),
+Size = UDim2.new(1, -56, 0, 0),
 AutomaticSize = Enum.AutomaticSize.Y,
-LayoutOrder = 2,
+ZIndex = 4,
 Parent = header,
 })
 self.Description = description
@@ -10430,7 +10107,7 @@ end
 local chevronHolder = Util.row({
 Name = "Chevron",
 AnchorPoint = Vector2.new(1, 0.5),
-Position = UDim2.new(1, -12, 0, spec.Description and 26 or 21),
+Position = UDim2.new(1, -14, 0, spec.Description and 27 or 22),
 Size = UDim2.fromOffset(14, 14),
 ZIndex = 5,
 Parent = header,
@@ -10915,17 +10592,24 @@ ScrollingEnabled = true,
 Parent = root,
 })
 self.Scroll = scroll
-Util.pad(scroll, { Right = 4 })
+Util.pad(scroll, { Left = 2, Right = 2 })
 
 local content = Util.row({
 Name = "Content",
+AnchorPoint = Vector2.new(0.5, 0),
+Position = UDim2.new(0.5, 0, 0, 0),
 Size = UDim2.new(1, 0, 0, 0),
 AutomaticSize = Enum.AutomaticSize.Y,
-Position = UDim2.fromOffset(0, 0),
 Parent = scroll,
 })
-Util.stack(content, 14)
-Util.pad(content, { Top = 4, Bottom = 20, Left = 0, Right = 6 })
+Util.stack(content, 16)
+Util.pad(content, { Top = 18, Bottom = 28, Left = 20, Right = 20 })
+
+Util.create("UISizeConstraint", {
+Name = "Measure",
+MaxSize = Vector2.new(760, 100000),
+Parent = content,
+})
 self.Content = content
 
 self._layer = context.layer or root
@@ -11553,12 +11237,10 @@ Size = UDim2.fromScale(1, 1),
 BackgroundTransparency = 1,
 Parent = screen,
 })
-Util.list(root, {
-FillDirection = Enum.FillDirection.Vertical,
-SortOrder = Enum.SortOrder.LayoutOrder,
-Padding = UDim.new(0, 0),
-})
+
 self.Root = root
+
+self.Instance = root
 
 local scrim = Util.frame({
 Name = "Scrim",
@@ -11578,10 +11260,7 @@ BackgroundTransparency = 1,
 ZIndex = 2,
 Parent = root,
 })
-Util.list(shellHolder, {
-FillDirection = Enum.FillDirection.Vertical,
-SortOrder = Enum.SortOrder.LayoutOrder,
-})
+
 self.ShellHolder = shellHolder
 
 local minSize = Vector2.new(config.minSize.X, config.minSize.Y)
@@ -11590,7 +11269,7 @@ local shell = Util.frame({
 Name = "Shell",
 AnchorPoint = config.anchor or Vector2.new(0.5, 0.5),
 Position = config.position or UDim2.fromScale(0.5, 0.5),
-Size = config.size or UDim2.fromOffset(680, 440),
+Size = config.size or UDim2.fromOffset(880, 560),
 BackgroundColor3 = tokens.surface,
 BackgroundTransparency = 0.02,
 ClipsDescendants = false,
@@ -11611,7 +11290,7 @@ Position = UDim2.new(
 (config.position or UDim2.fromScale(0.5, 0.5)).Y.Scale,
 (config.position or UDim2.fromScale(0.5, 0.5)).Y.Offset + 10
 ),
-Size = config.size or UDim2.fromOffset(680, 440),
+Size = config.size or UDim2.fromOffset(880, 560),
 BackgroundColor3 = tokens.shadow,
 BackgroundTransparency = 0.72,
 ZIndex = 1,
@@ -11644,20 +11323,14 @@ LayoutOrder = 1,
 Parent = inner,
 })
 Util.corner(titleBar, tokens.radiusXl)
-Util.pad(titleBar, { Left = 14, Right = 8 })
 self.TitleBar = titleBar
-
-Util.list(titleBar, {
-FillDirection = Enum.FillDirection.Horizontal,
-SortOrder = Enum.SortOrder.LayoutOrder,
-Padding = UDim.new(0, 8),
-VerticalAlignment = Enum.VerticalAlignment.Center,
-})
 
 local markGlyphHolder = Util.row({
 Name = "Mark",
+AnchorPoint = Vector2.new(0, 0.5),
+Position = UDim2.new(0, 16, 0.5, 0),
 Size = UDim2.fromOffset(18, 18),
-LayoutOrder = 1,
+ZIndex = 3,
 Parent = titleBar,
 })
 local markGlyph = Glyph.draw(markGlyphHolder, "ring", {
@@ -11671,9 +11344,11 @@ self._markGlyph = markGlyph
 
 local titleBlock = Util.row({
 Name = "TitleBlock",
-Size = UDim2.new(0, 0, 1, 0),
+AnchorPoint = Vector2.new(0, 0.5),
+Position = UDim2.new(0, 42, 0.5, 0),
+Size = UDim2.new(0, 0, 0, 20),
 AutomaticSize = Enum.AutomaticSize.X,
-LayoutOrder = 2,
+ZIndex = 3,
 Parent = titleBar,
 })
 Util.list(titleBlock, {
@@ -11735,7 +11410,7 @@ BackgroundTransparency = 1,
 AutoButtonColor = false,
 AnchorPoint = Vector2.new(0, 0),
 Position = UDim2.fromOffset(0, 0),
-Size = UDim2.new(1, -132, 1, 0),
+Size = UDim2.fromScale(1, 1),
 ZIndex = 2,
 Parent = titleBar,
 })
@@ -11744,7 +11419,7 @@ self._dragSurface = dragSurface
 local controls = Util.row({
 Name = "Controls",
 AnchorPoint = Vector2.new(1, 0.5),
-Position = UDim2.new(1, -6, 0.5, 0),
+Position = UDim2.new(1, -10, 0.5, 0),
 Size = UDim2.new(0, 0, 1, 0),
 AutomaticSize = Enum.AutomaticSize.X,
 ZIndex = 3,
@@ -11835,17 +11510,24 @@ LayoutOrder = 1,
 Visible = config.sidebar ~= false,
 Parent = body,
 })
-Util.stack(sidebar, 2)
-Util.pad(sidebar, { Left = 10, Right = 6, Top = 2, Bottom = 10 })
 self.Sidebar = sidebar
+
+local rail = Util.row({
+Name = "Rail",
+Size = UDim2.fromScale(1, 1),
+Parent = sidebar,
+})
+Util.stack(rail, 2)
+Util.pad(rail, { Left = 12, Right = 8, Top = 10, Bottom = 10 })
+self._rail = rail
 
 self._sidebarSearch = nil
 local sidebarSearchHolder = Util.row({
 Name = "Search",
-Size = UDim2.new(1, 0, 0, 28),
+Size = UDim2.new(1, 0, 0, 30),
 LayoutOrder = 0,
 Visible = false,
-Parent = sidebar,
+Parent = rail,
 })
 local sidebarSearchShell = Util.frame({
 Name = "Shell",
@@ -11891,20 +11573,30 @@ Name = "TabList",
 Size = UDim2.new(1, 0, 0, 0),
 AutomaticSize = Enum.AutomaticSize.Y,
 LayoutOrder = 1,
+Parent = rail,
+})
+Util.stack(tabList, 3)
+self._tabList = tabList
+
+local sidebarOverlay = Util.frame({
+Name = "SidebarOverlay",
+Size = UDim2.fromScale(1, 1),
+BackgroundTransparency = 1,
+
+ZIndex = 0,
 Parent = sidebar,
 })
-Util.stack(tabList, 2)
-self._tabList = tabList
+self._sidebarOverlay = sidebarOverlay
 
 local tabIndicator = Util.frame({
 Name = "Indicator",
 AnchorPoint = Vector2.new(0, 0),
-Position = UDim2.fromOffset(0, 0),
-Size = UDim2.new(1, 0, 0, 34),
+Position = UDim2.fromOffset(12, 0),
+Size = UDim2.new(1, -20, 0, 38),
 BackgroundColor3 = tokens.selected,
 Visible = false,
 ZIndex = 1,
-Parent = sidebar,
+Parent = sidebarOverlay,
 })
 Util.corner(tabIndicator, tokens.radiusMd)
 Util.stroke(tabIndicator, tokens.accentBorder, 1, 0.7)
@@ -11915,7 +11607,7 @@ Name = "SidebarFooter",
 Size = UDim2.new(1, 0, 0, 0),
 AutomaticSize = Enum.AutomaticSize.Y,
 LayoutOrder = 99,
-Parent = sidebar,
+Parent = rail,
 })
 Util.stack(sidebarFooter, 4)
 self._sidebarFooter = sidebarFooter
@@ -12073,19 +11765,38 @@ Parent = root,
 })
 self.UIScale = uiScale
 
+local function shellSpace(): Vector2
+local viewport = Util.viewport()
+return Vector2.new(viewport.X, viewport.Y) / math.max(uiScale.Scale, 0.01)
+end
+self._shellSpace = shellSpace
+
+local function fitToViewport()
+local space = shellSpace()
+local availableX = math.max(minSize.X, space.X - 40)
+local availableY = math.max(minSize.Y, space.Y - 96)
+local current = shell.Size
+local width = math.clamp(current.X.Offset, math.min(minSize.X, availableX), availableX)
+local height = math.clamp(current.Y.Offset, math.min(minSize.Y, availableY), availableY)
+if width ~= current.X.Offset or height ~= current.Y.Offset then
+shell.Size = UDim2.fromOffset(width, height)
+shadow.Size = UDim2.fromOffset(width, height)
+end
+end
+self._fitToViewport = fitToViewport
+
 local function applyScale()
 local width = Util.viewport().X
 local raw
 if config.uiScale then
 raw = config.uiScale
 elseif width < 620 then
-raw = 0.86
-elseif width < 1000 then
-raw = 0.94
+raw = 0.9
 else
-raw = Util.uiScale(1920)
+raw = Util.uiScale()
 end
 uiScale.Scale = raw
+fitToViewport()
 end
 applyScale()
 
@@ -12112,21 +11823,27 @@ local dragOrigin
 local dragConnection
 local dragEndConnection
 
-local function clampPosition(position: UDim2): UDim2
-local viewport = Util.viewport()
-local size = shell.AbsoluteSize
+local function cornerOf(position: UDim2, size: Vector2): Vector2
+local space = shellSpace()
 local anchor = shell.AnchorPoint
-local x = position.X.Scale * viewport.X + position.X.Offset
-local y = position.Y.Scale * viewport.Y + position.Y.Offset
-local left = x - size.X * anchor.X
-local top = y - size.Y * anchor.Y
+return Vector2.new(
+position.X.Scale * space.X + position.X.Offset - size.X * anchor.X,
+position.Y.Scale * space.Y + position.Y.Offset - size.Y * anchor.Y
+)
+end
+
+local function clampPosition(position: UDim2): UDim2
+local space = shellSpace()
+local size = Vector2.new(shell.Size.X.Offset, shell.Size.Y.Offset)
+local anchor = shell.AnchorPoint
+local corner = cornerOf(position, size)
 
 local minLeft = -size.X + 120
-local maxLeft = viewport.X - 60
+local maxLeft = space.X - 60
 local minTop = 0
-local maxTop = viewport.Y - 40
-local clampedLeft = Util.clamp(left, minLeft, math.max(minLeft, maxLeft))
-local clampedTop = Util.clamp(top, minTop, math.max(minTop, maxTop))
+local maxTop = space.Y - 40
+local clampedLeft = Util.clamp(corner.X, minLeft, math.max(minLeft, maxLeft))
+local clampedTop = Util.clamp(corner.Y, minTop, math.max(minTop, maxTop))
 return UDim2.fromOffset(
 clampedLeft + size.X * anchor.X,
 clampedTop + size.Y * anchor.Y
@@ -12149,8 +11866,10 @@ if config.draggable == false or self._maximized then
 return
 end
 dragging = true
-dragStart = Vector2.new(inputX, inputY)
-dragOrigin = Vector2.new(shell.AbsolutePosition.X, shell.AbsolutePosition.Y)
+local scale = math.max(uiScale.Scale, 0.01)
+
+dragStart = Vector2.new(inputX / scale, inputY / scale)
+dragOrigin = Vector2.new(shell.AbsolutePosition.X / scale, shell.AbsolutePosition.Y / scale)
 Motion.tween(shell, {
 BackgroundTransparency = 0.05,
 }, Motion.options("hover"))
@@ -12163,14 +11882,16 @@ local function updateDrag(inputX: number, inputY: number)
 if not dragging then
 return
 end
-local delta = Vector2.new(inputX - dragStart.X, inputY - dragStart.Y)
-local viewport = Util.viewport()
-local size = shell.AbsoluteSize
+local scale = math.max(uiScale.Scale, 0.01)
+local pointer = Vector2.new(inputX / scale, inputY / scale)
+local delta = pointer - dragStart
+local space = shellSpace()
+local size = Vector2.new(shell.Size.X.Offset, shell.Size.Y.Offset)
 local anchor = shell.AnchorPoint
 local targetLeft = dragOrigin.X + delta.X
 local targetTop = dragOrigin.Y + delta.Y
-targetLeft = Util.clamp(targetLeft, -size.X + 120, viewport.X - 60)
-targetTop = Util.clamp(targetTop, 0, viewport.Y - 40)
+targetLeft = Util.clamp(targetLeft, -size.X + 120, space.X - 60)
+targetTop = Util.clamp(targetTop, 0, space.Y - 40)
 local position = UDim2.fromOffset(targetLeft + size.X * anchor.X, targetTop + size.Y * anchor.Y)
 shell.Position = position
 shadow.Position = UDim2.new(position.X.Scale, position.X.Offset, position.Y.Scale, position.Y.Offset + 10)
@@ -12338,8 +12059,38 @@ end))
 
 self:_restore()
 
+local registry = Util.registry()
+local previous = registry.window
+if previous and previous ~= self then
+
+local alive = true
+if type(previous.IsAlive) == "function" then
+local ok, result = pcall(previous.IsAlive, previous)
+alive = not ok or result == true
+end
+if alive then
+pcall(function()
+previous:Destroy()
+end)
+end
+end
+registry.window = self
+
 self._ready = true
 return self
+end
+
+function Window:IsAlive(): boolean
+return self.ScreenGui ~= nil and self.ScreenGui.Parent ~= nil
+end
+
+function Window.Current()
+local registry = Util.registry()
+local window = registry.window
+if window and window:IsAlive() then
+return window
+end
+return nil
 end
 
 function Window:_persist()
@@ -12599,18 +12350,17 @@ if entry.icon then
 Glyph.setColor(entry.icon, self._tokens.accent)
 end
 
-local sidebarOrigin = self._tabList.AbsolutePosition.Y
+local sidebarOrigin = self._tabIndicator.Parent.AbsolutePosition.Y
 local offset = entry.row.AbsolutePosition.Y - sidebarOrigin
-self._tabIndicator.Size = UDim2.new(1, 0, 0, entry.row.AbsoluteSize.Y)
+self._tabIndicator.Size = UDim2.new(1, -20, 0, entry.row.AbsoluteSize.Y)
 
 if not self._indicatorSpring then
 local spring = Motion.springFrom("snappy", offset)
 self._indicatorSpring = spring
 self._maid:add(function()
 spring:destroy()
-end)
-spring:observe(function(value)
-self._tabIndicator.Position = UDim2.fromOffset(0, value)
+end)			spring:observe(function(value)
+self._tabIndicator.Position = UDim2.fromOffset(12, value)
 end)
 end
 
@@ -12828,6 +12578,11 @@ self._maid:destroy()
 if self.ScreenGui then
 self.ScreenGui:Destroy()
 self.ScreenGui = nil
+end
+
+local registry = Util.registry()
+if registry.window == self then
+registry.window = nil
 end
 end
 
@@ -14360,6 +14115,34 @@ insets = inset,
 breakpoint = Util.breakpoint(),
 loadedAt = os.clock(),
 }
+end
+
+function Vantage.GetWindow()
+return Window.Current()
+end
+
+function Vantage.GetLoadingScreen()
+return LoadingScreen.Current()
+end
+
+function Vantage.Destroy()
+local registry = Util.registry()
+
+local window = registry.window
+if window and type(window.Destroy) == "function" then
+pcall(function()
+window:Destroy()
+end)
+end
+registry.window = nil
+
+local loading = registry.loadingScreen
+if loading and type(loading.Destroy) == "function" then
+pcall(function()
+loading:Destroy()
+end)
+end
+registry.loadingScreen = nil
 end
 
 function Vantage.GetInstances()

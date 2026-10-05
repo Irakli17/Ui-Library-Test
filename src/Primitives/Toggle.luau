@@ -48,6 +48,7 @@ function Toggle.new(spec: { [any]: any }, context: { [any]: any })
 		Icon = spec.Icon or "power",
 		Disabled = spec.Disabled,
 		ControlWidth = TRACK_WIDTH,
+		ControlHeight = TRACK_HEIGHT,
 		MinHeight = TRACK_HEIGHT + 4,
 	}, { maid = ctx.maid, parent = ctx.parent })
 	self.Field = field

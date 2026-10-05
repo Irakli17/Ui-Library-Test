@@ -3070,14 +3070,52 @@ function Util.breakpoint(width: number?): string
 	return "desktop"
 end
 
+--- The client the interface is drawn for. Every metric is tuned at this
+--- size, so it is also the scale reference: 1536x792 renders at 1.0.
+Util.referenceViewport = Vector2.new(1536, 792)
+
+--- The one table every copy of the library in this client can see.
+---
+--- `loadstring` hands each run its own module tables, so anything that must
+--- hold across loads — "only one Vantage interface exists" — cannot live in
+--- a module field. It lives in `shared` when the environment has one, and in
+--- a process-local table when it does not (headless hosts and tests).
+function Util.registry(): { [any]: any }
+	if Util._registry then
+		return Util._registry
+	end
+
+	local ok, host = pcall(function()
+		return shared
+	end)
+	if ok and type(host) == "table" then
+		if type(host.__Vantage) ~= "table" then
+			host.__Vantage = {}
+		end
+		Util._registry = host.__Vantage
+	else
+		Util._registry = {}
+	end
+	return Util._registry
+end
+
 --- A UI scale that keeps the interface physically consistent across
---- resolutions: 1.0 at 1920x1080, smaller on laptops, larger on 4K.
-function Util.uiScale(baseWidth: number?): number
-	local width = Util.viewport().X
-	local reference = baseWidth or 1920
-	-- Damped rather than linear so ultrawide screens stay usable.
-	local raw = width / reference
-	return Util.clamp(0.78 + (raw - 0.78) * 0.62, 0.72, 1.35)
+--- resolutions. 1.0 on the reference client (1536x792), damped by the
+--- square-root of the deviation either way, so a small window shrinks a
+--- little rather than collapsing and a 4K screen grows a little rather
+--- than turning a settings panel into a billboard.
+---
+--- The old linear form scaled a 1536-wide client to 0.79, which made body
+--- text render around 10px — legible only if you leaned in.
+function Util.uiScale(baseWidth: number?, baseHeight: number?): number
+	local viewport = Util.viewport()
+	local referenceX = baseWidth or Util.referenceViewport.X
+	local referenceY = baseHeight or Util.referenceViewport.Y
+	local fit = math.min(viewport.X / referenceX, viewport.Y / referenceY)
+	if fit <= 0 then
+		return 1
+	end
+	return Util.clamp(0.5 + 0.5 * math.pow(fit, 0.35), 0.85, 1.25)
 end
 
 --- True when the player is on a touch-only device.
@@ -3205,19 +3243,21 @@ Config.persistence = {
 	save = nil :: ((key: string, value: any) -> ())?,
 }
 
---- Hosting defaults applied to every `Window` unless overridden.
+--- Hosting defaults applied to every `Window` unless overridden. The
+--- window opens at a size that reads as a real application on the
+--- reference client, and never wider than the viewport allows.
 Config.defaults = {
 	theme = "obsidian",
-	size = UDim2.fromOffset(680, 440),
+	size = UDim2.fromOffset(880, 560),
 	position = UDim2.fromScale(0.5, 0.5),
 	anchor = Vector2.new(0.5, 0.5),
-	minSize = Vector2.new(420, 300),
+	minSize = Vector2.new(620, 420),
 	resizable = true,
 	draggable = true,
 	closeOnEscape = true,
-	sidebarWidth = 168,
-	titleBarHeight = 40,
-	statusBarHeight = 24,
+	sidebarWidth = 196,
+	titleBarHeight = 48,
+	statusBarHeight = 26,
 	uiScale = nil :: number?,
 }
 
@@ -4206,10 +4246,10 @@ function Theme.derive(definition: { [any]: any }): { [any]: any }
 	end
 
 	-- Metrics ------------------------------------------------------
-	tokens.radiusXs = 4
-	tokens.radiusSm = 6
-	tokens.radiusMd = 10
-	tokens.radiusLg = 14
+	tokens.radiusXs = 5
+	tokens.radiusSm = 8
+	tokens.radiusMd = 12
+	tokens.radiusLg = 16
 	tokens.radiusXl = 20
 	tokens.radiusPill = 999
 	tokens.borderWidth = 1
@@ -4222,15 +4262,17 @@ function Theme.derive(definition: { [any]: any }): { [any]: any }
 	tokens.space6 = 24
 	tokens.space7 = 32
 	tokens.space8 = 40
-	tokens.controlSm = 26
-	tokens.controlMd = 32
-	tokens.controlLg = 40
-	tokens.fontSizeXs = 10
-	tokens.fontSizeSm = 11
-	tokens.fontSizeMd = 13
-	tokens.fontSizeLg = 15
-	tokens.fontSizeXl = 18
-	tokens.fontSizeDisplay = 24
+	tokens.controlSm = 28
+	tokens.controlMd = 34
+	tokens.controlLg = 42
+	-- Type scale, tuned for the reference client at 1.0 scale: body text has
+	-- to be comfortably readable before any scaling is applied, not after.
+	tokens.fontSizeXs = 11
+	tokens.fontSizeSm = 12
+	tokens.fontSizeMd = 14
+	tokens.fontSizeLg = 16
+	tokens.fontSizeXl = 20
+	tokens.fontSizeDisplay = 28
 	tokens.lineHeight = 1.35
 	tokens.letterWide = 0
 
@@ -5375,36 +5417,37 @@ __modules["Feedback.LoadingScreen"] = function()
 --[[
 	Vantage 1.0.0 · Feedback/LoadingScreen
 	------------------------------------------------------------------
-	A preloading screen that reports the truth and looks like it costs
-	money.
+	Preloading, without a takeover.
 
-	What it actually does:
+	This screen is one thing: the wave mark, in the bottom-right corner
+	of the safe area, moving while your assets stream in. No backdrop,
+	no full-screen panel, no progress bar across the join, no rotating
+	tips. The player's view of the world stays visible, and the screen
+	never swallows a click, because everything it draws is a passive
+	mark in a corner.
+
+	What it still does behind that mark:
 
 	· Real progress. `Spec.Assets` are streamed through
-	  `ContentProvider:PreloadAsync`, and the bar is driven by the
-	  per-asset callback rather than a timer. A fake progress bar is the
-	  single most obvious tell that an interface was not finished.
+	  `ContentProvider:PreloadAsync` and the progress is driven by the
+	  per-asset callback rather than a timer, so `OnProgress` and
+	  `Progress` report the truth even though nothing numeric is drawn.
 	· Phase reporting. Work is split into named phases with weights, so
-	  the readout says "Compiling shaders" rather than "Loading..." for
-	  four minutes.
-	· A spring-smoothed bar. Raw progress jumps in steps; the spring
-	  turns each step into a sweep, and it can never move backwards.
+	  `OnPhase` can say "Streaming assets" instead of "Loading…".
 	· Stall protection. If preloading goes quiet for `StallTimeout` the
-	  screen says so instead of freezing at 68% forever, and
-	  `MaxDuration` guarantees the player eventually reaches the game.
-	· A minimum display time. A cached join that finishes in 90ms would
-	  otherwise flash the screen for one frame, which reads as a glitch.
-	· Failures are counted, not hidden. If assets fail, the screen says
-	  how many and continues.
-	· The wave logo sits bottom-right, aligned to the safe area, so it
-	  clears notches, the Roblox topbar and the mobile home indicator on
-	  every aspect ratio.
-	· Reduced-motion collapses the wave to a still mark. The screen still
-	  works, it just stops moving.
+	  phase is re-announced as still-working instead of the screen
+	  hanging silently, and `MaxDuration` guarantees the player gets in.
+	· A minimum display time, so a cached join does not flash the mark
+	  for a single frame.
+	· Failures are counted, not hidden — `GetReport()` says how many
+	  assets failed and what the loader said.
+	· The mark rises as progress completes, so the corner still reads as
+	  "something is happening" without a number to stare at.
+	· Reduced motion keeps the mark still and honest: it appears, it
+	  stays, it 'leaves on completion, without the wave.
 
-	Cleanup is total: destroy releases the ScreenGui, every connection
-	and the rendering stack, and restores the mouse and camera state the
-	game had before the screen appeared.
+	Cleanup is total: `destroy()` releases the ScreenGui, every
+	connection and the rendering stack.
 ]]
 
 local Util = __require("Core.Util")
@@ -5418,39 +5461,34 @@ local LogoWave = __require("Feedback.LogoWave")
 local LoadingScreen = {}
 LoadingScreen.__index = LoadingScreen
 
---- Where the mark comes from by default. Ship an empty string and the
---- screen draws the procedural mark instead of an empty frame — the
---- screen never shows a blank image.
+--- Where the mark comes from by default. Leave it empty and the screen
+--- draws the procedural mark instead of an empty frame — the corner is
+--- never blank.
 LoadingScreen.LogoImage = ""
 
 LoadingScreen.defaults = {
-	Title = "Vantage",
-	Version = "v" .. Config.version,
-	Tagline = "Interface, engineered.",
 	--- Assets handed to ContentProvider. Supply your own.
 	Assets = {},
 	--- Phases run in order. `Weight` controls how much of the bar each
-	--- phase owns; `Run` is an optional function called with a
-	--- progress reporter.
+	--- phase owns; `Run` is an optional function called with a progress
+	--- reporter.
 	Phases = nil,
-	MinDuration = 1.6,
+	MinDuration = 1.4,
 	MaxDuration = 25,
 	StallTimeout = 6,
-	TipInterval = 4.6,
-	Tips = {
-		"Press {TOGGLE} at any time to show or hide the interface.",
-		"Every control in Vantage supports keyboard navigation.",
-		"Theme changes morph rather than cut, so nothing flashes.",
-		"Hold Shift on a slider for fine adjustment.",
-		"Right-click a keybind to clear it.",
-		"ContentProvider preloading happens in parallel with your gameplay setup.",
-	},
+	--- Pixels the mark travels upward across the whole load. Set 0 to
+	--- keep it perfectly still.
+	Rise = 10,
+	--- Seconds the settled mark is held before it leaves on its own.
+	--- `false` waits for `handle.continue()` instead.
+	AutoContinue = 1.1,
+	--- When true the screen waits for `handle.continue()` (or an input of
+	--- any kind) instead of leaving on its own.
+	RequireInput = false,
 	Logo = {
 		Image = nil :: string?,
-		Size = 92,
-		Position = "bottom-right",
+		Size = 104,
 		Padding = 26,
-		ShowWordmark = true,
 		Amplitude = 5.5,
 		Frequency = 1.15,
 		Speed = 0.42,
@@ -5459,28 +5497,13 @@ LoadingScreen.defaults = {
 		TintStrength = 0.34,
 		Glow = true,
 	},
-	ShowTips = true,
-	ShowRail = true,
-	ShowPercentage = true,
-	--- Seconds to wait after finishing before continuing on its own,
-	--- counted down on the Continue affordance. Pass `false` to wait for
-	--- the player instead, or `RequireInput = true` for "press any key".
-	AutoContinue = 2.4,
-	RequireInput = false,
 	Parent = nil,
 	OnProgress = nil,
 	OnPhase = nil,
 	OnComplete = nil,
+	OnReady = nil,
 	OnContinue = nil,
-	BlurBackground = true,
 }
-
---- Wraps a tip so `{TOGGLE}` becomes the actual bound key name.
-local function formatTip(text: string): string
-	local toggle = Config.keybinds.toggleInterface
-	local name = toggle and toggle.Name or "RightShift"
-	return (text:gsub("{TOGGLE}", name):gsub("{VERSION}", Config.version))
-end
 
 local function resolveParent(explicit: any): any
 	if explicit then
@@ -5516,13 +5539,11 @@ function LoadingScreen.new(spec: { [any]: any }): any
 		_displayed = 0,
 		_complete = false,
 		_destroyed = false,
+		_continued = false,
+		_revealed = false,
 		_failures = 0,
 		_startedAt = os.clock(),
 		_lastAssetAt = os.clock(),
-		_tipIndex = 1,
-		_settings = {
-			mouseIconEnabled = nil,
-		},
 	}, LoadingScreen)
 
 	self.Progress = Signal.new("LoadingScreen.Progress")
@@ -5531,420 +5552,103 @@ function LoadingScreen.new(spec: { [any]: any }): any
 	self.Continued = Signal.new("LoadingScreen.Continued")
 
 	-- Screen ------------------------------------------------------------
-	-- Remembered so the screen can put the game back exactly as it found it.
-	local camera = workspace and workspace.CurrentCamera
-
 	local parent = resolveParent(options.Parent)
 	local screen = Util.create("ScreenGui", {
 		Name = "VantageLoadingScreen",
 		ResetOnSpawn = false,
 		IgnoreGuiInset = true,
-		DisplayOrder = 2000,
+		DisplayOrder = 250,
 		ZIndexBehavior = Enum.ZIndexBehavior.Sibling,
 		Parent = parent,
 	})
 	Util.tag(screen, "Vantage")
 	self.ScreenGui = screen
 
+	-- A transparent, non-interactive frame: it exists only to give the mark
+	-- a coordinate space that ignores the Roblox topbar. Nothing here is a
+	-- button, so gameplay input passes straight through to the game.
 	local root = Util.frame({
 		Name = "Root",
 		Size = UDim2.fromScale(1, 1),
-		BackgroundColor3 = tokens.canvas,
+		BackgroundTransparency = 1,
+		Active = false,
 		Parent = screen,
 	})
 	self.Root = root
 
-	-- A vertical gradient gives the flat canvas some depth; the second
-	-- layer is a warm accent wash from the bottom-left corner, which is
-	-- what makes the composition feel lit rather than filled.
-	local canvasGradient = Util.gradient(root, {
-		{ Time = 0, Color = Util.lighten(tokens.canvas, 0.045) },
-		{ Time = 0.55, Color = tokens.canvas },
-		{ Time = 1, Color = Util.darken(tokens.canvas, 0.35) },
-	}, 90)
-	self._canvasGradient = canvasGradient
-
-	local wash = Util.frame({
-		Name = "Wash",
-		Size = UDim2.fromScale(1, 1),
-		BackgroundColor3 = tokens.accent,
-		BackgroundTransparency = 0.94,
-		ZIndex = 1,
-		Parent = root,
-	})
-	Util.gradient(wash, {
-		{ Time = 0, Color = tokens.accent, Transparency = 1 },
-		{ Time = 0.45, Color = tokens.accent, Transparency = 0.85 },
-		{ Time = 1, Color = tokens.accent, Transparency = 1 },
-	}, 90)
-	self._wash = wash
-
-	-- Vignette: darker toward the edges.
-	local vignette = Util.frame({
-		Name = "Vignette",
-		Size = UDim2.fromScale(1, 1),
-		BackgroundColor3 = tokens.shadow,
-		BackgroundTransparency = 0.78,
-		ZIndex = 2,
-		Parent = root,
-	})
-	Util.gradient(vignette, {
-		{ Time = 0, Color = tokens.shadow, Transparency = 0.35 },
-		{ Time = 0.5, Color = tokens.shadow, Transparency = 1 },
-		{ Time = 1, Color = tokens.shadow, Transparency = 0.35 },
-	}, 90)
-	self._vignette = vignette
-
-	-- Left column: percentage, phase, tip --------------------------------
-	local left = Util.group({
-		Name = "LeftColumn",
-		AnchorPoint = Vector2.new(0, 1),
-		Position = UDim2.new(0, 0, 1, 0),
-		Size = UDim2.new(0.62, 0, 0, 0),
-		AutomaticSize = Enum.AutomaticSize.Y,
-		ZIndex = 5,
-		Parent = root,
-	})
-	Util.stack(left, 6)
-	self._left = left
-
-	local percentage = Util.text({
-		Name = "Percentage",
-		Text = "0",
-		TextSize = 62,
-		Font = "display",
-		TextColor3 = tokens.text,
-		TextXAlignment = Enum.TextXAlignment.Left,
-		TextYAlignment = Enum.TextYAlignment.Bottom,
-		Size = UDim2.new(1, 0, 0, 66),
-		Visible = options.ShowPercentage ~= false,
-		LayoutOrder = 1,
-		Parent = left,
-	})
-	self._percentage = percentage
-
-	local phaseRow = Util.row({
-		Name = "PhaseRow",
-		Size = UDim2.new(1, 0, 0, 16),
-		AutomaticSize = Enum.AutomaticSize.X,
-		LayoutOrder = 2,
-		Parent = left,
-	})
-	Util.list(phaseRow, {
-		FillDirection = Enum.FillDirection.Horizontal,
-		SortOrder = Enum.SortOrder.LayoutOrder,
-		Padding = UDim.new(0, 8),
-		VerticalAlignment = Enum.VerticalAlignment.Center,
-	})
-
-	local phaseDotHolder = Util.row({
-		Name = "Dot",
-		Size = UDim2.fromOffset(7, 7),
-		LayoutOrder = 1,
-		Parent = phaseRow,
-	})
-	local phaseDot = Util.frame({
-		Name = "DotFrame",
-		Size = UDim2.fromScale(1, 1),
-		BackgroundColor3 = tokens.accent,
-		Parent = phaseDotHolder,
-	})
-	Util.pill(phaseDot)
-	self._phaseDot = phaseDot
-
-	local phaseLabel = Util.text({
-		Name = "Phase",
-		Text = "Preparing",
-		TextSize = tokens.fontSizeMd,
-		Font = "subheading",
-		TextColor3 = tokens.accent,
-		TextXAlignment = Enum.TextXAlignment.Left,
-		TextYAlignment = Enum.TextYAlignment.Center,
-		Size = UDim2.new(0, 0, 1, 0),
-		AutomaticSize = Enum.AutomaticSize.X,
-		LayoutOrder = 2,
-		Parent = phaseRow,
-	})
-	self._phaseLabel = phaseLabel
-
-	local detail = Util.text({
-		Name = "Detail",
-		Text = "",
-		TextSize = tokens.fontSizeSm,
-		Font = "body",
-		TextColor3 = tokens.textDim,
-		TextXAlignment = Enum.TextXAlignment.Left,
-		TextYAlignment = Enum.TextYAlignment.Top,
-		TextWrapped = true,
-		Size = UDim2.new(1, 0, 0, 0),
-		AutomaticSize = Enum.AutomaticSize.Y,
-		LayoutOrder = 3,
-		Parent = left,
-	})
-	self._detail = detail
-
-	local tipHolder = Util.row({
-		Name = "Tip",
-		Size = UDim2.new(1, 0, 0, 0),
-		AutomaticSize = Enum.AutomaticSize.Y,
-		LayoutOrder = 4,
-		Visible = options.ShowTips ~= false,
-		Parent = left,
-	})
-	Util.stack(tipHolder, 4)
-	self._tipHolder = tipHolder
-
-	local tipOverline = Util.text({
-		Name = "Overline",
-		Text = "DID YOU KNOW",
-		TextSize = tokens.fontSizeXs,
-		Font = "bodyBold",
-		TextColor3 = tokens.textDim,
-		TextXAlignment = Enum.TextXAlignment.Left,
-		Size = UDim2.new(1, 0, 0, 12),
-		LayoutOrder = 1,
-		Parent = tipHolder,
-	})
-	local tipLabel = Util.text({
-		Name = "TipText",
-		Text = formatTip(options.Tips[1] or ""),
-		TextSize = tokens.fontSizeSm,
-		Font = "body",
-		TextColor3 = tokens.textMuted,
-		TextXAlignment = Enum.TextXAlignment.Left,
-		TextYAlignment = Enum.TextYAlignment.Top,
-		TextWrapped = true,
-		Size = UDim2.new(1, 0, 0, 0),
-		AutomaticSize = Enum.AutomaticSize.Y,
-		LayoutOrder = 2,
-		Parent = tipHolder,
-	})
-	self._tipLabel = tipLabel
-
-	-- Right column: logo block --------------------------------------------
-	local logoBlock = Util.group({
-		Name = "LogoBlock",
+	local logoBlock = Util.frame({
+		Name = "Logo",
 		AnchorPoint = Vector2.new(1, 1),
-		Position = UDim2.new(1, 0, 1, 0),
-		Size = UDim2.new(0, options.Logo.Size, 0, 0),
-		AutomaticSize = Enum.AutomaticSize.Y,
-		ZIndex = 6,
+		Size = UDim2.fromOffset(options.Logo.Size, options.Logo.Size),
+		BackgroundTransparency = 1,
 		Parent = root,
 	})
-	Util.stack(logoBlock, 10)
 	self._logoBlock = logoBlock
 
-	local waveHolder = Util.row({
-		Name = "Wave",
-		Size = UDim2.fromOffset(options.Logo.Size, options.Logo.Size),
-		LayoutOrder = 1,
-		Parent = logoBlock,
-	})
-	self._waveHolder = waveHolder
+	local logo = LogoWave.new({
+		Image = options.Logo.Image,
+		Size = options.Logo.Size,
+		Amplitude = options.Logo.Amplitude,
+		Frequency = options.Logo.Frequency,
+		Speed = options.Logo.Speed,
+		Slices = options.Logo.Slices,
+		Tint = options.Logo.Tint,
+		TintStrength = options.Logo.TintStrength,
+		Glow = options.Logo.Glow,
+	}, { parent = logoBlock, maid = self._maid })
+	self.Logo = logo
 
-	local wordmark
-	local wordmarkSub
-	if options.Logo.ShowWordmark ~= false then
-		local wordmarkHolder = Util.row({
-			Name = "Wordmark",
-			Size = UDim2.new(1, 0, 0, 0),
-			AutomaticSize = Enum.AutomaticSize.Y,
-			LayoutOrder = 2,
-			Parent = logoBlock,
-		})
-		Util.stack(wordmarkHolder, 2)
-
-		wordmark = Util.text({
-			Name = "Name",
-			Text = string.upper(options.Title or "Vantage"),
-			TextSize = 15,
-			Font = "display",
-			TextColor3 = tokens.text,
-			TextXAlignment = Enum.TextXAlignment.Right,
-			Size = UDim2.new(1, 0, 0, 18),
-			LayoutOrder = 1,
-			Parent = wordmarkHolder,
-		})
-		wordmarkSub = Util.text({
-			Name = "Tagline",
-			Text = options.Tagline or "",
-			TextSize = tokens.fontSizeSm,
-			Font = "body",
-			TextColor3 = tokens.textDim,
-			TextXAlignment = Enum.TextXAlignment.Right,
-			Size = UDim2.new(1, 0, 0, 14),
-			Visible = (options.Tagline or "") ~= "",
-			LayoutOrder = 2,
-			Parent = wordmarkHolder,
-		})
-	end
-
-	-- The mark itself.
-	local waveSpec = table.clone(options.Logo)
-	waveSpec.Size = options.Logo.Size
-	waveSpec.Entrance = false
-	if Motion.getReducedMotion() then
-		waveSpec.Amplitude = 0
-		waveSpec.TintStrength = 0
-	end
-
-	local wave = LogoWave.new(waveSpec, {
-		parent = waveHolder,
-		maid = self._maid,
-	})
-	self.Logo = wave
-
-	-- Bottom rail -----------------------------------------------------------
-	local rail
-	local railFill
-	if options.ShowRail ~= false then
-		rail = Util.group({
-			Name = "Rail",
-			AnchorPoint = Vector2.new(0, 1),
-			Position = UDim2.new(0, 0, 1, 0),
-			Size = UDim2.new(1, 0, 0, 3),
-			BackgroundColor3 = tokens.border,
-			BackgroundTransparency = 0.6,
-			ZIndex = 7,
-			Parent = root,
-		})
-		railFill = Util.frame({
-			Name = "Fill",
-			Size = UDim2.new(0, 0, 1, 0),
-			BackgroundColor3 = tokens.accent,
-			ZIndex = 8,
-			Parent = rail,
-		})
-		Util.gradient(railFill, {
-			{ Time = 0, Color = tokens.accent },
-			{ Time = 0.65, Color = tokens.accentHover },
-			{ Time = 1, Color = Util.lighten(tokens.accent, 0.35) },
-		}, 0)
-
-		-- A soft leading edge so the front of the bar reads as a light
-		-- source rather than a hard cut.
-		local head = Util.frame({
-			Name = "Head",
-			AnchorPoint = Vector2.new(1, 0.5),
-			Position = UDim2.new(1, 0, 0.5, 0),
-			Size = UDim2.fromOffset(52, 3),
-			BackgroundColor3 = Util.lighten(tokens.accent, 0.5),
-			BackgroundTransparency = 0.35,
-			ZIndex = 9,
-			Parent = railFill,
-		})
-		Util.gradient(head, {
-			{ Time = 0, Color = Util.lighten(tokens.accent, 0.5), Transparency = 1 },
-			{ Time = 1, Color = Util.lighten(tokens.accent, 0.55), Transparency = 0 },
-		}, 0)
-		self._railHead = head
-	end
-	self._rail = rail
-	self._railFill = railFill
-
-	-- Continue affordance ----------------------------------------------------
-	local continueHolder = Util.group({
-		Name = "Continue",
-		AnchorPoint = Vector2.new(0.5, 1),
-		Position = UDim2.new(0.5, 0, 1, -34),
-		Size = UDim2.new(0, 0, 0, 0),
-		AutomaticSize = Enum.AutomaticSize.XY,
-		BackgroundColor3 = tokens.accent,
-		BackgroundTransparency = 1,
-		Visible = false,
-		ZIndex = 12,
-		Parent = root,
-	})
-	Util.corner(continueHolder, tokens.radiusPill)
-	Util.pad(continueHolder, { Left = 18, Right = 18, Top = 9, Bottom = 9 })
-	local continueLabel = Util.text({
-		Name = "Label",
-		Text = "Continue",
-		TextSize = tokens.fontSizeMd,
-		Font = "bodyBold",
-		TextColor3 = tokens.onAccent,
-		TextXAlignment = Enum.TextXAlignment.Center,
-		TextYAlignment = Enum.TextYAlignment.Center,
-		Size = UDim2.new(0, 0, 0, 18),
-		AutomaticSize = Enum.AutomaticSize.X,
-		Parent = continueHolder,
-	})
-	self._continueHit = Util.create("TextButton", {
-		Name = "Hit",
-		Text = "",
-		BackgroundTransparency = 1,
-		AutoButtonColor = false,
-		Size = UDim2.fromScale(1, 1),
-		ZIndex = 13,
-		Parent = continueHolder,
-	})
-	self._continueHolder = continueHolder
-	self._continueLabel = continueLabel
-
-	-- Layout: apply safe-area insets ------------------------------------------
+	-- Placement ---------------------------------------------------------
+	-- Bottom-right of the *safe* area: notches, the topbar, the mobile home
+	-- indicator and any host UI all shift the corner, and the mark has to
+	-- land in the corner that is actually usable.
 	local function layout()
 		local insets = Util.insets()
 		local pad = options.Logo.Padding
-		local bottom = insets.bottom + pad
-		local side = insets.left + pad
 		local right = insets.right + pad
-
-		left.Position = UDim2.new(0, side, 1, -(bottom + 42))
-		left.Size = UDim2.new(0.56, -side, 0, 0)
-
-		logoBlock.Position = UDim2.new(1, -right, 1, -bottom)
-		if options.Logo.ShowWordmark == false then
-			logoBlock.Size = UDim2.new(0, options.Logo.Size, 0, options.Logo.Size)
-		else
-			logoBlock.Size = UDim2.new(0, math.max(options.Logo.Size, 150), 0, 0)
-		end
-
-		if rail then
-			rail.Position = UDim2.new(0, 0, 1, -insets.bottom)
-		end
-
-		continueHolder.Position = UDim2.new(0.5, 0, 1, -(bottom + 8))
+		local bottom = insets.bottom + pad
+		local rise = (1 - Util.clamp01(self._displayed)) * (options.Rise or 0)
+		logoBlock.Position = UDim2.new(1, -right, 1, -(bottom + rise))
 	end
 	self._layout = layout
 	layout()
-	self._maid:add(Theme.Changed:connect(function(next)
-		tokens = next
-		self._tokens = next
-		root.BackgroundColor3 = next.canvas
-		percentage.TextColor3 = next.text
-		phaseLabel.TextColor3 = next.accent
-		phaseDot.BackgroundColor3 = next.accent
-		detail.TextColor3 = next.textDim
-		tipLabel.TextColor3 = next.textMuted
-		tipOverline.TextColor3 = next.textDim
-		if wordmark then
-			wordmark.TextColor3 = next.text
-		end
-		if wordmarkSub then
-			wordmarkSub.TextColor3 = next.textDim
-		end
-		if rail then
-			rail.BackgroundColor3 = next.border
-			Util.gradient(railFill, {
-				{ Time = 0, Color = next.accent },
-				{ Time = 0.65, Color = next.accentHover },
-				{ Time = 1, Color = Util.lighten(next.accent, 0.35) },
-			}, 0)
-		end
-		Util.gradient(root, {
-			{ Time = 0, Color = Util.lighten(next.canvas, 0.045) },
-			{ Time = 0.55, Color = next.canvas },
-			{ Time = 1, Color = Util.darken(next.canvas, 0.35) },
-		}, 90)
-		wave:RefreshTheme()
-		layout()
-	end))
-	if camera and camera.GetPropertyChangedSignal then
+
+	local camera = workspace and workspace.CurrentCamera
+	if camera then
 		pcall(function()
 			self._maid:add(camera:GetPropertyChangedSignal("ViewportSize"):Connect(function()
 				task.defer(layout)
 			end))
 		end)
+	end
+	self._maid:add(Theme.Changed:connect(function(next)
+		tokens = next
+		self._tokens = next
+		logo:RefreshTheme()
+	end))
+
+	-- Entrance ----------------------------------------------------------
+	self._maid:add(function()
+		Motion.cancelAll(logoBlock)
+	end)
+
+	if Motion.getReducedMotion() then
+		logo:SetOpacity(1)
+	else
+		-- A spring rather than a tween: the mark settles with a little
+		-- momentum instead of arriving on rails.
+		logo:SetOpacity(0)
+		local fadeIn = Motion.springFrom("standard", 0)
+		self._maid:add(function()
+			fadeIn:destroy()
+		end)
+		fadeIn:observe(function(value)
+			logo:SetOpacity(value)
+		end)
+		fadeIn:setGoal(1)
+
+		Motion.setScale(logoBlock, 0.9)
+		Motion.scale(logoBlock, 1, Motion.options("enter", { duration = 0.5 }))
 	end
 
 	return self
@@ -5952,9 +5656,10 @@ end
 
 --[[ Progress ------------------------------------------------------- ]]
 
---- Sets the smoothed progress target and the secondary readout line.
+--- Reports work progress. Nothing numeric is drawn — the mark's rise and
+--- the `OnProgress` callback are what carry it.
 --- Progress never moves backwards: a phase that reports less than the
---- previous one is clamped, because a bar that rewinds destroys trust.
+--- previous one is clamped, because a readout that rewinds destroys trust.
 function LoadingScreen:SetProgress(value: number, detailText: string?)
 	value = Util.clamp01(value)
 	if value < self._progress then
@@ -5963,27 +5668,20 @@ function LoadingScreen:SetProgress(value: number, detailText: string?)
 	self._progress = value
 
 	if not self._progressSpring then
-		local spring = Motion.springFrom("gentle", 0)
+		local spring = Motion.springFrom("gentle", self._displayed)
 		self._progressSpring = spring
 		self._maid:add(function()
 			spring:destroy()
 		end)
 		spring:observe(function(displayed)
 			self._displayed = displayed
-			local fraction = Util.clamp01(displayed)
-			if self._railFill then
-				self._railFill.Size = UDim2.new(fraction, 0, 1, 0)
-			end
-			local rounded = math.floor(fraction * 100 + 0.5)
-			if self._percentage and self._percentage.Text ~= tostring(rounded) then
-				self._percentage.Text = tostring(rounded)
-			end
+			self._layout()
 		end)
 	end
 	self._progressSpring:setGoal(value)
 
-	if detailText ~= nil and self._detail and self._detail.Text ~= detailText then
-		self._detail.Text = detailText
+	if detailText ~= nil then
+		self._detailText = detailText
 	end
 
 	self.Progress:fire(value, detailText, self)
@@ -5991,16 +5689,12 @@ function LoadingScreen:SetProgress(value: number, detailText: string?)
 	return self
 end
 
---- Announces a new phase. The dot pulses so a phase that takes a while
---- still looks alive.
+--- Announces a new phase. Fires `PhaseChanged` and `OnPhase`; the screen
+--- itself stays quiet.
 function LoadingScreen:SetPhase(name: string, detailText: string?)
-	if self._phaseLabel.Text ~= name then
-		self._phaseLabel.Text = name
-		Motion.setScale(self._phaseLabel, 0.94)
-		Motion.scale(self._phaseLabel, 1, { duration = 0.3, easing = "settle" })
-	end
-	if detailText ~= nil and self._detail then
-		self._detail.Text = detailText
+	self._phaseIndex += 1
+	if detailText ~= nil then
+		self._detailText = detailText
 	end
 	self.PhaseChanged:fire(name, detailText, self)
 	Util.safeCall(self._spec.OnPhase, name, detailText, self)
@@ -6080,14 +5774,39 @@ local function defaultPhases(self: any): { any }
 	}
 end
 
---- Runs the screen. Yields until the screen is finished and the player
---- has continued, or returns immediately when `run == false`.
+--- Runs the screen. Yields until the screen has finished and left, or
+--- returns immediately when `run == false`.
 ---
 --- `LoadingScreen.Run(spec)` is the one-call entry point;
 --- `screen:Start()` exists for hosts that want the instance first.
 function LoadingScreen:Start()
 	local spec = self._spec
 	local phases = spec.Phases or defaultPhases(self)
+
+	-- Minimum display time: a join that finishes from cache would otherwise
+	-- flash the mark for one frame, which reads as a glitch.
+	if (spec.MinDuration or 0) > 0 then
+		task.delay(spec.MinDuration, function()
+			self._minDurationElapsed = true
+			self:_maybeFinish()
+		end)
+	else
+		self._minDurationElapsed = true
+	end
+
+	-- Nothing may strand the player: after `MaxDuration` the screen finishes
+	-- itself and the report says it timed out.
+	if spec.MaxDuration and spec.MaxDuration > 0 then
+		task.delay(spec.MaxDuration, function()
+			if self._destroyed or self._complete then
+				return
+			end
+			self._timedOut = true
+			self:_finish()
+		end)
+	end
+
+	self:_watchForStalls()
 
 	task.spawn(function()
 		local totalWeight = 0
@@ -6112,15 +5831,12 @@ function LoadingScreen:Start()
 			local phaseSpan = weight * (1 - startingProgress)
 			consumed += weight
 
-			local reported = 0
 			local function report(fraction: number, detailText: string?)
-				reported = Util.clamp01(fraction)
-				self:SetProgress(phaseBase + reported * phaseSpan, detailText)
+				self:SetProgress(phaseBase + Util.clamp01(fraction) * phaseSpan, detailText)
 			end
 
 			if type(phase.Run) == "function" then
-				-- Wrap so one failing phase cannot strand the player on a
-				-- loading screen forever.
+				-- Wrapped so one failing phase cannot strand the player.
 				local ok, err = pcall(phase.Run, report, self)
 				if not ok then
 					self._loadError = tostring(err)
@@ -6138,79 +5854,27 @@ function LoadingScreen:Start()
 			end
 		end
 
-		self:SetProgress(1, self._loadError and "Finished with warnings" or nil)
-		self:_finish()
-	end)
-
-	-- Minimum display time, held in parallel so a fast load still shows
-	-- the wordmark settling rather than a single frame of it.
-	self._maid:add(task.delay((spec.MinDuration or 0), function()
-		self._minDurationElapsed = true
-		self:_maybeFinish()
-	end))
-
-	-- Hard ceiling. Nothing keeps the player on a loading screen.
-	self._maid:add(task.delay(spec.MaxDuration or 25, function()
-		if not self._complete then
-			self._timedOut = true
-			self:SetProgress(1, "Taking longer than expected; continuing")
+		if not self._destroyed then
+			self:SetProgress(1)
 			self:_finish()
 		end
-	end))
+	end)
 
-	self:_startTips()
-	self:_watchForStalls()
 	return self
 end
 
-function LoadingScreen:_startTips()
-	local tips = self._spec.Tips
-	if self._spec.ShowTips == false or not tips or #tips <= 1 then
-		return
-	end
-	self._maid:add(function()
-		self._tipToken = (self._tipToken or 0) + 1
-	end)
-	local function cycle()
-		self._tipToken = (self._tipToken or 0) + 1
-		local token = self._tipToken
-		task.delay(self._spec.TipInterval or 4.6, function()
-			if token ~= self._tipToken or self._destroyed then
-				return
-			end
-			self._tipIndex = (self._tipIndex % #tips) + 1
-			local label = self._tipLabel
-			if not label then
-				return
-			end
-			Motion.tween(label, { TextTransparency = 1 }, Motion.options("exit", {
-				duration = 0.2,
-				onComplete = function()
-					label.Text = formatTip(tips[self._tipIndex])
-					Motion.tween(label, { TextTransparency = 0 }, Motion.options("enter", { duration = 0.26 }))
-				end,
-			}))
-			cycle()
-		end)
-	end
-	cycle()
-end
-
---- If asset streaming goes quiet for too long, say so. A bar frozen at
---- 68% with no explanation is the worst possible failure mode.
+--- If asset streaming goes quiet for too long, say so rather than stalling
+--- silently. The phase is re-announced so `OnPhase` listeners can react.
 function LoadingScreen:_watchForStalls()
 	self._maid:add(Motion.ticker(function()
-		if self._destroyed or self._complete then
+		if self._destroyed or self._complete or self._stallNoted then
 			return
 		end
 		local quietFor = os.clock() - (self._lastAssetAt or os.clock())
-		if quietFor > (self._spec.StallTimeout or 6) and not self._stallNoted then
+		if quietFor > (self._spec.StallTimeout or 6) then
 			self._stallNoted = true
-			self._detail.Text = "Still working — this can take a moment on a slow connection"
+			self:SetPhase("Still working", "Waiting on a slow asset")
 		end
-		-- A gentle breathing pulse on the phase dot while work is pending.
-		local pulse = 0.5 + 0.5 * math.sin(os.clock() * 2.2)
-		self._phaseDot.BackgroundTransparency = 0.15 + pulse * 0.35
 	end))
 end
 
@@ -6218,7 +5882,7 @@ end
 --- because `self._complete` is the boolean the rest of the class reads:
 --- one name, one meaning.
 function LoadingScreen:_finish()
-	if self._complete then
+	if self._complete or self._destroyed then
 		return
 	end
 	self._complete = true
@@ -6228,8 +5892,8 @@ function LoadingScreen:_finish()
 	self:_maybeFinish()
 end
 
---- Reveals the Continue affordance once both the work and the minimum
---- display time are satisfied.
+--- Settles the mark, then leaves — either on its own after `AutoContinue`
+--- or when the host calls `handle.continue()`.
 function LoadingScreen:_maybeFinish()
 	if self._revealed or self._destroyed then
 		return
@@ -6240,31 +5904,19 @@ function LoadingScreen:_maybeFinish()
 	if not self._minDurationElapsed and (self._spec.MinDuration or 0) > 0 then
 		return
 	end
+
 	self._revealed = true
 
+	-- One pulse of accent as the work lands: the only "done" signal the
+	-- screen gives, and it is enough.
 	self.Logo:Pulse({ Color = self._tokens.accent })
-	self._continueHolder.Visible = true
-	Motion.setScale(self._continueHolder, 0.9)
-	Motion.scale(self._continueHolder, 1, { duration = 0.42, easing = "emphasize" })
-	Motion.tween(self._continueHolder, { BackgroundTransparency = 0 }, Motion.options("enter"))
-
-	self._maid:add(self._continueHit.Activated:Connect(function()
-		self:Continue()
-	end))
+	Util.safeCall(self._spec.OnReady, self)
 
 	if self._spec.RequireInput then
-		self._continueLabel.Text = "Press any key"
-		self._maid:add(game:GetService("UserInputService").InputBegan:Connect(function(input)
-			if input.UserInputType == Enum.UserInputType.Keyboard
-				or input.UserInputType == Enum.UserInputType.MouseButton1
-				or input.UserInputType == Enum.UserInputType.Touch
-				then
-				self:Continue()
-			end
-		end))
-	elseif self._spec.AutoContinue then
-		-- A visible countdown, so continuing on its own is never a
-		-- surprise.
+		return
+	end
+
+	if self._spec.AutoContinue then
 		local remaining = self._spec.AutoContinue
 		local token = (self._autoToken or 0) + 1
 		self._autoToken = token
@@ -6277,16 +5929,10 @@ function LoadingScreen:_maybeFinish()
 				self:Continue()
 				return
 			end
-			self._continueLabel.Text = string.format("Continue  ·  %.1fs", remaining)
 			task.delay(0.1, tick)
 		end
-		self._continueLabel.Text = string.format("Continue  ·  %.1fs", remaining)
 		task.delay(0.1, tick)
-	else
-		self._continueLabel.Text = "Continue"
 	end
-
-	Util.safeCall(self._spec.OnReady, self)
 end
 
 --- Dismisses the screen. Safe to call more than once.
@@ -6295,6 +5941,7 @@ function LoadingScreen:Continue(instant: boolean?)
 		return self
 	end
 	self._continued = true
+
 	self.Continued:fire(self)
 	Util.safeCall(self._spec.OnContinue, self)
 
@@ -6303,25 +5950,27 @@ function LoadingScreen:Continue(instant: boolean?)
 		return self
 	end
 
-	-- Mark first, then let the rest of the composition follow it out.
-	Motion.tween(self._logoBlock, { GroupTransparency = 1 }, Motion.options("exit", { duration = 0.36 }))
-	task.delay(0.1, function()
+	-- The mark lifts a little as it fades, which is what makes the exit read
+	-- as leaving rather than blinking out.
+	local block = self._logoBlock
+	if block then
+		Motion.tween(block, {
+			Position = UDim2.new(block.Position.X.Scale, block.Position.X.Offset, block.Position.Y.Scale, block.Position.Y.Offset - 8),
+		}, { duration = 0.4, easing = "exitSoft" })
+	end
+	local fade = Motion.springFrom("gentle", 1)
+	self._maid:add(function()
+		fade:destroy()
+	end)
+	fade:observe(function(value)
 		if not self._destroyed and self.Logo then
-			self.Logo:SetOpacity(0)
+			self.Logo:SetOpacity(value)
 		end
 	end)
-	Motion.tween(self._left, { GroupTransparency = 1 }, Motion.options("exit", { duration = 0.32 }))
-	if self._rail then
-		Motion.tween(self._rail, { GroupTransparency = 1, BackgroundTransparency = 1 }, Motion.options("exit"))
-	end
-	Motion.tween(self._continueHolder, { GroupTransparency = 1 }, Motion.options("exit", { duration = 0.24 }))
-	Motion.tween(self.Root, { BackgroundTransparency = 1 }, {
-		duration = 0.46,
-		easing = "exitSoft",
-		onComplete = function()
-			self:Destroy()
-		end,
-	})
+	fade:setGoal(0)
+	task.delay(0.42, function()
+		self:Destroy()
+	end)
 	return self
 end
 
@@ -6329,8 +5978,17 @@ function LoadingScreen:GetProgress(): number
 	return self._displayed
 end
 
+--- The reported progress target, 0..1, independent of the smoothed value.
+function LoadingScreen:GetTarget(): number
+	return self._progress
+end
+
 function LoadingScreen:IsComplete(): boolean
 	return self._complete
+end
+
+function LoadingScreen:IsDestroyed(): boolean
+	return self._destroyed == true
 end
 
 --- Diagnostics for the harness and for bug reports.
@@ -6339,10 +5997,13 @@ function LoadingScreen:GetReport()
 		progress = self._progress,
 		displayed = self._displayed,
 		complete = self._complete,
+		continued = self._continued == true,
 		failures = self._failures,
 		loadError = self._loadError,
 		timedOut = self._timedOut == true,
 		stalled = self._stallNoted == true,
+		phase = self._phaseIndex,
+		detail = self._detailText,
 		duration = os.clock() - self._startedAt,
 		mode = self.Logo and self.Logo._mode or "unknown",
 		slices = self.Logo and self.Logo._sliceCount or 0,
@@ -6362,6 +6023,10 @@ function LoadingScreen:Destroy()
 
 	self._maid:destroy()
 
+	if self.Logo then
+		self.Logo:destroy()
+		self.Logo = nil
+	end
 	if self.ScreenGui then
 		self.ScreenGui:Destroy()
 		self.ScreenGui = nil
@@ -6370,15 +6035,27 @@ end
 
 --- One-call entry point.
 ---
----     local done = Vantage.LoadingScreen.Run({
+---     local loading = Vantage.LoadingScreen.Run({
 ---         Assets = { "rbxassetid://1" },
 ---         Logo = { Image = "rbxassetid://123" },
 ---     })
----     done.wait()  -- optional
+---     loading.wait()          -- wait until it has left
+---     loading.wait(3)         -- or give up after three seconds
 ---
---- Returns a handle with `:wait()`, `:continue()` and the screen itself.
+--- Returns a handle with `:wait(timeout?)`, `:continue()` and `:destroy()`.
+--- Every load method is safe to call twice: a second `Run` while a screen is
+--- already up replaces it rather than stacking a second mark in the corner.
 function LoadingScreen.Run(spec: { [any]: any })
+	-- One screen at a time, across every copy of the library that may be
+	-- loaded in this client.
+	local registry = Util.registry()
+	local previous = registry.loadingScreen
+	if previous and not previous:IsDestroyed() then
+		previous:Destroy()
+	end
+
 	local screen = LoadingScreen.new(spec)
+	registry.loadingScreen = screen
 	screen:Start()
 
 	local handle = {
@@ -6406,6 +6083,16 @@ function LoadingScreen.Run(spec: { [any]: any })
 	end
 
 	return handle
+end
+
+--- The screen currently on display, if any. `nil` once it has left.
+function LoadingScreen.Current()
+	local registry = Util.registry()
+	local screen = registry.loadingScreen
+	if screen and not screen:IsDestroyed() then
+		return screen
+	end
+	return nil
 end
 
 return LoadingScreen
@@ -7050,16 +6737,29 @@ function Field.new(spec: { [any]: any }, context: { [any]: any })
 	})
 	self.Status = status
 
+	-- The control's box is declared by the control, never measured back into
+	-- itself: a host sized from its own AbsoluteSize is a feedback loop that
+	-- collapses to 0x0 on the first frame, which is how a switch ends up
+	-- drawn straight through its own label.
+	local declaredWidth = tonumber(spec.ControlWidth) or 0
+	local declaredHeight = tonumber(spec.ControlHeight) or tokens.controlMd
+
 	local controlHost = Util.row({
 		Name = "Control",
 		AnchorPoint = Vector2.new(1, 0),
 		Position = UDim2.new(1, 0, 0, 0),
-		Size = UDim2.new(0, spec.ControlWidth or 0, 0, 0),
-		AutomaticSize = Enum.AutomaticSize.XY,
+		Size = UDim2.fromOffset(declaredWidth, declaredHeight),
 		Parent = root,
 	})
 	controlHost.ZIndex = 3
 	self.Control = controlHost
+
+	-- Reserve the control's column immediately, from the declared width, so
+	-- the label can never be laid out under the control — not on the first
+	-- frame, and not for as long as the control reports an unmeasured size.
+	if declaredWidth > 0 then
+		infoPadding.PaddingRight = UDim.new(0, declaredWidth + Field.GAP)
+	end
 
 	-- Label hit zone: activates the control.
 	local hit = Util.create("TextButton", {
@@ -7081,8 +6781,11 @@ function Field.new(spec: { [any]: any }, context: { [any]: any })
 		local available = root.AbsoluteSize.X
 		local controlSize = controlHost.AbsoluteSize
 		local stacked = available > 0 and available < Field.STACK_BREAKPOINT
-		local controlWidth = controlSize.X
-		local controlHeight = controlSize.Y
+		-- Never smaller than what the control declared: a freshly parented
+		-- control reports 0x0 for a frame, and a reserve of zero is a reserve
+		-- that lets the two columns collide.
+		local controlWidth = math.max(controlSize.X, declaredWidth)
+		local controlHeight = math.max(controlSize.Y, declaredHeight)
 
 		if controlHeight <= 0 and controlWidth <= 0 then
 			return
@@ -8231,6 +7934,7 @@ function Toggle.new(spec: { [any]: any }, context: { [any]: any })
 		Icon = spec.Icon or "power",
 		Disabled = spec.Disabled,
 		ControlWidth = TRACK_WIDTH,
+		ControlHeight = TRACK_HEIGHT,
 		MinHeight = TRACK_HEIGHT + 4,
 	}, { maid = ctx.maid, parent = ctx.parent })
 	self.Field = field
@@ -8521,6 +8225,7 @@ function Slider.new(spec: { [any]: any }, context: { [any]: any })
 		Icon = spec.Icon,
 		Disabled = spec.Disabled,
 		ControlWidth = controlWidth,
+		ControlHeight = 26,
 		Align = "right",
 	}, { maid = ctx.maid, parent = ctx.parent })
 	self.Field = field
@@ -9093,6 +8798,7 @@ function Dropdown.new(spec: { [any]: any }, context: { [any]: any })
 		Icon = spec.Icon,
 		Disabled = spec.Disabled,
 		ControlWidth = controlWidth,
+		ControlHeight = 32,
 	}, { maid = ctx.maid, parent = ctx.parent })
 	self.Field = field
 	self.Instance = field.Instance
@@ -10018,6 +9724,7 @@ function Input.new(spec: { [any]: any }, context: { [any]: any })
 		Icon = spec.Icon,
 		Disabled = spec.Disabled,
 		ControlWidth = controlWidth,
+		ControlHeight = multiline and 76 or 32,
 	}, { maid = ctx.maid, parent = ctx.parent })
 	self.Field = field
 	self.Instance = field.Instance
@@ -10520,6 +10227,7 @@ function Keybind.new(spec: { [any]: any }, context: { [any]: any })
 		Icon = spec.Icon or "gear",
 		Disabled = spec.Disabled,
 		ControlWidth = 104,
+		ControlHeight = 32,
 	}, { maid = ctx.maid, parent = ctx.parent })
 	self.Field = field
 	self.Instance = field.Instance
@@ -10864,6 +10572,7 @@ function Segmented.new(spec: { [any]: any }, context: { [any]: any })
 		Icon = spec.Icon,
 		Disabled = spec.Disabled,
 		ControlWidth = controlWidth,
+		ControlHeight = height,
 		Align = "right",
 	}, { maid = ctx.maid, parent = ctx.parent })
 	self.Field = field
@@ -11512,22 +11221,27 @@ function Section.new(spec: { [any]: any }, context: { [any]: any })
 	self.Card = card
 
 	-- Header ------------------------------------------------------------
+	-- Placed by hand, not by a list layout. A header is three things stacked
+	-- in a fixed-height band: the title row, an optional description, and a
+	-- click target that must cover both. A UIListLayout cannot express that
+	-- (it has no overlay child), and with one the chevron, the hit target and
+	-- the title all became siblings in the flow — which is why the section
+	-- name used to print across its own first control.
+	local headerHeight = spec.Description and 54 or 44
 	local header = Util.row({
 		Name = "Header",
-		Size = UDim2.new(1, 0, 0, spec.Description and 52 or 42),
+		Size = UDim2.new(1, 0, 0, headerHeight),
 		LayoutOrder = 1,
 		Parent = card,
 	})
-	Util.pad(header, { Left = 16, Right = 12, Top = 10, Bottom = 10 })
 	self.Header = header
-
-	local headerStack = Util.stack(header, 2)
-	headerStack.HorizontalAlignment = Enum.HorizontalAlignment.Left
 
 	local titleRow = Util.row({
 		Name = "TitleRow",
-		Size = UDim2.new(1, 0, 0, 20),
-		LayoutOrder = 1,
+		AnchorPoint = Vector2.new(0, 0),
+		Position = UDim2.fromOffset(16, spec.Description and 11 or 12),
+		Size = UDim2.new(1, -56, 0, 22),
+		ZIndex = 4,
 		Parent = header,
 	})
 	Util.list(titleRow, {
@@ -11594,9 +11308,10 @@ function Section.new(spec: { [any]: any }, context: { [any]: any })
 			TextXAlignment = Enum.TextXAlignment.Left,
 			TextYAlignment = Enum.TextYAlignment.Top,
 			TextWrapped = true,
-			Size = UDim2.new(1, 0, 0, 0),
+			Position = UDim2.fromOffset(16, 34),
+			Size = UDim2.new(1, -56, 0, 0),
 			AutomaticSize = Enum.AutomaticSize.Y,
-			LayoutOrder = 2,
+			ZIndex = 4,
 			Parent = header,
 		})
 		self.Description = description
@@ -11605,7 +11320,7 @@ function Section.new(spec: { [any]: any }, context: { [any]: any })
 	local chevronHolder = Util.row({
 		Name = "Chevron",
 		AnchorPoint = Vector2.new(1, 0.5),
-		Position = UDim2.new(1, -12, 0, spec.Description and 26 or 21),
+		Position = UDim2.new(1, -14, 0, spec.Description and 27 or 22),
 		Size = UDim2.fromOffset(14, 14),
 		ZIndex = 5,
 		Parent = header,
@@ -12127,17 +11842,26 @@ function Tab.new(spec: { [any]: any }, context: { [any]: any })
 		Parent = root,
 	})
 	self.Scroll = scroll
-	Util.pad(scroll, { Right = 4 })
+	Util.pad(scroll, { Left = 2, Right = 2 })
 
 	local content = Util.row({
 		Name = "Content",
+		AnchorPoint = Vector2.new(0.5, 0),
+		Position = UDim2.new(0.5, 0, 0, 0),
 		Size = UDim2.new(1, 0, 0, 0),
 		AutomaticSize = Enum.AutomaticSize.Y,
-		Position = UDim2.fromOffset(0, 0),
 		Parent = scroll,
 	})
-	Util.stack(content, 14)
-	Util.pad(content, { Top = 4, Bottom = 20, Left = 0, Right = 6 })
+	Util.stack(content, 16)
+	Util.pad(content, { Top = 18, Bottom = 28, Left = 20, Right = 20 })
+	-- A settings pane stretched across 1200px loses the label/control
+	-- relationship the eye needs. The measure is capped and centred instead,
+	-- which is what makes the same section look deliberate on any window.
+	Util.create("UISizeConstraint", {
+		Name = "Measure",
+		MaxSize = Vector2.new(760, 100000),
+		Parent = content,
+	})
 	self.Content = content
 
 	self._layer = context.layer or root
@@ -12842,12 +12566,15 @@ function Window.new(spec: { [any]: any }): any
 		BackgroundTransparency = 1,
 		Parent = screen,
 	})
-	Util.list(root, {
-		FillDirection = Enum.FillDirection.Vertical,
-		SortOrder = Enum.SortOrder.LayoutOrder,
-		Padding = UDim.new(0, 0),
-	})
+	-- No list layout here on purpose. The root is a stack of full-viewport
+	-- layers (scrim, shell, overlays, notifications, tooltips) and every one
+	-- of them positions itself. A UIListLayout on this frame used to re-flow
+	-- all of them into a column, which is what pushed the shell off the top
+	-- of the screen and stacked the overlay hosts underneath it.
 	self.Root = root
+	-- `Instance` is the name every other component in the library exposes for
+	-- "the GuiObject I own", so the window answers to it as well.
+	self.Instance = root
 
 	-- Scrim --------------------------------------------------------------
 	local scrim = Util.frame({
@@ -12869,10 +12596,8 @@ function Window.new(spec: { [any]: any }): any
 		ZIndex = 2,
 		Parent = root,
 	})
-	Util.list(shellHolder, {
-		FillDirection = Enum.FillDirection.Vertical,
-		SortOrder = Enum.SortOrder.LayoutOrder,
-	})
+	-- Also deliberately layout-free: the shell and its shadow are anchored
+	-- and centred by hand, and a list layout would override that position.
 	self.ShellHolder = shellHolder
 
 	local minSize = Vector2.new(config.minSize.X, config.minSize.Y)
@@ -12881,7 +12606,7 @@ function Window.new(spec: { [any]: any }): any
 		Name = "Shell",
 		AnchorPoint = config.anchor or Vector2.new(0.5, 0.5),
 		Position = config.position or UDim2.fromScale(0.5, 0.5),
-		Size = config.size or UDim2.fromOffset(680, 440),
+		Size = config.size or UDim2.fromOffset(880, 560),
 		BackgroundColor3 = tokens.surface,
 		BackgroundTransparency = 0.02,
 		ClipsDescendants = false,
@@ -12903,7 +12628,7 @@ function Window.new(spec: { [any]: any }): any
 			(config.position or UDim2.fromScale(0.5, 0.5)).Y.Scale,
 			(config.position or UDim2.fromScale(0.5, 0.5)).Y.Offset + 10
 		),
-		Size = config.size or UDim2.fromOffset(680, 440),
+		Size = config.size or UDim2.fromOffset(880, 560),
 		BackgroundColor3 = tokens.shadow,
 		BackgroundTransparency = 0.72,
 		ZIndex = 1,
@@ -12938,21 +12663,20 @@ function Window.new(spec: { [any]: any }): any
 		Parent = inner,
 	})
 	Util.corner(titleBar, tokens.radiusXl)
-	Util.pad(titleBar, { Left = 14, Right = 8 })
 	self.TitleBar = titleBar
 
-	Util.list(titleBar, {
-		FillDirection = Enum.FillDirection.Horizontal,
-		SortOrder = Enum.SortOrder.LayoutOrder,
-		Padding = UDim.new(0, 8),
-		VerticalAlignment = Enum.VerticalAlignment.Center,
-	})
+	-- Placed by hand, not by a list layout. A title bar is two clusters at
+	-- opposite ends with a drag area behind them, and a UIListLayout cannot
+	-- express "this child is behind the others" — with one, the logo and the
+	-- window title ended up queued after the window buttons on the far right.
 
 	-- The wordmark is text, never the logo asset.
 	local markGlyphHolder = Util.row({
 		Name = "Mark",
+		AnchorPoint = Vector2.new(0, 0.5),
+		Position = UDim2.new(0, 16, 0.5, 0),
 		Size = UDim2.fromOffset(18, 18),
-		LayoutOrder = 1,
+		ZIndex = 3,
 		Parent = titleBar,
 	})
 	local markGlyph = Glyph.draw(markGlyphHolder, "ring", {
@@ -12966,9 +12690,11 @@ function Window.new(spec: { [any]: any }): any
 
 	local titleBlock = Util.row({
 		Name = "TitleBlock",
-		Size = UDim2.new(0, 0, 1, 0),
+		AnchorPoint = Vector2.new(0, 0.5),
+		Position = UDim2.new(0, 42, 0.5, 0),
+		Size = UDim2.new(0, 0, 0, 20),
 		AutomaticSize = Enum.AutomaticSize.X,
-		LayoutOrder = 2,
+		ZIndex = 3,
 		Parent = titleBar,
 	})
 	Util.list(titleBlock, {
@@ -13023,7 +12749,8 @@ function Window.new(spec: { [any]: any }): any
 	}, { parent = versionBadgeHolder, maid = self._maid })
 	self._versionBadge = versionBadge
 
-	-- Drag surface: sits under the controls so they stay clickable.
+	-- Drag surface: the whole bar is one grab handle, sitting under the
+	-- controls and the wordmark in ZIndex so those stay clickable.
 	local dragSurface = Util.create("TextButton", {
 		Name = "DragSurface",
 		Text = "",
@@ -13031,7 +12758,7 @@ function Window.new(spec: { [any]: any }): any
 		AutoButtonColor = false,
 		AnchorPoint = Vector2.new(0, 0),
 		Position = UDim2.fromOffset(0, 0),
-		Size = UDim2.new(1, -132, 1, 0),
+		Size = UDim2.fromScale(1, 1),
 		ZIndex = 2,
 		Parent = titleBar,
 	})
@@ -13041,7 +12768,7 @@ function Window.new(spec: { [any]: any }): any
 	local controls = Util.row({
 		Name = "Controls",
 		AnchorPoint = Vector2.new(1, 0.5),
-		Position = UDim2.new(1, -6, 0.5, 0),
+		Position = UDim2.new(1, -10, 0.5, 0),
 		Size = UDim2.new(0, 0, 1, 0),
 		AutomaticSize = Enum.AutomaticSize.X,
 		ZIndex = 3,
@@ -13133,17 +12860,27 @@ function Window.new(spec: { [any]: any }): any
 		Visible = config.sidebar ~= false,
 		Parent = body,
 	})
-	Util.stack(sidebar, 2)
-	Util.pad(sidebar, { Left = 10, Right = 6, Top = 2, Bottom = 10 })
 	self.Sidebar = sidebar
+
+	-- The sidebar itself carries no layout: it holds the scrolling rail and the
+	-- indicator layer, and a layout on this frame would drag the indicator into
+	-- the flow. The rail owns the stack and the gutters.
+	local rail = Util.row({
+		Name = "Rail",
+		Size = UDim2.fromScale(1, 1),
+		Parent = sidebar,
+	})
+	Util.stack(rail, 2)
+	Util.pad(rail, { Left = 12, Right = 8, Top = 10, Bottom = 10 })
+	self._rail = rail
 
 	self._sidebarSearch = nil
 	local sidebarSearchHolder = Util.row({
 		Name = "Search",
-		Size = UDim2.new(1, 0, 0, 28),
+		Size = UDim2.new(1, 0, 0, 30),
 		LayoutOrder = 0,
 		Visible = false,
-		Parent = sidebar,
+		Parent = rail,
 	})
 	local sidebarSearchShell = Util.frame({
 		Name = "Shell",
@@ -13189,21 +12926,37 @@ function Window.new(spec: { [any]: any }): any
 		Size = UDim2.new(1, 0, 0, 0),
 		AutomaticSize = Enum.AutomaticSize.Y,
 		LayoutOrder = 1,
-		Parent = sidebar,
+		Parent = rail,
 	})
-	Util.stack(tabList, 2)
+	Util.stack(tabList, 3)
 	self._tabList = tabList
 
 	-- The active-tab indicator slides between rows.
+	-- The indicator is an overlay, so it lives in a layout-free layer inside
+	-- the sidebar: as a direct child of the stacked sidebar it took part in
+	-- the flow and parked itself on top of the search field.
+	local sidebarOverlay = Util.frame({
+		Name = "SidebarOverlay",
+		Size = UDim2.fromScale(1, 1),
+		BackgroundTransparency = 1,
+		-- Below the rail: the sliding pill is painted first and the tab rows
+		-- draw on top of it, so the label is never hidden by its own marker.
+		ZIndex = 0,
+		Parent = sidebar,
+	})
+	self._sidebarOverlay = sidebarOverlay
+
+	-- 12 from the sidebar edge and 16 narrower: the same measure as a tab row
+	-- inside the rail, so the pill lands exactly on the row it marks.
 	local tabIndicator = Util.frame({
 		Name = "Indicator",
 		AnchorPoint = Vector2.new(0, 0),
-		Position = UDim2.fromOffset(0, 0),
-		Size = UDim2.new(1, 0, 0, 34),
+		Position = UDim2.fromOffset(12, 0),
+		Size = UDim2.new(1, -20, 0, 38),
 		BackgroundColor3 = tokens.selected,
 		Visible = false,
 		ZIndex = 1,
-		Parent = sidebar,
+		Parent = sidebarOverlay,
 	})
 	Util.corner(tabIndicator, tokens.radiusMd)
 	Util.stroke(tabIndicator, tokens.accentBorder, 1, 0.7)
@@ -13214,7 +12967,7 @@ function Window.new(spec: { [any]: any }): any
 		Size = UDim2.new(1, 0, 0, 0),
 		AutomaticSize = Enum.AutomaticSize.Y,
 		LayoutOrder = 99,
-		Parent = sidebar,
+		Parent = rail,
 	})
 	Util.stack(sidebarFooter, 4)
 	self._sidebarFooter = sidebarFooter
@@ -13379,19 +13132,45 @@ function Window.new(spec: { [any]: any }): any
 	})
 	self.UIScale = uiScale
 
+	--- The shell's own coordinate space: the viewport divided by the
+	--- interface scale. `shell.Position` offsets live here, so every clamp
+	--- has to be computed here too. Mixing screen pixels with pre-scale
+	--- offsets is what let the window drift off the top of the screen.
+	local function shellSpace(): Vector2
+		local viewport = Util.viewport()
+		return Vector2.new(viewport.X, viewport.Y) / math.max(uiScale.Scale, 0.01)
+	end
+	self._shellSpace = shellSpace
+
+	--- Keeps the shell inside the viewport on every screen: a window that
+	--- fits on a 1440p monitor must still fit on a 1280x720 laptop, so the
+	--- size is capped against the available area rather than trusted.
+	local function fitToViewport()
+		local space = shellSpace()
+		local availableX = math.max(minSize.X, space.X - 40)
+		local availableY = math.max(minSize.Y, space.Y - 96)
+		local current = shell.Size
+		local width = math.clamp(current.X.Offset, math.min(minSize.X, availableX), availableX)
+		local height = math.clamp(current.Y.Offset, math.min(minSize.Y, availableY), availableY)
+		if width ~= current.X.Offset or height ~= current.Y.Offset then
+			shell.Size = UDim2.fromOffset(width, height)
+			shadow.Size = UDim2.fromOffset(width, height)
+		end
+	end
+	self._fitToViewport = fitToViewport
+
 	local function applyScale()
 		local width = Util.viewport().X
 		local raw
 		if config.uiScale then
 			raw = config.uiScale
 		elseif width < 620 then
-			raw = 0.86
-		elseif width < 1000 then
-			raw = 0.94
+			raw = 0.9
 		else
-			raw = Util.uiScale(1920)
+			raw = Util.uiScale()
 		end
 		uiScale.Scale = raw
+		fitToViewport()
 	end
 	applyScale()
 
@@ -13419,22 +13198,29 @@ function Window.new(spec: { [any]: any }): any
 	local dragConnection
 	local dragEndConnection
 
-	local function clampPosition(position: UDim2): UDim2
-		local viewport = Util.viewport()
-		local size = shell.AbsoluteSize
+	--- Converts a position into the top-left corner the shell would sit at.
+	local function cornerOf(position: UDim2, size: Vector2): Vector2
+		local space = shellSpace()
 		local anchor = shell.AnchorPoint
-		local x = position.X.Scale * viewport.X + position.X.Offset
-		local y = position.Y.Scale * viewport.Y + position.Y.Offset
-		local left = x - size.X * anchor.X
-		local top = y - size.Y * anchor.Y
+		return Vector2.new(
+			position.X.Scale * space.X + position.X.Offset - size.X * anchor.X,
+			position.Y.Scale * space.Y + position.Y.Offset - size.Y * anchor.Y
+		)
+	end
+
+	local function clampPosition(position: UDim2): UDim2
+		local space = shellSpace()
+		local size = Vector2.new(shell.Size.X.Offset, shell.Size.Y.Offset)
+		local anchor = shell.AnchorPoint
+		local corner = cornerOf(position, size)
 		-- Always leave a comfortable strip on screen so the window can
 		-- never be dragged out of reach.
 		local minLeft = -size.X + 120
-		local maxLeft = viewport.X - 60
+		local maxLeft = space.X - 60
 		local minTop = 0
-		local maxTop = viewport.Y - 40
-		local clampedLeft = Util.clamp(left, minLeft, math.max(minLeft, maxLeft))
-		local clampedTop = Util.clamp(top, minTop, math.max(minTop, maxTop))
+		local maxTop = space.Y - 40
+		local clampedLeft = Util.clamp(corner.X, minLeft, math.max(minLeft, maxLeft))
+		local clampedTop = Util.clamp(corner.Y, minTop, math.max(minTop, maxTop))
 		return UDim2.fromOffset(
 			clampedLeft + size.X * anchor.X,
 			clampedTop + size.Y * anchor.Y
@@ -13457,8 +13243,12 @@ function Window.new(spec: { [any]: any }): any
 			return
 		end
 		dragging = true
-		dragStart = Vector2.new(inputX, inputY)
-		dragOrigin = Vector2.new(shell.AbsolutePosition.X, shell.AbsolutePosition.Y)
+		local scale = math.max(uiScale.Scale, 0.01)
+		-- Pointer coordinates arrive in screen pixels; the shell moves in
+		-- pre-scale offsets, so both sides of the drag are normalised once
+		-- here instead of drifting apart when the interface is scaled.
+		dragStart = Vector2.new(inputX / scale, inputY / scale)
+		dragOrigin = Vector2.new(shell.AbsolutePosition.X / scale, shell.AbsolutePosition.Y / scale)
 		Motion.tween(shell, {
 			BackgroundTransparency = 0.05,
 		}, Motion.options("hover"))
@@ -13471,14 +13261,16 @@ function Window.new(spec: { [any]: any }): any
 		if not dragging then
 			return
 		end
-		local delta = Vector2.new(inputX - dragStart.X, inputY - dragStart.Y)
-		local viewport = Util.viewport()
-		local size = shell.AbsoluteSize
+		local scale = math.max(uiScale.Scale, 0.01)
+		local pointer = Vector2.new(inputX / scale, inputY / scale)
+		local delta = pointer - dragStart
+		local space = shellSpace()
+		local size = Vector2.new(shell.Size.X.Offset, shell.Size.Y.Offset)
 		local anchor = shell.AnchorPoint
 		local targetLeft = dragOrigin.X + delta.X
 		local targetTop = dragOrigin.Y + delta.Y
-		targetLeft = Util.clamp(targetLeft, -size.X + 120, viewport.X - 60)
-		targetTop = Util.clamp(targetTop, 0, viewport.Y - 40)
+		targetLeft = Util.clamp(targetLeft, -size.X + 120, space.X - 60)
+		targetTop = Util.clamp(targetTop, 0, space.Y - 40)
 		local position = UDim2.fromOffset(targetLeft + size.X * anchor.X, targetTop + size.Y * anchor.Y)
 		shell.Position = position
 		shadow.Position = UDim2.new(position.X.Scale, position.X.Offset, position.Y.Scale, position.Y.Offset + 10)
@@ -13653,8 +13445,46 @@ function Window.new(spec: { [any]: any }): any
 	-- Restore persisted geometry ---------------------------------------------------
 	self:_restore()
 
+	-- One window at a time ----------------------------------------------------
+	-- A second `Window.new` (a re-run of the same script, a second copy of the
+	-- bundle loaded with `loadstring`) replaces the window on screen instead of
+	-- stacking a second identical shell on top of the first.
+	local registry = Util.registry()
+	local previous = registry.window
+	if previous and previous ~= self then
+		-- A previous copy of the library may predate `IsAlive`; when it does,
+		-- it is still ours to replace.
+		local alive = true
+		if type(previous.IsAlive) == "function" then
+			local ok, result = pcall(previous.IsAlive, previous)
+			alive = not ok or result == true
+		end
+		if alive then
+			pcall(function()
+				previous:Destroy()
+			end)
+		end
+	end
+	registry.window = self
+
 	self._ready = true
 	return self
+end
+
+--- True while this window is still on screen.
+function Window:IsAlive(): boolean
+	return self.ScreenGui ~= nil and self.ScreenGui.Parent ~= nil
+end
+
+--- The window currently on screen, if any. Lets a host re-open or re-theme
+--- the interface without holding on to the reference it got at startup.
+function Window.Current()
+	local registry = Util.registry()
+	local window = registry.window
+	if window and window:IsAlive() then
+		return window
+	end
+	return nil
 end
 
 --[[ Geometry --------------------------------------------------------- ]]
@@ -13933,19 +13763,20 @@ function Window:SelectTab(target: any, options: { [any]: any }?)
 	-- Slide the indicator to the active row. The row's top edge is
 	-- expressed in the sidebar's own coordinate space so it survives
 	-- window moves and UI scaling.
-	local sidebarOrigin = self._tabList.AbsolutePosition.Y
+	-- Measured against the indicator's own parent, which carries no padding,
+	-- so this holds for any sidebar width and UI scale.
+	local sidebarOrigin = self._tabIndicator.Parent.AbsolutePosition.Y
 	local offset = entry.row.AbsolutePosition.Y - sidebarOrigin
-	self._tabIndicator.Size = UDim2.new(1, 0, 0, entry.row.AbsoluteSize.Y)
+	self._tabIndicator.Size = UDim2.new(1, -20, 0, entry.row.AbsoluteSize.Y)
 
 	if not self._indicatorSpring then
 		local spring = Motion.springFrom("snappy", offset)
 		self._indicatorSpring = spring
 		self._maid:add(function()
 			spring:destroy()
-		end)
-		spring:observe(function(value)
-			self._tabIndicator.Position = UDim2.fromOffset(0, value)
-		end)
+		end)			spring:observe(function(value)
+				self._tabIndicator.Position = UDim2.fromOffset(12, value)
+			end)
 	end
 
 	if self._tabIndicatorVisible then
@@ -14171,6 +14002,11 @@ function Window:Destroy()
 	if self.ScreenGui then
 		self.ScreenGui:Destroy()
 		self.ScreenGui = nil
+	end
+
+	local registry = Util.registry()
+	if registry.window == self then
+		registry.window = nil
 	end
 end
 
@@ -15687,10 +15523,11 @@ __modules["init"] = function()
 	-----------
 	    local Vantage = require(game.ReplicatedStorage.Vantage)
 
+	    -- The wave mark in the corner of the safe area while assets stream in.
 	    Vantage.LoadingScreen.Run({
 	        Assets = { "rbxassetid://0" },
 	        Logo = { Image = "rbxassetid://0" },
-	    })
+	    }).wait()
 
 	    local window = Vantage.Window.new({
 	        Name = "My Game",
@@ -15898,6 +15735,42 @@ function Vantage.Diagnostics()
 		breakpoint = Util.breakpoint(),
 		loadedAt = os.clock(),
 	}
+end
+
+--- The window currently on screen, if any. Vantage keeps one interface at a
+--- time: creating a second window replaces the first rather than stacking it,
+--- and re-running the same loadstring therefore never leaves two shells on
+--- top of each other.
+function Vantage.GetWindow()
+	return Window.Current()
+end
+
+--- The loading screen currently on screen, if any.
+function Vantage.GetLoadingScreen()
+	return LoadingScreen.Current()
+end
+
+--- Destroys every Vantage interface on screen — window and loading screen —
+--- whichever copy of the library created it. Safe to call more than once, and
+--- safe to call when nothing is on screen.
+function Vantage.Destroy()
+	local registry = Util.registry()
+
+	local window = registry.window
+	if window and type(window.Destroy) == "function" then
+		pcall(function()
+			window:Destroy()
+		end)
+	end
+	registry.window = nil
+
+	local loading = registry.loadingScreen
+	if loading and type(loading.Destroy) == "function" then
+		pcall(function()
+			loading:Destroy()
+		end)
+	end
+	registry.loadingScreen = nil
 end
 
 --- Every instance Vantage has tagged. Requires
