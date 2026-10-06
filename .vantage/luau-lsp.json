@@ -1,9 +1,0 @@
-{
-  "luau-lsp.require.mode": "relativeToFile",
-  "luau-lsp.types.roblox": true,
-  "luau-lsp.types.definitionFiles": [],
-  "luau-lsp.ignoreGlobs": ["**/.tools/**", "**/dist/**", "**/tests/build/**"],
-  "luau-lsp.analysisTypeErrors": true,
-  "luau-lsp.diagnostics.strictDatamodelTypes": false,
-  "luau-lsp.platform.type": "standard"
-}
