@@ -5,7 +5,7 @@ A dark, compact Roblox UI library in a single file. Loads with `loadstring`, no 
 ```lua
 local Lumen = loadstring(game:HttpGet("https://raw.githubusercontent.com/Irakli17/Ui-Library-Test/main/Lumen.lua"))()
 
-local Window = Lumen:CreateWindow({ Title = "My Hub", Tag = "Pro", Version = "v1.0.0" })
+local Window = Lumen:CreateWindow({ Title = "My Hub", Tag = "Pro", Version = "v1.0.0", Snow = true })
 local Tab = Window:AddTab("Main")
 local Group = Tab:AddGroup("Hello")
 
@@ -19,14 +19,14 @@ Window:AddConfigTab("Config")
 ## Features
 
 - Tabs, tabboxes (sub-tabs), groups, warning banners
-- Toggle, slider, dropdown (multi), input, button (with sub-buttons), label, divider, image
+- Toggle, slider, dropdown (multi), input, button (with sub-buttons), label, divider, image, selectable image grid, rotating 3D viewport
 - Keybinds (toggle / hold / press) and color pickers as addons, plus tooltips
-- Draggable and resizable window, popup click-away, mobile toggle button
-- Snow effect with dimmed backdrop (`Snow = true`)
-- Notifications, watermark (FPS and ping), live hotkey list
+- Top dock bar, compact notifications, watermark (FPS and ping), live hotkey list
+- Dimmed and blurred backdrop with falling snow
 - Floating panels, credits panel, key prompt panel
-- Config save / load / autoload, built-in settings tab, live accent color
-- Safe reload: running the script again replaces the old copy
+- Everything adjustable in the built-in settings tab: menu key, UI scale, HUD toggles, snow, backdrop, full theme editor with presets
+- Config save / load / autoload
+- Draggable, resizable window; safe reload (running the script again replaces the old copy)
 
 ## Docs
 
@@ -34,4 +34,4 @@ See [DOCS.md](DOCS.md) for the API and [Example.lua](Example.lua) for a full dem
 
 ## Versioning
 
-`vX.X.X`. Current version: **v2.0.0**.
+`vX.X.X`. Current version: **v2.1.0**.

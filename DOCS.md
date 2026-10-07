@@ -1,4 +1,4 @@
-# Lumen v2.0.0 - API Reference
+# Lumen v2.1.0 - API Reference
 
 ```lua
 local Lumen = loadstring(game:HttpGet("https://raw.githubusercontent.com/Irakli17/Ui-Library-Test/main/Lumen.lua"))()
@@ -16,7 +16,10 @@ Loading the script again automatically unloads the previous copy.
 local Window = Lumen:CreateWindow({
   Title = "My Hub", Tag = "Pro", Version = "v1.0.0", Subtitle = "Game name", Footer = "discord.gg/x",
   Size = Vector2.new(580, 430), MenuKey = Enum.KeyCode.RightShift,
-  Watermark = true, Hotkeys = true,
+  Watermark = true, Hotkeys = true, Dock = true,
+  Snow = {Count = 70, Speed = 1},      -- or true / omit
+  Backdrop = {Dim = 0.5, Blur = 8},    -- or false to disable
+  Icon = "rbxassetid://123",           -- watermark logo (optional)
 })
 ```
 
@@ -25,13 +28,13 @@ local Window = Lumen:CreateWindow({
 | Method | Description |
 |---|---|
 | `Window:AddTab(name)` | Returns a Tab |
-| `Window:AddConfigTab(name?)` | Ready-made settings tab: menu key, accent color, HUD toggles, config save/load/autoload, unload |
+| `Window:AddConfigTab(name?)` | Ready-made settings tab. Menu: key, dock, watermark, hotkey list, notifications, UI scale, unload. Effects: snow on/amount/speed, backdrop dim and blur. Theme: preset dropdown plus a color picker for every theme color. Configs: save, load, delete, autoload |
 | `Window:SelectTab(tab)` | Switch tab |
 | `Window:Toggle()` / `SetVisible(bool)` | Show or hide |
 | `Window:SetTitle / SetSubtitle / SetFooter(text)` | Update header and footer |
 | `Window:Destroy()` | Remove just this window |
 
-The window is draggable by its header and resizable from the bottom-right grip.
+The window is draggable by its header and resizable from the bottom-right grip. Its size is clamped to the screen on creation.
 
 ## Tab
 
@@ -61,10 +64,16 @@ Every element takes an options table. `Flag` stores the value in `Lumen.Flags[fl
 `{Text, Callback, Tooltip, DoubleClick}`. `DoubleClick = true` asks for a second click to confirm. `:AddSubButton({Text, Callback})` splits the row.
 
 ### AddLabel
-`AddLabel(text, {Dim, Bold})`. Methods: `:SetText`, `:SetColor`. Supports `:AddKeybind` and `:AddColorPicker`, which is how you make standalone ones.
+`AddLabel(text, {Dim, Bold, Box})`. `Box = true` puts the text in a bordered box. Methods: `:SetText`, `:SetColor`. Supports `:AddKeybind` and `:AddColorPicker`, which is how you make standalone ones.
 
 ### AddDivider / AddImage
 `AddDivider()`. `AddImage({Image, Height, ScaleType})`.
+
+### AddViewport
+`AddViewport({Height, Object, Character, Rotate})`. A rotating 3D preview. With no options it shows a gray block. `Character = true` shows a clone of your avatar, `Object` takes any Model or BasePart to clone-display. `:SetObject(inst)` swaps it later.
+
+### AddImageGrid
+`AddImageGrid({Items = {{Image = "rbxassetid://...", Name = "Skin"}}, Columns = 4, CellHeight = 64, Flag, Callback(item, index)})`. Click a cell to select it (accent outline). `.Value` is the selected index. Methods: `:Set(i)`, `:SetItems(list)`.
 
 ## Addons
 
@@ -89,6 +98,17 @@ p:AddLabel("Any element works here")
 
 `Lumen:CreateKeySystem({Title, Note, Validate, OnSuccess, GetKey, GetKeyLink})`. `Validate(key)` is your own function and must return `true`, or `false, "message"`.
 
+## Dock
+
+The icon bar at the top centre (menu, hotkey list, watermark, snow). It stays visible when the window is hidden, so it doubles as the mobile toggle.
+
+```lua
+Lumen:AddDockButton({Icon = "gear", Tooltip = "Settings", Callback = function() end, Active = function() return true end})
+Lumen:SetDockVisible(false)
+```
+
+Built-in icons: `window, keyboard, list, bell, user, snow, gear`, or any `rbxassetid://` / `rbxthumb://` string. `Active` returns whether the button should look highlighted.
+
 ## Notifications
 
 ```lua
@@ -96,29 +116,31 @@ Lumen:Notify({Title = "Hi", Content = "Hello", Type = "Success", Duration = 4})
 Lumen:Notify("Quick message")
 ```
 
-Types: `Accent` (default), `Success`, `Warning`, `Danger`, `Info`.
+Types: default (accent), `Success`, `Warning`, `Danger`, `Info` (tint the bell icon). Options: `Title`, `Content`, `Type`, `Duration`, `Progress` (show a countdown bar). Turn them all off with `Lumen.ShowNotifications = false`.
 
 ## HUD
 
-`Lumen:SetWatermarkVisible(bool)`, `Lumen:SetWatermark("custom text")`, `Lumen:SetHotkeysVisible(bool)`. The hotkey list shows every non-`Press` keybind with its state.
+`Lumen:SetWatermarkVisible(bool)`, `Lumen:SetWatermark("custom text")`, `Lumen:SetIcon(assetId | nil)`, `Lumen:SetHotkeysVisible(bool)`. The hotkey list shows every non-`Press` keybind with its state.
 
-## Snow effect
+## Snow and backdrop
 
 ```lua
-Lumen:CreateWindow({ Title = "My Hub", Snow = true })                       -- defaults
-Lumen:CreateWindow({ Title = "My Hub", Snow = {Count = 100, Speed = 1.5, Dim = 0.5} })
-Lumen:SetSnow(false)                                                       -- turn off later
+Lumen:SetSnow(true, {Count = 100, Speed = 1.5})   -- falling snow
+Lumen:SetSnowOptions({Count = 50})                -- tweak while running
+Lumen:SetBackdrop({Dim = 0.5, Blur = 12})         -- darken (0-1) and blur (0-40) the game world
 ```
 
-Falling snow plus a darkened backdrop, drawn behind the UI. Only visible while a window is open. The config tab has a toggle for it.
+Drawn behind the UI and only while a window is open. Dim defaults to 0.35, blur to 0, snow to off. All of it is adjustable from the config tab.
 
-## Themes
+## Themes and scale
 
 ```lua
 Lumen:SetTheme({Accent = Color3.fromRGB(255, 90, 120)})
+Lumen:ApplyPreset("Ocean")     -- Lavender, Ocean, Rose, Emerald, Sunset, Mono
+Lumen:SetScale(1.15)           -- scales windows, panels and popups (0.6 - 1.6)
 ```
 
-Keys: `Background, Group, Control, ControlHover, Border, Text, TextDim, Accent, AccentText, Success, Warning, Danger, Info`. Everything updates live.
+Keys: `Background, Group, Control, ControlHover, Border, Text, TextDim, Accent, AccentText, TabActive, Success, Warning, Danger, Info`. Everything updates live. Setting `Accent` also derives `AccentText` and `TabActive` unless you pass them.
 
 ## Configs
 
