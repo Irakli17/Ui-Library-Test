@@ -18,15 +18,16 @@ Window:AddConfigTab("Config")
 
 ## Features
 
-- Tabs, tabboxes (sub-tabs), groups, warning banners
-- Toggle, slider, dropdown (multi), input, button (with sub-buttons), label, divider, image, selectable image grid, rotating 3D viewport
-- Keybinds (toggle / hold / press) and color pickers as addons, plus tooltips
-- Top dock bar, compact notifications, watermark (FPS and ping), live hotkey list
+- Tabs, tabboxes (sub-tabs), titled groups with icons, banners, equal-height column layout, tabs and sections you can switch off
+- Toggle (with glow, disabled state), slider, dropdown (multi), input, button (with sub-buttons), label, image, selectable image grid
+- 3D viewport you can orbit with the mouse in any direction; it returns to auto-rotating when released
+- Keybinds (toggle / hold / press / always) and color pickers as addons, plus tooltips
+- Top dock, command palette (Ctrl+K), compact notifications, draggable watermark and hotkey list
 - Dimmed and blurred backdrop with falling snow
-- Floating panels, credits panel, key prompt panel
-- Everything adjustable in the built-in settings tab: menu key, UI scale, HUD toggles, snow, backdrop, full theme editor with presets
-- Config save / load / autoload
-- Draggable, resizable window; safe reload (running the script again replaces the old copy)
+- Floating panels, credits panel, key prompt panel with Discord icon
+- Everything adjustable in the built-in settings tab, including a full theme editor with presets
+- Inter font (downloaded once, falls back to Gotham), UI scale, config save / load / autoload
+- Draggable, resizable window; safe reload
 
 ## Docs
 
@@ -34,4 +35,4 @@ See [DOCS.md](DOCS.md) for the API and [Example.lua](Example.lua) for a full dem
 
 ## Versioning
 
-`vX.X.X`. Current version: **v2.1.0**.
+`vX.X.X`. Current version: **v2.2.0**.

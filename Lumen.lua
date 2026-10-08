@@ -1,12 +1,13 @@
 --!nocheck
 --!nolint
 --[[
-	Lumen UI Library  v2.1.0
+	Lumen UI Library  v2.2.0
 	Single file, no dependencies, loadstring-ready.
 
 	local Lumen = loadstring(game:HttpGet("https://raw.githubusercontent.com/Irakli17/Ui-Library-Test/main/Lumen.lua"))()
 
 	See DOCS.md for the full API and Example.lua for a complete demo.
+	Set getgenv().LumenNoInter = true before loading to skip the one-time Inter font download.
 ]]
 
 local env = (getgenv and getgenv()) or _G
@@ -26,7 +27,7 @@ local Stats = Service("Stats")
 local Lighting = Service("Lighting")
 
 local Lumen = {
-	Version = "v2.1.0",
+	Version = "v2.2.0",
 	Flags = {},
 	Options = {},
 	Windows = {},
@@ -37,37 +38,104 @@ local Lumen = {
 	ShowNotifications = true,
 	ShowDock = true,
 	Scale = 1,
+	FontName = "Gotham",
+	-- colours sampled from the reference UI
 	Theme = {
-		Background = Color3.fromRGB(14, 14, 19),
-		Group = Color3.fromRGB(20, 20, 27),
-		Control = Color3.fromRGB(28, 28, 37),
-		ControlHover = Color3.fromRGB(38, 38, 50),
-		Border = Color3.fromRGB(41, 41, 54),
-		Text = Color3.fromRGB(236, 236, 242),
-		TextDim = Color3.fromRGB(140, 140, 157),
-		Accent = Color3.fromRGB(150, 138, 224),
-		AccentText = Color3.fromRGB(196, 189, 245),
-		TabActive = Color3.fromRGB(43, 41, 60),
-		Success = Color3.fromRGB(96, 205, 140),
-		Warning = Color3.fromRGB(240, 170, 70),
-		Danger = Color3.fromRGB(232, 92, 104),
-		Info = Color3.fromRGB(100, 160, 240),
+		Background = Color3.fromRGB(14, 13, 17),
+		Group = Color3.fromRGB(17, 16, 21),
+		GroupBorder = Color3.fromRGB(25, 24, 30),
+		Control = Color3.fromRGB(24, 23, 28),
+		ControlHover = Color3.fromRGB(34, 33, 39),
+		Border = Color3.fromRGB(48, 47, 58),
+		Outline = Color3.fromRGB(37, 35, 44),
+		Text = Color3.fromRGB(208, 207, 219),
+		Label = Color3.fromRGB(185, 184, 193),
+		TextDim = Color3.fromRGB(134, 133, 141),
+		TextMuted = Color3.fromRGB(102, 101, 108),
+		Chip = Color3.fromRGB(23, 22, 26),
+		ChipText = Color3.fromRGB(153, 152, 160),
+		Accent = Color3.fromRGB(159, 150, 193),
+		AccentText = Color3.fromRGB(159, 150, 193),
+		AccentBorder = Color3.fromRGB(104, 98, 127),
+		Toggle = Color3.fromRGB(68, 64, 81),
+		TabActive = Color3.fromRGB(43, 40, 52),
+		Success = Color3.fromRGB(80, 159, 119),
+		Warning = Color3.fromRGB(168, 128, 82),
+		Danger = Color3.fromRGB(159, 88, 88),
+		Info = Color3.fromRGB(80, 158, 237),
 	},
 	Presets = {
-		Lavender = { Accent = Color3.fromRGB(150, 138, 224), Background = Color3.fromRGB(14, 14, 19), Group = Color3.fromRGB(20, 20, 27), Control = Color3.fromRGB(28, 28, 37), ControlHover = Color3.fromRGB(38, 38, 50), Border = Color3.fromRGB(41, 41, 54), Text = Color3.fromRGB(236, 236, 242), TextDim = Color3.fromRGB(140, 140, 157) },
-		Ocean = { Accent = Color3.fromRGB(86, 160, 235), Background = Color3.fromRGB(10, 15, 22), Group = Color3.fromRGB(15, 22, 32), Control = Color3.fromRGB(22, 32, 46), ControlHover = Color3.fromRGB(30, 44, 62), Border = Color3.fromRGB(32, 46, 64), Text = Color3.fromRGB(232, 238, 246), TextDim = Color3.fromRGB(128, 150, 176) },
-		Rose = { Accent = Color3.fromRGB(235, 110, 150), Background = Color3.fromRGB(18, 12, 16), Group = Color3.fromRGB(26, 18, 23), Control = Color3.fromRGB(37, 26, 32), ControlHover = Color3.fromRGB(50, 36, 44), Border = Color3.fromRGB(54, 38, 47), Text = Color3.fromRGB(244, 234, 238), TextDim = Color3.fromRGB(166, 140, 150) },
-		Emerald = { Accent = Color3.fromRGB(80, 205, 140), Background = Color3.fromRGB(11, 17, 15), Group = Color3.fromRGB(17, 25, 22), Control = Color3.fromRGB(25, 37, 32), ControlHover = Color3.fromRGB(34, 50, 43), Border = Color3.fromRGB(36, 52, 45), Text = Color3.fromRGB(234, 244, 238), TextDim = Color3.fromRGB(134, 160, 148) },
-		Sunset = { Accent = Color3.fromRGB(240, 150, 70), Background = Color3.fromRGB(18, 14, 12), Group = Color3.fromRGB(26, 20, 17), Control = Color3.fromRGB(38, 30, 25), ControlHover = Color3.fromRGB(52, 41, 34), Border = Color3.fromRGB(55, 43, 36), Text = Color3.fromRGB(246, 238, 230), TextDim = Color3.fromRGB(168, 150, 135) },
-		Mono = { Accent = Color3.fromRGB(205, 205, 212), Background = Color3.fromRGB(12, 12, 12), Group = Color3.fromRGB(18, 18, 18), Control = Color3.fromRGB(27, 27, 27), ControlHover = Color3.fromRGB(38, 38, 38), Border = Color3.fromRGB(45, 45, 45), Text = Color3.fromRGB(240, 240, 240), TextDim = Color3.fromRGB(140, 140, 140) },
+		Lavender = { Accent = Color3.fromRGB(159, 150, 193), Background = Color3.fromRGB(14, 13, 17), Group = Color3.fromRGB(17, 16, 21), GroupBorder = Color3.fromRGB(25, 24, 30), Control = Color3.fromRGB(24, 23, 28), ControlHover = Color3.fromRGB(34, 33, 39), Border = Color3.fromRGB(48, 47, 58), Outline = Color3.fromRGB(38, 36, 45), Text = Color3.fromRGB(210, 209, 220), Label = Color3.fromRGB(187, 186, 195), TextDim = Color3.fromRGB(134, 133, 141), TextMuted = Color3.fromRGB(108, 107, 114) },
+		Ocean = { Accent = Color3.fromRGB(110, 165, 225), Background = Color3.fromRGB(10, 14, 20), Group = Color3.fromRGB(14, 19, 27), GroupBorder = Color3.fromRGB(22, 30, 41), Control = Color3.fromRGB(20, 27, 38), ControlHover = Color3.fromRGB(29, 39, 54), Border = Color3.fromRGB(40, 54, 72), Outline = Color3.fromRGB(33, 45, 61), Text = Color3.fromRGB(210, 218, 230), Label = Color3.fromRGB(180, 190, 204), TextDim = Color3.fromRGB(122, 138, 158), TextMuted = Color3.fromRGB(96, 110, 128) },
+		Rose = { Accent = Color3.fromRGB(205, 120, 150), Background = Color3.fromRGB(17, 12, 15), Group = Color3.fromRGB(22, 16, 20), GroupBorder = Color3.fromRGB(33, 24, 29), Control = Color3.fromRGB(31, 23, 28), ControlHover = Color3.fromRGB(43, 32, 39), Border = Color3.fromRGB(62, 46, 54), Outline = Color3.fromRGB(50, 37, 44), Text = Color3.fromRGB(228, 214, 220), Label = Color3.fromRGB(200, 184, 191), TextDim = Color3.fromRGB(150, 130, 140), TextMuted = Color3.fromRGB(118, 100, 109) },
+		Emerald = { Accent = Color3.fromRGB(100, 190, 145), Background = Color3.fromRGB(10, 15, 13), Group = Color3.fromRGB(14, 20, 18), GroupBorder = Color3.fromRGB(22, 31, 28), Control = Color3.fromRGB(20, 28, 25), ControlHover = Color3.fromRGB(29, 40, 36), Border = Color3.fromRGB(42, 58, 52), Outline = Color3.fromRGB(34, 47, 42), Text = Color3.fromRGB(212, 226, 219), Label = Color3.fromRGB(184, 198, 191), TextDim = Color3.fromRGB(124, 144, 133), TextMuted = Color3.fromRGB(98, 114, 106) },
+		Sunset = { Accent = Color3.fromRGB(215, 150, 90), Background = Color3.fromRGB(17, 13, 11), Group = Color3.fromRGB(23, 18, 15), GroupBorder = Color3.fromRGB(34, 27, 22), Control = Color3.fromRGB(32, 26, 21), ControlHover = Color3.fromRGB(44, 36, 30), Border = Color3.fromRGB(64, 52, 43), Outline = Color3.fromRGB(51, 41, 34), Text = Color3.fromRGB(230, 220, 210), Label = Color3.fromRGB(202, 191, 180), TextDim = Color3.fromRGB(152, 138, 124), TextMuted = Color3.fromRGB(120, 108, 96) },
+		Mono = { Accent = Color3.fromRGB(190, 190, 196), Background = Color3.fromRGB(12, 12, 12), Group = Color3.fromRGB(17, 17, 17), GroupBorder = Color3.fromRGB(26, 26, 26), Control = Color3.fromRGB(25, 25, 25), ControlHover = Color3.fromRGB(36, 36, 36), Border = Color3.fromRGB(52, 52, 52), Outline = Color3.fromRGB(41, 41, 41), Text = Color3.fromRGB(222, 222, 222), Label = Color3.fromRGB(194, 194, 194), TextDim = Color3.fromRGB(136, 136, 136), TextMuted = Color3.fromRGB(106, 106, 106) },
 	},
 }
 env.LumenUI = Lumen
 
-local Connections, Themed, Refreshers, Keybinds = {}, {}, {}, {}
+local Connections, Themed, Refreshers, Keybinds, FontObjs, Gradients = {}, {}, {}, {}, {}, {}
 local Gui, Overlay, OpenPopup
 local ZCounter = 10
 local Elements = {}
+
+------------------------------------------------------------------------------
+-- Fonts (Inter is downloaded once and cached; falls back to Gotham)
+------------------------------------------------------------------------------
+
+local GothamByWeight = {
+	Regular = Enum.Font.Gotham, Medium = Enum.Font.GothamMedium,
+	SemiBold = Enum.Font.GothamSemibold, Bold = Enum.Font.GothamBold,
+}
+local WeightEnum = {
+	Regular = Enum.FontWeight.Regular, Medium = Enum.FontWeight.Medium,
+	SemiBold = Enum.FontWeight.SemiBold, Bold = Enum.FontWeight.Bold,
+}
+local EnumToWeight = {}
+for w, e in pairs(GothamByWeight) do EnumToWeight[e] = w end
+
+local function ApplyFont(obj, weight)
+	local asset = Lumen._fontAsset
+	if asset then
+		local ok = pcall(function() obj.FontFace = Font.new(asset, WeightEnum[weight]) end)
+		if ok then return end
+	end
+	obj.Font = GothamByWeight[weight]
+end
+
+function Lumen:SetFont(name)
+	self.FontName = name
+	self._fontAsset = (name == "Inter") and self._interAsset or nil
+	if self._fontDropdown then self._fontDropdown:Set(name, true) end
+	for i = #FontObjs, 1, -1 do
+		local e = FontObjs[i]
+		if e[1].Parent == nil then table.remove(FontObjs, i) else ApplyFont(e[1], e[2]) end
+	end
+end
+
+local INTER_URL = "https://raw.githubusercontent.com/rsms/inter/v3.19/docs/font-files/Inter-"
+function Lumen:_LoadInter()
+	if not (writefile and readfile and isfile and isfolder and makefolder and getcustomasset) then return false end
+	local ok = pcall(function()
+		if not isfolder(self.Folder) then makefolder(self.Folder) end
+		local dir = self.Folder .. "/fonts"
+		if not isfolder(dir) then makefolder(dir) end
+		local faces = {}
+		for name, weight in pairs({ Regular = 400, Medium = 500, SemiBold = 600, Bold = 700 }) do
+			local path = dir .. "/Inter-" .. name .. ".otf"
+			if not isfile(path) then
+				local data = game:HttpGet(INTER_URL .. name .. ".otf")
+				assert(data and #data > 10000, "download failed")
+				writefile(path, data)
+			end
+			table.insert(faces, { name = name, weight = weight, style = "normal", assetId = getcustomasset(path) })
+		end
+		writefile(dir .. "/Inter.json", HttpService:JSONEncode({ name = "Inter", faces = faces }))
+		self._interAsset = getcustomasset(dir .. "/Inter.json")
+	end)
+	return ok and self._interAsset ~= nil
+end
 
 ------------------------------------------------------------------------------
 -- Core helpers
@@ -85,12 +153,15 @@ local function Tween(obj, time, props)
 	return tw
 end
 
+local TEXT_CLASSES = { TextLabel = true, TextButton = true, TextBox = true }
+
 local function New(class, props, children)
 	local obj = Instance.new(class)
-	if class == "TextLabel" or class == "TextButton" or class == "TextBox" then
-		obj.Font = Enum.Font.GothamMedium
+	local isText = TEXT_CLASSES[class]
+	if isText then
+		obj.Font = Enum.Font.GothamSemibold
 		obj.TextSize = 12
-		obj.TextColor3 = Lumen.Theme.Text
+		obj.TextColor3 = Lumen.Theme.Label
 		if class ~= "TextBox" then obj.BackgroundTransparency = 1 end
 		if class == "TextButton" then
 			obj.AutoButtonColor = false
@@ -114,12 +185,19 @@ local function New(class, props, children)
 			table.insert(Themed, { obj, prop, key })
 		end
 	end
-	if (class == "TextLabel" or class == "TextButton" or class == "TextBox") and not (theme and theme.TextColor3) then
-		if obj.TextColor3 == Lumen.Theme.Text then
-			table.insert(Themed, { obj, "TextColor3", "Text" })
-		elseif obj.TextColor3 == Lumen.Theme.TextDim then
-			table.insert(Themed, { obj, "TextColor3", "TextDim" })
+	if isText then
+		if not (theme and theme.TextColor3) then
+			local c = obj.TextColor3
+			for _, key in ipairs({ "Label", "Text", "TextDim", "TextMuted" }) do
+				if c == Lumen.Theme[key] then
+					table.insert(Themed, { obj, "TextColor3", key })
+					break
+				end
+			end
 		end
+		local w = EnumToWeight[obj.Font] or "SemiBold"
+		table.insert(FontObjs, { obj, w })
+		if Lumen._fontAsset then ApplyFont(obj, w) end
 	end
 	for _, c in ipairs(children or {}) do c.Parent = obj end
 	if parent then obj.Parent = parent end
@@ -128,11 +206,22 @@ end
 
 local function Corner(r) return New("UICorner", { CornerRadius = UDim.new(0, r or 4) }) end
 
-local function Stroke(key)
+local function UpdateGradient(g)
+	local T = Lumen.Theme
+	g.Color = ColorSequence.new(T.Border:Lerp(Color3.new(1, 1, 1), 0.1), T.Border:Lerp(T.Background, 0.45))
+end
+
+-- grad = true gives the soft top-lit border used on windows and HUD panels
+local function Stroke(key, grad)
+	if grad then
+		local st = New("UIStroke", { Thickness = 1, ApplyStrokeMode = Enum.ApplyStrokeMode.Border, Color = Color3.new(1, 1, 1) })
+		local g = New("UIGradient", { Rotation = 90, Parent = st })
+		table.insert(Gradients, g)
+		UpdateGradient(g)
+		return st
+	end
 	return New("UIStroke", {
-		Thickness = 1,
-		ApplyStrokeMode = Enum.ApplyStrokeMode.Border,
-		Theme = { Color = key or "Border" },
+		Thickness = 1, ApplyStrokeMode = Enum.ApplyStrokeMode.Border, Theme = { Color = key or "Outline" },
 	})
 end
 
@@ -152,6 +241,31 @@ local function List(pad, dir, ha, va)
 		VerticalAlignment = va or Enum.VerticalAlignment.Top,
 		SortOrder = Enum.SortOrder.LayoutOrder,
 	})
+end
+
+-- soft glow from four concentric rings (no image assets). `color` is a theme key or a Color3.
+-- Measured from the reference: ring alphas 19% / 15% / 10% / 6%.
+local GLOW_ALPHA = { 0.19, 0.15, 0.10, 0.06 }
+local function Glow(host, color, radius)
+	local G = { rings = {}, mult = 1 }
+	for i = 1, #GLOW_ALPHA do
+		local props = { Thickness = 1, Transparency = 1 - GLOW_ALPHA[i], ApplyStrokeMode = Enum.ApplyStrokeMode.Border }
+		if type(color) == "string" then props.Theme = { Color = color } else props.Color = color end
+		local st = New("UIStroke", props)
+		New("Frame", {
+			AnchorPoint = Vector2.new(0.5, 0.5), Position = UDim2.fromScale(0.5, 0.5), Size = UDim2.new(1, i * 2, 1, i * 2),
+			BackgroundTransparency = 1, Parent = host,
+		}, { Corner((radius or 5) + i), st })
+		G.rings[i] = st
+	end
+	function G:Set(mult)
+		self.mult = mult
+		for i, st in ipairs(self.rings) do st.Transparency = 1 - GLOW_ALPHA[i] * mult end
+	end
+	function G:SetColor(c)
+		for _, st in ipairs(self.rings) do st.Color = c end
+	end
+	return G
 end
 
 local Scales = {}
@@ -176,33 +290,47 @@ local function SyncOption(flag, v)
 	if o and o.Value ~= v then o:Set(v, true) end
 end
 
--- Small vector icons drawn from frames: window, keyboard, list, bell, user, snow, gear
+-- Vector icons drawn from frames: window, keyboard, command, scan, bell, user, gear, snow, list, discord
 local function Icon(kind, parent, size, colorKey)
 	size = size or 16
-	colorKey = colorKey or "AccentText"
+	colorKey = colorKey or "Label"
 	local s = size / 16
 	local f = New("Frame", { BackgroundTransparency = 1, Size = UDim2.fromOffset(size, size), Parent = parent })
-	local function Bar(x, y, w, h, r)
-		return New("Frame", {
+	local function Bar(x, y, w, h, r, key)
+		local b = New("Frame", {
 			Position = UDim2.fromOffset(x * s, y * s), Size = UDim2.fromOffset(w * s, h * s), Parent = f,
-			Theme = { BackgroundColor3 = colorKey },
+			Theme = { BackgroundColor3 = key or colorKey },
 		}, { Corner((r or 1) * s) })
+		if key then b:SetAttribute("Fixed", true) end
+		return b
 	end
 	local function Ring(x, y, w, h, r, th)
 		return New("Frame", {
 			Position = UDim2.fromOffset(x * s, y * s), Size = UDim2.fromOffset(w * s, h * s),
 			BackgroundTransparency = 1, Parent = f,
-		}, { Corner((r or 3) * s), New("UIStroke", { Thickness = th or 1.5, Theme = { Color = colorKey } }) })
+		}, { Corner((r or 3) * s), New("UIStroke", { Thickness = th or 1.4, Theme = { Color = colorKey } }) })
 	end
 	if kind == "window" then
-		Ring(1, 2.5, 14, 11, 3)
-		Bar(1.5, 6, 13, 1.3)
+		Ring(1, 2, 14, 12, 3, 1.5)
+		Bar(1.6, 5.2, 12.8, 1.4)
+		Ring(7.2, 8.4, 5.2, 3.2, 1, 1.2)
 	elseif kind == "keyboard" then
-		Ring(0.5, 3.5, 15, 9, 2.5)
-		Bar(3, 6.2, 1.6, 1.6); Bar(6.2, 6.2, 1.6, 1.6); Bar(9.4, 6.2, 1.6, 1.6); Bar(12, 6.2, 1.6, 1.6)
-		Bar(4.5, 9.4, 7, 1.5)
-	elseif kind == "list" then
-		Bar(2, 3.5, 12, 1.6); Bar(2, 7.2, 12, 1.6); Bar(2, 10.9, 12, 1.6)
+		Ring(0.6, 3, 14.8, 10, 2.5, 1.4)
+		for _, x in ipairs({ 3.2, 5.9, 8.6, 11.3 }) do Bar(x, 5.4, 1.5, 1.5) Bar(x, 7.9, 1.5, 1.5) end
+		Bar(4.6, 10.5, 6.8, 1.3, 0.6)
+	elseif kind == "command" then
+		Ring(5, 5, 6, 6, 0.5, 1.3)
+		Ring(1.4, 1.4, 4.6, 4.6, 2.3, 1.3)
+		Ring(10, 1.4, 4.6, 4.6, 2.3, 1.3)
+		Ring(1.4, 10, 4.6, 4.6, 2.3, 1.3)
+		Ring(10, 10, 4.6, 4.6, 2.3, 1.3)
+	elseif kind == "scan" then
+		Bar(1, 1, 4, 1.4); Bar(1, 1, 1.4, 4)
+		Bar(11, 1, 4, 1.4); Bar(13.6, 1, 1.4, 4)
+		Bar(1, 13.6, 4, 1.4); Bar(1, 11, 1.4, 4)
+		Bar(11, 13.6, 4, 1.4); Bar(13.6, 11, 1.4, 4)
+		Ring(6, 4.2, 4, 4, 2, 1.3)
+		Ring(4.6, 9.4, 6.8, 3, 1.5, 1.3)
 	elseif kind == "bell" then
 		Bar(7.2, 1, 1.6, 1.8)
 		Bar(4, 2.5, 8, 8, 4)
@@ -216,11 +344,25 @@ local function Icon(kind, parent, size, colorKey)
 		Ring(2.5, 2.5, 11, 11, 5.5, 2)
 		Bar(6, 6, 4, 4, 2)
 	elseif kind == "snow" then
-		for _, rot in ipairs({ 0, 60, 120 }) do
-			Bar(1, 7.2, 14, 1.6).Rotation = rot
-		end
+		for _, rot in ipairs({ 0, 60, 120 }) do Bar(1, 7.2, 14, 1.6).Rotation = rot end
+	elseif kind == "list" then
+		Bar(2, 3.5, 12, 1.6); Bar(2, 7.2, 12, 1.6); Bar(2, 10.9, 12, 1.6)
+	elseif kind == "discord" then
+		Bar(2.4, 1.8, 4, 4, 2); Bar(9.6, 1.8, 4, 4, 2)
+		Bar(1, 3.8, 14, 9.4, 4.7)
+		Bar(4.4, 7.2, 2.2, 3, 1.1, "Background"); Bar(9.4, 7.2, 2.2, 3, 1.1, "Background")
 	end
 	return f
+end
+
+local function RecolorIcon(f, color)
+	for _, d in ipairs(f:GetDescendants()) do
+		if d:IsA("UIStroke") then
+			d.Color = color
+		elseif d:IsA("Frame") and d.BackgroundTransparency < 1 and not d:GetAttribute("Fixed") then
+			d.BackgroundColor3 = color
+		end
+	end
 end
 
 local function Row(container, h)
@@ -313,24 +455,28 @@ function Lumen:ApplyPreset(name)
 end
 
 function Lumen:SetTheme(t)
-	for k, v in pairs(t) do self.Theme[k] = v end
-	if t.Accent and not t.AccentText then
-		self.Theme.AccentText = t.Accent:Lerp(Color3.new(1, 1, 1), 0.4)
+	local T = self.Theme
+	for k, v in pairs(t) do T[k] = v end
+	if t.Accent or t.Background then
+		if not t.AccentText then T.AccentText = T.Accent:Lerp(Color3.new(1, 1, 1), 0.02) end
+		if not t.AccentBorder then T.AccentBorder = T.Accent:Lerp(T.Background, 0.36) end
+		if not t.Toggle then T.Toggle = T.Accent:Lerp(T.Background, 0.64) end
+		if not t.TabActive then T.TabActive = T.Accent:Lerp(T.Background, 0.79) end
 	end
-	if (t.Accent or t.Group) and not t.TabActive then
-		self.Theme.TabActive = self.Theme.Accent:Lerp(self.Theme.Group, 0.84)
-	end
+	if (t.Control or t.Background) and not t.Chip then T.Chip = T.Control:Lerp(T.Background, 0.08) end
+	if (t.TextDim or t.Label) and not t.ChipText then T.ChipText = T.TextDim:Lerp(T.Label, 0.4) end
 	if t.Control and not t.ControlHover then
-		self.Theme.ControlHover = t.Control:Lerp(Color3.new(1, 1, 1), 0.07)
+		T.ControlHover = t.Control:Lerp(Color3.new(1, 1, 1), 0.07)
 	end
 	for i = #Themed, 1, -1 do
 		local e = Themed[i]
 		if e[1].Parent == nil then
 			table.remove(Themed, i)
 		else
-			pcall(function() e[1][e[2]] = self.Theme[e[3]] end)
+			pcall(function() e[1][e[2]] = T[e[3]] end)
 		end
 	end
+	for _, g in ipairs(Gradients) do UpdateGradient(g) end
 	for _, fn in ipairs(Refreshers) do pcall(fn) end
 end
 
@@ -383,11 +529,10 @@ end
 
 local TooltipFrame = New("Frame", {
 	Visible = false, AutomaticSize = Enum.AutomaticSize.XY, Size = UDim2.fromOffset(0, 0),
-	ZIndex = 200, Parent = Gui, Theme = { BackgroundColor3 = "Group" },
-}, { Corner(4), Stroke("Border"), Pad(8, 5, 8, 5) })
+	ZIndex = 200, Parent = Gui, Theme = { BackgroundColor3 = "Background" },
+}, { Corner(5), Stroke("Border"), Pad(9, 6, 9, 6) })
 local TooltipLabel = New("TextLabel", {
-	AutomaticSize = Enum.AutomaticSize.XY, Size = UDim2.fromOffset(0, 0), TextSize = 11,
-	Parent = TooltipFrame,
+	AutomaticSize = Enum.AutomaticSize.XY, Size = UDim2.fromOffset(0, 0), TextSize = 11, Parent = TooltipFrame,
 })
 
 local function AttachTooltip(inst, text)
@@ -422,6 +567,20 @@ function OptBase:SetVisible(v)
 	if self.Row then self.Row.Visible = v end
 end
 
+function OptBase:SetDisabled(v)
+	self.Disabled = v and true or false
+	if self._onDisabled then self._onDisabled(self.Disabled) end
+	if self.Row then
+		if not self._blocker then
+			self._blocker = New("TextButton", {
+				Size = UDim2.fromScale(1, 1), BackgroundTransparency = self._blockerAlpha or 0.45, ZIndex = 30,
+				Active = true, Visible = false, Parent = self.Row, Theme = { BackgroundColor3 = "Group" },
+			})
+		end
+		self._blocker.Visible = self.Disabled
+	end
+end
+
 function OptBase:Destroy()
 	if self.Flag then
 		Lumen.Options[self.Flag] = nil
@@ -443,12 +602,19 @@ local function Fire(opt, ...)
 	for _, cb in ipairs(opt.Listeners) do task.spawn(cb, ...) end
 end
 
+-- everything searchable from the command palette
+Lumen._Catalog = {}
+local function CatalogAdd(group, opt, name)
+	if not name then return end
+	table.insert(Lumen._Catalog, { Opt = opt, Name = name, Path = group._path or "", Tab = group._tab })
+end
+
 -- addon holder (keybind chip / color swatches / tooltip chip, right aligned in a row)
 local function MakeAddonHolder(row)
 	return New("Frame", {
 		BackgroundTransparency = 1, AnchorPoint = Vector2.new(1, 0.5), Position = UDim2.new(1, 0, 0.5, 0),
-		Size = UDim2.fromOffset(0, 18), AutomaticSize = Enum.AutomaticSize.X, Parent = row,
-	}, { List(4, Enum.FillDirection.Horizontal, Enum.HorizontalAlignment.Right, Enum.VerticalAlignment.Center) })
+		Size = UDim2.fromOffset(0, 22), AutomaticSize = Enum.AutomaticSize.X, ZIndex = 5, Parent = row,
+	}, { List(5, Enum.FillDirection.Horizontal, Enum.HorizontalAlignment.Right, Enum.VerticalAlignment.Center) })
 end
 
 ------------------------------------------------------------------------------
@@ -456,33 +622,35 @@ end
 ------------------------------------------------------------------------------
 
 local NotifHolder = New("Frame", {
-	BackgroundTransparency = 1, AnchorPoint = Vector2.new(1, 0), Position = UDim2.new(1, -14, 0, 14),
-	Size = UDim2.fromOffset(250, 0), AutomaticSize = Enum.AutomaticSize.Y, ZIndex = 100, Parent = Gui,
+	BackgroundTransparency = 1, AnchorPoint = Vector2.new(1, 0), Position = UDim2.new(1, -12, 0, 12),
+	Size = UDim2.fromOffset(280, 0), AutomaticSize = Enum.AutomaticSize.Y, ZIndex = 100, Parent = Gui,
 }, { List(6, Enum.FillDirection.Vertical, Enum.HorizontalAlignment.Right) })
 
+-- o: string, or {Title, Content, Type = Success/Warning/Danger/Info, Duration, Progress}
 function Lumen:Notify(o, duration)
 	if type(o) == "string" then o = { Content = o, Duration = duration } end
 	if not self.ShowNotifications then return end
-	local key = o.Type or "AccentText"
-	if not self.Theme[key] then key = "AccentText" end
+	local key = o.Type
+	if not key or not self.Theme[key] then key = "TextDim" end
 	local dur = o.Duration or 4
 	local card = New("CanvasGroup", {
-		Size = UDim2.fromOffset(250, 0), AutomaticSize = Enum.AutomaticSize.Y, GroupTransparency = 1,
+		Size = UDim2.fromOffset(280, 0), AutomaticSize = Enum.AutomaticSize.Y, GroupTransparency = 1,
 		Parent = NotifHolder, Theme = { BackgroundColor3 = "Background" },
-	}, { Corner(7), Stroke("Border"), List(0) })
+	}, { Corner(8), Stroke("Outline"), List(0) })
 	local body = New("Frame", {
 		BackgroundTransparency = 1, Size = UDim2.new(1, 0, 0, 0), AutomaticSize = Enum.AutomaticSize.Y,
 		LayoutOrder = 1, Parent = card,
-	}, { Pad(11, 8, 12, 8), List(9, Enum.FillDirection.Horizontal, Enum.HorizontalAlignment.Left, Enum.VerticalAlignment.Center) })
+	}, { Pad(12, 8, 12, 8), New("UISizeConstraint", { MinSize = Vector2.new(0, 32) }),
+		List(10, Enum.FillDirection.Horizontal, Enum.HorizontalAlignment.Left, Enum.VerticalAlignment.Center) })
 	local iconHolder = New("Frame", { BackgroundTransparency = 1, Size = UDim2.fromOffset(16, 16), LayoutOrder = 1, Parent = body })
 	Icon("bell", iconHolder, 16, key)
 	local text = New("Frame", {
-		BackgroundTransparency = 1, Size = UDim2.new(1, -27, 0, 0), AutomaticSize = Enum.AutomaticSize.Y,
+		BackgroundTransparency = 1, Size = UDim2.new(1, -28, 0, 0), AutomaticSize = Enum.AutomaticSize.Y,
 		LayoutOrder = 2, Parent = body,
 	}, { List(1) })
 	if o.Title then
 		New("TextLabel", {
-			Size = UDim2.new(1, 0, 0, 16), Text = o.Title, Font = Enum.Font.GothamSemibold,
+			Size = UDim2.new(1, 0, 0, 16), Text = o.Title, TextColor3 = self.Theme.Text,
 			TextXAlignment = Enum.TextXAlignment.Left, LayoutOrder = 1, Parent = text,
 		})
 	end
@@ -490,12 +658,12 @@ function Lumen:Notify(o, duration)
 		New("TextLabel", {
 			Size = UDim2.new(1, 0, 0, 0), AutomaticSize = Enum.AutomaticSize.Y, Text = o.Content, TextWrapped = true,
 			TextXAlignment = Enum.TextXAlignment.Left, LayoutOrder = 2, TextSize = o.Title and 11 or 12,
-			TextColor3 = o.Title and self.Theme.TextDim or self.Theme.Text, Parent = text,
+			TextColor3 = o.Title and self.Theme.TextDim or self.Theme.Label, Parent = text,
 		})
 	end
 	if o.Progress then
 		local track = New("Frame", {
-			Size = UDim2.new(1, 0, 0, 2), LayoutOrder = 2, Parent = card, Theme = { BackgroundColor3 = "Border" },
+			Size = UDim2.new(1, 0, 0, 2), LayoutOrder = 2, Parent = card, Theme = { BackgroundColor3 = "Outline" },
 		})
 		local fill = New("Frame", { Size = UDim2.fromScale(1, 1), BackgroundColor3 = self.Theme[key], Parent = track })
 		Tween(fill, dur, { Size = UDim2.new(0, 0, 1, 0) })
@@ -508,44 +676,56 @@ function Lumen:Notify(o, duration)
 	end)
 end
 
-local Fps, WatermarkOverride = 60, nil
+local Fps, WatermarkOverride, WatermarkTitle = 60, nil, nil
 local Watermark = New("Frame", {
-	Position = UDim2.fromOffset(16, 16), Size = UDim2.fromOffset(0, 30), AutomaticSize = Enum.AutomaticSize.X,
+	Position = UDim2.fromOffset(12, 12), Size = UDim2.fromOffset(0, 32), AutomaticSize = Enum.AutomaticSize.X,
 	ZIndex = 5, Parent = Gui, Theme = { BackgroundColor3 = "Background" },
-}, { Corner(8), Stroke("Border"), Pad(8, 0, 13, 0),
-	List(8, Enum.FillDirection.Horizontal, Enum.HorizontalAlignment.Left, Enum.VerticalAlignment.Center) })
+}, { Corner(9), Stroke(nil, true), Pad(11, 0, 14, 0),
+	List(9, Enum.FillDirection.Horizontal, Enum.HorizontalAlignment.Left, Enum.VerticalAlignment.Center) })
+MakeDraggable(Watermark, Watermark)
 local WatermarkLogo = New("Frame", { BackgroundTransparency = 1, Size = UDim2.fromOffset(18, 18), LayoutOrder = 1, Parent = Watermark }, {
-	New("Frame", { Size = UDim2.fromScale(1, 1), BackgroundTransparency = 1 }, { Corner(9), New("UIStroke", { Thickness = 2, Theme = { Color = "Accent" } }) }),
-	New("Frame", { AnchorPoint = Vector2.new(0.5, 0.5), Position = UDim2.fromScale(0.5, 0.5), Size = UDim2.fromOffset(6, 6), Theme = { BackgroundColor3 = "Accent" } }, { Corner(3) }),
+	New("Frame", { Size = UDim2.fromScale(1, 1), BackgroundTransparency = 1 }, { Corner(9), New("UIStroke", { Thickness = 2, Theme = { Color = "AccentBorder" } }) }),
+	New("Frame", { AnchorPoint = Vector2.new(0.5, 0.5), Position = UDim2.fromScale(0.5, 0.5), Size = UDim2.fromOffset(6, 6), Theme = { BackgroundColor3 = "AccentText" } }, { Corner(3) }),
 })
 local WatermarkImage = New("ImageLabel", {
 	BackgroundTransparency = 1, Size = UDim2.fromOffset(18, 18), LayoutOrder = 1, Visible = false, Parent = Watermark,
 })
 local WatermarkLabel = New("TextLabel", {
-	Size = UDim2.fromOffset(0, 30), AutomaticSize = Enum.AutomaticSize.X, RichText = true, LayoutOrder = 2, Parent = Watermark,
+	Size = UDim2.fromOffset(0, 32), AutomaticSize = Enum.AutomaticSize.X, RichText = true, LayoutOrder = 2,
+	TextColor3 = Lumen.Theme.Text, Parent = Watermark,
 })
 
 local HotkeyFrame = New("Frame", {
-	Position = UDim2.fromOffset(16, 54), Size = UDim2.fromOffset(0, 0), AutomaticSize = Enum.AutomaticSize.XY,
+	Position = UDim2.fromOffset(12, 56), Size = UDim2.fromOffset(0, 0), AutomaticSize = Enum.AutomaticSize.XY,
 	Visible = false, ZIndex = 5, Parent = Gui, Theme = { BackgroundColor3 = "Background" },
-}, { Corner(8), Stroke("Border"), Pad(12, 9, 14, 10), List(5), New("UISizeConstraint", { MinSize = Vector2.new(150, 0) }) })
+}, { Corner(9), Stroke(nil, true), Pad(14, 10, 16, 12), List(8), New("UISizeConstraint", { MinSize = Vector2.new(160, 0) }) })
+MakeDraggable(HotkeyFrame, HotkeyFrame)
 local HotkeyTitle = New("Frame", {
-	BackgroundTransparency = 1, Size = UDim2.fromOffset(0, 16), AutomaticSize = Enum.AutomaticSize.X,
+	BackgroundTransparency = 1, Size = UDim2.fromOffset(0, 18), AutomaticSize = Enum.AutomaticSize.X,
 	LayoutOrder = 0, Parent = HotkeyFrame,
-}, { List(7, Enum.FillDirection.Horizontal, Enum.HorizontalAlignment.Left, Enum.VerticalAlignment.Center) })
-do
-	local ic = Icon("keyboard", HotkeyTitle, 14, "TextDim")
-	ic.LayoutOrder = 1
-	New("TextLabel", {
-		Text = "Hotkeys", AutomaticSize = Enum.AutomaticSize.X, Size = UDim2.fromOffset(0, 16),
-		Font = Enum.Font.GothamSemibold, LayoutOrder = 2, Parent = HotkeyTitle,
-	})
-end
-New("Frame", { Size = UDim2.new(1, 0, 0, 1), LayoutOrder = 1, Parent = HotkeyFrame, Theme = { BackgroundColor3 = "Border" } })
+}, { List(8, Enum.FillDirection.Horizontal, Enum.HorizontalAlignment.Left, Enum.VerticalAlignment.Center) })
+local HotkeyIcon = Icon("keyboard", HotkeyTitle, 15)
+HotkeyIcon.LayoutOrder = 1
+local HotkeyTitleLabel = New("TextLabel", {
+	Text = "Hotkeys", AutomaticSize = Enum.AutomaticSize.X, Size = UDim2.fromOffset(0, 18),
+	LayoutOrder = 2, Parent = HotkeyTitle,
+})
+local HotkeyDivider = New("Frame", { Size = UDim2.new(1, 0, 0, 1), LayoutOrder = 1, Parent = HotkeyFrame })
 local HotkeyList = New("Frame", {
 	BackgroundTransparency = 1, Size = UDim2.fromOffset(0, 0), AutomaticSize = Enum.AutomaticSize.XY,
 	LayoutOrder = 2, Parent = HotkeyFrame,
-}, { List(3) })
+}, { List(6) })
+
+-- hotkey panel colours are the accent dimmed toward the background (as in the reference)
+local function StyleHotkeys()
+	local T = Lumen.Theme
+	local c = T.Accent:Lerp(T.Background, 0.11)
+	HotkeyTitleLabel.TextColor3 = c
+	HotkeyDivider.BackgroundColor3 = T.Accent:Lerp(T.Background, 0.27)
+	RecolorIcon(HotkeyIcon, c)
+end
+StyleHotkeys()
+table.insert(Refreshers, StyleHotkeys)
 
 function Lumen:_UpdateHotkeys()
 	for _, c in ipairs(HotkeyList:GetChildren()) do
@@ -556,14 +736,14 @@ function Lumen:_UpdateHotkeys()
 		if not Keybinds[i].Chip:IsDescendantOf(Gui) then table.remove(Keybinds, i) end
 	end
 	for _, K in ipairs(Keybinds) do
-		if K.Value and K.Mode ~= "Press" and not K.Hidden then
+		if (K.Value or K.Mode == "Always") and K.Mode ~= "Press" and not K.Hidden then
 			n = n + 1
 			local active = K:IsActive()
 			New("TextLabel", {
-				Size = UDim2.fromOffset(0, 15), AutomaticSize = Enum.AutomaticSize.X, TextSize = 11, LayoutOrder = n,
+				Size = UDim2.fromOffset(0, 15), AutomaticSize = Enum.AutomaticSize.X, LayoutOrder = n,
 				TextXAlignment = Enum.TextXAlignment.Left, Parent = HotkeyList,
-				TextColor3 = active and self.Theme.Text or self.Theme.TextDim,
-				Text = string.format("[%s] %s - %s", KeyName(K.Value):upper(), K.Name, active and "Active" or "Inactive"),
+				Font = Enum.Font.GothamMedium, TextColor3 = self.Theme.Label:Lerp(self.Theme.Background, active and 0.08 or 0.12),
+				Text = string.format("[%s] %s - %s", K.Value and KeyName(K.Value):upper() or "?", K.Name, active and "Active" or "Inactive"),
 			})
 		end
 	end
@@ -588,6 +768,10 @@ function Lumen:SetWatermark(text)
 	WatermarkOverride = text
 end
 
+function Lumen:SetWatermarkTitle(text)
+	WatermarkTitle = text
+end
+
 -- custom logo for the watermark, e.g. "rbxassetid://123"; pass nil for the default logo
 function Lumen:SetIcon(id)
 	local has = id ~= nil and id ~= ""
@@ -601,15 +785,15 @@ task.spawn(function()
 		local T = Lumen.Theme
 		local ping = 0
 		pcall(function() ping = math.floor(Stats.Network.ServerStatsItem["Data Ping"]:GetValue()) end)
-		local function dim(s) return string.format('<font color="#%s">%s</font>', T.TextDim:ToHex(), s) end
-		local function warn(s) return string.format('<font color="#%s">%s</font>', T.Warning:ToHex(), s) end
-		local function good(s) return string.format('<font color="#%s">%s</font>', T.Success:ToHex(), s) end
+		local function col(c, s) return string.format('<font color="#%s">%s</font>', c:ToHex(), s) end
 		if WatermarkOverride then
 			WatermarkLabel.Text = Esc(WatermarkOverride)
 		else
-			local title = Lumen.Windows[1] and Lumen.Windows[1].Title or "Lumen"
-			WatermarkLabel.Text = string.format("%s  %s  %s  %s  %s  %s", Esc(title), dim("|"),
-				Esc(Players.LocalPlayer.Name), dim("|"), warn(Fps .. " FPS"), dim("|") .. "  " .. good(ping .. "ms"))
+			local title = WatermarkTitle or (Lumen.Windows[1] and Lumen.Windows[1].Title) or "Lumen"
+			local sep = col(T.Label:Lerp(T.Background, 0.15), "|")
+			WatermarkLabel.Text = string.format("%s  %s  %s  %s  %s  %s  %s",
+				Esc(title), sep, Esc(Players.LocalPlayer.Name), sep,
+				col(T.Warning, Fps .. " FPS"), sep, col(T.Success, ping .. "ms"))
 		end
 		task.wait(0.5)
 	end
@@ -630,8 +814,12 @@ local function MakeColorPicker(holder, o, owner)
 	C.Value = default
 
 	local swatch = New("TextButton", {
-		Size = UDim2.fromOffset(16, 16), BackgroundTransparency = 0, BackgroundColor3 = default, Parent = holder,
-	}, { Corner(4), Stroke("Border") })
+		Size = UDim2.fromOffset(18, 18), BackgroundTransparency = 0, BackgroundColor3 = default, Parent = holder,
+	}, { Corner(5), New("Frame", { Size = UDim2.fromScale(1, 1), BackgroundColor3 = Color3.new(1, 1, 1) }, {
+		Corner(5), New("UIGradient", { Rotation = 35, Transparency = NumberSequence.new({
+			NumberSequenceKeypoint.new(0, 0.97), NumberSequenceKeypoint.new(0.4, 0.88), NumberSequenceKeypoint.new(0.62, 0.97),
+			NumberSequenceKeypoint.new(1, 0.9) }) }) }) })
+	local glow = { SetColor = function() end }
 	if o.Tooltip then AttachTooltip(swatch, o.Tooltip) end
 
 	local pop = New("Frame", {
@@ -675,6 +863,7 @@ local function MakeColorPicker(holder, o, owner)
 	local function Update(fire)
 		C.Value = Color3.fromHSV(C.H, C.S, C.V)
 		swatch.BackgroundColor3 = C.Value
+		glow:SetColor(C.Value)
 		sv.BackgroundColor3 = Color3.fromHSV(C.H, 1, 1)
 		cursor.Position = UDim2.new(C.S, 0, 1 - C.V, 0)
 		hueCursor.Position = UDim2.new(C.H, 0, 0.5, 0)
@@ -727,7 +916,7 @@ local function MakeKeybind(holder, o, owner)
 	K.KeyListeners = {}
 	K.Mode = o.Mode or "Toggle"
 	K.Owner = (owner and owner.Type == "Toggle") and owner or nil
-	K.Active = false
+	K.Active = (K.Mode == "Always")
 	K.Hidden = o.ShowInList == false
 	K.Name = o.Name or (owner and owner._text) or "Keybind"
 	local key = o.Default
@@ -738,10 +927,10 @@ local function MakeKeybind(holder, o, owner)
 	K.Value = key
 
 	local chip = New("TextButton", {
-		Size = UDim2.fromOffset(0, 18), AutomaticSize = Enum.AutomaticSize.X, BackgroundTransparency = 0,
-		TextSize = 11, TextColor3 = Lumen.Theme.TextDim, Text = KeyName(key), Parent = holder,
-		Theme = { BackgroundColor3 = "Control" },
-	}, { Corner(4), Stroke("Border"), Pad(7, 0, 7, 0) })
+		Size = UDim2.fromOffset(0, 22), AutomaticSize = Enum.AutomaticSize.X, BackgroundTransparency = 0,
+		TextSize = 11, TextColor3 = Lumen.Theme.ChipText, Text = KeyName(key), Parent = holder, LayoutOrder = 10,
+		Font = Enum.Font.GothamMedium, Theme = { BackgroundColor3 = "Chip" },
+	}, { Corner(6), Stroke("Outline"), Pad(10, 0, 10, 0), New("UISizeConstraint", { MinSize = Vector2.new(34, 0) }) })
 	K.Chip = chip
 	AttachTooltip(chip, K.Mode == "Press" and "Click to rebind" or "Click to rebind  -  Right-click to switch Toggle/Hold")
 
@@ -794,7 +983,7 @@ local function MakeKeybind(holder, o, owner)
 		chip.Text = "..."
 	end)
 	Connect(chip.MouseButton2Click, function()
-		if K.Mode == "Press" then return end
+		if K.Mode == "Press" or K.Mode == "Always" then return end
 		K.Mode = (K.Mode == "Toggle") and "Hold" or "Toggle"
 		Lumen:Notify({ Content = (K.Name or "Keybind") .. ": " .. K.Mode .. " mode", Duration = 2 })
 		Lumen:_UpdateHotkeys()
@@ -820,11 +1009,11 @@ end
 
 function OptBase:AddTooltip(text)
 	assert(self._addons, "This element does not support addons")
+	local T = Lumen.Theme
 	local chip = New("TextButton", {
-		Size = UDim2.fromOffset(16, 16), BackgroundTransparency = 0, Text = "?", TextSize = 10,
-		TextColor3 = Lumen.Theme.TextDim, Parent = self._addons, LayoutOrder = 100,
-		Theme = { BackgroundColor3 = "Control" },
-	}, { Corner(8) })
+		Size = UDim2.fromOffset(20, 20), BackgroundTransparency = 1, Text = "?", TextSize = 11,
+		TextColor3 = T.Accent:Lerp(T.Background, 0.5), Parent = self._addons, LayoutOrder = 100,
+	}, { Corner(10), Stroke("Outline") })
 	AttachTooltip(chip, text)
 	return self
 end
@@ -832,15 +1021,6 @@ end
 ------------------------------------------------------------------------------
 -- Elements
 ------------------------------------------------------------------------------
-
-local function Label(parent, text, o)
-	o = o or {}
-	return New("TextLabel", {
-		Text = text, TextXAlignment = Enum.TextXAlignment.Left, TextColor3 = o.Color or Lumen.Theme.Text,
-		Font = o.Bold and Enum.Font.GothamBold or Enum.Font.GothamMedium, TextSize = o.Size or 12,
-		Size = o.Size2 or UDim2.new(1, 0, 1, 0), Parent = parent,
-	})
-end
 
 function Elements:AddLabel(text, o)
 	if type(text) == "table" then o, text = text, text.Text end
@@ -859,14 +1039,14 @@ function Elements:AddLabel(text, o)
 	if o.Box then
 		holder = New("Frame", {
 			Size = UDim2.new(1, 0, 0, 0), AutomaticSize = Enum.AutomaticSize.Y, Parent = row,
-			Theme = { BackgroundColor3 = "Control" },
-		}, { Corner(4), Stroke("Border"), Pad(9, 7, 9, 7) })
+			BackgroundTransparency = 1,
+		}, { Corner(6), Stroke("Outline"), Pad(10, 7, 10, 7) })
 	end
 	local lbl = New("TextLabel", {
 		Text = text or "", Size = UDim2.new(1, 0, 0, 0), AutomaticSize = Enum.AutomaticSize.Y, TextWrapped = true,
 		RichText = true, TextXAlignment = Enum.TextXAlignment.Left,
-		Font = o.Bold and Enum.Font.GothamBold or Enum.Font.GothamMedium,
-		TextColor3 = o.Dim and Lumen.Theme.TextDim or Lumen.Theme.Text, Parent = holder,
+		Font = o.Bold and Enum.Font.GothamBold or Enum.Font.GothamSemibold,
+		TextColor3 = o.Dim and Lumen.Theme.TextDim or Lumen.Theme.Label, Parent = holder,
 	})
 	function L:SetText(t) lbl.Text = t; self._text = t end
 	function L:SetColor(c) lbl.TextColor3 = c end
@@ -877,7 +1057,7 @@ function Elements:AddDivider()
 	local row = Row(self._container, 9)
 	New("Frame", {
 		AnchorPoint = Vector2.new(0, 0.5), Position = UDim2.fromScale(0, 0.5), Size = UDim2.new(1, 0, 0, 1),
-		Parent = row, Theme = { BackgroundColor3 = "Border" },
+		Parent = row, Theme = { BackgroundColor3 = "Outline" },
 	})
 	return { Row = row, SetVisible = OptBase.SetVisible }
 end
@@ -887,7 +1067,7 @@ function Elements:AddImage(o)
 	local row = Row(self._container, o.Height or 120)
 	local frame = New("Frame", {
 		Size = UDim2.fromScale(1, 1), ClipsDescendants = true, Parent = row, Theme = { BackgroundColor3 = "Background" },
-	}, { Corner(5), Stroke("Border") })
+	}, { Corner(6), Stroke("Outline") })
 	local img = New("ImageLabel", {
 		BackgroundTransparency = 1, Size = UDim2.fromScale(1, 1), Image = o.Image or "",
 		ScaleType = o.ScaleType or Enum.ScaleType.Fit, Parent = frame,
@@ -900,29 +1080,40 @@ function Elements:AddToggle(o)
 	local T = NewOpt("Toggle", o)
 	T.Value = o.Default == true
 	T._text = o.Text or "Toggle"
+	T._blockerAlpha = 1
 	local row = Row(self._container, 20)
 	T.Row = row
 	T._addons = MakeAddonHolder(row)
 
 	local btn = New("TextButton", { Size = UDim2.new(1, 0, 1, 0), Parent = row, ZIndex = 1 })
+	local stroke = New("UIStroke", { Thickness = 1, Theme = { Color = "AccentBorder" } })
 	local box = New("Frame", {
-		Size = UDim2.fromOffset(16, 16), Position = UDim2.new(0, 0, 0.5, -8), ZIndex = 2, Parent = row,
-		Theme = { BackgroundColor3 = "Control" },
-	}, { Corner(4), Stroke("Border") })
-	local fill = New("Frame", {
-		Size = UDim2.fromScale(1, 1), BackgroundTransparency = 1, ZIndex = 2, Parent = box,
-		Theme = { BackgroundColor3 = "Accent" },
-	}, { Corner(4) })
-	New("TextLabel", {
-		Text = T._text, Position = UDim2.fromOffset(24, 0), Size = UDim2.new(1, -24, 1, 0),
+		Size = UDim2.fromOffset(18, 18), Position = UDim2.new(0, 0, 0.5, -9), ZIndex = 2, Parent = row,
+		Theme = { BackgroundColor3 = "Toggle" },
+	}, { Corner(5), stroke })
+	local glow = Glow(box, "Accent", 5)
+	local lbl = New("TextLabel", {
+		Text = T._text, Position = UDim2.fromOffset(26, 0), Size = UDim2.new(1, -26, 1, 0),
 		TextXAlignment = Enum.TextXAlignment.Left, ZIndex = 2, Parent = row,
 	})
-	-- addons must sit above the click area
-	T._addons.ZIndex = 5
 
-	local function Render()
-		Tween(fill, 0.12, { BackgroundTransparency = T.Value and 0.1 or 1 })
+	local function Colors()
+		local TH = Lumen.Theme
+		if T.Disabled then
+			return TH.Toggle:Lerp(TH.Background, 0.55), TH.AccentBorder:Lerp(TH.Background, 0.7), TH.TextMuted
+		end
+		return T.Value and TH.Accent or TH.Toggle, TH.AccentBorder, TH.Label
 	end
+	local function Render(instant)
+		local fill, border, text = Colors()
+		stroke.Color = border
+		lbl.TextColor3 = text
+		if instant then box.BackgroundColor3 = fill else Tween(box, 0.12, { BackgroundColor3 = fill }) end
+		glow:Set(T.Disabled and 0 or 1)
+	end
+	T._onDisabled = function() Render() end
+	table.insert(Refreshers, function() Render(true) end)
+
 	function T:Set(v, silent)
 		v = v and true or false
 		if self.Value == v then return end
@@ -932,11 +1123,15 @@ function Elements:AddToggle(o)
 		if self._kb then Lumen:_UpdateHotkeys() end
 	end
 	Connect(btn.MouseButton1Click, function() T:Set(not T.Value) end)
-	Connect(btn.MouseEnter, function() Tween(box, 0.1, { BackgroundColor3 = Lumen.Theme.ControlHover }) end)
-	Connect(btn.MouseLeave, function() Tween(box, 0.1, { BackgroundColor3 = Lumen.Theme.Control }) end)
+	Connect(btn.MouseEnter, function()
+		if not T.Disabled then Tween(box, 0.1, { BackgroundColor3 = (Colors()):Lerp(Color3.new(1, 1, 1), 0.07) }) end
+	end)
+	Connect(btn.MouseLeave, function() Render() end)
 
 	Register(T, o.Flag)
-	fill.BackgroundTransparency = T.Value and 0.1 or 1
+	CatalogAdd(self, T, T._text)
+	Render(true)
+	if o.Disabled then T:SetDisabled(true) end
 	if o.Tooltip then T:AddTooltip(o.Tooltip) end
 	return T
 end
@@ -951,23 +1146,23 @@ function Elements:AddSlider(o)
 	S.Row = row
 
 	New("TextLabel", {
-		Text = o.Text or "Slider", Size = UDim2.new(0.6, 0, 0, 16), TextXAlignment = Enum.TextXAlignment.Left,
-		Font = Enum.Font.GothamSemibold, Parent = row,
+		Text = o.Text or "Slider", Size = UDim2.new(0.6, 0, 0, 16), TextXAlignment = Enum.TextXAlignment.Left, Parent = row,
 	})
 	local valueLabel = New("TextLabel", {
 		AnchorPoint = Vector2.new(1, 0), Position = UDim2.new(1, 0, 0, 0), Size = UDim2.new(0.4, 0, 0, 16),
-		TextXAlignment = Enum.TextXAlignment.Right, TextColor3 = Lumen.Theme.TextDim, Parent = row,
+		TextXAlignment = Enum.TextXAlignment.Right, Parent = row,
 	})
 	local track = New("Frame", {
-		Position = UDim2.fromOffset(0, 22), Size = UDim2.new(1, 0, 0, 4), Parent = row, Theme = { BackgroundColor3 = "Control" },
-	}, { Corner(2) })
+		Position = UDim2.fromOffset(0, 22), Size = UDim2.new(1, 0, 0, 4), Parent = row, Theme = { BackgroundColor3 = "Group" },
+	}, { Corner(3), Stroke("Outline") })
 	local fill = New("Frame", {
 		Size = UDim2.new(0, 0, 1, 0), Parent = track, Theme = { BackgroundColor3 = "Accent" },
-	}, { Corner(2) })
-	New("Frame", {
-		Size = UDim2.fromOffset(9, 9), AnchorPoint = Vector2.new(0.5, 0.5), Position = UDim2.new(1, 0, 0.5, 0),
-		BackgroundColor3 = Color3.new(1, 1, 1), Parent = fill,
-	}, { Corner(5) })
+	}, { Corner(3) })
+	local knob = New("Frame", {
+		Size = UDim2.fromOffset(8, 8), AnchorPoint = Vector2.new(0.5, 0.5), Position = UDim2.new(1, 0, 0.5, 0),
+		BackgroundColor3 = Color3.new(1, 1, 1), ZIndex = 3, Parent = fill,
+	}, { Corner(4) })
+	Glow(knob, Color3.new(1, 1, 1), 4):Set(0.2)
 	local hit = New("TextButton", { Position = UDim2.fromOffset(0, 14), Size = UDim2.new(1, 0, 0, 18), Parent = row })
 
 	local function Render()
@@ -990,19 +1185,21 @@ function Elements:AddSlider(o)
 		S:Set(S.Min + a * (S.Max - S.Min))
 	end)
 	Register(S, o.Flag)
+	CatalogAdd(self, S, o.Text or "Slider")
 	Render()
+	if o.Disabled then S:SetDisabled(true) end
 	return S
 end
 
 local function Chevron(parent)
 	local f = New("Frame", {
-		BackgroundTransparency = 1, AnchorPoint = Vector2.new(1, 0.5), Position = UDim2.new(1, -9, 0.5, 0),
+		BackgroundTransparency = 1, AnchorPoint = Vector2.new(1, 0.5), Position = UDim2.new(1, -10, 0.5, 0),
 		Size = UDim2.fromOffset(9, 6), Parent = parent,
 	})
 	for _, r in ipairs({ 40, -40 }) do
 		New("Frame", {
 			AnchorPoint = Vector2.new(0.5, 0.5), Position = UDim2.new(r > 0 and 0.28 or 0.72, 0, 0.5, 0),
-			Size = UDim2.fromOffset(6, 1.6), Rotation = r, Parent = f, Theme = { BackgroundColor3 = "TextDim" },
+			Size = UDim2.fromOffset(6, 1.6), Rotation = r, Parent = f, Theme = { BackgroundColor3 = "Label" },
 		}, { Corner(1) })
 	end
 	return f
@@ -1015,28 +1212,27 @@ function Elements:AddDropdown(o)
 	D.Multi = o.Multi == true
 	D.Value = D.Multi and {} or nil
 	local hasLabel = o.Text ~= nil
-	local h = hasLabel and 44 or 24
+	local h = hasLabel and 48 or 28
 	local row = Row(self._container, h)
 	D.Row = row
 	if hasLabel then
-		New("TextLabel", {
-			Text = o.Text, Size = UDim2.new(1, 0, 0, 16), TextXAlignment = Enum.TextXAlignment.Left,
-			Font = Enum.Font.GothamSemibold, Parent = row,
-		})
+		New("TextLabel", { Text = o.Text, Size = UDim2.new(1, 0, 0, 16), TextXAlignment = Enum.TextXAlignment.Left, Parent = row })
 	end
+	local stroke = Stroke("Outline")
 	local box = New("TextButton", {
-		Position = UDim2.fromOffset(0, h - 24), Size = UDim2.new(1, 0, 0, 24), BackgroundTransparency = 0,
-		Parent = row, Theme = { BackgroundColor3 = "Control" },
-	}, { Corner(4), Stroke("Border") })
+		Position = UDim2.fromOffset(0, h - 28), Size = UDim2.new(1, 0, 0, 28), BackgroundTransparency = 1, Parent = row,
+	}, { Corner(6), stroke })
 	local valueText = New("TextLabel", {
-		Position = UDim2.fromOffset(8, 0), Size = UDim2.new(1, -28, 1, 0), TextXAlignment = Enum.TextXAlignment.Left,
-		TextTruncate = Enum.TextTruncate.AtEnd, Parent = box,
+		Position = UDim2.fromOffset(10, 0), Size = UDim2.new(1, -30, 1, 0), TextXAlignment = Enum.TextXAlignment.Left,
+		TextTruncate = Enum.TextTruncate.AtEnd, Font = Enum.Font.GothamMedium, Parent = box,
 	})
 	Chevron(box)
+	Connect(box.MouseEnter, function() Tween(stroke, 0.1, { Color = Lumen.Theme.Border }) end)
+	Connect(box.MouseLeave, function() Tween(stroke, 0.1, { Color = Lumen.Theme.Outline }) end)
 
 	local pop = New("Frame", {
-		Visible = false, Size = UDim2.fromOffset(200, 100), Parent = Overlay, Theme = { BackgroundColor3 = "Group" },
-	}, { Corner(5), Stroke("Border") })
+		Visible = false, Size = UDim2.fromOffset(200, 100), Parent = Overlay, Theme = { BackgroundColor3 = "Background" },
+	}, { Corner(7), Stroke("Border") })
 	local scroll = New("ScrollingFrame", {
 		Size = UDim2.fromScale(1, 1), BackgroundTransparency = 1, ScrollBarThickness = 2, CanvasSize = UDim2.new(),
 		AutomaticCanvasSize = Enum.AutomaticSize.Y, Parent = pop, Theme = { ScrollBarImageColor3 = "Accent" },
@@ -1055,24 +1251,24 @@ function Elements:AddDropdown(o)
 		else
 			valueText.Text = D.Value ~= nil and tostring(D.Value) or "--"
 		end
-		valueText.TextColor3 = (valueText.Text == "--") and Lumen.Theme.TextDim or Lumen.Theme.Text
+		valueText.TextColor3 = (valueText.Text == "--") and Lumen.Theme.TextDim or Lumen.Theme.Label
 		for v, b in pairs(items) do
-			b.TextColor3 = IsSelected(v) and Lumen.Theme.AccentText or Lumen.Theme.Text
-			b.BackgroundTransparency = IsSelected(v) and 0.85 or 1
+			b.TextColor3 = IsSelected(v) and Lumen.Theme.AccentText or Lumen.Theme.Label
+			b.BackgroundTransparency = IsSelected(v) and 0 or 1
 		end
 	end
 	table.insert(Refreshers, Render)
 	local function PopupSize()
-		pop.Size = UDim2.fromOffset(math.max(box.AbsoluteSize.X / Lumen.Scale, 120), math.min(#D.Values * 24 + 8, 176))
+		pop.Size = UDim2.fromOffset(math.max(box.AbsoluteSize.X / Lumen.Scale, 120), math.min(#D.Values * 26 + 8, 184))
 	end
 	local function Build()
 		for _, b in pairs(items) do b:Destroy() end
 		items = {}
 		for i, v in ipairs(D.Values) do
 			local b = New("TextButton", {
-				Size = UDim2.new(1, 0, 0, 22), Text = tostring(v), TextXAlignment = Enum.TextXAlignment.Left,
-				LayoutOrder = i, Parent = scroll, Theme = { BackgroundColor3 = "Accent" },
-			}, { Corner(4), Pad(8, 0, 8, 0) })
+				Size = UDim2.new(1, 0, 0, 24), Text = tostring(v), TextXAlignment = Enum.TextXAlignment.Left,
+				LayoutOrder = i, Parent = scroll, Theme = { BackgroundColor3 = "TabActive" },
+			}, { Corner(5), Pad(8, 0, 8, 0) })
 			items[v] = b
 			Connect(b.MouseButton1Click, function()
 				if D.Multi then
@@ -1126,7 +1322,9 @@ function Elements:AddDropdown(o)
 	Build()
 	if o.Default ~= nil then D:Set(o.Default, true) end
 	Register(D, o.Flag)
+	CatalogAdd(self, D, o.Text or "Dropdown")
 	Render()
+	if o.Disabled then D:SetDisabled(true) end
 	return D
 end
 
@@ -1134,26 +1332,22 @@ function Elements:AddInput(o)
 	o = type(o) == "string" and { Text = o } or o or {}
 	local I = NewOpt("Input", o)
 	I.Value = tostring(o.Default or "")
-	local h = o.Text and 42 or 24
+	local h = o.Text and 48 or 28
 	local row = Row(self._container, h)
 	I.Row = row
 	if o.Text then
-		New("TextLabel", {
-			Text = o.Text, Size = UDim2.new(1, 0, 0, 16), TextXAlignment = Enum.TextXAlignment.Left,
-			Font = Enum.Font.GothamSemibold, Parent = row,
-		})
+		New("TextLabel", { Text = o.Text, Size = UDim2.new(1, 0, 0, 16), TextXAlignment = Enum.TextXAlignment.Left, Parent = row })
 	end
-	local stroke = Stroke("Border")
+	local stroke = Stroke("Outline")
 	local box = New("TextBox", {
-		Position = UDim2.fromOffset(0, h - 24), Size = UDim2.new(1, 0, 0, 24), Text = I.Value,
+		Position = UDim2.fromOffset(0, h - 28), Size = UDim2.new(1, 0, 0, 28), Text = I.Value, BackgroundTransparency = 1,
 		PlaceholderText = o.Placeholder or "", PlaceholderColor3 = Lumen.Theme.TextDim, ClearTextOnFocus = false,
-		TextXAlignment = Enum.TextXAlignment.Left, ClipsDescendants = true, Parent = row,
-		Theme = { BackgroundColor3 = "Control" },
-	}, { Corner(4), stroke, Pad(8, 0, 8, 0) })
+		TextXAlignment = Enum.TextXAlignment.Left, ClipsDescendants = true, Font = Enum.Font.GothamMedium, Parent = row,
+	}, { Corner(6), stroke, Pad(11, 0, 11, 0) })
 
-	Connect(box.Focused, function() Tween(stroke, 0.1, { Color = Lumen.Theme.Accent }) end)
+	Connect(box.Focused, function() Tween(stroke, 0.1, { Color = Lumen.Theme.AccentBorder }) end)
 	Connect(box.FocusLost, function()
-		Tween(stroke, 0.1, { Color = Lumen.Theme.Border })
+		Tween(stroke, 0.1, { Color = Lumen.Theme.Outline })
 		if not o.Realtime then Fire(I, I.Value) end
 	end)
 	Connect(box:GetPropertyChangedSignal("Text"), function()
@@ -1171,30 +1365,40 @@ function Elements:AddInput(o)
 		box.Text = v
 		if not silent then Fire(self, v) end
 	end
+	I.Box = box
 	Register(I, o.Flag)
+	CatalogAdd(self, I, o.Text or "Input")
+	if o.Disabled then I:SetDisabled(true) end
 	return I
 end
 
 function Elements:AddButton(o)
 	o = type(o) == "string" and { Text = o } or o or {}
 	local B = NewOpt("Button", {})
-	local row = Row(self._container, 24)
+	local row = Row(self._container, 28)
 	B.Row = row
 	New("UIListLayout", {
-		FillDirection = Enum.FillDirection.Horizontal, Padding = UDim.new(0, 4), SortOrder = Enum.SortOrder.LayoutOrder, Parent = row,
+		FillDirection = Enum.FillDirection.Horizontal, Padding = UDim.new(0, 5), SortOrder = Enum.SortOrder.LayoutOrder,
+		VerticalAlignment = Enum.VerticalAlignment.Center, Parent = row,
 	})
 	local buttons = {}
 	local function Layout()
 		local n = #buttons
 		for _, b in ipairs(buttons) do
-			b.Size = UDim2.new(1 / n, -(4 * (n - 1)) / n, 1, 0)
+			b.Size = UDim2.new(1 / n, -(5 * (n - 1)) / n, 0, 30)
 		end
 	end
 	local function Make(opts)
 		local b = New("TextButton", {
-			BackgroundTransparency = 0, Text = opts.Text or "Button", Font = Enum.Font.GothamBold, TextSize = 11,
+			BackgroundTransparency = 0, Text = opts.Text or "Button", Font = Enum.Font.GothamBold,
 			LayoutOrder = #buttons + 1, Parent = row, Theme = { BackgroundColor3 = "Control" },
-		}, { Corner(4), Stroke("Border") })
+		}, { Corner(6), Stroke("Outline") })
+		-- soft glow along the inner bottom edge, peaking ~77% down and easing off at the border (measured from the reference)
+		New("Frame", { Size = UDim2.fromScale(1, 1), BackgroundColor3 = Color3.new(1, 1, 1), Parent = b }, {
+			Corner(6), New("UIGradient", { Rotation = 90, Transparency = NumberSequence.new({
+				NumberSequenceKeypoint.new(0, 1), NumberSequenceKeypoint.new(0.55, 1), NumberSequenceKeypoint.new(0.68, 0.975),
+				NumberSequenceKeypoint.new(0.77, 0.952), NumberSequenceKeypoint.new(0.9, 0.958), NumberSequenceKeypoint.new(1, 0.985) }) }),
+		})
 		table.insert(buttons, b)
 		Layout()
 		if opts.Tooltip then AttachTooltip(b, opts.Tooltip) end
@@ -1202,7 +1406,7 @@ function Elements:AddButton(o)
 		local original = b.Text
 		Connect(b.MouseEnter, function() Tween(b, 0.1, { BackgroundColor3 = Lumen.Theme.ControlHover }) end)
 		Connect(b.MouseLeave, function() Tween(b, 0.1, { BackgroundColor3 = Lumen.Theme.Control }) end)
-		Connect(b.MouseButton1Click, function()
+		local function Press()
 			if opts.DoubleClick and not confirming then
 				confirming = true
 				b.Text = "Click again to confirm"
@@ -1211,7 +1415,7 @@ function Elements:AddButton(o)
 					if confirming then
 						confirming = false
 						b.Text = original
-						b.TextColor3 = Lumen.Theme.Text
+						b.TextColor3 = Lumen.Theme.Label
 					end
 				end)
 				return
@@ -1219,25 +1423,31 @@ function Elements:AddButton(o)
 			if confirming then
 				confirming = false
 				b.Text = original
-				b.TextColor3 = Lumen.Theme.Text
+				b.TextColor3 = Lumen.Theme.Label
 			end
-			b.BackgroundColor3 = Lumen.Theme.Accent
+			b.BackgroundColor3 = Lumen.Theme.TabActive
 			Tween(b, 0.25, { BackgroundColor3 = Lumen.Theme.ControlHover })
 			if opts.Callback then task.spawn(opts.Callback) end
-		end)
-		return b
+		end
+		Connect(b.MouseButton1Click, Press)
+		return b, Press
 	end
-	B.Button = Make(o)
+	local first, press = Make(o)
+	B.Button = first
+	B.Press = press
 	function B:AddSubButton(o2)
 		if type(o2) == "string" then o2 = { Text = o2 } end
 		Make(o2 or {})
 		return self
 	end
 	function B:SetText(t) buttons[1].Text = t end
+	CatalogAdd(self, B, o.Text or "Button")
+	if o.Disabled then B:SetDisabled(true) end
 	return B
 end
 
--- 3D preview. Options: Height, Object (Model/BasePart to clone-display), Character (use your avatar), Rotate (default true)
+-- 3D preview. Options: Height, Object (Model/BasePart to display), Character (use your avatar), Rotate (auto-rotate, default true),
+-- Color (background). Drag with the mouse to orbit in any direction; it eases back into auto-rotation when released. Wheel zooms.
 function Elements:AddViewport(o)
 	o = o or {}
 	local V = NewOpt("Viewport", o)
@@ -1245,17 +1455,22 @@ function Elements:AddViewport(o)
 	V.Row = row
 	local vf = New("ViewportFrame", {
 		Size = UDim2.fromScale(1, 1), ClipsDescendants = true, Parent = row, Theme = { BackgroundColor3 = "Background" },
-	}, { Corner(5), Stroke("Border") })
+	}, { Corner(6), Stroke("Outline") })
+	if o.Color then vf.BackgroundColor3 = o.Color end
 	local cam = Instance.new("Camera")
 	cam.FieldOfView = 45
 	cam.Parent = vf
 	vf.CurrentCamera = cam
+
 	local model, center, dist = nil, Vector3.new(0, 0, 0), 8
-	local angle = 0.6
+	local yaw, pitch, zoom = 0.6, 0.12, 1
+	local dragging, lastMouse = false, nil
 
 	local function Place()
 		if not model then return end
-		cam.CFrame = CFrame.lookAt(center + Vector3.new(math.sin(angle) * dist, dist * 0.12, math.cos(angle) * dist), center)
+		local d = dist * zoom
+		local cp = math.cos(pitch)
+		cam.CFrame = CFrame.lookAt(center + Vector3.new(math.sin(yaw) * cp * d, math.sin(pitch) * d, math.cos(yaw) * cp * d), center)
 	end
 	local function Prepare(obj)
 		if model then model:Destroy() model = nil end
@@ -1285,14 +1500,39 @@ function Elements:AddViewport(o)
 		return ok and c or nil
 	end
 	Prepare(o.Object or (o.Character and CharacterClone()) or nil)
-	if o.Rotate ~= false then
-		Connect(RunService.RenderStepped, function(dt)
-			if model and vf:IsDescendantOf(Gui) then
-				angle = angle + dt * 0.9
-				Place()
-			end
-		end)
-	end
+
+	Connect(vf.InputBegan, function(i)
+		if IsPress(i) then
+			dragging = true
+			lastMouse = UIS:GetMouseLocation()
+		end
+	end)
+	Connect(UIS.InputChanged, function(i)
+		if dragging and (i.UserInputType == Enum.UserInputType.MouseMovement or i.UserInputType == Enum.UserInputType.Touch) then
+			local m = UIS:GetMouseLocation()
+			local d = m - lastMouse
+			lastMouse = m
+			yaw = yaw - d.X * 0.012
+			pitch = math.clamp(pitch + d.Y * 0.012, -1.3, 1.3)
+			Place()
+		end
+	end)
+	Connect(UIS.InputEnded, function(i)
+		if IsPress(i) then dragging = false end
+	end)
+	Connect(vf.InputChanged, function(i)
+		if i.UserInputType == Enum.UserInputType.MouseWheel then
+			zoom = math.clamp(zoom - i.Position.Z * 0.08, 0.45, 1.8)
+			Place()
+		end
+	end)
+	Connect(RunService.RenderStepped, function(dt)
+		if not model or dragging or not vf:IsDescendantOf(Gui) then return end
+		if o.Rotate ~= false then yaw = yaw + dt * 0.9 end
+		pitch = pitch + (0.12 - pitch) * math.min(1, dt * 3)   -- ease back to the default tilt
+		Place()
+	end)
+
 	function V:SetObject(obj) Prepare(obj) end
 	V.Viewport = vf
 	return V
@@ -1319,7 +1559,7 @@ function Elements:AddImageGrid(o)
 	local function Render()
 		for i, c in ipairs(cells) do
 			local on = (G.Value == i)
-			c.Stroke.Color = on and Lumen.Theme.Accent or Lumen.Theme.Border
+			c.Stroke.Color = on and Lumen.Theme.AccentBorder or Lumen.Theme.Outline
 			c.Stroke.Thickness = on and 1.5 or 1
 		end
 	end
@@ -1328,10 +1568,10 @@ function Elements:AddImageGrid(o)
 		for _, c in ipairs(cells) do c.Button:Destroy() end
 		cells = {}
 		for i, item in ipairs(G.Items) do
-			local stroke = Stroke("Border")
+			local stroke = Stroke("Outline")
 			local b = New("TextButton", {
 				BackgroundTransparency = 0, LayoutOrder = i, Parent = grid, Theme = { BackgroundColor3 = "Background" },
-			}, { Corner(5), stroke })
+			}, { Corner(6), stroke })
 			New("ImageLabel", {
 				BackgroundTransparency = 1, Position = UDim2.fromOffset(4, 4),
 				Size = UDim2.new(1, -8, 1, item.Name and -22 or -8), Image = item.Image or "",
@@ -1364,53 +1604,82 @@ function Elements:AddImageGrid(o)
 end
 
 ------------------------------------------------------------------------------
--- Groups / tabboxes
+-- Groups, pills, panels
 ------------------------------------------------------------------------------
 
-local function NewGroupObject(container, frame)
-	return setmetatable({ _container = container, Frame = frame }, { __index = Elements })
+local function NewGroupObject(container, frame, path, tab)
+	local g = setmetatable({ _container = container, Frame = frame, _path = path, _tab = tab }, { __index = Elements })
+	function g:SetVisible(v)
+		frame.Visible = v
+		if tab and tab._Relayout then tab._Relayout() end
+	end
+	return g
 end
 
 local function SubTabButton(parent, text, order)
 	return New("TextButton", {
-		AutomaticSize = Enum.AutomaticSize.X, Size = UDim2.fromOffset(0, 22), BackgroundTransparency = 1,
-		Text = text, TextColor3 = Lumen.Theme.TextDim, LayoutOrder = order, Parent = parent,
+		AutomaticSize = Enum.AutomaticSize.X, Size = UDim2.fromOffset(0, 24), BackgroundTransparency = 1,
+		Text = text, TextColor3 = Lumen.Theme.Label, LayoutOrder = order, Parent = parent,
 		Theme = { BackgroundColor3 = "TabActive" },
-	}, { Corner(5), Pad(9, 0, 9, 0) })
+	}, { Corner(6), Pad(9, 0, 9, 0) })
 end
 
-------------------------------------------------------------------------------
--- Panels (free-floating draggable windows: credits, key system, previews...)
-------------------------------------------------------------------------------
+-- Measured from the reference: fill = colour 80% toward the background, border = 50%, text = the colour.
+local function Pill(parent, text, color, order, height, textSize, bg)
+	bg = bg or Lumen.Theme.Background
+	return New("TextLabel", {
+		Text = text, AutomaticSize = Enum.AutomaticSize.X, Size = UDim2.fromOffset(0, height or 21), TextSize = textSize or 12,
+		TextColor3 = color, BackgroundTransparency = 0, BackgroundColor3 = color:Lerp(bg, 0.78),
+		LayoutOrder = order or 0, Parent = parent,
+	}, { Corner(11), Pad(11, 0, 11, 0), New("UIStroke", { Color = color:Lerp(bg, 0.45), Thickness = 1 }) })
+end
 
+-- Free-floating draggable panel. Options: Title, Subtitle, Width, Height (0 = grows with content), Position,
+-- HeaderIcon = {Icon, Tooltip, Callback}, Dock = {Icon, Tooltip, Order} (adds a dock button that shows/hides it)
 function Lumen:CreatePanel(o)
 	o = o or {}
 	local P = setmetatable({}, { __index = Elements })
+	P._path = o.Title or "Panel"
 	local autoH = (o.Height or 0) == 0
 	local frame = New("Frame", {
 		Position = o.Position or UDim2.new(0.5, -(o.Width or 300) / 2, 0.5, -100),
 		Size = UDim2.fromOffset(o.Width or 300, o.Height or 0),
 		AutomaticSize = autoH and Enum.AutomaticSize.Y or Enum.AutomaticSize.None,
 		Parent = Gui, Theme = { BackgroundColor3 = "Background" },
-	}, { Corner(8), Stroke("Border"), Pad(14, 12, 14, 14), List(8) })
+	}, { Corner(10), Stroke(nil, true), Pad(18, 16, 18, 18), List(12) })
 	local header = New("Frame", {
 		BackgroundTransparency = 1, Size = UDim2.new(1, 0, 0, 0), AutomaticSize = Enum.AutomaticSize.Y,
 		LayoutOrder = 0, Parent = frame,
-	}, { List(1) })
+	}, { List(3) })
+	local titleRow = New("Frame", { BackgroundTransparency = 1, Size = UDim2.new(1, 0, 0, 20), LayoutOrder = 1, Parent = header })
 	New("TextLabel", {
-		Text = o.Title or "Panel", Size = UDim2.new(1, 0, 0, 18), Font = Enum.Font.GothamBold, TextSize = 13,
-		TextXAlignment = Enum.TextXAlignment.Left, LayoutOrder = 1, Parent = header,
+		Text = o.Title or "Panel", Size = UDim2.new(1, -30, 1, 0), TextSize = 13, TextColor3 = Lumen.Theme.Text,
+		TextXAlignment = Enum.TextXAlignment.Left, Parent = titleRow,
 	})
+	if o.HeaderIcon then
+		local hb = New("TextButton", {
+			AnchorPoint = Vector2.new(1, 0.5), Position = UDim2.new(1, 0, 0.5, 0), Size = UDim2.fromOffset(22, 22), Parent = titleRow,
+		})
+		local ic = Icon(o.HeaderIcon.Icon or "gear", hb, 18, "TextDim")
+		ic.AnchorPoint = Vector2.new(0.5, 0.5)
+		ic.Position = UDim2.fromScale(0.5, 0.5)
+		if o.HeaderIcon.Tooltip then AttachTooltip(hb, o.HeaderIcon.Tooltip) end
+		Connect(hb.MouseEnter, function() RecolorIcon(ic, Lumen.Theme.Label) end)
+		Connect(hb.MouseLeave, function() RecolorIcon(ic, Lumen.Theme.TextDim) end)
+		Connect(hb.MouseButton1Click, function()
+			if o.HeaderIcon.Callback then task.spawn(o.HeaderIcon.Callback) end
+		end)
+	end
 	if o.Subtitle then
 		New("TextLabel", {
-			Text = o.Subtitle, Size = UDim2.new(1, 0, 0, 14), TextSize = 11, TextColor3 = Lumen.Theme.TextDim,
+			Text = o.Subtitle, Size = UDim2.new(1, 0, 0, 15), TextSize = 11, TextColor3 = Lumen.Theme.TextDim,
 			TextXAlignment = Enum.TextXAlignment.Left, LayoutOrder = 2, Parent = header,
 		})
 	end
 	local content = New("Frame", {
 		BackgroundTransparency = 1, Size = UDim2.new(1, 0, 0, 0), AutomaticSize = Enum.AutomaticSize.Y,
 		LayoutOrder = 1, Parent = frame,
-	}, { List(5) })
+	}, { List(6) })
 	P._container, P.Frame = content, frame
 	RegisterScale(frame)
 
@@ -1421,8 +1690,19 @@ function Lumen:CreatePanel(o)
 	MakeDraggable(header, frame, Front)
 	Front()
 
-	function P:SetVisible(v) frame.Visible = v end
-	function P:Destroy() ClosePopup() frame:Destroy() end
+	function P:SetVisible(v)
+		frame.Visible = v
+		Lumen:_UpdateDock()
+	end
+	function P:Toggle() self:SetVisible(not frame.Visible) end
+	function P:Destroy() ClosePopup() frame:Destroy() Lumen:_UpdateDock() end
+	if o.Visible == false then frame.Visible = false end
+	if o.Dock then
+		Lumen:AddDockButton({
+			Icon = o.Dock.Icon or "window", Tooltip = o.Dock.Tooltip or o.Title, Order = o.Dock.Order or 20,
+			Callback = function() P:Toggle() end, Active = function() return frame.Visible end,
+		})
+	end
 	return P
 end
 
@@ -1430,7 +1710,7 @@ function Lumen:CreateCredits(o)
 	o = o or {}
 	local P = self:CreatePanel({
 		Title = o.Title or "CREDITS", Subtitle = o.Subtitle or "People behind this script",
-		Width = o.Width or 300, Position = o.Position,
+		Width = o.Width or 340, Height = o.Height, Position = o.Position, Dock = o.Dock,
 	})
 	function P:AddEntry(e)
 		local color = e.RoleColor or Lumen.Theme.Accent
@@ -1438,27 +1718,21 @@ function Lumen:CreateCredits(o)
 			Size = UDim2.new(1, 0, 0, 0), AutomaticSize = Enum.AutomaticSize.Y,
 			LayoutOrder = (self._container:GetAttribute("Order") or 0) + 1, Parent = self._container,
 			Theme = { BackgroundColor3 = "Group" },
-		}, { Corner(5), Stroke("Border"), Pad(10, 8, 10, 8), List(4) })
+		}, { Corner(7), Stroke("Outline"), Pad(12, 9, 12, 10), List(5) })
 		self._container:SetAttribute("Order", card.LayoutOrder)
 		local line = New("Frame", {
-			BackgroundTransparency = 1, Size = UDim2.new(1, 0, 0, 20), LayoutOrder = 1, Parent = card,
-		}, { List(8, Enum.FillDirection.Horizontal, Enum.HorizontalAlignment.Left, Enum.VerticalAlignment.Center) })
+			BackgroundTransparency = 1, Size = UDim2.new(1, 0, 0, 22), LayoutOrder = 1, Parent = card,
+		}, { List(9, Enum.FillDirection.Horizontal, Enum.HorizontalAlignment.Left, Enum.VerticalAlignment.Center) })
 		New("TextLabel", {
-			Text = e.Name or "Name", AutomaticSize = Enum.AutomaticSize.X, Size = UDim2.fromOffset(0, 20),
-			Font = Enum.Font.GothamBold, TextSize = 13, LayoutOrder = 1, Parent = line,
+			Text = e.Name or "Name", AutomaticSize = Enum.AutomaticSize.X, Size = UDim2.fromOffset(0, 22),
+			TextSize = 13, TextColor3 = Lumen.Theme.Text, LayoutOrder = 1, Parent = line,
 		})
-		if e.Role then
-			New("TextLabel", {
-				Text = e.Role:upper(), AutomaticSize = Enum.AutomaticSize.X, Size = UDim2.fromOffset(0, 16),
-				TextSize = 10, TextColor3 = color, BackgroundTransparency = 0.88, BackgroundColor3 = color,
-				LayoutOrder = 2, Parent = line,
-			}, { Corner(8), Pad(8, 0, 8, 0), New("UIStroke", { Color = color, Transparency = 0.5 }) })
-		end
+		if e.Role then Pill(line, e.Role:upper(), color, 2, 20, 10, Lumen.Theme.Group) end
 		if e.Description then
 			New("TextLabel", {
 				Text = e.Description, Size = UDim2.new(1, 0, 0, 0), AutomaticSize = Enum.AutomaticSize.Y, TextSize = 11,
-				TextColor3 = Lumen.Theme.TextDim, TextWrapped = true, TextXAlignment = Enum.TextXAlignment.Left,
-				LayoutOrder = 2, Parent = card,
+				TextColor3 = Lumen.Theme.TextMuted, TextWrapped = true, TextXAlignment = Enum.TextXAlignment.Left,
+				Font = Enum.Font.GothamMedium, LayoutOrder = 2, Parent = card,
 			})
 		end
 		return card
@@ -1468,10 +1742,23 @@ function Lumen:CreateCredits(o)
 end
 
 -- Generic key prompt. `Validate(key)` is YOUR function; it should return true (or false, "message").
+-- DiscordLink adds the Discord icon in the header (click copies the link).
 function Lumen:CreateKeySystem(o)
 	o = o or {}
-	local P = self:CreatePanel({ Title = o.Title or "Key System", Width = o.Width or 340, Position = o.Position })
-	if o.Note then P:AddLabel(o.Note, { Dim = true, Box = true }) end
+	local header
+	if o.DiscordLink or o.HeaderIcon then
+		header = o.HeaderIcon or {
+			Icon = "discord", Tooltip = "Copy Discord invite",
+			Callback = function()
+				if setclipboard then setclipboard(o.DiscordLink) end
+				Lumen:Notify({ Content = "Discord invite copied.", Type = "Info" })
+			end,
+		}
+	end
+	local P = self:CreatePanel({
+		Title = o.Title or "Key System", Width = o.Width or 440, Position = o.Position, HeaderIcon = header, Dock = o.Dock,
+	})
+	if o.Note then P:AddLabel(o.Note, { Dim = true }) end
 	local input = P:AddInput({ Placeholder = o.Placeholder or "Enter your key...", Realtime = true })
 	local function Submit()
 		if not o.Validate then return end
@@ -1610,7 +1897,7 @@ function Lumen:LoadAutoload()
 end
 
 ------------------------------------------------------------------------------
--- Backdrop (dim + blur + snow) and dock. Shown only while a window is open.
+-- Backdrop (dim + blur + snow). Shown only while a window is open.
 ------------------------------------------------------------------------------
 
 local Snow = { Enabled = false, Count = 70, Speed = 1, Flakes = {}, Time = 0 }
@@ -1706,7 +1993,29 @@ Connect(RunService.RenderStepped, function(dt)
 	end
 end)
 
--- Dock: the icon bar at the top centre. Add your own buttons with Lumen:AddDockButton.
+-- faint diagonal text tiled over the whole screen (anti-leak watermark). Pass nil to remove.
+local ScreenWM
+function Lumen:SetScreenWatermark(text)
+	if ScreenWM then ScreenWM:Destroy() ScreenWM = nil end
+	if not text or text == "" then return end
+	ScreenWM = New("Frame", {
+		BackgroundTransparency = 1, Size = UDim2.fromScale(1, 1), ClipsDescendants = true, ZIndex = 90, Parent = Gui,
+	})
+	for r = 0, 7 do
+		for c = 0, 4 do
+			New("TextLabel", {
+				Text = text, Size = UDim2.fromOffset(520, 28), Position = UDim2.new((c + (r % 2) * 0.5) / 4.2, -120, r / 7.2, 0),
+				Rotation = -28, TextSize = 20, TextColor3 = Color3.new(1, 1, 1), TextTransparency = 0.94,
+				Font = Enum.Font.GothamBold, Parent = ScreenWM,
+			})
+		end
+	end
+end
+
+------------------------------------------------------------------------------
+-- Dock (icon bar at the top centre)
+------------------------------------------------------------------------------
+
 local Dock
 local DockButtons = {}
 
@@ -1716,44 +2025,58 @@ local function EnsureDock()
 		AnchorPoint = Vector2.new(0.5, 0), Position = UDim2.new(0.5, 0, 0, 12), Size = UDim2.fromOffset(0, 0),
 		AutomaticSize = Enum.AutomaticSize.XY, ZIndex = 6, Visible = Lumen.ShowDock, Parent = Gui,
 		Theme = { BackgroundColor3 = "Background" },
-	}, { Corner(10), Stroke("Border"), Pad(5), List(5, Enum.FillDirection.Horizontal, Enum.HorizontalAlignment.Left, Enum.VerticalAlignment.Center) })
+	}, { Corner(10), Stroke(nil, true), Pad(10, 7, 10, 7),
+		List(4, Enum.FillDirection.Horizontal, Enum.HorizontalAlignment.Left, Enum.VerticalAlignment.Center) })
+	MakeDraggable(Dock, Dock)
 	return Dock
 end
 
 function Lumen:_UpdateDock()
-	for _, e in ipairs(DockButtons) do
-		if e.Button.Parent then
+	local T = self.Theme
+	local active = T.Accent:Lerp(T.Background, 0.1)
+	for i = #DockButtons, 1, -1 do
+		local e = DockButtons[i]
+		if e.Button.Parent == nil then
+			table.remove(DockButtons, i)
+		else
 			local on = e.Active and e.Active() or false
-			Tween(e.Button, 0.12, { BackgroundColor3 = on and Lumen.Theme.TabActive or Lumen.Theme.Control })
+			e.Button.BackgroundColor3 = T.TabActive
+			Tween(e.Button, 0.12, { BackgroundTransparency = on and 0 or 1 })
+			if e.Icon then RecolorIcon(e.Icon, on and active or T.Label) end
+			if e.Image then e.Image.ImageColor3 = on and active or T.Label end
 		end
 	end
 end
 table.insert(Refreshers, function() Lumen:_UpdateDock() end)
 
--- o: Icon ("window","keyboard","list","bell","user","snow","gear" or an rbxassetid), Tooltip, Callback, Active (function -> bool)
+-- o: Icon ("window","keyboard","command","scan","bell","user","gear","snow","list","discord" or an rbxassetid),
+-- Tooltip, Callback, Active (function -> bool, highlights the button), Order
 function Lumen:AddDockButton(o)
 	o = o or {}
 	local dock = EnsureDock()
 	local b = New("TextButton", {
-		Size = UDim2.fromOffset(30, 30), BackgroundTransparency = 0, LayoutOrder = #DockButtons + 1, Parent = dock,
-		Theme = { BackgroundColor3 = "Control" },
-	}, { Corner(7) })
+		Size = UDim2.fromOffset(32, 32), BackgroundTransparency = 1, LayoutOrder = o.Order or 50, Parent = dock,
+		Theme = { BackgroundColor3 = "TabActive" },
+	}, { Corner(8) })
+	local entry = { Button = b, Active = o.Active }
 	local ic = o.Icon or "window"
 	if ic:find("rbxasset") or ic:find("rbxthumb") then
-		New("ImageLabel", {
+		entry.Image = New("ImageLabel", {
 			BackgroundTransparency = 1, AnchorPoint = Vector2.new(0.5, 0.5), Position = UDim2.fromScale(0.5, 0.5),
-			Size = UDim2.fromOffset(16, 16), Image = ic, Parent = b,
+			Size = UDim2.fromOffset(17, 17), Image = ic, Parent = b,
 		})
 	else
-		local f = Icon(ic, b, 16)
-		f.AnchorPoint = Vector2.new(0.5, 0.5)
-		f.Position = UDim2.fromScale(0.5, 0.5)
+		entry.Icon = Icon(ic, b, 17)
+		entry.Icon.AnchorPoint = Vector2.new(0.5, 0.5)
+		entry.Icon.Position = UDim2.fromScale(0.5, 0.5)
 	end
 	if o.Tooltip then AttachTooltip(b, o.Tooltip) end
-	local entry = { Button = b, Active = o.Active }
 	table.insert(DockButtons, entry)
 	Connect(b.MouseEnter, function()
-		if not (entry.Active and entry.Active()) then Tween(b, 0.1, { BackgroundColor3 = Lumen.Theme.ControlHover }) end
+		if not (entry.Active and entry.Active()) then
+			b.BackgroundColor3 = Lumen.Theme.ControlHover
+			Tween(b, 0.1, { BackgroundTransparency = 0.35 })
+		end
 	end)
 	Connect(b.MouseLeave, function() Lumen:_UpdateDock() end)
 	Connect(b.MouseButton1Click, function()
@@ -1771,16 +2094,253 @@ function Lumen:SetDockVisible(v)
 end
 
 ------------------------------------------------------------------------------
--- Window
+-- Command palette: search every option, see its path and value (Ctrl+K or the dock button)
 ------------------------------------------------------------------------------
 
-local function Pill(parent, spec, order)
-	return New("TextLabel", {
-		Text = spec.Text, AutomaticSize = Enum.AutomaticSize.X, Size = UDim2.fromOffset(0, 18), TextSize = 11,
-		TextColor3 = spec.Color, BackgroundTransparency = 0.86, BackgroundColor3 = spec.Color,
-		LayoutOrder = order, Parent = parent,
-	}, { Corner(9), Pad(9, 0, 9, 0), New("UIStroke", { Color = spec.Color, Transparency = 0.55 }) })
+local Palette = { Open = false, Results = {}, Selected = 1, Rows = {} }
+local PaletteDim, PaletteFrame, PaletteInput, PaletteList
+local PaletteRefresh
+
+local function FormatValue(opt)
+	local t = opt.Type
+	if t == "Toggle" or t == "Slider" then
+		return tostring(opt.Value)
+	elseif t == "Dropdown" then
+		if opt.Multi then
+			local sel = {}
+			for _, v in ipairs(opt.Values) do if opt.Value[v] then table.insert(sel, tostring(v)) end end
+			return #sel > 0 and table.concat(sel, ", ") or "nil"
+		end
+		return opt.Value == nil and "nil" or tostring(opt.Value)
+	elseif t == "Input" then
+		return '"' .. tostring(opt.Value) .. '"'
+	end
+	return "..."
 end
+
+local function PaletteScore(q, text)
+	if q == "" then return 1 end
+	text = text:lower()
+	local i = text:find(q, 1, true)
+	if i then return 1000 - i end
+	local qi = 1
+	for ci = 1, #text do
+		if text:sub(ci, ci) == q:sub(qi, qi) then
+			qi = qi + 1
+			if qi > #q then return 100 end
+		end
+	end
+	return nil
+end
+
+local function PaletteSearch(query)
+	local q = query:lower():gsub("^%s*>?%s*", "")
+	local out = {}
+	local cat = Lumen._Catalog
+	for i = #cat, 1, -1 do
+		local e = cat[i]
+		if not (e.Opt.Row and e.Opt.Row.Parent) then
+			table.remove(cat, i)
+		end
+	end
+	for _, e in ipairs(cat) do
+		local sc = PaletteScore(q, e.Name .. " " .. e.Path)
+		if sc then table.insert(out, { Entry = e, Score = sc }) end
+	end
+	table.sort(out, function(a, b)
+		if a.Score ~= b.Score then return a.Score > b.Score end
+		return a.Entry.Name < b.Entry.Name
+	end)
+	local res = {}
+	for _, r in ipairs(out) do table.insert(res, r.Entry) end
+	return res
+end
+
+local function PaletteHighlight()
+	for i, row in ipairs(Palette.Rows) do
+		row.BackgroundTransparency = (i == Palette.Selected) and 0 or 1
+	end
+end
+
+local function PaletteActivate(e)
+	local opt = e.Opt
+	if opt.Disabled then return end
+	if opt.Type == "Toggle" then
+		opt:Set(not opt.Value)
+		PaletteRefresh()
+	elseif opt.Type == "Button" then
+		Lumen:ClosePalette()
+		if opt.Press then opt.Press() end
+	else
+		Lumen:ClosePalette()
+		local tab = e.Tab
+		if tab and tab.Window then
+			tab.Window:SetVisible(true)
+			tab.Window:SelectTab(tab)
+		end
+	end
+end
+
+function PaletteRefresh()
+	for _, r in ipairs(Palette.Rows) do r:Destroy() end
+	Palette.Rows = {}
+	Palette.Results = PaletteSearch(PaletteInput.Text)
+	Palette.Selected = math.clamp(Palette.Selected, 1, math.max(#Palette.Results, 1))
+	for i, e in ipairs(Palette.Results) do
+		if i > 60 then break end
+		local row = New("TextButton", {
+			Size = UDim2.new(1, 0, 0, 30), LayoutOrder = i, BackgroundTransparency = 1, Parent = PaletteList,
+			Theme = { BackgroundColor3 = "Control" },
+		}, { Corner(6) })
+		local left = New("Frame", {
+			BackgroundTransparency = 1, Position = UDim2.fromOffset(12, 0), Size = UDim2.new(1, -130, 1, 0), Parent = row,
+		}, { List(10, Enum.FillDirection.Horizontal, Enum.HorizontalAlignment.Left, Enum.VerticalAlignment.Center) })
+		New("TextLabel", {
+			Text = e.Name, AutomaticSize = Enum.AutomaticSize.X, Size = UDim2.fromOffset(0, 30),
+			TextColor3 = Lumen.Theme.Text, LayoutOrder = 1, Parent = left,
+		})
+		New("TextLabel", {
+			Text = e.Path, AutomaticSize = Enum.AutomaticSize.X, Size = UDim2.fromOffset(0, 30), TextSize = 11,
+			TextColor3 = Lumen.Theme.TextDim, Font = Enum.Font.GothamMedium, LayoutOrder = 2, Parent = left,
+		})
+		New("TextLabel", {
+			Text = FormatValue(e.Opt), AnchorPoint = Vector2.new(1, 0.5), Position = UDim2.new(1, -12, 0.5, 0),
+			Size = UDim2.fromOffset(110, 30), TextXAlignment = Enum.TextXAlignment.Right, Font = Enum.Font.GothamMedium,
+			TextColor3 = Lumen.Theme.Label, Parent = row,
+		})
+		Connect(row.MouseEnter, function()
+			Palette.Selected = i
+			PaletteHighlight()
+		end)
+		Connect(row.MouseButton1Click, function()
+			Palette.Selected = i
+			PaletteActivate(e)
+		end)
+		table.insert(Palette.Rows, row)
+	end
+	PaletteHighlight()
+end
+
+local function BuildPalette()
+	if PaletteFrame then return end
+	PaletteDim = New("TextButton", {
+		Size = UDim2.fromScale(1, 1), BackgroundColor3 = Color3.new(0, 0, 0), BackgroundTransparency = 0.45,
+		Visible = false, ZIndex = 60, Active = true, Parent = Gui,
+	})
+	PaletteFrame = New("Frame", {
+		AnchorPoint = Vector2.new(0.5, 0), Position = UDim2.new(0.5, 0, 0, 98), Size = UDim2.fromOffset(580, 360),
+		Visible = false, ZIndex = 61, Parent = Gui, Theme = { BackgroundColor3 = "Background" },
+	}, { Corner(10), Stroke(nil, true) })
+	RegisterScale(PaletteFrame)
+	local head = New("Frame", { BackgroundTransparency = 1, Size = UDim2.new(1, 0, 0, 44), Parent = PaletteFrame })
+	New("TextLabel", {
+		Text = ">", Position = UDim2.fromOffset(14, 0), Size = UDim2.fromOffset(14, 44), TextSize = 13,
+		TextColor3 = Lumen.Theme.TextDim, Parent = head,
+	})
+	PaletteInput = New("TextBox", {
+		Position = UDim2.fromOffset(32, 0), Size = UDim2.new(1, -46, 1, 0), BackgroundTransparency = 1, Text = "",
+		PlaceholderText = "Search options...", PlaceholderColor3 = Lumen.Theme.TextMuted, ClearTextOnFocus = false,
+		TextSize = 13, TextColor3 = Lumen.Theme.Text, TextXAlignment = Enum.TextXAlignment.Left, Parent = head,
+	})
+	New("Frame", {
+		Position = UDim2.fromOffset(0, 44), Size = UDim2.new(1, 0, 0, 1), Parent = PaletteFrame,
+		Theme = { BackgroundColor3 = "Outline" },
+	})
+	PaletteList = New("ScrollingFrame", {
+		Position = UDim2.fromOffset(0, 46), Size = UDim2.new(1, 0, 1, -46), BackgroundTransparency = 1, ScrollBarThickness = 2,
+		CanvasSize = UDim2.new(), AutomaticCanvasSize = Enum.AutomaticSize.Y, Parent = PaletteFrame,
+		Theme = { ScrollBarImageColor3 = "Accent" },
+	}, { Pad(8, 8, 8, 8), List(2) })
+	Connect(PaletteDim.MouseButton1Click, function() Lumen:ClosePalette() end)
+	Connect(PaletteInput:GetPropertyChangedSignal("Text"), function()
+		if Palette.Open then
+			Palette.Selected = 1
+			PaletteRefresh()
+		end
+	end)
+	Connect(PaletteInput.FocusLost, function(enter)
+		if enter and Palette.Open then
+			local e = Palette.Results[Palette.Selected]
+			if e then PaletteActivate(e) end
+			if Palette.Open then pcall(function() PaletteInput:CaptureFocus() end) end
+		end
+	end)
+end
+
+function Lumen:OpenPalette()
+	BuildPalette()
+	ClosePopup()
+	Palette.Open = true
+	PaletteDim.Visible = true
+	PaletteFrame.Visible = true
+	PaletteInput.Text = ""
+	Palette.Selected = 1
+	PaletteRefresh()
+	task.defer(function() pcall(function() PaletteInput:CaptureFocus() end) end)
+	self:_UpdateDock()
+end
+
+function Lumen:ClosePalette()
+	if not Palette.Open then return end
+	Palette.Open = false
+	PaletteDim.Visible = false
+	PaletteFrame.Visible = false
+	pcall(function() PaletteInput:ReleaseFocus() end)
+	self:_UpdateDock()
+end
+
+function Lumen:TogglePalette()
+	if Palette.Open then self:ClosePalette() else self:OpenPalette() end
+end
+
+-- called from the global input handler while the palette is open; returns true when the key was used
+function Lumen:_PaletteKey(kc)
+	if not Palette.Open then return false end
+	if kc == Enum.KeyCode.Escape then
+		self:ClosePalette()
+	elseif kc == Enum.KeyCode.Down then
+		Palette.Selected = math.min(Palette.Selected + 1, math.max(#Palette.Rows, 1))
+		PaletteHighlight()
+	elseif kc == Enum.KeyCode.Up then
+		Palette.Selected = math.max(Palette.Selected - 1, 1)
+		PaletteHighlight()
+	else
+		return false
+	end
+	return true
+end
+
+-- `which` lists the built-in dock buttons to create (default: all of them)
+function Lumen:_InitDock(W, which)
+	if self._dockInit then return end
+	self._dockInit = true
+	local want = {}
+	for _, k in ipairs(which or { "menu", "hotkeys", "watermark", "snow", "palette" }) do want[k] = true end
+	if want.menu then
+		self:AddDockButton({ Icon = "window", Tooltip = "Toggle menu", Order = 1,
+			Callback = function() W:Toggle() end, Active = function() return W.Visible end })
+	end
+	if want.hotkeys then
+		self:AddDockButton({ Icon = "keyboard", Tooltip = "Hotkey list", Order = 30,
+			Callback = function() Lumen:SetHotkeysVisible(not Lumen.ShowHotkeys) end, Active = function() return Lumen.ShowHotkeys end })
+	end
+	if want.watermark then
+		self:AddDockButton({ Icon = "list", Tooltip = "Watermark", Order = 32,
+			Callback = function() Lumen:SetWatermarkVisible(not Lumen.ShowWatermark) end, Active = function() return Lumen.ShowWatermark end })
+	end
+	if want.snow then
+		self:AddDockButton({ Icon = "snow", Tooltip = "Snow", Order = 34,
+			Callback = function() Lumen:SetSnow(not Snow.Enabled) end, Active = function() return Snow.Enabled end })
+	end
+	if want.palette then
+		self:AddDockButton({ Icon = "command", Tooltip = "Command palette (Ctrl+K)", Order = 40,
+			Callback = function() Lumen:TogglePalette() end, Active = function() return Palette.Open end })
+	end
+end
+
+------------------------------------------------------------------------------
+-- Window
+------------------------------------------------------------------------------
 
 local function PillSpec(v, default)
 	if type(v) == "string" then return { Text = v, Color = default } end
@@ -1789,66 +2349,78 @@ end
 
 function Lumen:CreateWindow(o)
 	o = o or {}
-	local W = { Tabs = {}, Title = o.Title or "Lumen", MenuKey = o.MenuKey or Enum.KeyCode.RightShift, Visible = true }
+	local W = {
+		Tabs = {}, Title = o.Title or "Lumen", Id = o.Id or "MainWindow", Visible = true,
+		MenuKey = o.MenuKey or Enum.KeyCode.RightShift,
+	}
 	local vp = Gui.AbsoluteSize
-	local size = o.Size or Vector2.new(470, 570)
+	local size = o.Size or Vector2.new(560, 752)
 	size = Vector2.new(math.min(size.X, math.max(vp.X * 0.94, 320)), math.min(size.Y, math.max(vp.Y * 0.9, 300)))
 	if o.Watermark == false then self:SetWatermarkVisible(false) end
 	if o.Hotkeys == false then self:SetHotkeysVisible(false) end
+	if o.WatermarkTitle then self:SetWatermarkTitle(o.WatermarkTitle) end
 
 	local main = New("Frame", {
 		Name = "Window", Size = UDim2.fromOffset(size.X, size.Y),
 		Position = o.Position or UDim2.new(0.5, -size.X / 2, 0.5, -size.Y / 2),
 		Parent = Gui, Theme = { BackgroundColor3 = "Background" },
-	}, { Corner(9), Stroke("Border") })
+	}, { Corner(10), Stroke(nil, true) })
 	RegisterScale(main)
 	W.Frame = main
 
-	local header = New("Frame", { BackgroundTransparency = 1, Size = UDim2.new(1, 0, 0, 42), Parent = main })
+	local header = New("Frame", { BackgroundTransparency = 1, Size = UDim2.new(1, 0, 0, 50), Parent = main })
 	local titleRow = New("Frame", {
-		BackgroundTransparency = 1, Position = UDim2.fromOffset(16, 0), Size = UDim2.new(0.72, 0, 1, 0), Parent = header,
-	}, { List(8, Enum.FillDirection.Horizontal, Enum.HorizontalAlignment.Left, Enum.VerticalAlignment.Center) })
+		BackgroundTransparency = 1, Position = UDim2.fromOffset(18, 0), Size = UDim2.new(0.7, 0, 1, 0), Parent = header,
+	}, { List(10, Enum.FillDirection.Horizontal, Enum.HorizontalAlignment.Left, Enum.VerticalAlignment.Center) })
 	local titleLabel = New("TextLabel", {
-		Text = W.Title, AutomaticSize = Enum.AutomaticSize.X, Size = UDim2.fromOffset(0, 20), Font = Enum.Font.GothamBold,
-		TextSize = 12, LayoutOrder = 1, Parent = titleRow,
+		Text = W.Title, AutomaticSize = Enum.AutomaticSize.X, Size = UDim2.fromOffset(0, 22), TextSize = 13,
+		TextColor3 = self.Theme.Text, LayoutOrder = 1, Parent = titleRow,
 	})
+	local pills = New("Frame", {
+		BackgroundTransparency = 1, Size = UDim2.fromOffset(0, 21), AutomaticSize = Enum.AutomaticSize.X, LayoutOrder = 2,
+		Parent = titleRow,
+	}, { List(4, Enum.FillDirection.Horizontal, Enum.HorizontalAlignment.Left, Enum.VerticalAlignment.Center) })
 	local tag = PillSpec(o.Tag, self.Theme.Success)
-	if tag then Pill(titleRow, tag, 2) end
+	if tag then Pill(pills, tag.Text, tag.Color, 1) end
 	local ver = PillSpec(o.Version, self.Theme.Danger)
-	if ver then Pill(titleRow, ver, 3) end
+	if ver then Pill(pills, ver.Text, ver.Color, 2) end
 	local subtitle = New("TextLabel", {
-		AnchorPoint = Vector2.new(1, 0), Position = UDim2.new(1, -16, 0, 0), Size = UDim2.new(0.28, 0, 1, 0),
-		Text = o.Subtitle or "", TextSize = 11, TextColor3 = self.Theme.TextDim, TextXAlignment = Enum.TextXAlignment.Right,
-		TextTruncate = Enum.TextTruncate.AtEnd, Parent = header,
+		AnchorPoint = Vector2.new(1, 0), Position = UDim2.new(1, -18, 0, 0), Size = UDim2.new(0.3, 0, 1, 0),
+		Text = o.Subtitle or "", TextSize = 12, Font = Enum.Font.GothamMedium, TextColor3 = self.Theme.TextMuted,
+		TextXAlignment = Enum.TextXAlignment.Right, TextTruncate = Enum.TextTruncate.AtEnd, Parent = header,
 	})
 	MakeDraggable(header, main)
 
 	local tabbar = New("ScrollingFrame", {
-		Position = UDim2.fromOffset(10, 42), Size = UDim2.new(1, -20, 0, 30), BackgroundTransparency = 1,
+		Position = UDim2.fromOffset(17, 49), Size = UDim2.new(1, -34, 0, 28), BackgroundTransparency = 1,
 		ScrollBarThickness = 0, CanvasSize = UDim2.new(), AutomaticCanvasSize = Enum.AutomaticSize.X,
 		ScrollingDirection = Enum.ScrollingDirection.X, Parent = main,
-	}, { List(3, Enum.FillDirection.Horizontal, Enum.HorizontalAlignment.Left, Enum.VerticalAlignment.Center) })
+	}, { List(5, Enum.FillDirection.Horizontal, Enum.HorizontalAlignment.Left, Enum.VerticalAlignment.Center) })
 
 	local content = New("Frame", {
-		BackgroundTransparency = 1, ClipsDescendants = true, Position = UDim2.fromOffset(0, 78),
-		Size = UDim2.new(1, 0, 1, -104), Parent = main,
+		BackgroundTransparency = 1, ClipsDescendants = true, Position = UDim2.fromOffset(17, 87),
+		Size = UDim2.new(1, -34, 1, -122), Parent = main,
 	})
-	New("Frame", {
-		AnchorPoint = Vector2.new(0, 1), Position = UDim2.new(0, 0, 1, -25), Size = UDim2.new(1, 0, 0, 1),
-		Parent = main, Theme = { BackgroundColor3 = "Border" },
-	})
+
+	-- footer strip (slightly lighter than the window, soft top edge)
+	local footerBar = New("Frame", {
+		AnchorPoint = Vector2.new(0, 1), Position = UDim2.new(0, 0, 1, 0), Size = UDim2.new(1, 0, 0, 32), Parent = main,
+		Theme = { BackgroundColor3 = "Group" },
+	}, { Corner(10) })
+	New("Frame", { Size = UDim2.new(1, 0, 0, 14), Parent = footerBar, Theme = { BackgroundColor3 = "Group" } })
+	New("Frame", { Size = UDim2.new(1, 0, 0, 1), Parent = footerBar, Theme = { BackgroundColor3 = "GroupBorder" } })
 	local footer = New("TextLabel", {
-		AnchorPoint = Vector2.new(0, 1), Position = UDim2.new(0, 0, 1, -2), Size = UDim2.new(1, 0, 0, 22),
-		Text = o.Footer or "", TextSize = 11, TextColor3 = self.Theme.TextDim, Parent = main,
+		Size = UDim2.fromScale(1, 1), Text = o.Footer or "", TextSize = 12, Font = Enum.Font.GothamMedium,
+		TextColor3 = self.Theme.TextMuted, Parent = footerBar,
 	})
 
 	-- resize grip
 	local grip = New("TextButton", {
-		AnchorPoint = Vector2.new(1, 1), Position = UDim2.new(1, -3, 1, -3), Size = UDim2.fromOffset(14, 14),
-		Text = "", Parent = main,
+		AnchorPoint = Vector2.new(1, 1), Position = UDim2.new(1, -4, 1, -4), Size = UDim2.fromOffset(14, 14),
+		Text = "", ZIndex = 5, Parent = main,
 	}, {
-		New("Frame", { Size = UDim2.fromOffset(8, 1), Position = UDim2.new(1, -9, 1, -3), BackgroundColor3 = self.Theme.TextDim, Rotation = -45, BackgroundTransparency = 0.4 }),
-		New("Frame", { Size = UDim2.fromOffset(4, 1), Position = UDim2.new(1, -6, 1, -3), BackgroundColor3 = self.Theme.TextDim, Rotation = -45, BackgroundTransparency = 0.4 }),
+		New("Frame", { Size = UDim2.fromOffset(8, 1), Position = UDim2.new(1, -9, 1, -3), BackgroundColor3 = self.Theme.TextMuted, Rotation = -45, BackgroundTransparency = 0.3 }),
+		New("Frame", { Size = UDim2.fromOffset(4, 1), Position = UDim2.new(1, -6, 1, -3), BackgroundColor3 = self.Theme.TextMuted, Rotation = -45, BackgroundTransparency = 0.3 }),
 	})
 	do
 		local resizing, startMouse, startSize = false, nil, nil
@@ -1862,7 +2434,7 @@ function Lumen:CreateWindow(o)
 			if resizing and (i.UserInputType == Enum.UserInputType.MouseMovement or i.UserInputType == Enum.UserInputType.Touch) then
 				local d = (UIS:GetMouseLocation() - startMouse) / Lumen.Scale
 				local base = startSize / Lumen.Scale
-				main.Size = UDim2.fromOffset(math.max(380, base.X + d.X), math.max(300, base.Y + d.Y))
+				main.Size = UDim2.fromOffset(math.max(400, base.X + d.X), math.max(320, base.Y + d.Y))
 			end
 		end)
 		Connect(UIS.InputEnded, function(i) if IsPress(i) then resizing = false end end)
@@ -1874,20 +2446,29 @@ function Lumen:CreateWindow(o)
 
 	function W:_StyleTabs()
 		for _, t in ipairs(self.Tabs) do
-			local on = (t == self.Active)
+			local on = (t == self.Active) and not t.Hidden
 			t.Page.Visible = on
 			Tween(t.Button, 0.12, {
 				BackgroundTransparency = on and 0 or 1,
-				TextColor3 = on and Lumen.Theme.Text or Lumen.Theme.TextDim,
+				TextColor3 = on and Lumen.Theme.AccentText or Lumen.Theme.TextDim,
 			})
 		end
 	end
 	function W:SelectTab(t)
+		if t.Hidden then return end
 		ClosePopup()
 		self.Active = t
 		self:_StyleTabs()
+		if t._Relayout then t._Relayout() end
+		if t.OnSelect then t.OnSelect() end
 	end
 	table.insert(Refreshers, function() W:_StyleTabs() end)
+
+	function W:SetTabVisible(name, v)
+		for _, t in ipairs(self.Tabs) do
+			if t.Name == name then t:SetVisible(v) end
+		end
+	end
 
 	function W:SetVisible(v)
 		self.Visible = v
@@ -1904,20 +2485,20 @@ function Lumen:CreateWindow(o)
 	end
 
 	function W:AddTab(name)
-		local T = { Name = name, Window = W, _flip = false }
+		local T = { Name = name, Window = W, _flip = false, Boxes = {}, Sections = {}, Fill = o.Fill ~= false }
 		T.Button = New("TextButton", {
-			AutomaticSize = Enum.AutomaticSize.X, Size = UDim2.fromOffset(0, 24), BackgroundTransparency = 1,
+			AutomaticSize = Enum.AutomaticSize.X, Size = UDim2.fromOffset(0, 28), BackgroundTransparency = 1,
 			Text = name, TextColor3 = Lumen.Theme.TextDim, LayoutOrder = #W.Tabs + 1, Parent = tabbar,
 			Theme = { BackgroundColor3 = "TabActive" },
-		}, { Corner(6), Pad(12, 0, 12, 0) })
+		}, { Corner(7), Pad(11, 0, 11, 0) })
 		T.Page = New("ScrollingFrame", {
 			Visible = false, Size = UDim2.fromScale(1, 1), BackgroundTransparency = 1, ScrollBarThickness = 2,
 			CanvasSize = UDim2.new(), AutomaticCanvasSize = Enum.AutomaticSize.Y, Parent = content,
-			Theme = { ScrollBarImageColor3 = "Accent" },
-		}, { Pad(10, 4, 10, 10), List(8) })
+			Theme = { ScrollBarImageColor3 = "AccentBorder" },
+		}, { List(8) })
 		local banners = New("Frame", {
 			BackgroundTransparency = 1, Size = UDim2.new(1, 0, 0, 0), AutomaticSize = Enum.AutomaticSize.Y,
-			LayoutOrder = 0, Parent = T.Page,
+			LayoutOrder = 0, Visible = false, Parent = T.Page,
 		}, { List(6) })
 		local columns = New("Frame", {
 			BackgroundTransparency = 1, Size = UDim2.new(1, 0, 0, 0), AutomaticSize = Enum.AutomaticSize.Y,
@@ -1931,6 +2512,26 @@ function Lumen:CreateWindow(o)
 		end
 		local left, right = Column(1), Column(2)
 
+		-- Fill layout (as in the reference): boxes in a column share the page height equally, and grow if their content is taller
+		local function Relayout()
+			local avail = T.Page.AbsoluteSize.Y
+			if banners.Visible then avail = avail - banners.AbsoluteSize.Y - 8 end
+			for _, col in ipairs({ left, right }) do
+				local vis = {}
+				for _, b in ipairs(T.Boxes) do
+					if b.Col == col and b.Frame.Parent and b.Frame.Visible then table.insert(vis, b) end
+				end
+				local n = #vis
+				for _, b in ipairs(vis) do
+					local mh = 0
+					if T.Fill and n > 0 then mh = math.max(0, math.floor((avail - (n - 1) * 8) / n)) end
+					b.Constraint.MinSize = Vector2.new(0, mh)
+				end
+			end
+		end
+		T._Relayout = Relayout
+		Connect(T.Page:GetPropertyChangedSignal("AbsoluteSize"), Relayout)
+
 		local function PickColumn(side)
 			if side == "Right" or side == 2 then return right end
 			if side == "Left" or side == 1 then return left end
@@ -1939,31 +2540,48 @@ function Lumen:CreateWindow(o)
 		end
 
 		local function NewBox(side)
-			return New("Frame", {
-				Size = UDim2.new(1, 0, 0, 0), AutomaticSize = Enum.AutomaticSize.Y, Parent = PickColumn(side),
+			local col = PickColumn(side)
+			local constraint = New("UISizeConstraint", {})
+			local frame = New("Frame", {
+				Size = UDim2.new(1, 0, 0, 0), AutomaticSize = Enum.AutomaticSize.Y, Parent = col,
 				Theme = { BackgroundColor3 = "Group" },
-			}, { Corner(6), Stroke("Border"), Pad(9), List(6) })
+			}, { Corner(7), Stroke("GroupBorder"), Pad(6, 6, 6, 8), List(6), constraint })
+			table.insert(T.Boxes, { Frame = frame, Constraint = constraint, Col = col })
+			Relayout()
+			return frame
 		end
 
+		-- AddGroup("Title", "Left")  or  AddGroup({Title = "Auto Parry", Icon = "command", Side = "Left"})
 		function T:AddGroup(title, side)
+			local icon
+			if type(title) == "table" then title, side, icon = title.Title, title.Side or side, title.Icon end
 			local frame = NewBox(side)
 			if title then
+				local titleRow = New("Frame", {
+					BackgroundTransparency = 1, Size = UDim2.new(1, 0, 0, 20), LayoutOrder = 0, Parent = frame,
+				}, { Pad(6, 0, 0, 0), List(8, Enum.FillDirection.Horizontal, Enum.HorizontalAlignment.Left, Enum.VerticalAlignment.Center) })
+				if icon then Icon(icon, titleRow, 15, "Label").LayoutOrder = 1 end
 				New("TextLabel", {
-					Text = title, Size = UDim2.new(1, 0, 0, 16), Font = Enum.Font.GothamSemibold,
-					TextXAlignment = Enum.TextXAlignment.Left, LayoutOrder = 0, Parent = frame,
+					Text = title, AutomaticSize = Enum.AutomaticSize.X, Size = UDim2.fromOffset(0, 20), LayoutOrder = 2, Parent = titleRow,
 				})
 			end
 			local c = New("Frame", {
 				BackgroundTransparency = 1, Size = UDim2.new(1, 0, 0, 0), AutomaticSize = Enum.AutomaticSize.Y,
 				LayoutOrder = 1, Parent = frame,
-			}, { List(5) })
-			return NewGroupObject(c, frame)
+			}, { Pad(6, 4, 6, 0), List(5) })
+			local g = NewGroupObject(c, frame, W.Id .. "/" .. name .. "/" .. (title or "Group"), T)
+			table.insert(T.Sections, {
+				Get = function() return title or "Group" end,
+				Set = function(v) g:SetVisible(v) end,
+				IsVisible = function() return frame.Visible end,
+			})
+			return g
 		end
 
 		function T:AddTabbox(side)
 			local frame = NewBox(side)
 			local bar = New("Frame", {
-				BackgroundTransparency = 1, Size = UDim2.new(1, 0, 0, 22), LayoutOrder = 0, Parent = frame,
+				BackgroundTransparency = 1, Size = UDim2.new(1, 0, 0, 24), LayoutOrder = 0, Parent = frame,
 			}, { List(3, Enum.FillDirection.Horizontal, Enum.HorizontalAlignment.Left, Enum.VerticalAlignment.Center) })
 			local body = New("Frame", {
 				BackgroundTransparency = 1, Size = UDim2.new(1, 0, 0, 0), AutomaticSize = Enum.AutomaticSize.Y,
@@ -1976,18 +2594,38 @@ function Lumen:CreateWindow(o)
 					sub.Container.Visible = on
 					Tween(sub.Button, 0.12, {
 						BackgroundTransparency = on and 0 or 1,
-						TextColor3 = on and Lumen.Theme.Text or Lumen.Theme.TextDim,
+						TextColor3 = on and Lumen.Theme.AccentText or Lumen.Theme.Label,
 					})
 				end
 			end
+			local function PickActive()
+				if active and not active.Hidden then return end
+				active = nil
+				for _, sub in ipairs(subs) do
+					if not sub.Hidden then active = sub break end
+				end
+			end
 			table.insert(Refreshers, Style)
+			function Box:SetVisible(v)
+				frame.Visible = v
+				Relayout()
+			end
+			table.insert(T.Sections, {
+				Get = function()
+					local names = {}
+					for _, sub in ipairs(subs) do table.insert(names, sub.Name) end
+					return #names > 0 and table.concat(names, "/") or "Tabbox"
+				end,
+				Set = function(v) Box:SetVisible(v) end,
+				IsVisible = function() return frame.Visible end,
+			})
 			function Box:AddTab(tabName)
-				local sub = {}
+				local sub = { Name = tabName }
 				sub.Button = SubTabButton(bar, tabName, #subs + 1)
 				sub.Container = New("Frame", {
 					BackgroundTransparency = 1, Size = UDim2.new(1, 0, 0, 0), AutomaticSize = Enum.AutomaticSize.Y,
 					Visible = false, Parent = body,
-				}, { Pad(0, 2, 0, 0), List(5) })
+				}, { Pad(6, 6, 6, 0), List(5) })
 				table.insert(subs, sub)
 				Connect(sub.Button.MouseButton1Click, function()
 					ClosePopup()
@@ -1996,33 +2634,77 @@ function Lumen:CreateWindow(o)
 				end)
 				if not active then active = sub end
 				Style()
-				return NewGroupObject(sub.Container, frame)
+				local g = NewGroupObject(sub.Container, frame, W.Id .. "/" .. name .. "/" .. tabName, T)
+				function g:SetVisible(v)
+					sub.Hidden = not v
+					sub.Button.Visible = v
+					if not v and active == sub then active = nil end
+					if v and not active then active = sub end
+					PickActive()
+					Style()
+				end
+				function g:Destroy()
+					for i, s in ipairs(subs) do if s == sub then table.remove(subs, i) break end end
+					sub.Button:Destroy()
+					sub.Container:Destroy()
+					if active == sub then active = nil end
+					PickActive()
+					Style()
+				end
+				return g
 			end
 			return Box
 		end
 
 		function T:AddWarning(wo)
 			if type(wo) == "string" then wo = { Text = wo } end
-			local color = Lumen.Theme[wo.Type or "Warning"] or Lumen.Theme.Warning
+			local color = wo.Type and Lumen.Theme[wo.Type] or Lumen.Theme.Text
+			banners.Visible = true
 			local f = New("Frame", {
 				Size = UDim2.new(1, 0, 0, 0), AutomaticSize = Enum.AutomaticSize.Y,
 				LayoutOrder = #banners:GetChildren(), Parent = banners, Theme = { BackgroundColor3 = "Group" },
-			}, { Corner(6), Stroke("Border"), Pad(12, 8, 12, 8), List(2) })
+			}, { Corner(7), Stroke("GroupBorder"), Pad(14, 9, 14, 10), List(2) })
 			local tl = wo.Title and New("TextLabel", {
-				Text = wo.Title, Size = UDim2.new(1, 0, 0, 16), Font = Enum.Font.GothamBold, TextColor3 = color,
+				Text = wo.Title, Size = UDim2.new(1, 0, 0, 16), TextColor3 = color,
 				TextXAlignment = Enum.TextXAlignment.Left, LayoutOrder = 1, Parent = f,
 			})
 			local bl = New("TextLabel", {
 				Text = wo.Text or "", Size = UDim2.new(1, 0, 0, 0), AutomaticSize = Enum.AutomaticSize.Y, TextSize = 11,
-				TextColor3 = Lumen.Theme.TextDim, TextWrapped = true, TextXAlignment = Enum.TextXAlignment.Left,
-				LayoutOrder = 2, Parent = f,
+				TextColor3 = Lumen.Theme.Label:Lerp(Lumen.Theme.Background, 0.12), TextWrapped = true, TextXAlignment = Enum.TextXAlignment.Left,
+				Font = Enum.Font.GothamMedium, LayoutOrder = 2, Parent = f,
 			})
+			Relayout()
 			return {
 				SetText = function(_, t) bl.Text = t end,
 				SetTitle = function(_, t) if tl then tl.Text = t end end,
-				SetVisible = function(_, v) f.Visible = v end,
-				Destroy = function() f:Destroy() end,
+				SetVisible = function(_, v) f.Visible = v Relayout() end,
+				Destroy = function() f:Destroy() Relayout() end,
 			}
+		end
+
+		-- hide / show / remove a whole tab
+		function T:SetVisible(v)
+			T.Hidden = not v
+			T.Button.Visible = v
+			if not v and W.Active == T then
+				W.Active = nil
+				for _, t in ipairs(W.Tabs) do
+					if not t.Hidden then W:SelectTab(t) break end
+				end
+			end
+			if v and not W.Active then W:SelectTab(T) end
+			W:_StyleTabs()
+		end
+		function T:Destroy()
+			for i, t in ipairs(W.Tabs) do if t == T then table.remove(W.Tabs, i) break end end
+			T.Button:Destroy()
+			T.Page:Destroy()
+			if W.Active == T then
+				W.Active = nil
+				for _, t in ipairs(W.Tabs) do
+					if not t.Hidden then W:SelectTab(t) break end
+				end
+			end
 		end
 
 		Connect(T.Button.MouseButton1Click, function() W:SelectTab(T) end)
@@ -2031,9 +2713,10 @@ function Lumen:CreateWindow(o)
 		return T
 	end
 
-	-- Ready-made settings tab: menu, effects, theme editor and configs, all editable from the UI
+	-- Ready-made settings tab: everything adjustable from the UI (menu, effects, layout, theme, configs)
 	function W:AddConfigTab(name)
 		local tab = self:AddTab(name or "Config")
+		tab.Fill = false
 
 		local menu = tab:AddGroup("Menu", "Left")
 		menu:AddLabel("Menu keybind"):AddKeybind({
@@ -2050,6 +2733,15 @@ function Lumen:CreateWindow(o)
 			Callback = function(v) Lumen.ShowNotifications = v end })
 		menu:AddSlider({ Text = "UI scale", Min = 0.7, Max = 1.4, Default = Lumen.Scale, Increment = 0.05, Suffix = "x",
 			Flag = "Lumen_Scale", Callback = function(v) Lumen:SetScale(v) end })
+		Lumen._fontDropdown = menu:AddDropdown({ Text = "Font", Values = { "Inter", "Gotham" }, Default = Lumen.FontName,
+			Callback = function(v)
+				if v == "Inter" and not Lumen._interAsset then
+					Lumen:Notify({ Title = "Font", Content = "Inter needs file support in your executor. Using Gotham.", Type = "Warning" })
+				end
+				if v then Lumen:SetFont(v) end
+			end })
+		menu:AddInput({ Text = "Screen watermark", Placeholder = "text tiled over the screen (empty = off)",
+			Callback = function(v) Lumen:SetScreenWatermark(v) end })
 		menu:AddDivider()
 		menu:AddButton({ Text = "Unload", DoubleClick = true, Callback = function() Lumen:Unload() end })
 
@@ -2064,6 +2756,29 @@ function Lumen:CreateWindow(o)
 			Flag = "Lumen_Dim", Callback = function(v) Lumen:SetBackdrop({ Dim = v / 100 }) end })
 		fx:AddSlider({ Text = "Backdrop blur", Min = 0, Max = 40, Default = Backdrop.Blur,
 			Flag = "Lumen_Blur", Callback = function(v) Lumen:SetBackdrop({ Blur = v }) end })
+
+		-- turn tabs and sections on or off (rebuilt every time this tab is opened)
+		local layout = tab:AddGroup("Layout", "Left")
+		local layoutOpts = {}
+		local function RefreshLayout()
+			for _, op in ipairs(layoutOpts) do op:Destroy() end
+			layoutOpts = {}
+			for _, t in ipairs(W.Tabs) do
+				if t ~= tab then
+					table.insert(layoutOpts, layout:AddToggle({
+						Text = "Tab: " .. t.Name, Default = not t.Hidden, Callback = function(v) t:SetVisible(v) end,
+					}))
+					for _, sec in ipairs(t.Sections) do
+						table.insert(layoutOpts, layout:AddToggle({
+							Text = "   " .. t.Name .. " / " .. sec.Get(), Default = sec.IsVisible(),
+							Callback = function(v) sec.Set(v) end,
+						}))
+					end
+				end
+			end
+		end
+		tab.OnSelect = RefreshLayout
+		RefreshLayout()
 
 		local th = tab:AddGroup("Theme", "Right")
 		local pickers = {}
@@ -2081,7 +2796,8 @@ function Lumen:CreateWindow(o)
 				end
 			end })
 		for _, entry in ipairs({ { "Accent", "Accent" }, { "Background", "Window" }, { "Group", "Panels" },
-			{ "Control", "Controls" }, { "Border", "Borders" }, { "Text", "Text" }, { "TextDim", "Dim text" } }) do
+			{ "Control", "Controls" }, { "Outline", "Outlines" }, { "Border", "Borders" },
+			{ "Text", "Text" }, { "Label", "Labels" }, { "TextDim", "Dim text" } }) do
 			local key, label = entry[1], entry[2]
 			pickers[key] = th:AddLabel(label):AddColorPicker({
 				Default = Lumen.Theme[key], Flag = "Lumen_Theme_" .. key,
@@ -2137,30 +2853,19 @@ function Lumen:CreateWindow(o)
 	end
 
 	table.insert(Lumen.Windows, W)
-
-	-- dock (top-centre icon bar), created once for the first window
-	if o.Dock ~= false and not Lumen._dockInit then
-		Lumen._dockInit = true
-		Lumen:AddDockButton({ Icon = "window", Tooltip = "Toggle menu", Callback = function() W:Toggle() end,
-			Active = function() return W.Visible end })
-		Lumen:AddDockButton({ Icon = "keyboard", Tooltip = "Hotkey list",
-			Callback = function() Lumen:SetHotkeysVisible(not Lumen.ShowHotkeys) end, Active = function() return Lumen.ShowHotkeys end })
-		Lumen:AddDockButton({ Icon = "list", Tooltip = "Watermark",
-			Callback = function() Lumen:SetWatermarkVisible(not Lumen.ShowWatermark) end, Active = function() return Lumen.ShowWatermark end })
-		Lumen:AddDockButton({ Icon = "snow", Tooltip = "Snow",
-			Callback = function() Lumen:SetSnow(not Snow.Enabled) end, Active = function() return Snow.Enabled end })
-	end
+	if o.Dock ~= false then Lumen:_InitDock(W, type(o.Dock) == "table" and o.Dock or nil) end
 
 	-- mobile fallback when the dock is disabled
 	if o.Dock == false and UIS.TouchEnabled and not UIS.KeyboardEnabled and o.MobileButton ~= false then
 		local mb = New("TextButton", {
-			Size = UDim2.fromOffset(44, 44), Position = UDim2.new(0, 14, 0.5, -22), Text = "UI", Font = Enum.Font.GothamBold,
+			Size = UDim2.fromOffset(44, 44), Position = UDim2.new(0, 14, 0.5, -22), Text = "UI",
 			BackgroundTransparency = 0, ZIndex = 20, Parent = Gui, Theme = { BackgroundColor3 = "Group" },
-		}, { Corner(22), Stroke("Accent") })
+		}, { Corner(22), Stroke("Border") })
 		Connect(mb.MouseButton1Click, function() W:Toggle() end)
 	end
 
 	if o.Icon then self:SetIcon(o.Icon) end
+	if o.ScreenWatermark then self:SetScreenWatermark(o.ScreenWatermark) end
 	if o.Backdrop == false then
 		Backdrop.Dim, Backdrop.Blur = 0, 0
 	elseif type(o.Backdrop) == "table" then
@@ -2201,6 +2906,14 @@ Connect(UIS.InputBegan, function(input, gp)
 		if not MouseInside(OpenPopup.Frame) and not MouseInside(OpenPopup.Trigger) then ClosePopup() end
 	end
 
+	-- command palette: Escape / arrows while open, Ctrl+K to toggle
+	if Lumen:_PaletteKey(input.KeyCode) then return end
+	if input.UserInputType == Enum.UserInputType.Keyboard and input.KeyCode == Enum.KeyCode.K
+		and (UIS:IsKeyDown(Enum.KeyCode.LeftControl) or UIS:IsKeyDown(Enum.KeyCode.RightControl)) then
+		Lumen:TogglePalette()
+		return
+	end
+
 	if UIS:GetFocusedTextBox() then return end
 	local mouseBtn = input.UserInputType == Enum.UserInputType.MouseButton2 or input.UserInputType == Enum.UserInputType.MouseButton3
 	if mouseBtn and gp then return end
@@ -2209,7 +2922,7 @@ Connect(UIS.InputBegan, function(input, gp)
 		if Matches(input, w.MenuKey) then w:Toggle() end
 	end
 	for _, K in ipairs(Keybinds) do
-		if K.Value and Matches(input, K.Value) then
+		if K.Value and K.Mode ~= "Always" and Matches(input, K.Value) then
 			if K.Mode == "Press" then
 				Fire(K, true)
 			elseif K.Mode == "Hold" then
@@ -2239,6 +2952,13 @@ function Lumen:Unload()
 	if BlurEffect then pcall(function() BlurEffect:Destroy() end) end
 	Gui:Destroy()
 	if env.LumenUI == self then env.LumenUI = nil end
+end
+
+-- Inter font: downloaded once into the Lumen folder (needs writefile + getcustomasset), otherwise Gotham stays.
+if not env.LumenNoInter then
+	task.spawn(function()
+		if Lumen:_LoadInter() and not Lumen.Unloaded then Lumen:SetFont("Inter") end
+	end)
 end
 
 return Lumen
