@@ -1,4 +1,4 @@
-# Lumen v0.0.2-stable - API Reference
+# Lumen v0.0.3-stable - API Reference
 
 ## Loading
 
@@ -13,7 +13,7 @@ local Lumen = loadstring(game:HttpGet("https://raw.githubusercontent.com/Irakli1
 
 -- sturdiest: GitHub, then the jsDelivr mirror, then a cached copy on disk; returns nil + error instead of crashing
 local Lumen, err = loadstring(game:HttpGet("https://raw.githubusercontent.com/Irakli17/Ui-Library-Test/main/Loader.lua"))()({
-  Id = "MyHub", Version = "main",   -- or a tag like "v0.0.2-stable" to pin a release
+  Id = "MyHub", Version = "main",   -- or a tag like "v0.0.3-stable" to pin a release
 })
 if not Lumen then return warn(err) end
 ```
@@ -32,6 +32,9 @@ if not Lumen then return warn(err) end
 | `NotifyErrors` | `true` | Show a red notification when one of your callbacks errors. |
 | `Hints` | `true` | Hover explanations. |
 | `NoInter` | `false` | Skip the one-time Inter font download. |
+| `NoImages` | `false` | Skip the high-res icon download and keep the vector icons. |
+| `AssetBase` | this repo | URL folder holding the icon PNGs (`<AssetBase>/<name>.png`), tried before GitHub and jsDelivr. |
+| `Icons` | `{}` | Your own images per icon name, e.g. `{gear = "rbxassetid://123"}`. Also settable later via `Lumen.IconAssets`. |
 | `Parent` | auto | Where the ScreenGui goes. By default: `gethui()`, then CoreGui, then PlayerGui. |
 | `DisplayOrder`, `Name` | `10000`, `"LumenUI"` | ScreenGui properties. |
 
@@ -155,7 +158,16 @@ A dropdown of everyone in the server that updates itself as players join and lea
 ### AddViewport
 `AddViewport({Height, Object, Character, Rotate, Color, ESP})`. A 3D preview. No options shows a gray block, `Character = true` shows a clone of your avatar, `Object` takes a Model or BasePart. **Drag with the mouse to orbit in any direction; when you let go it eases back to its default tilt and keeps auto-rotating.** The mouse wheel zooms. `Rotate = false` turns auto-rotation off (dragging still works). `:SetObject(inst)` swaps the model.
 
-**ESP preview.** `ESP = {Box = "Full" | "Corner", Name = true | "text", Health = 0-1, Distance = true, DistanceText, Color}` draws an ESP overlay that tracks the model's real on-screen bounds as it rotates: a box (full outline or corner brackets), the name above, a health bar on the left (green to red) and distance below. Update it live with `viewport:SetESP({Health = 0.3, Name = "Enemy", DistanceText = "42m"})`.
+**ESP preview.** `ESP = {Box = "Full" | "Corner", Name = true | "text", Health = 0-1, Distance = true, DistanceText, Color}` draws an ESP overlay that tracks the model's real on-screen bounds as it rotates: a box (full outline or corner brackets), the name above, a health bar on the left (green to red) and distance below. Update it live with `viewport:SetESP({Health = 0.3, Name = "Enemy", DistanceText = "42m", Color = Color3})` (`Color` recolours the box, name and distance smoothly).
+
+**Highlight.** Roblox `Highlight` instances don't render inside ViewportFrames, so Lumen draws its own: a tinted fill over the model plus an outline traced around its silhouette. Pass `Highlight = true` or a table, and change it live:
+
+```lua
+local v = Group:AddViewport({Character = true, Highlight = {Enabled = true, Fill = Color3.fromRGB(255, 70, 110), FillTransparency = 0.55,
+  Outline = Color3.new(1, 1, 1), OutlineTransparency = 0, Thickness = 2}})
+v:SetHighlight({Enabled = false})          -- fades out
+v:SetHighlight({Outline = Color3.new(0, 1, 0), Thickness = 3})
+```
 
 ### AddImageGrid
 `AddImageGrid({Items = {{Image, Name}}, Columns = 4, CellHeight = 64, Flag, Callback(item, index)})`. Click to select (accent outline). `:Set(i)`, `:SetItems(list)`.
@@ -184,13 +196,13 @@ p:AddLabel("Any element works here")
 p:SetVisible(false); p:Toggle(); p:Destroy()
 ```
 
-`Height = 0` grows with content. `Lumen:CreateCredits({Title, Subtitle, Entries = {{Name, Role, RoleColor, Description}}, Height, Dock})` and `panel:AddEntry({...})`.
+`Height = 0` grows with content. `Visible = false` creates the panel hidden (it fades in the first time it is shown); use it for extra windows so a script's first run shows only the main UI. This works for `CreateCredits` and `CreateKeySystem` too. `Lumen:CreateCredits({Title, Subtitle, Entries = {{Name, Role, RoleColor, Description}}, Height, Dock})` and `panel:AddEntry({...})`.
 
 `Lumen:CreateKeySystem({Title, Placeholder, Validate, OnSuccess, GetKey, GetKeyLink, DiscordLink, Note})`. `Validate(key)` is your own function and must return `true`, or `false, "message"`. `DiscordLink` adds the Discord icon (click copies the link).
 
 ## Dock
 
-The icon bar at the top centre. The `window`, `scan`, `keyboard`, `command` and `user` icons are traced pixel-for-pixel from the reference, so a default setup (menu, a preview panel, hotkeys, palette, a credits panel) looks exactly like it. Built-in buttons: menu, hotkey list and command palette are shown by default; a particles button also exists but starts hidden (there is no watermark button; the watermark is toggled in the config tab). Choose which built-ins are shown with `Dock = {"menu", "hotkeys", "palette", "particles"}` in `CreateWindow`, or `Dock = false` for none. Every dock button can also be switched on or off from the config tab's Layout group, or with `Lumen:SetDockButtonVisible(name, bool)` (name = its tooltip). Active buttons are highlighted. It stays visible when the window is hidden, so it doubles as the mobile toggle. Drag it to move it.
+The icon bar at the top centre. Icons are high-resolution images (see **Icons** below), so a default setup (menu, a preview panel, hotkeys, palette, a credits panel) stays crisp at any UI scale. Built-in buttons: menu, hotkey list and command palette are shown by default; a particles button also exists but starts hidden (there is no watermark button; the watermark is toggled in the config tab). Choose which built-ins are shown with `Dock = {"menu", "hotkeys", "palette", "particles"}` in `CreateWindow`, or `Dock = false` for none. Every dock button can also be switched on or off from the config tab's Layout group, or with `Lumen:SetDockButtonVisible(name, bool)` (name = its tooltip). Active buttons are highlighted. It stays visible when the window is hidden, so it doubles as the mobile toggle. Drag it to move it.
 
 ```lua
 Lumen:AddDockButton({Icon = "gear", Tooltip = "Settings", Order = 50, Callback = function() end, Active = function() return true end})
@@ -201,7 +213,7 @@ Lumen:SetDockVisible(false)
 
 ## Hover explanations
 
-Rest the mouse on anything with a `Description` (or `Tooltip`) and, after a short pause, a card fades and lifts in under it with the element's name and the explanation. Moving to another explained element makes the card glide over instead of popping again; leaving fades it out. Every setting in the config tab has one.
+Rest the mouse on anything with a `Description` (or `Tooltip`) and, after a short pause, a card fades and slides in **beside the window, panel or dock it belongs to**, never on top of what you are about to click. If there is no room on either side it sits beside the element, then below it, always clear of the element itself. Moving to another explained element makes the card glide over instead of popping again; leaving fades it out. Every setting in the config tab has one.
 
 ```lua
 Group:AddToggle({Text = "Fullbright", Description = "Lights the whole map evenly so dark areas are visible."})
@@ -209,6 +221,16 @@ someElement:SetDescription("Changed text")
 Lumen.HintDelay = 0.35   -- seconds before it appears
 Lumen.Hints = false      -- turn them all off (also in the config tab)
 ```
+
+## Icons
+
+The built-in icons (`window, scan, keyboard, command, user, bell, check, cross, warn, info, discord, gear, snow, list, heart, chevron, search, eye, sparkle, lock, palette`) are 96 px white PNGs tinted to the theme. On load Lumen draws crisp vector versions immediately, downloads the PNGs in the background (`AssetBase`, then GitHub, then jsDelivr), caches them in `<Folder>/icons/v1/` and fades each icon over to its image. Without `writefile`/`getcustomasset`, or with `NoImages = true`, the vector icons stay.
+
+To use your own: `Icons = {gear = "rbxassetid://..."}` in the load options, `Lumen.IconAssets.gear = "..."` before building the UI, or `Lumen:RegisterIcon(name, fn)` for a fully custom one. To change or add PNGs, edit and run `tools/build_icons.py` (Python with `cairosvg` and `Pillow`), then upload `assets/icons/` to your repo.
+
+## Dropdowns
+
+Opening a dropdown unfolds the list and the rows cascade in. Hovering a row (about to pick) gives it a soft wash, grows a short accent bar on its edge and nudges the label in; pressing squeezes the row slightly; picking it flashes the accent, settles into the selected fill with a full-height bar, pops a check mark in and slides the new value up into the field. The chevron turns as the list opens and closes.
 
 ## Confirmation dialog
 
@@ -274,7 +296,7 @@ Lumen:SetSnowOptions({Count = 50})
 Lumen:SetBackdrop({Dim = 0.5, Blur = 12})
 ```
 
-Kinds: `Theme` (whatever the active theme ships with), `Snow`, `Bubbles`, `Petals`, `Embers`, `Fireflies`, `Stars`, `Glyphs`, `Rain`, `Confetti`, `Sparkles`, `Pixels`, `Starfield` (with shooting stars), `Crystals`, `Neon`. Switching kind, amount or theme **crossfades** the old particles out and the new ones in. The whole backdrop fades in when a window opens and out when the last one closes.
+Kinds: `Theme` (whatever the active theme ships with), `Snow`, `Bubbles`, `Petals`, `Embers`, `Fireflies`, `Stars`, `Glyphs`, `Rain`, `Confetti`, `Sparkles`, `Pixels`, `Starfield` (with shooting stars), `Crystals`, `Neon`, `Drafting` (pencil marks), `FilmGrain`, `Prisms`, `Sparks` (arcing under gravity), `Bokeh`, `Bats` (flapping), `Leaves`. Switching kind, amount or theme **crossfades** the old particles out and the new ones in. The whole backdrop fades in when a window opens and out when the last one closes.
 
 ## Themes, fonts and scale
 
@@ -295,6 +317,15 @@ Every preset changes the **shape and feel** of every element, not just the colou
 | **Arcade** | square | Press Start (pixel) | CRT scanlines, **thick yellow border** | solid | Stepping pixels |
 | **Cosmos** | round | Titillium Web | violet nebula band, **slowly turning aurora border** | violet-to-cyan gradient | Stars + shooting stars |
 | **Storm** | reference | Oswald (condensed) | steel top light | solid | Slanted rain + distant lightning |
+| **Blueprint** | sharp | Patrick Hand | **drafting grid** over the window, white inner line | solid | Pencil marks |
+| **Noir** | sharp, no glow | Special Elite (typewriter) | **vignette**, a single red top line | solid red | Film grain |
+| **Prism** | round | Ubuntu | aurora band, **8-colour rainbow border** | **accent cycles through the spectrum** | Floating prisms |
+| **Hazard** | square | Sarpanch | **static yellow/black striped border** at 45° | solid | Sparks arcing under gravity |
+| **Glass** | very round | Nunito | **translucent, blurred surfaces**, white inner line | gradient | Soft bokeh |
+| **Haunted** | round | Creepster | green ground glow, vignette | orange-to-purple gradient | Flapping bats |
+| **Parchment** | reference | Fondamento | **light theme**: paper, ink-brown inner line, vignette | solid | Falling leaves |
+
+Lavender is the default and is shown as **"Lavender (Default)"** in the config tab; `Lumen:ApplyPreset("Lavender (Default)")` also works.
 
 ```lua
 Lumen:ApplyPreset("Cosmos")
@@ -305,7 +336,7 @@ Lumen:SetScale(1.15)           -- windows, panels and popups (0.6 - 1.6)
 Lumen:SetFont("Michroma", 0.35) -- any Roblox font name, "Inter", "Gotham" or "Mono"; optional fade
 ```
 
-**Style keys** (all optional): `Radius` (corner scale), `Glow` (0 = off), `Font`, `TextScale`, `Particles`, `ParticleColor`, `Tint` + `TintPlace` (`"Top"`, `"Bottom"`, `"Aurora"`) + `TintAmount`, `TopLine = {c1, c2}`, `Scanlines`, `Aura = {c1, c2, ...}` + `AuraSpeed` + `AuraThickness`, `InnerLine = Color3`, `AccentGradient = {c1, c2}`, `Lightning`.
+**Style keys** (all optional): `Radius` (corner scale), `Glow` (0 = off), `Font`, `TextScale`, `Particles`, `ParticleColor`, `Tint` + `TintPlace` (`"Top"`, `"Bottom"`, `"Aurora"`) + `TintAmount`, `TopLine = {c1, c2}`, `Scanlines`, `Aura = {c1, c2, ...}` + `AuraSpeed` + `AuraThickness`, `InnerLine = Color3`, `AccentGradient = {c1, c2}`, `Lightning`, `Grid = true` + `GridColor`, `Vignette = 0-1`, `SurfaceTransparency = 0-1`, `Blur` (world blur behind the UI), `AccentCycle = true`, `AuraHard = true` (hard colour bands instead of a smooth gradient), `AuraRotation` (border angle when `AuraSpeed = 0`).
 
 **Your own theme:**
 
@@ -328,7 +359,7 @@ Theme keys: `Background, Group, GroupBorder, Control, ControlHover, Border, Outl
 - **Menu**: menu key, dock, watermark, hotkey list, notifications, notification position, hover explanations, script error alerts, UI scale, font, screen watermark, unload
 - **Effects**: particles on/off, particle style, amount, speed, backdrop dim and blur
 - **HUD Positions**: return-to-place on/off, delay, which pieces (dock, hotkey list, watermark), Return now, Set as home
-- **Layout**: a toggle for every tab, section, floating panel and dock button
+- **Layout**: dropdowns (Tabs, Sections, Panels, Dock buttons); tick or untick entries to show or hide them
 - **Theme**: preset dropdown with a one-line description of each look, theme fade time, a colour picker for each theme colour, reset button
 - **Tests**: Success, Warning, Error and Info notifications, Loading -> Done, plain, with action buttons, a deliberate script error, and a hold-to-confirm dialog
 - **Configs**: save, load, delete, autoload
@@ -431,6 +462,18 @@ end)
 `Lumen:Unload()` runs `Events.Unloading` handlers, then removes everything and disconnects all events. `Lumen.OnUnload = function() end` still works. Read your own state from `Lumen.Flags.YourFlag`.
 
 ## Changelog
+
+**v0.0.3-stable**
+- High-resolution icons: 96 px PNGs tinted to the theme, cached on disk, with vector fallback (`AssetBase`, `Icons`, `NoImages`; `tools/build_icons.py` to rebuild)
+- Seven new themes (Blueprint, Noir, Prism, Hazard, Glass, Haunted, Parchment) and seven new particle styles, with new Style keys: `Grid`, `Vignette`, `SurfaceTransparency`, `Blur`, `AccentCycle`, `AuraHard`, `AuraRotation`
+- Fixed: some themes showed an empty window (overlay frames fed back into auto-sized panels and the dock). Borders now animate on the surface's own stroke
+- Hover hints sit beside the window, panel or dock instead of covering the element under the mouse
+- Dropdowns: unfold and cascade, separate hover (about to pick) and press feedback, accent fill and check mark on pick, value slides in, turning chevron
+- Viewport `Highlight` (fill + silhouette outline) and `SetHighlight`; `SetESP({Color})` recolours the ESP overlay
+- Config tab: Layout organised into dropdowns; the default preset is labelled "Lavender (Default)"
+- Tab highlight pill: accent border, top sheen, underline and soft glow; hover ghost on other tabs
+- Panels accept `Visible = false` (CreatePanel, CreateCredits, CreateKeySystem) and fade in when shown
+- Example: only the main window shows on first run, Lighting moved to World, highlight controls, "Cool Toggle With Colors" explained and wired to the preview
 
 **v0.0.2-stable**
 - Integration: load options as a loadstring argument, per-script instances (`Id`, `Reuse`), `Loader.lua` with a CDN mirror and offline cache, ModuleScript/Studio support, `Parent`/`DisplayOrder` options

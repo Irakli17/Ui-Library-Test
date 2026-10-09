@@ -7,7 +7,9 @@
 local Lumen = loadstring(game:HttpGet("https://raw.githubusercontent.com/Irakli17/Ui-Library-Test/main/Lumen.lua"))({
 	Id = "LumenExample",
 	Folder = "LumenExample",
-	-- Theme = "Cosmos",          -- start in any theme: Lavender, Ocean, Rose, Emerald, Sunset, Mono, Synthwave, Frost, Royal, Candy, Arcade, Cosmos, Storm
+	-- Theme = "Cosmos",          -- start in any theme: Lavender (default), Ocean, Rose, Emerald, Sunset, Mono, Synthwave, Frost, Royal,
+	--                               Candy, Arcade, Cosmos, Storm, Blueprint, Noir, Prism, Hazard, Glass, Haunted, Parchment
+	-- AssetBase = "https://your.host/icons/",   -- optional: where the high-res icon PNGs live (defaults to this repo)
 })
 
 local Players = game:GetService("Players")
@@ -19,7 +21,7 @@ local LocalPlayer = Players.LocalPlayer
 local Window = Lumen:CreateWindow({
 	Title = "Lumen Interface Suite",
 	Tag = "Pro",                         -- green pill
-	Version = "v0.0.2",                  -- red pill
+	Version = "v0.0.3",                  -- red pill
 	Subtitle = "Example Game",
 	Footer = "discord.gg/yourserver",
 	WatermarkTitle = "Lumen V2",
@@ -34,6 +36,17 @@ Lumen.Events.Unloading:Connect(function()
 	for _, fn in ipairs(Restore) do pcall(fn) end
 end)
 
+-- The ESP Preview panel is created up front so controls in any tab can drive it.
+-- Visible = false: only the main window shows on first run. Open it from the dock (scan icon) or the Visuals tab.
+local espPanel = Lumen:CreatePanel({
+	Title = "ESP Preview", Width = 250, Position = UDim2.new(1, -790, 0.5, -90), Visible = false,
+	Dock = { Icon = "scan", Tooltip = "ESP Preview", Order = 20 },
+})
+local esp = espPanel:AddViewport({ Height = 320, Character = true, Color = Color3.fromRGB(58, 58, 62),
+	ESP = { Box = "Corner", Name = true, Health = 0.85, Distance = true },
+	-- a Roblox-style Highlight: tinted fill plus an outline around the character's silhouette
+	Highlight = { Enabled = false, Fill = Color3.fromRGB(158, 224, 151), FillTransparency = 0.55, Outline = Color3.fromRGB(120, 230, 170), Thickness = 2 } })
+
 ------------------------------------------------------------------ Combat (the reference layout)
 local Combat = Window:AddTab("Combat")
 Combat:AddWarning({ Title = "PATCHED!!!", Text = "example warning for a tab" })
@@ -47,9 +60,13 @@ Aimbot:AddToggle({ Text = "Cool Selected Toggle", Default = true })
 Aimbot:AddToggle({ Text = "Aimbot", Disabled = true, Description = "Disabled elements are dimmed and can't be clicked." })
 Aimbot:AddToggle({ Text = "Cool Toggle" }):AddKeybind({ Default = Enum.KeyCode.Insert, Mode = "Toggle", Name = "Cool Toggle" })
 Aimbot:AddToggle({ Text = "Cool Toggle With a Tooltip", Tooltip = "Hover the ? chip to see this" })
-local colors = Aimbot:AddToggle({ Text = "Cool Toggle With Colors", Flag = "CoolColors" })
-colors:AddColorPicker({ Default = Color3.fromRGB(158, 224, 151), Flag = "ColorA" })
-colors:AddColorPicker({ Default = Color3.fromRGB(120, 230, 170), Flag = "ColorB" })
+-- A toggle with colour pickers attached: the swatches on the right open a picker. In this example it
+-- switches on the character highlight in the ESP Preview; swatch 1 is the fill, swatch 2 the outline.
+local colors = Aimbot:AddToggle({ Text = "Cool Toggle With Colors", Flag = "CoolColors",
+	Description = "A toggle with colour swatches attached. Click a swatch to pick a colour. Here it turns on the character highlight in the ESP Preview: the first swatch is the fill, the second the outline.",
+	Callback = function(v) Lumen:SetFlag("EspHighlight", v) end })
+colors:AddColorPicker({ Default = Color3.fromRGB(158, 224, 151), Flag = "ColorA", Callback = function(c) esp:SetHighlight({ Fill = c }) end })
+colors:AddColorPicker({ Default = Color3.fromRGB(120, 230, 170), Flag = "ColorB", Callback = function(c) esp:SetHighlight({ Outline = c }) end })
 Aimbot:AddToggle({ Text = "Risky Toggle", Risky = true, Description = "Risky = true tints the label red, for features users should think twice about." })
 Aimbot:AddSlider({ Text = "Cool Slider", Min = 0, Max = 300, Default = 300, Flag = "CoolSlider", Description = "Drag it, or click the number to type an exact value." })
 Aimbot:AddDropdown({ Text = "Cool Dropdown", Values = { "One", "Two", "Three" }, Flag = "CoolDrop" })
@@ -70,7 +87,13 @@ Quick:AddLabel("Always on"):AddKeybind({ Mode = "Always", Name = "Always Active"
 local RightBox = Combat:AddTabbox("Right")
 local Silent, Range, Pred2 = RightBox:AddTab("Silent Aim"), RightBox:AddTab("FOV"), RightBox:AddTab("Prediction")
 Silent:AddToggle({ Text = "Silent Aim", Flag = "Silent", Disabled = true })
-Silent:AddToggle({ Text = "Cool Toggle With Colors" }):AddColorPicker({ Default = Color3.fromRGB(255, 170, 255) })
+Silent:AddToggle({ Text = "Cool Toggle With Colors", Flag = "EspTint",
+	Description = "Same idea: a toggle with a colour swatch. Turn it on to colour the ESP box, name and distance in the ESP Preview with the swatch colour.",
+	Callback = function(v)
+		esp:SetESP({ Color = v and (Lumen.Flags.EspTintColor or Color3.fromRGB(255, 170, 255)) or Color3.new(1, 1, 1) })
+		if v then espPanel:SetVisible(true) end
+	end }):AddColorPicker({ Default = Color3.fromRGB(255, 170, 255), Flag = "EspTintColor",
+	Callback = function(c) if Lumen.Flags.EspTint then esp:SetESP({ Color = c }) end end })
 Silent:AddLabel("I'm a basic label")
 Silent:AddSlider({ Text = "Cool Slider", Min = 0, Max = 8000, Default = 8000, Suffix = " km/100", Increment = 10, Flag = "Speed" })
 Silent:AddLabel("Label with text in it so coolLabel with text in it so coolLabel with text in it so coolLabel with text in it so cool")
@@ -106,18 +129,13 @@ Tests:AddButton({
 	Callback = function() Lumen:Notify({ Title = "Reset", Content = "Everything was reset.", Type = "Success" }) end,
 })
 
------------------------------------------------------------------- Visuals: ESP preview controls, camera, fullbright
+------------------------------------------------------------------ Visuals: ESP preview, highlight, panels, camera
 local Visuals = Window:AddTab("Visuals")
-local espPanel = Lumen:CreatePanel({
-	Title = "ESP Preview", Width = 250, Position = UDim2.new(1, -790, 0.5, -90),
-	Dock = { Icon = "scan", Tooltip = "ESP Preview", Order = 20 },
-})
-local esp = espPanel:AddViewport({ Height = 320, Character = true, Color = Color3.fromRGB(58, 58, 62),
-	ESP = { Box = "Corner", Name = true, Health = 0.85, Distance = true } })
 
 local EspGroup = Visuals:AddGroup({ Title = "ESP Preview", Icon = "scan", Side = "Left" })
 EspGroup:AddParagraph({ Content = "These controls drive the ESP Preview panel live, so you can see how the overlay looks before using it." })
-EspGroup:AddToggle({ Text = "Show preview panel", Default = true, Callback = function(v) espPanel:SetVisible(v) end })
+local showPanel = EspGroup:AddToggle({ Text = "Show preview panel", Description = "Opens the floating ESP Preview. The scan icon in the dock does the same.",
+	Callback = function(v) espPanel:SetVisible(v) end })
 EspGroup:AddInput({ Text = "Name tag", Default = LocalPlayer and LocalPlayer.DisplayName or "Player", Realtime = true,
 	Callback = function(v) esp:SetESP({ Name = v ~= "" and v or " " }) end })
 EspGroup:AddSlider({ Text = "Health", Min = 0, Max = 100, Default = 85, Suffix = "%",
@@ -125,6 +143,28 @@ EspGroup:AddSlider({ Text = "Health", Min = 0, Max = 100, Default = 85, Suffix =
 	Callback = function(v) esp:SetESP({ Health = v / 100 }) end })
 EspGroup:AddSlider({ Text = "Distance", Min = 0, Max = 500, Default = 42, Suffix = " studs",
 	Callback = function(v) esp:SetESP({ DistanceText = v .. " studs" }) end })
+
+local HighlightGroup = Visuals:AddGroup({ Title = "Highlight", Icon = "eye", Side = "Left" })
+HighlightGroup:AddToggle({ Text = "Character highlight", Flag = "EspHighlight",
+	Description = "Outlines and tints the character in the ESP Preview, like Roblox's Highlight instance.",
+	Callback = function(v)
+		esp:SetHighlight({ Enabled = v })
+		if v then espPanel:SetVisible(true) showPanel:Set(true) end
+	end })
+	:AddColorPicker({ Default = Color3.fromRGB(158, 224, 151), Flag = "HighlightFill", Callback = function(c) esp:SetHighlight({ Fill = c }) end })
+HighlightGroup:AddLabel("Outline colour"):AddColorPicker({ Default = Color3.fromRGB(120, 230, 170), Flag = "HighlightOutline",
+	Callback = function(c) esp:SetHighlight({ Outline = c }) end })
+HighlightGroup:AddSlider({ Text = "Fill opacity", Min = 0, Max = 100, Default = 45, Suffix = "%",
+	Description = "How strongly the fill colour covers the character. 0% shows only the outline.",
+	Callback = function(v) esp:SetHighlight({ FillTransparency = 1 - v / 100 }) end })
+HighlightGroup:AddSlider({ Text = "Outline thickness", Min = 1, Max = 4, Default = 2, Suffix = " px",
+	Callback = function(v) esp:SetHighlight({ Thickness = v }) end })
+
+local skins -- the Skin Changer panel, created at the bottom
+local PanelsGroup = Visuals:AddGroup({ Title = "Panels", Icon = "window", Side = "Right" })
+PanelsGroup:AddParagraph({ Content = "Extra floating windows stay hidden on first run. Open them here, from the dock, or from Config > Layout." })
+PanelsGroup:AddButton({ Text = "Skin Changer", Callback = function() if skins then skins:Toggle() end end })
+	:AddSubButton({ Text = "ESP Preview", Callback = function() showPanel:Set(not espPanel.Frame.Visible) end })
 
 local CameraGroup = Visuals:AddGroup({ Title = "Camera", Side = "Right" })
 local camera = workspace.CurrentCamera
@@ -138,7 +178,9 @@ CameraGroup:AddButton({ Text = "Reset field of view", Callback = function()
 	Lumen:SetFlag("Fov", baseFov)
 end })
 
-local LightGroup = Visuals:AddGroup({ Title = "Lighting", Side = "Right" })
+------------------------------------------------------------------ World: lighting, time of day, fog
+local World = Window:AddTab("World")
+local LightGroup = World:AddGroup({ Title = "Lighting", Icon = "sparkle", Side = "Left" })
 local saved = {
 	Brightness = Lighting.Brightness, Ambient = Lighting.Ambient, OutdoorAmbient = Lighting.OutdoorAmbient,
 	ClockTime = Lighting.ClockTime, FogEnd = Lighting.FogEnd, GlobalShadows = Lighting.GlobalShadows,
@@ -158,8 +200,6 @@ LightGroup:AddToggle({ Text = "Fullbright", Flag = "Fullbright",
 		end
 	end })
 
------------------------------------------------------------------- World: time of day, fog
-local World = Window:AddTab("World")
 local TimeGroup = World:AddGroup({ Title = "Time", Side = "Left" })
 local lockTime = false
 TimeGroup:AddSlider({ Text = "Time of day", Min = 0, Max = 24, Increment = 0.25, Default = saved.ClockTime or 14, Suffix = "h", Flag = "ClockTime",
@@ -309,14 +349,17 @@ About:AddGroup("Contributors", "Right"):AddCredits({
 Window:AddConfigTab("Config")   -- menu, effects, layout toggles, theme editor, tests, configs: all adjustable in the UI
 
 ------------------------------------------------------------ Floating panels from the reference
-local skins = Lumen:CreatePanel({ Title = "Skin Changer", Width = 440, Position = UDim2.new(1, -490, 0, 96) })
+-- Every extra window starts hidden (Visible = false) so first run shows only the main UI.
+skins = Lumen:CreatePanel({ Title = "Skin Changer", Width = 440, Position = UDim2.new(1, -490, 0, 96), Visible = false,
+	Dock = { Icon = "palette", Tooltip = "Skin Changer", Order = 30 } })
 local items = {}
 for i = 1, 12 do
-	items[i] = { Image = "rbxthumb://type=AvatarHeadShot&id=" .. i .. "&w=150&h=150" }
+	items[i] = { Image = "rbxthumb://type=AvatarHeadShot&id=" .. i .. "&w=420&h=420" }
 end
 skins:AddImageGrid({ Items = items, Columns = 4, CellHeight = 82, Callback = function() Lumen:Notify("Skin selected") end })
 
-Lumen:CreateKeySystem({
+local keySystem = Lumen:CreateKeySystem({
+	Visible = false,
 	Title = "Key System",
 	Note = "Get your key from our Discord",
 	Placeholder = "Enter your key...",
@@ -333,6 +376,7 @@ Lumen:CreateCredits({
 	Position = UDim2.new(1, -400, 0.5, -10),
 	Height = 420,
 	Dock = { Icon = "user", Tooltip = "Credits", Order = 50 },
+	Visible = false,
 	Entries = {
 		{ Name = "@developer", Role = "Owner/Developer", RoleColor = Color3.fromRGB(80, 159, 119), Description = "Founder and developer." },
 		{ Name = "@tester", Role = "Owner/Tester", RoleColor = Color3.fromRGB(168, 128, 82), Description = "Co-founder." },
@@ -341,8 +385,9 @@ Lumen:CreateCredits({
 	},
 })
 
-Lumen:Notify("test notif")
-Lumen:Notify("test notif")
+-- About tab: open the demo windows
+About:AddGroup("Demos", "Left"):AddButton({ Text = "Key System demo", Description = "Opens the example key prompt. The valid key is my-secret-key.",
+	Callback = function() keySystem:Toggle() end })
 Lumen:Notify({ Title = "Loaded", Content = "Lumen " .. Lumen.Version .. " is ready. RightShift hides the menu, Ctrl+K searches.", Type = "Success" })
 
 Lumen:LoadAutoload()

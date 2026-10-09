@@ -1,7 +1,7 @@
 --!nocheck
 --!nolint
 --[[
-	Lumen UI Library  v0.0.2-stable
+	Lumen UI Library  v0.0.3-stable
 	Single file, no dependencies, loadstring-ready. Also works as a ModuleScript (require) in Studio.
 
 	local Lumen = loadstring(game:HttpGet("https://raw.githubusercontent.com/Irakli17/Ui-Library-Test/main/Lumen.lua"))()
@@ -50,7 +50,7 @@ local Lighting = Service("Lighting")
 local TextService = Service("TextService")
 
 local Lumen = {
-	Version = "v0.0.2-stable",
+	Version = "v0.0.3-stable",
 	Id = InstanceId,
 	LoadOptions = LoadOptions,
 	NotifyErrors = LoadOptions.NotifyErrors ~= false,   -- a crashing callback shows a red notification
@@ -135,6 +135,34 @@ local Lumen = {
 		-- slate and steel, condensed type, slanted rain and distant lightning
 		Storm = { Accent = Color3.fromRGB(120, 180, 255), Background = Color3.fromRGB(13, 15, 19), Group = Color3.fromRGB(18, 21, 26), GroupBorder = Color3.fromRGB(28, 32, 40), Control = Color3.fromRGB(24, 28, 35), ControlHover = Color3.fromRGB(34, 39, 48), Border = Color3.fromRGB(62, 72, 88), Outline = Color3.fromRGB(42, 48, 60), Text = Color3.fromRGB(226, 232, 242), Label = Color3.fromRGB(200, 208, 222), TextDim = Color3.fromRGB(140, 150, 168), TextMuted = Color3.fromRGB(104, 112, 128),
 			Style = { Radius = 0.9, Glow = 1.25, Font = "Oswald", TextScale = 1.05, Particles = "Rain", ParticleColor = Color3.fromRGB(170, 200, 240), Tint = Color3.fromRGB(90, 120, 170), TintPlace = "Top", TintAmount = 0.16, TopLine = { Color3.fromRGB(200, 225, 255), Color3.fromRGB(120, 180, 255) }, Lightning = true } },
+		-- drafting paper: navy blue, a white grid, a ruled double border, handwritten labels and drafting marks
+		Blueprint = { Accent = Color3.fromRGB(225, 238, 255), Background = Color3.fromRGB(18, 48, 92), Group = Color3.fromRGB(22, 56, 104), GroupBorder = Color3.fromRGB(52, 90, 140), Control = Color3.fromRGB(28, 64, 116), ControlHover = Color3.fromRGB(40, 80, 136), Border = Color3.fromRGB(120, 160, 210), Outline = Color3.fromRGB(70, 110, 165), Text = Color3.fromRGB(240, 246, 255), Label = Color3.fromRGB(214, 228, 248), TextDim = Color3.fromRGB(150, 180, 220), TextMuted = Color3.fromRGB(115, 145, 190),
+			Style = { Radius = 0.3, Glow = 0.35, Font = "PatrickHand", TextScale = 1.15, Particles = "Drafting", ParticleColor = Color3.fromRGB(210, 230, 255), Grid = true, GridColor = Color3.fromRGB(220, 235, 255), InnerLine = Color3.fromRGB(200, 225, 255) } },
+		-- film noir: black, white and one red, typewriter type, a dark vignette and flickering film grain
+		Noir = { Accent = Color3.fromRGB(214, 40, 52), Background = Color3.fromRGB(11, 11, 11), Group = Color3.fromRGB(17, 17, 17), GroupBorder = Color3.fromRGB(30, 30, 30), Control = Color3.fromRGB(24, 24, 24), ControlHover = Color3.fromRGB(36, 36, 36), Border = Color3.fromRGB(70, 70, 70), Outline = Color3.fromRGB(44, 44, 44), Text = Color3.fromRGB(236, 236, 236), Label = Color3.fromRGB(205, 205, 205), TextDim = Color3.fromRGB(140, 140, 140), TextMuted = Color3.fromRGB(105, 105, 105),
+			Style = { Radius = 0.3, Glow = 0.9, Font = "SpecialElite", TextScale = 1.02, Particles = "FilmGrain", ParticleColor = Color3.fromRGB(230, 230, 230), Vignette = true, TopLine = { Color3.fromRGB(214, 40, 52), Color3.fromRGB(120, 20, 28) } } },
+		-- prism: a rainbow border that turns, accents that cycle through the spectrum, rising glass shards
+		Prism = { Accent = Color3.fromRGB(180, 160, 255), Background = Color3.fromRGB(12, 12, 18), Group = Color3.fromRGB(17, 17, 26), GroupBorder = Color3.fromRGB(30, 30, 44), Control = Color3.fromRGB(24, 24, 36), ControlHover = Color3.fromRGB(34, 34, 50), Border = Color3.fromRGB(70, 70, 100), Outline = Color3.fromRGB(44, 44, 64), Text = Color3.fromRGB(240, 240, 255), Label = Color3.fromRGB(215, 215, 235), TextDim = Color3.fromRGB(150, 150, 180), TextMuted = Color3.fromRGB(110, 110, 140),
+			Style = { Radius = 1.25, Glow = 1.6, Font = "Ubuntu", TextScale = 1, Particles = "Prisms", AccentCycle = true, Tint = Color3.fromRGB(120, 80, 255), TintPlace = "Aurora", TintAmount = 0.12,
+				TopLine = { Color3.fromRGB(255, 120, 200), Color3.fromRGB(120, 200, 255) }, AuraSpeed = 0.2, AuraThickness = 1.6,
+				Aura = { Color3.fromRGB(255, 90, 90), Color3.fromRGB(255, 190, 70), Color3.fromRGB(240, 255, 90), Color3.fromRGB(90, 255, 150), Color3.fromRGB(80, 210, 255), Color3.fromRGB(120, 110, 255), Color3.fromRGB(240, 100, 255), Color3.fromRGB(255, 90, 90) } } },
+		-- hazard: industrial yellow and black, a striped warning-tape border, square corners and welding sparks
+		Hazard = { Accent = Color3.fromRGB(255, 200, 0), Background = Color3.fromRGB(16, 15, 10), Group = Color3.fromRGB(22, 21, 14), GroupBorder = Color3.fromRGB(40, 38, 24), Control = Color3.fromRGB(30, 28, 18), ControlHover = Color3.fromRGB(42, 40, 26), Border = Color3.fromRGB(90, 84, 40), Outline = Color3.fromRGB(56, 52, 30), Text = Color3.fromRGB(250, 246, 230), Label = Color3.fromRGB(228, 222, 200), TextDim = Color3.fromRGB(165, 158, 130), TextMuted = Color3.fromRGB(125, 118, 95),
+			Style = { Radius = 0.2, Glow = 0.9, Font = "Sarpanch", TextScale = 1.05, Particles = "Sparks", ParticleColor = Color3.fromRGB(255, 210, 90), Tint = Color3.fromRGB(255, 140, 0), TintPlace = "Bottom", TintAmount = 0.12,
+				Aura = { Color3.fromRGB(255, 200, 0), Color3.fromRGB(24, 22, 14), Color3.fromRGB(255, 200, 0), Color3.fromRGB(24, 22, 14), Color3.fromRGB(255, 200, 0), Color3.fromRGB(24, 22, 14), Color3.fromRGB(255, 200, 0), Color3.fromRGB(24, 22, 14), Color3.fromRGB(255, 200, 0), Color3.fromRGB(24, 22, 14) },
+				AuraHard = true, AuraSpeed = 0, AuraRotation = 45, AuraThickness = 3 } },
+		-- glass: see-through frosted surfaces over a blurred world, soft rounded type and drifting bokeh
+		Glass = { Accent = Color3.fromRGB(170, 215, 255), Background = Color3.fromRGB(22, 26, 36), Group = Color3.fromRGB(30, 36, 50), GroupBorder = Color3.fromRGB(60, 70, 92), Control = Color3.fromRGB(38, 45, 62), ControlHover = Color3.fromRGB(52, 60, 80), Border = Color3.fromRGB(110, 125, 155), Outline = Color3.fromRGB(70, 82, 108), Text = Color3.fromRGB(245, 248, 255), Label = Color3.fromRGB(220, 228, 242), TextDim = Color3.fromRGB(160, 172, 195), TextMuted = Color3.fromRGB(122, 134, 158),
+			Style = { Radius = 1.6, Glow = 1, Font = "Nunito", TextScale = 1.04, Particles = "Bokeh", ParticleColor = Color3.fromRGB(180, 210, 255), SurfaceTransparency = 0.35, Blur = 18, InnerLine = Color3.fromRGB(255, 255, 255),
+				TopLine = { Color3.fromRGB(255, 255, 255), Color3.fromRGB(170, 215, 255) }, AccentGradient = { Color3.fromRGB(220, 240, 255), Color3.fromRGB(140, 190, 255) } } },
+		-- haunted: pumpkin orange on midnight purple, dripping type, ghostly green fog below, bats overhead
+		Haunted = { Accent = Color3.fromRGB(255, 140, 40), Background = Color3.fromRGB(14, 10, 20), Group = Color3.fromRGB(20, 14, 28), GroupBorder = Color3.fromRGB(36, 26, 48), Control = Color3.fromRGB(28, 20, 38), ControlHover = Color3.fromRGB(40, 30, 54), Border = Color3.fromRGB(86, 60, 110), Outline = Color3.fromRGB(54, 38, 70), Text = Color3.fromRGB(245, 236, 225), Label = Color3.fromRGB(225, 212, 200), TextDim = Color3.fromRGB(165, 145, 150), TextMuted = Color3.fromRGB(125, 105, 120),
+			Style = { Radius = 1.1, Glow = 1.5, Font = "Creepster", TextScale = 1.05, Particles = "Bats", ParticleColor = Color3.fromRGB(130, 90, 170), Tint = Color3.fromRGB(110, 220, 140), TintPlace = "Bottom", TintAmount = 0.13, Vignette = true,
+				TopLine = { Color3.fromRGB(255, 140, 40), Color3.fromRGB(150, 70, 220) }, AccentGradient = { Color3.fromRGB(255, 170, 60), Color3.fromRGB(170, 90, 255) } } },
+		-- parchment (a light theme): aged paper, ink-brown text, a wax-seal red accent, a calligraphic hand and falling leaves
+		Parchment = { Accent = Color3.fromRGB(156, 52, 40), Background = Color3.fromRGB(236, 224, 198), Group = Color3.fromRGB(243, 234, 212), GroupBorder = Color3.fromRGB(214, 196, 160), Control = Color3.fromRGB(229, 215, 186), ControlHover = Color3.fromRGB(221, 205, 172), Border = Color3.fromRGB(168, 140, 100), Outline = Color3.fromRGB(200, 178, 140), Text = Color3.fromRGB(52, 36, 24), Label = Color3.fromRGB(70, 50, 34), TextDim = Color3.fromRGB(120, 96, 72), TextMuted = Color3.fromRGB(148, 124, 98),
+			Style = { Radius = 0.55, Glow = 0.25, Font = "Fondamento", TextScale = 1.06, Particles = "Leaves", ParticleColor = Color3.fromRGB(200, 110, 50), InnerLine = Color3.fromRGB(120, 84, 54), Vignette = true,
+				Tint = Color3.fromRGB(150, 100, 50), TintPlace = "Top", TintAmount = 0.06 } },
 	},
 }
 env.LumenInstances[InstanceId] = Lumen
@@ -473,6 +501,10 @@ local function AccentEnds()
 	local from = StyleBlend and StyleBlend.From or to
 	local a = StyleBlend and StyleBlend.A or 1
 	local function ends(st)
+		if st.AccentCycle then
+			local h = (os.clock() * 0.07) % 1
+			return Color3.fromHSV(h, 0.5, 1), Color3.fromHSV((h + 0.3) % 1, 0.5, 1)
+		end
 		local g = st.AccentGradient
 		if g then return g[1], g[2] or g[1] end
 		return acc, acc
@@ -514,6 +546,19 @@ local function TintSeq(base, tint, amt, place)
 			ColorSequenceKeypoint.new(0.32, base), ColorSequenceKeypoint.new(1, base) })
 	end
 	return ColorSequence.new({ ColorSequenceKeypoint.new(0, tc), ColorSequenceKeypoint.new(0.45, base), ColorSequenceKeypoint.new(1, base) })
+end
+
+local SurfaceSet = {}
+
+-- hard-edged stripes (hazard tape) instead of a smooth blend
+local function HardSeq(list)
+	local kps, n = {}, #list
+	for i, c in ipairs(list) do
+		local a0, b0 = (i - 1) / n, i / n
+		table.insert(kps, ColorSequenceKeypoint.new(a0 == 0 and 0 or a0 + 0.0005, c))
+		table.insert(kps, ColorSequenceKeypoint.new(b0 == 1 and 1 or b0 - 0.0005, c))
+	end
+	return ColorSequence.new(kps)
 end
 
 local function MultiSeq(list)
@@ -599,21 +644,36 @@ local function StyleSurface(e)
 		end
 	end
 
-	-- aura: an animated gradient border (rotation driven by the style's AuraSpeed)
+	-- surface see-through (glass themes)
+	local fs, ts = from.SurfaceTransparency or 0, to.SurfaceTransparency or 0
+	e.Frame.BackgroundTransparency = fs + (ts - fs) * a
+
+	-- aura: the surface's own border takes an animated gradient (no extra frames, so layouts and auto-sizing are untouched)
 	local ap = presence("Aura")
-	if ap > 0.01 and not e.Aura then
-		e.Aura = New("Frame", { BackgroundTransparency = 1, Size = UDim2.fromScale(1, 1), ZIndex = 20, Parent = e.Frame }, { Corner(e.Radius) })
-		e.AuraStroke = New("UIStroke", { Thickness = 1.5, Transparency = 1, Color = Color3.new(1, 1, 1), Parent = e.Aura })
-		e.AuraGrad = New("UIGradient", { Parent = e.AuraStroke })
-	end
-	if e.Aura then
+	if e.Stroke and e.StrokeGrad then
 		local list = to.Aura or from.Aura
-		e.Aura.Visible = ap > 0.01
-		if list then e.AuraGrad.Color = MultiSeq(list) end
-		e.AuraStroke.Thickness = (to.Aura and to.AuraThickness) or (from.Aura and from.AuraThickness) or 1.5
-		e.AuraStroke.Transparency = 1 - ap * 0.9
-		e.AuraSpeed = (to.Aura and (to.AuraSpeed or 0.3)) or (from.AuraSpeed or 0.3)
+		if ap > 0.01 and list then
+			local edge = Lumen.Theme.Border:Lerp(Color3.new(1, 1, 1), 0.1)
+			local cols = {}
+			for i, c in ipairs(list) do cols[i] = edge:Lerp(c, ap) end
+			e.StrokeGrad.Color = ((to.Aura and to.AuraHard) or (not to.Aura and from.AuraHard)) and HardSeq(cols) or MultiSeq(cols)
+			local th = (to.Aura and to.AuraThickness) or (from.Aura and from.AuraThickness) or 1.5
+			e.Stroke.Thickness = 1 + (th - 1) * ap
+			e.AuraSpeed = (to.Aura and (to.AuraSpeed or 0.3)) or (from.AuraSpeed or 0.3)
+			if e.AuraSpeed <= 0 then
+				e.StrokeGrad.Rotation = (to.Aura and to.AuraRotation) or (from.Aura and from.AuraRotation) or 90
+			end
+			e.AuraOn = true
+		elseif e.AuraOn then
+			e.AuraOn = false
+			e.Stroke.Thickness = 1
+			e.StrokeGrad.Rotation = 90
+			UpdateGradient(e.StrokeGrad)
+		end
 	end
+
+	-- the rest only goes on windows (they have no layout, so overlays can't push content around)
+	if e.Kind ~= "Window" then return end
 
 	-- inner line: a thin second border inset from the edge
 	local ip = presence("InnerLine")
@@ -629,10 +689,39 @@ local function StyleSurface(e)
 		e.InnerStroke.Color = (fc and tc) and fc:Lerp(tc, a) or (tc or fc or Color3.new(1, 1, 1))
 		e.InnerStroke.Transparency = 1 - ip * 0.45
 	end
+
+	-- blueprint grid
+	local gp = presence("Grid")
+	if gp > 0.01 and not e.Grid then
+		e.Grid = New("Frame", { BackgroundTransparency = 1, Size = UDim2.fromScale(1, 1), ClipsDescendants = true, ZIndex = 0, Parent = e.Frame })
+		e.GridLines = {}
+		for x = 0, 1600, 22 do
+			table.insert(e.GridLines, New("Frame", { Position = UDim2.fromOffset(x, 0), Size = UDim2.new(0, 1, 1, 0), BackgroundTransparency = 1, ZIndex = 0, Parent = e.Grid }))
+		end
+		for y = 0, 1200, 22 do
+			table.insert(e.GridLines, New("Frame", { Position = UDim2.fromOffset(0, y), Size = UDim2.new(1, 0, 0, 1), BackgroundTransparency = 1, ZIndex = 0, Parent = e.Grid }))
+		end
+		e.GridP = -1
+	end
+	if e.Grid then
+		e.Grid.Visible = gp > 0.01
+		local gc = to.GridColor or from.GridColor or Color3.new(1, 1, 1)
+		if math.abs((e.GridP or -1) - gp) > 0.004 or e.GridC ~= gc then
+			e.GridP, e.GridC = gp, gc
+			for i, ln in ipairs(e.GridLines) do
+				ln.BackgroundColor3 = gc
+				-- every 4th line is a major line
+				ln.BackgroundTransparency = 1 - gp * ((i % 4 == 1) and 0.09 or 0.04)
+			end
+		end
+	end
 end
 
 local function RegisterSurface(frame, kind, radius)
 	local e = { Frame = frame, Kind = kind, Radius = radius or 10, Gradient = New("UIGradient", { Rotation = 90, Parent = frame }) }
+	e.Stroke = frame:FindFirstChildOfClass("UIStroke")
+	e.StrokeGrad = e.Stroke and e.Stroke:FindFirstChildOfClass("UIGradient")
+	SurfaceSet[frame] = true
 	if kind == "Window" then
 		e.LineGrad = New("UIGradient", { Transparency = NumberSequence.new({
 			NumberSequenceKeypoint.new(0, 1), NumberSequenceKeypoint.new(0.5, 0), NumberSequenceKeypoint.new(1, 1) }) })
@@ -659,9 +748,14 @@ end)
 Connect(RunService.RenderStepped, function()
 	local t = os.clock()
 	for _, e in ipairs(Surfaces) do
-		if e.Aura and e.Aura.Visible and (e.AuraSpeed or 0) > 0 and e.Frame.Visible then
-			e.AuraGrad.Rotation = (t * e.AuraSpeed * 360) % 360
+		if e.AuraOn and (e.AuraSpeed or 0) > 0 and e.Frame.Visible then
+			e.StrokeGrad.Rotation = (t * e.AuraSpeed * 360) % 360
 		end
+	end
+	-- prism themes: the accent gradient slowly cycles through the spectrum
+	if Lumen.Style.AccentCycle and t - (Lumen._cycleT or 0) > 0.05 then
+		Lumen._cycleT = t
+		for _, e in ipairs(AccentFills) do if e.Frame.Parent then PaintAccent(e) end end
 	end
 end)
 
@@ -687,29 +781,26 @@ local function SyncOption(flag, v)
 	if o and o.Value ~= v then o:Set(v, true) end
 end
 
--- Icons traced pixel-for-pixel from the reference UI: alpha runs {x, y, width, alpha/16}. They recolour like any other icon.
-local PIXEL_ICONS = {
-	dock_window = { w = 27, h = 25, ox = 2, oy = 3, runs = {{5,4,1,3},{6,4,16,5},{22,4,1,3},{4,5,1,2},{5,5,1,12},{6,5,16,16},{22,5,1,12},{23,5,1,2},{4,6,1,2},{5,6,1,15},{6,6,16,16},{22,6,1,15},{23,6,1,2},{4,7,1,2},{5,7,1,15},{6,7,1,14},{7,7,14,12},{21,7,1,14},{22,7,1,15},{23,7,1,2},{4,8,1,2},{5,8,1,14},{6,8,1,8},{7,8,14,3},{21,8,1,8},{22,8,1,14},{23,8,1,2},{4,9,1,2},{5,9,1,14},{6,9,1,6},{21,9,1,6},{22,9,1,14},{23,9,1,2},{4,10,1,2},{5,10,1,14},{6,10,1,6},{12,10,1,10},{13,10,6,13},{19,10,1,6},{21,10,1,6},{22,10,1,14},{23,10,1,2},{4,11,1,2},{5,11,1,14},{6,11,1,6},{12,11,2,13},{14,11,3,9},{17,11,1,10},{18,11,1,14},{19,11,1,8},{21,11,1,6},{22,11,1,14},{23,11,1,2},{4,12,1,2},{5,12,1,14},{6,12,1,6},{12,12,1,13},{13,12,1,9},{14,12,1,1},{17,12,1,4},{18,12,1,12},{19,12,1,8},{21,12,1,6},{22,12,1,14},{23,12,1,2},{4,13,1,2},{5,13,1,14},{6,13,1,6},{12,13,1,13},{13,13,1,12},{14,13,3,9},{17,13,1,10},{18,13,1,14},{19,13,1,8},{21,13,1,6},{22,13,1,14},{23,13,1,2},{4,14,1,2},{5,14,1,14},{6,14,1,6},{12,14,1,9},{13,14,5,12},{18,14,1,11},{19,14,1,5},{21,14,1,6},{22,14,1,14},{23,14,1,2},{4,15,1,2},{5,15,1,14},{6,15,1,6},{21,15,1,6},{22,15,1,14},{23,15,1,2},{4,16,1,2},{5,16,1,14},{6,16,1,6},{21,16,1,6},{22,16,1,14},{23,16,1,2},{4,17,1,2},{5,17,1,14},{6,17,1,8},{7,17,14,4},{21,17,1,8},{22,17,1,14},{23,17,1,2},{4,18,1,2},{5,18,1,12},{6,18,1,14},{7,18,14,13},{21,18,1,14},{22,18,1,12},{23,18,1,2},{5,19,1,3},{6,19,16,5},{22,19,1,3}} },
-	dock_scan = { w = 27, h = 25, ox = 2, oy = 3, runs = {{5,2,1,2},{6,2,3,3},{9,2,1,2},{18,2,1,2},{19,2,3,3},{22,2,1,2},{4,3,1,2},{5,3,1,12},{6,3,1,16},{7,3,2,15},{9,3,1,12},{10,3,1,3},{17,3,1,3},{18,3,1,12},{19,3,2,15},{21,3,1,16},{22,3,1,12},{23,3,1,2},{4,4,1,3},{5,4,1,16},{6,4,1,10},{7,4,2,6},{9,4,1,5},{10,4,1,1},{17,4,1,1},{18,4,1,5},{19,4,2,6},{21,4,1,10},{22,4,1,16},{23,4,1,3},{4,5,1,3},{5,5,1,15},{6,5,1,6},{21,5,1,6},{22,5,1,15},{23,5,1,3},{4,6,1,3},{5,6,1,15},{6,6,1,6},{12,6,1,5},{13,6,2,8},{15,6,1,5},{21,6,1,6},{22,6,1,15},{23,6,1,3},{4,7,1,2},{5,7,1,12},{6,7,1,5},{11,7,1,5},{12,7,1,13},{13,7,2,14},{15,7,1,13},{16,7,1,5},{21,7,1,5},{22,7,1,12},{23,7,1,2},{5,8,1,3},{6,8,1,1},{11,8,1,11},{12,8,1,13},{13,8,2,5},{15,8,1,13},{16,8,1,11},{21,8,1,1},{22,8,1,3},{11,9,1,12},{12,9,1,11},{13,9,2,1},{15,9,2,12},{11,10,1,9},{12,10,1,15},{13,10,2,10},{15,10,1,15},{16,10,1,8},{11,11,1,1},{12,11,1,10},{13,11,2,16},{15,11,1,10},{16,11,1,1},{12,12,4,2},{9,13,1,2},{10,13,1,6},{11,13,1,11},{12,13,1,14},{13,13,2,15},{15,13,1,14},{16,13,1,11},{17,13,1,6},{18,13,1,2},{8,14,1,3},{9,14,1,12},{10,14,1,14},{11,14,1,12},{12,14,1,9},{13,14,2,7},{15,14,1,9},{16,14,1,12},{17,14,1,14},{18,14,1,12},{19,14,1,3},{5,15,1,3},{6,15,1,1},{8,15,1,8},{9,15,1,15},{10,15,1,9},{11,15,1,5},{12,15,4,4},{16,15,1,5},{17,15,1,9},{18,15,1,15},{19,15,1,8},{21,15,1,1},{22,15,1,3},{4,16,1,2},{5,16,1,12},{6,16,1,5},{8,16,1,8},{9,16,1,16},{10,16,1,14},{11,16,6,13},{17,16,1,14},{18,16,1,16},{19,16,1,8},{21,16,1,5},{22,16,1,12},{23,16,1,2},{4,17,1,3},{5,17,1,15},{6,17,1,6},{8,17,1,4},{9,17,1,8},{10,17,8,9},{18,17,1,8},{19,17,1,4},{21,17,1,6},{22,17,1,15},{23,17,1,3},{4,18,1,3},{5,18,1,15},{6,18,1,6},{21,18,1,6},{22,18,1,15},{23,18,1,3},{4,19,1,3},{5,19,1,16},{6,19,1,10},{7,19,2,6},{9,19,1,5},{10,19,1,1},{17,19,1,1},{18,19,1,5},{19,19,2,6},{21,19,1,10},{22,19,1,16},{23,19,1,3},{4,20,1,2},{5,20,1,12},{6,20,1,16},{7,20,2,15},{9,20,1,12},{10,20,1,3},{17,20,1,3},{18,20,1,12},{19,20,2,15},{21,20,1,16},{22,20,1,12},{23,20,1,2},{5,21,1,2},{6,21,3,3},{9,21,1,2},{18,21,1,2},{19,21,3,3},{22,21,1,2}} },
-	dock_keyboard = { w = 27, h = 25, ox = 2, oy = 3, runs = {{5,5,1,5},{6,5,1,7},{7,5,14,8},{21,5,1,7},{22,5,1,5},{4,6,1,2},{5,6,1,13},{6,6,1,14},{7,6,14,13},{21,6,2,14},{23,6,1,2},{4,7,1,3},{5,7,1,16},{6,7,1,9},{7,7,14,4},{21,7,1,9},{22,7,1,16},{23,7,1,3},{4,8,1,3},{5,8,1,16},{6,8,1,7},{7,8,1,4},{8,8,1,6},{9,8,1,2},{10,8,1,5},{11,8,1,6},{12,8,1,1},{13,8,2,6},{15,8,1,1},{16,8,1,6},{17,8,1,5},{18,8,1,2},{19,8,1,6},{20,8,1,4},{21,8,1,7},{22,8,1,16},{23,8,1,3},{4,9,1,3},{5,9,1,16},{6,9,1,7},{7,9,1,4},{8,9,1,7},{9,9,1,2},{10,9,1,5},{11,9,1,7},{12,9,1,1},{13,9,2,6},{15,9,1,1},{16,9,2,6},{18,9,1,2},{19,9,1,7},{20,9,1,4},{21,9,1,7},{22,9,1,16},{23,9,1,3},{4,10,1,3},{5,10,1,16},{6,10,1,7},{11,10,1,1},{16,10,1,1},{21,10,1,7},{22,10,1,16},{23,10,1,3},{4,11,1,3},{5,11,1,16},{6,11,1,7},{7,11,1,4},{8,11,1,7},{9,11,1,2},{10,11,1,6},{11,11,1,7},{12,11,1,1},{13,11,2,7},{16,11,2,6},{18,11,1,2},{19,11,1,7},{20,11,1,4},{21,11,1,7},{22,11,1,16},{23,11,1,3},{4,12,1,3},{5,12,1,16},{6,12,1,7},{7,12,1,4},{8,12,1,7},{9,12,1,2},{10,12,1,5},{11,12,1,7},{12,12,1,1},{13,12,2,7},{16,12,2,6},{18,12,1,2},{19,12,1,7},{20,12,1,4},{21,12,1,7},{22,12,1,16},{23,12,1,3},{4,13,1,3},{5,13,1,16},{6,13,1,7},{10,13,8,2},{21,13,1,7},{22,13,1,16},{23,13,1,3},{4,14,1,3},{5,14,1,16},{6,14,1,6},{9,14,1,2},{10,14,1,10},{11,14,6,12},{17,14,1,10},{18,14,1,2},{21,14,1,6},{22,14,1,16},{23,14,1,3},{4,15,1,3},{5,15,1,16},{6,15,1,7},{9,15,1,2},{10,15,1,8},{11,15,6,11},{17,15,1,8},{18,15,1,2},{21,15,1,7},{22,15,1,16},{23,15,1,3},{4,16,1,3},{5,16,1,16},{6,16,1,9},{7,16,14,4},{21,16,1,9},{22,16,1,16},{23,16,1,3},{4,17,1,2},{5,17,2,14},{7,17,14,13},{21,17,1,14},{22,17,1,13},{23,17,1,2},{5,18,1,5},{6,18,1,7},{7,18,14,8},{21,18,1,7},{22,18,1,5}} },
-	dock_command = { w = 27, h = 25, ox = 2, oy = 3, runs = {{7,3,1,3},{8,3,2,4},{10,3,1,2},{17,3,1,2},{18,3,2,4},{20,3,1,3},{6,4,1,5},{7,4,1,13},{8,4,1,15},{9,4,1,14},{10,4,1,9},{11,4,1,2},{16,4,1,2},{17,4,1,9},{18,4,1,14},{19,4,1,15},{20,4,1,12},{21,4,1,5},{5,5,1,3},{6,5,1,13},{7,5,1,12},{8,5,1,7},{9,5,1,9},{10,5,1,15},{11,5,1,7},{16,5,1,7},{17,5,1,15},{18,5,1,9},{19,5,1,7},{20,5,2,12},{22,5,1,3},{5,6,1,4},{6,6,1,15},{7,6,1,7},{9,6,1,2},{10,6,1,13},{11,6,1,11},{12,6,1,1},{15,6,1,2},{16,6,1,11},{17,6,1,13},{18,6,1,2},{20,6,1,7},{21,6,1,15},{22,6,1,4},{5,7,1,4},{6,7,1,14},{7,7,1,9},{8,7,1,2},{10,7,1,12},{11,7,1,11},{12,7,1,2},{15,7,1,2},{16,7,1,11},{17,7,1,12},{19,7,1,2},{20,7,1,9},{21,7,1,14},{22,7,1,4},{5,8,1,2},{6,8,1,9},{7,8,1,15},{8,8,1,13},{9,8,1,12},{10,8,2,16},{12,8,1,13},{13,8,2,12},{15,8,1,13},{16,8,2,16},{18,8,1,12},{19,8,1,13},{20,8,1,15},{21,8,1,9},{22,8,1,2},{6,9,1,2},{7,9,1,7},{8,9,2,11},{10,9,2,16},{12,9,1,12},{13,9,2,11},{15,9,1,12},{16,9,2,16},{18,9,2,11},{20,9,1,7},{21,9,1,2},{8,10,1,1},{9,10,1,2},{10,10,1,13},{11,10,1,12},{12,10,1,3},{13,10,2,2},{15,10,1,3},{16,10,1,12},{17,10,1,13},{18,10,1,2},{19,10,1,1},{10,11,1,12},{11,11,1,11},{12,11,1,2},{15,11,1,2},{16,11,1,11},{17,11,1,12},{10,12,1,12},{11,12,1,11},{12,12,1,2},{15,12,1,2},{16,12,1,11},{17,12,1,12},{8,13,1,1},{9,13,1,2},{10,13,1,13},{11,13,1,12},{12,13,1,3},{13,13,2,2},{15,13,1,3},{16,13,1,12},{17,13,1,13},{18,13,1,2},{19,13,1,1},{6,14,1,2},{7,14,1,7},{8,14,2,11},{10,14,2,16},{12,14,1,12},{13,14,2,11},{15,14,1,12},{16,14,2,16},{18,14,2,11},{20,14,1,7},{21,14,1,2},{5,15,1,2},{6,15,1,9},{7,15,1,15},{8,15,1,13},{9,15,1,12},{10,15,2,16},{12,15,1,13},{13,15,2,12},{15,15,1,13},{16,15,2,16},{18,15,1,12},{19,15,1,13},{20,15,1,15},{21,15,1,9},{22,15,1,2},{5,16,1,4},{6,16,1,14},{7,16,1,9},{8,16,1,2},{10,16,1,12},{11,16,1,11},{12,16,1,2},{15,16,1,2},{16,16,1,11},{17,16,1,12},{19,16,1,2},{20,16,1,9},{21,16,1,14},{22,16,1,4},{5,17,1,4},{6,17,1,15},{7,17,1,7},{9,17,1,2},{10,17,1,13},{11,17,1,11},{12,17,1,1},{15,17,1,1},{16,17,1,11},{17,17,1,13},{18,17,1,2},{20,17,1,7},{21,17,1,14},{22,17,1,4},{5,18,1,3},{6,18,1,12},{7,18,1,13},{8,18,1,7},{9,18,1,9},{10,18,1,15},{11,18,1,7},{16,18,1,7},{17,18,1,15},{18,18,1,9},{19,18,1,7},{20,18,2,12},{22,18,1,3},{6,19,1,5},{7,19,1,12},{8,19,1,15},{9,19,1,14},{10,19,1,9},{11,19,1,2},{16,19,1,2},{17,19,1,9},{18,19,1,14},{19,19,1,15},{20,19,1,12},{21,19,1,5},{7,20,1,3},{8,20,2,4},{10,20,1,2},{17,20,1,2},{18,20,2,4},{20,20,1,3}} },
-	dock_user = { w = 27, h = 25, ox = 2, oy = 3, runs = {{12,4,1,1},{13,4,2,3},{15,4,1,1},{11,5,1,3},{12,5,1,8},{13,5,2,11},{15,5,1,8},{16,5,1,3},{10,6,1,2},{11,6,1,10},{12,6,1,15},{13,6,2,16},{15,6,1,15},{16,6,1,10},{17,6,1,2},{10,7,1,6},{11,7,1,14},{12,7,4,16},{16,7,1,14},{17,7,1,6},{10,8,1,8},{11,8,1,15},{12,8,4,16},{16,8,1,15},{17,8,1,8},{10,9,1,6},{11,9,1,14},{12,9,4,16},{16,9,1,14},{17,9,1,6},{10,10,1,2},{11,10,1,12},{12,10,1,15},{13,10,2,16},{15,10,1,15},{16,10,1,12},{17,10,1,2},{11,11,1,3},{12,11,1,10},{13,11,2,14},{15,11,1,10},{16,11,1,3},{17,12,1,1},{9,13,1,1},{10,13,1,3},{11,13,1,5},{12,13,1,7},{13,13,1,8},{14,13,1,1},{15,13,1,2},{16,13,1,10},{17,13,1,14},{18,13,1,10},{19,13,1,6},{20,13,1,11},{21,13,1,14},{22,13,1,8},{7,14,1,2},{8,14,1,6},{9,14,1,10},{10,14,1,14},{11,14,3,16},{14,14,1,5},{15,14,1,4},{16,14,6,16},{22,14,1,14},{23,14,1,2},{6,15,1,2},{7,15,1,9},{8,15,1,15},{9,15,5,16},{14,15,1,7},{15,15,1,4},{16,15,1,14},{17,15,5,16},{22,15,1,13},{23,15,1,2},{6,16,1,4},{7,16,1,14},{8,16,6,16},{14,16,1,12},{15,16,1,3},{16,16,1,7},{17,16,1,14},{18,16,3,16},{21,16,1,13},{22,16,1,6},{6,17,1,5},{7,17,7,16},{14,17,1,15},{15,17,1,9},{16,17,1,3},{17,17,1,7},{18,17,1,14},{19,17,1,16},{20,17,1,13},{21,17,1,6},{6,18,1,4},{7,18,1,13},{8,18,7,16},{15,18,1,14},{16,18,1,6},{17,18,1,2},{18,18,1,7},{19,18,1,10},{20,18,1,6},{7,19,1,4},{8,19,8,5},{16,19,1,2},{18,19,1,1},{19,19,1,2}} },
-	hotkeys_kb = { w = 19, h = 13, ox = 1, oy = 1, runs = {{1,0,1,8},{2,0,15,12},{17,0,1,8},{0,1,1,4},{1,1,1,16},{2,1,1,13},{3,1,13,11},{16,1,1,13},{17,1,1,16},{18,1,1,4},{0,2,1,4},{1,2,1,16},{2,2,1,6},{16,2,1,6},{17,2,1,16},{18,2,1,4},{0,3,1,4},{1,3,1,16},{2,3,1,6},{3,3,2,8},{6,3,1,10},{7,3,1,7},{8,3,1,4},{9,3,1,9},{10,3,1,4},{11,3,1,7},{12,3,1,11},{14,3,2,8},{16,3,1,6},{17,3,1,16},{18,3,1,4},{0,4,1,4},{1,4,1,16},{2,4,1,6},{3,4,2,4},{6,4,1,6},{7,4,1,4},{9,4,1,5},{11,4,1,4},{12,4,1,6},{14,4,2,4},{16,4,1,6},{17,4,1,16},{18,4,1,4},{0,5,1,4},{1,5,1,16},{2,5,1,6},{6,5,1,3},{12,5,1,3},{16,5,1,6},{17,5,1,16},{18,5,1,4},{0,6,1,4},{1,6,1,16},{2,6,3,6},{6,6,1,8},{7,6,1,5},{9,6,1,7},{11,6,1,5},{12,6,1,9},{14,6,3,6},{17,6,1,16},{18,6,1,4},{0,7,1,4},{1,7,1,16},{2,7,1,6},{6,7,1,3},{12,7,1,4},{16,7,1,6},{17,7,1,16},{18,7,1,4},{0,8,1,4},{1,8,1,16},{2,8,1,5},{6,8,7,10},{16,8,1,5},{17,8,1,16},{18,8,1,4},{0,9,1,4},{1,9,1,16},{2,9,1,5},{5,9,1,5},{6,9,1,15},{7,9,6,16},{13,9,1,5},{16,9,1,5},{17,9,1,16},{18,9,1,4},{0,10,1,4},{1,10,1,16},{2,10,1,6},{16,10,1,6},{17,10,1,16},{18,10,1,4},{0,11,1,4},{1,11,1,16},{2,11,1,13},{3,11,13,11},{16,11,1,13},{17,11,1,16},{18,11,1,4},{1,12,1,8},{2,12,15,12},{17,12,1,8}} },
-	bell = { w = 14, h = 16, ox = 2, oy = 1, runs = {{6,0,2,6},{2,1,1,7},{3,1,1,4},{5,1,1,5},{6,1,2,13},{8,1,1,5},{10,1,1,4},{11,1,1,7},{1,2,1,8},{2,2,1,10},{3,2,1,4},{4,2,1,7},{5,2,1,13},{6,2,2,15},{8,2,1,13},{9,2,1,7},{10,2,1,4},{11,2,1,10},{12,2,1,8},{1,3,1,12},{2,3,1,7},{3,3,1,8},{4,3,1,14},{5,3,1,15},{6,3,2,16},{8,3,1,15},{9,3,1,14},{10,3,1,8},{11,3,1,7},{12,3,1,12},{0,4,1,7},{1,4,1,10},{2,4,1,6},{3,4,1,13},{4,4,6,16},{10,4,1,13},{11,4,1,6},{12,4,1,10},{13,4,1,7},{0,5,1,9},{1,5,1,7},{2,5,1,8},{3,5,1,15},{4,5,6,16},{10,5,1,15},{11,5,1,8},{12,5,1,7},{13,5,1,9},{0,6,1,4},{2,6,1,8},{3,6,8,16},{11,6,1,8},{13,6,1,4},{2,7,1,8},{3,7,8,16},{11,7,1,8},{2,8,1,8},{3,8,8,16},{11,8,1,8},{2,9,1,8},{3,9,8,16},{11,9,1,8},{2,10,1,8},{3,10,8,16},{11,10,1,8},{2,11,1,9},{3,11,8,16},{11,11,1,9},{1,12,1,8},{2,12,1,12},{3,12,8,14},{11,12,1,12},{12,12,1,8},{1,13,4,4},{5,13,4,5},{9,13,4,4},{5,14,1,7},{6,14,2,14},{8,14,1,6},{6,15,2,6}} },
-	group_command = { w = 14, h = 14, ox = 4, oy = 6, runs = {{1,0,1,7},{2,0,2,10},{4,0,1,6},{9,0,1,6},{10,0,2,11},{12,0,1,8},{0,1,1,7},{1,1,1,14},{2,1,1,8},{3,1,1,10},{4,1,1,12},{5,1,1,7},{8,1,1,7},{9,1,1,13},{10,1,1,10},{11,1,1,9},{12,1,1,15},{13,1,1,7},{0,2,1,11},{1,2,1,8},{4,2,1,9},{5,2,1,12},{8,2,1,12},{9,2,1,9},{12,2,1,9},{13,2,1,10},{0,3,1,11},{1,3,1,10},{4,3,1,8},{5,3,1,13},{8,3,1,13},{9,3,1,8},{12,3,2,10},{0,4,1,6},{1,4,1,13},{2,4,1,10},{3,4,1,9},{4,4,1,12},{5,4,1,15},{6,4,2,8},{8,4,1,15},{9,4,1,12},{10,4,1,9},{11,4,1,10},{12,4,1,13},{13,4,1,6},{1,5,1,8},{2,5,1,12},{3,5,1,13},{4,5,1,15},{5,5,1,16},{6,5,2,13},{8,5,1,16},{9,5,1,15},{10,5,1,13},{11,5,1,12},{12,5,1,8},{4,6,1,9},{5,6,1,13},{8,6,1,13},{9,6,1,8},{4,7,1,9},{5,7,1,13},{8,7,1,13},{9,7,1,8},{1,8,1,7},{2,8,1,12},{3,8,1,13},{4,8,1,15},{5,8,1,16},{6,8,2,13},{8,8,1,16},{9,8,1,15},{10,8,1,13},{11,8,1,12},{12,8,1,7},{0,9,1,6},{1,9,1,12},{2,9,1,9},{3,9,1,8},{4,9,1,13},{5,9,1,15},{6,9,2,9},{8,9,1,15},{9,9,1,12},{10,9,1,8},{11,9,1,9},{12,9,1,13},{13,9,1,6},{0,10,2,10},{4,10,1,9},{5,10,1,13},{8,10,1,13},{9,10,1,8},{12,10,2,10},{0,11,1,11},{1,11,1,8},{4,11,1,9},{5,11,1,12},{8,11,1,12},{9,11,1,9},{12,11,1,8},{13,11,1,10},{0,12,1,7},{1,12,1,14},{2,12,1,8},{3,12,1,10},{4,12,1,13},{5,12,1,7},{8,12,1,7},{9,12,1,13},{10,12,1,10},{11,12,1,8},{12,12,1,14},{13,12,1,7},{1,13,1,7},{2,13,2,10},{4,13,1,6},{9,13,1,6},{10,13,2,10},{12,13,1,7}} },
-}
+-- High-res icons: 96px PNGs drawn as vectors (assets/icons in the repo), tinted by the theme through ImageColor3.
+-- They are downloaded once and cached in <Folder>/icons, then loaded with getcustomasset. Until they're ready (or where
+-- the executor can't load files, e.g. Studio) every icon falls back to the vector version drawn from frames below.
+-- Studio / your own uploads: pass Icons = {window = "rbxassetid://...", ...} as a load option, or set Lumen.IconAssets.
+local ICON_NAMES = { "window", "scan", "keyboard", "command", "user", "bell", "check", "cross", "warn", "info", "discord",
+	"gear", "snow", "list", "heart", "chevron", "search", "eye", "sparkle", "lock", "palette" }
+local ICON_VERSION = "v1"
+local IconImages = {}
+Lumen.IconAssets = IconImages
+if type(LoadOptions.Icons) == "table" then for k, v in pairs(LoadOptions.Icons) do IconImages[k] = v end end
+local LiveIcons = setmetatable({}, { __mode = "k" })
 
-local function PixelIcon(name, parent, colorKey)
-	local d = PIXEL_ICONS[name]
-	if not d then return nil end
-	local f = New("Frame", { BackgroundTransparency = 1, Size = UDim2.fromOffset(d.w, d.h), Parent = parent })
-	for _, r in ipairs(d.runs) do
-		New("Frame", {
-			Position = UDim2.fromOffset(r[1], r[2]), Size = UDim2.fromOffset(r[3], 1), BackgroundTransparency = 1 - r[4] / 16,
-			Parent = f, Theme = { BackgroundColor3 = colorKey or "Label" },
-		})
-	end
-	return f
+local function IconImage(f, kind, colorKey, fadeIn)
+	local img = New("ImageLabel", {
+		Name = "IconImage", BackgroundTransparency = 1, Size = UDim2.fromScale(1, 1), Image = IconImages[kind],
+		ScaleType = Enum.ScaleType.Fit, ImageTransparency = fadeIn and 1 or 0, ZIndex = f.ZIndex, Parent = f,
+		Theme = { ImageColor3 = colorKey },
+	})
+	if fadeIn then Tween(img, 0.3, { ImageTransparency = 0 }) end
+	return img
 end
 
 -- Vector icons drawn from frames: window, keyboard, command, scan, bell, user, gear, snow, list, discord
@@ -741,6 +832,12 @@ local function Icon(kind, parent, size, colorKey)
 		if not ok then warn("[Lumen] icon '" .. tostring(kind) .. "' failed: " .. tostring(err)) end
 		return f
 	end
+	if IconImages[kind] then
+		IconImage(f, kind, colorKey)
+		return f
+	end
+	-- vector fallback; swapped for the image as soon as the high-res set has loaded
+	if table.find(ICON_NAMES, kind) then LiveIcons[f] = { Kind = kind, Key = colorKey } end
 	local function Bar(x, y, w, h, r, key)
 		local b = New("Frame", {
 			Position = UDim2.fromOffset(x * s, y * s), Size = UDim2.fromOffset(w * s, h * s), Parent = f,
@@ -755,36 +852,53 @@ local function Icon(kind, parent, size, colorKey)
 			BackgroundTransparency = 1, Parent = f,
 		}, { CornerFixed((r or 3) * s), New("UIStroke", { Thickness = th or 1.4, Theme = { Color = colorKey } }) })
 	end
+	-- a clipping box, used to cut rounded shapes into arcs and domes
+	local function Clip(x, y, w, h)
+		return New("Frame", { BackgroundTransparency = 1, ClipsDescendants = true, Position = UDim2.fromOffset(x * s, y * s),
+			Size = UDim2.fromOffset(w * s, h * s), Parent = f })
+	end
+	local th = math.max(1, 1.35 * s)
 	if kind == "window" then
-		Ring(1, 2, 14, 12, 3, 1.5)
-		Bar(1.6, 5.2, 12.8, 1.4)
-		Ring(7.2, 8.4, 5.2, 3.2, 1, 1.2)
+		-- browser-style window: frame, title bar, a small inset panel
+		Ring(1, 2.4, 14, 11.2, 2.6, th)
+		Seg(1.6, 5.6, 14.4, 5.6, 1.3)
+		Ring(8.2, 8.4, 4.4, 2.8, 0.9, math.max(1, 1.1 * s))
 	elseif kind == "keyboard" then
-		Ring(0.6, 3, 14.8, 10, 2.5, 1.4)
-		for _, x in ipairs({ 3.2, 5.9, 8.6, 11.3 }) do Bar(x, 5.4, 1.5, 1.5) Bar(x, 7.9, 1.5, 1.5) end
-		Bar(4.6, 10.5, 6.8, 1.3, 0.6)
+		Ring(0.8, 3.4, 14.4, 9.2, 2.2, th)
+		for _, x in ipairs({ 3.6, 5.8, 8, 10.2, 12.4 }) do Dot(x, 6.3, 1.25) Dot(x, 8.3, 1.25) end
+		Seg(5.4, 10.5, 10.6, 10.5, 1.3)
 	elseif kind == "command" then
-		Ring(5, 5, 6, 6, 0.5, 1.3)
-		Ring(1.4, 1.4, 4.6, 4.6, 2.3, 1.3)
-		Ring(10, 1.4, 4.6, 4.6, 2.3, 1.3)
-		Ring(1.4, 10, 4.6, 4.6, 2.3, 1.3)
-		Ring(10, 10, 4.6, 4.6, 2.3, 1.3)
+		-- the command / looped-square symbol
+		Ring(5.4, 5.4, 5.2, 5.2, 0.6, th)
+		for _, p in ipairs({ { 1.5, 1.5 }, { 10.1, 1.5 }, { 1.5, 10.1 }, { 10.1, 10.1 } }) do
+			Ring(p[1], p[2], 4.4, 4.4, 2.2, th)
+		end
 	elseif kind == "scan" then
-		Bar(1, 1, 4, 1.4); Bar(1, 1, 1.4, 4)
-		Bar(11, 1, 4, 1.4); Bar(13.6, 1, 1.4, 4)
-		Bar(1, 13.6, 4, 1.4); Bar(1, 11, 1.4, 4)
-		Bar(11, 13.6, 4, 1.4); Bar(13.6, 11, 1.4, 4)
-		Ring(6, 4.2, 4, 4, 2, 1.3)
-		Ring(4.6, 9.4, 6.8, 3, 1.5, 1.3)
+		-- face-scan: four corner brackets around a head and shoulders
+		local L = 3.4
+		Seg(1.2, 1.2, 1.2 + L, 1.2, 1.3); Seg(1.2, 1.2, 1.2, 1.2 + L, 1.3)
+		Seg(14.8, 1.2, 14.8 - L, 1.2, 1.3); Seg(14.8, 1.2, 14.8, 1.2 + L, 1.3)
+		Seg(1.2, 14.8, 1.2 + L, 14.8, 1.3); Seg(1.2, 14.8, 1.2, 14.8 - L, 1.3)
+		Seg(14.8, 14.8, 14.8 - L, 14.8, 1.3); Seg(14.8, 14.8, 14.8, 14.8 - L, 1.3)
+		Ring(6, 3.6, 4, 4, 2, th)
+		local c = Clip(4.1, 9.2, 7.8, 3.2)
+		New("Frame", { BackgroundTransparency = 1, Size = UDim2.fromOffset(7.8 * s, 7 * s), Parent = c },
+			{ CornerFixed(3.5 * s), New("UIStroke", { Thickness = th, Theme = { Color = colorKey } }) })
 	elseif kind == "bell" then
-		Bar(7.2, 1, 1.6, 1.8)
-		Bar(4, 2.5, 8, 8, 4)
-		Bar(3, 8, 10, 3.2, 1)
-		Bar(2, 11, 12, 1.6, 1)
-		Bar(6.5, 13, 3, 2, 1)
+		-- filled bell: dome, flared rim, clapper, hanger
+		Dot(8, 2.1, 1.9)
+		local c = Clip(3.4, 2.6, 9.2, 8.6)
+		New("Frame", { Size = UDim2.fromOffset(9.2 * s, 14 * s), Parent = c, Theme = { BackgroundColor3 = colorKey } }, { CornerFixed(4.6 * s) })
+		Bar(2.2, 10.4, 11.6, 2, 1)
+		Dot(8, 13.9, 2.6)
 	elseif kind == "user" then
-		Bar(5, 1.5, 6, 6, 3)
-		Bar(2.5, 9, 11, 5.5, 3)
+		-- a person with a small heart: "people who made this"
+		Dot(6.6, 4.6, 5.4)
+		local c = Clip(1.4, 9, 10.4, 5.8)
+		New("Frame", { Size = UDim2.fromOffset(10.4 * s, 11 * s), Parent = c, Theme = { BackgroundColor3 = colorKey } }, { CornerFixed(5.2 * s) })
+		Dot(11.4, 10.4, 3.4); Dot(13.8, 10.4, 3.4)
+		local h = New("Frame", { AnchorPoint = Vector2.new(0.5, 0.5), Position = UDim2.fromOffset(12.6 * s, 11.9 * s), Size = UDim2.fromOffset(3.5 * s, 3.5 * s),
+			Rotation = 45, Parent = f, Theme = { BackgroundColor3 = colorKey } }, { CornerFixed(0.6 * s) })
 	elseif kind == "gear" then
 		Ring(2.5, 2.5, 11, 11, 5.5, 2)
 		Bar(6, 6, 4, 4, 2)
@@ -818,7 +932,9 @@ end
 
 local function RecolorIcon(f, color)
 	for _, d in ipairs(f:GetDescendants()) do
-		if d:IsA("UIStroke") then
+		if d:IsA("ImageLabel") and d.Name == "IconImage" then
+			d.ImageColor3 = color
+		elseif d:IsA("UIStroke") then
 			d.Color = color
 		elseif d:IsA("Frame") and d.BackgroundTransparency < 1 and not d:GetAttribute("Fixed") then
 			d.BackgroundColor3 = color
@@ -955,7 +1071,12 @@ local function Matches(input, v)
 	return input.UserInputType == v
 end
 
+local function PresetLabel(n) return n == "Lavender" and "Lavender (Default)" or n end
+local function PresetName(l) return (tostring(l):gsub(" %(Default%)$", "")) end
+Lumen.PresetLabel = PresetLabel
+
 function Lumen:ApplyPreset(name)
+	name = PresetName(name)
 	local p = self.Presets[name]
 	if not p then return end
 	self.Preset = name
@@ -963,7 +1084,7 @@ function Lumen:ApplyPreset(name)
 	for k, v in pairs(p) do if k ~= "Style" then colors[k] = v end end
 	self:SetTheme(colors, self.ThemeTransition)
 	self:SetStyle(p.Style or {}, self.ThemeTransition)
-	SyncOption("Lumen_Preset", name)
+	SyncOption("Lumen_Preset", PresetLabel(name))
 end
 
 local ThemeToken = 0
@@ -1134,27 +1255,47 @@ local HintText = New("TextLabel", {
 	TextXAlignment = Enum.TextXAlignment.Left, ZIndex = 303, LayoutOrder = 2, TextColor3 = Lumen.Theme.TextDim, Parent = HintBody,
 })
 
-local function HintWidth(title, body)
-	local w = 0
+local function HintMeasure(title, body)
+	local w, h = 0, 0
 	pcall(function()
-		w = TextService:GetTextSize(body, 11, Enum.Font.GothamMedium, Vector2.new(214, 10000)).X
+		local b = TextService:GetTextSize(body, 11, Enum.Font.GothamMedium, Vector2.new(214, 10000))
+		w, h = b.X, b.Y
 		if title and title ~= "" then
-			w = math.max(w, TextService:GetTextSize(title, 12, Enum.Font.GothamBold, Vector2.new(214, 10000)).X)
+			local t = TextService:GetTextSize(title, 12, Enum.Font.GothamBold, Vector2.new(214, 10000))
+			w = math.max(w, t.X)
+			h = h + t.Y + 3
 		end
 	end)
-	if not w or w <= 0 then w = 214 end
-	return math.clamp(math.ceil(w) + 30, 110, 246)
+	if not w or w <= 0 then w, h = 214, 40 end
+	w = math.clamp(math.ceil(w) + 30, 110, 246)
+	return w, math.ceil(h) + 21
 end
 
-local function HintSpot(anchor)
+-- The card goes beside the window (or panel / dock) the element lives in, level with the element, so it never covers
+-- what you're about to click. With no room on either side it goes beside the element itself, then below it.
+local function HintRoot(anchor)
+	local p = anchor
+	while p and p ~= Gui do
+		if SurfaceSet[p] then return p end
+		p = p.Parent
+	end
+end
+local function HintSpot(anchor, w, h)
 	local vp = Gui.AbsoluteSize
 	local ap, sz = anchor.AbsolutePosition, anchor.AbsoluteSize
-	local w = HintCard.Size.X.Offset
-	local h = math.max(HintCard.AbsoluteSize.Y, 34)
-	local x = math.clamp(ap.X, 8, math.max(8, vp.X - w - 8))
-	local y = ap.Y + sz.Y + 6
-	if y + h > vp.Y - 8 then y = math.max(8, ap.Y - h - 6) end
-	return x, y
+	local cy = ap.Y + sz.Y / 2
+	local y = math.clamp(cy - h / 2, 8, math.max(8, vp.Y - h - 8))
+	local root = HintRoot(anchor)
+	if root then
+		local rp, rs = root.AbsolutePosition, root.AbsoluteSize
+		if rp.X + rs.X + 12 + w <= vp.X - 8 then return rp.X + rs.X + 12, y, "right", cy end
+		if rp.X - w - 12 >= 8 then return rp.X - w - 12, y, "left", cy end
+	end
+	if ap.X + sz.X + 10 + w <= vp.X - 8 then return ap.X + sz.X + 10, y, "right", cy end
+	if ap.X - w - 10 >= 8 then return ap.X - w - 10, y, "left", cy end
+	local by = ap.Y + sz.Y + 6
+	if by + h > vp.Y - 8 then by = math.max(8, ap.Y - h - 6) end
+	return math.clamp(ap.X, 8, math.max(8, vp.X - w - 8)), by, "below", cy
 end
 
 local function ShowHint(anchor, title, body)
@@ -1167,14 +1308,22 @@ local function ShowHint(anchor, title, body)
 		HintTitle.Text = title or ""
 		HintTitle.Visible = title ~= nil and title ~= ""
 		HintText.Text = body
-		HintCard.Size = UDim2.fromOffset(HintWidth(title, body), 0)
-		local x, y = HintSpot(anchor)
+		local w, h = HintMeasure(title, body)
+		HintCard.Size = UDim2.fromOffset(w, 0)
+		local x, y, side, cy = HintSpot(anchor, w, h)
+		-- the accent strip sits on the side facing the element, level with it, like a pointer
+		local stripY = math.clamp(cy - y - 9, 6, math.max(6, h - 24))
+		local stripGoal = { Position = side == "left" and UDim2.new(1, -2, 0, stripY) or UDim2.fromOffset(0, stripY) }
+		HintStrip.Size = UDim2.fromOffset(2, 18)
 		if gliding then
 			TweenService:Create(HintCard, TweenInfo.new(0.22, Enum.EasingStyle.Quint, Enum.EasingDirection.Out),
 				{ Position = UDim2.fromOffset(x, y), GroupTransparency = 0 }):Play()
+			TweenService:Create(HintStrip, TweenInfo.new(0.22, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), stripGoal):Play()
 			TweenService:Create(HintScale, TweenInfo.new(0.2, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), { Scale = 1 }):Play()
 		else
-			HintCard.Position = UDim2.fromOffset(x, y + 7)
+			HintStrip.Position = stripGoal.Position
+			local dx = side == "left" and 8 or (side == "right" and -8 or 0)
+			HintCard.Position = UDim2.fromOffset(x + dx, side == "below" and y + 7 or y)
 			HintScale.Scale = 0.95
 			HintCard.GroupTransparency = 1
 			HintCard.Visible = true
@@ -1483,8 +1632,7 @@ function Lumen:Notify(o, duration)
 			TweenService:Create(ring:FindFirstChildOfClass("UIStroke"), TweenInfo.new(0.75, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), { Transparency = 1 }):Play()
 		else
 			iconFrame = New("Frame", { BackgroundTransparency = 1, Size = UDim2.fromOffset(16, 16), LayoutOrder = 1, Parent = body })
-			glyph = PixelIcon("bell", iconFrame, "Label")
-			glyph.Position = UDim2.fromOffset(1, 0)
+			glyph = Icon("bell", iconFrame, 16, "Label")
 		end
 
 		-- text
@@ -1645,7 +1793,7 @@ local HotkeyTitle = New("Frame", {
 	BackgroundTransparency = 1, Size = UDim2.fromOffset(0, 18), AutomaticSize = Enum.AutomaticSize.X,
 	LayoutOrder = 0, Parent = HotkeyFrame,
 }, { List(8, Enum.FillDirection.Horizontal, Enum.HorizontalAlignment.Left, Enum.VerticalAlignment.Center) })
-local HotkeyIcon = PixelIcon("hotkeys_kb", HotkeyTitle, "Label")
+local HotkeyIcon = Icon("keyboard", HotkeyTitle, 17, "Label")
 HotkeyIcon.LayoutOrder = 1
 local HotkeyTitleLabel = New("TextLabel", {
 	Text = "Hotkeys", AutomaticSize = Enum.AutomaticSize.X, Size = UDim2.fromOffset(0, 18),
@@ -2180,7 +2328,7 @@ end
 
 local function Chevron(parent)
 	local f = New("Frame", {
-		BackgroundTransparency = 1, AnchorPoint = Vector2.new(1, 0.5), Position = UDim2.new(1, -10, 0.5, 0),
+		BackgroundTransparency = 1, AnchorPoint = Vector2.new(0.5, 0.5), Position = UDim2.new(1, -14, 0.5, 0),
 		Size = UDim2.fromOffset(9, 6), Parent = parent,
 	})
 	for _, r in ipairs({ 40, -40 }) do
@@ -2210,13 +2358,20 @@ function Elements:AddDropdown(o)
 	local box = New("TextButton", {
 		Position = UDim2.fromOffset(0, h - 28), Size = UDim2.new(1, 0, 0, 28), BackgroundTransparency = 1, Parent = row,
 	}, { Corner(6), stroke })
+	box.ClipsDescendants = true
 	local valueText = New("TextLabel", {
 		Position = UDim2.fromOffset(10, 0), Size = UDim2.new(1, -30, 1, 0), TextXAlignment = Enum.TextXAlignment.Left,
 		TextTruncate = Enum.TextTruncate.AtEnd, Font = Enum.Font.GothamMedium, Parent = box,
 	})
-	Chevron(box)
-	Connect(box.MouseEnter, function() Tween(stroke, 0.1, { Color = Lumen.Theme.Border }) end)
-	Connect(box.MouseLeave, function() Tween(stroke, 0.1, { Color = Lumen.Theme.Outline }) end)
+	local chevron = Chevron(box)
+	local isOpen = false
+	Connect(box.MouseEnter, function() if not isOpen then Tween(stroke, 0.1, { Color = Lumen.Theme.Border }) end end)
+	Connect(box.MouseLeave, function() if not isOpen then Tween(stroke, 0.1, { Color = Lumen.Theme.Outline }) end end)
+	local function SetOpen(v)
+		isOpen = v
+		TweenService:Create(chevron, TweenInfo.new(0.28, Enum.EasingStyle.Back, Enum.EasingDirection.Out), { Rotation = v and 180 or 0 }):Play()
+		Tween(stroke, 0.15, { Color = v and Lumen.Theme.AccentBorder or Lumen.Theme.Outline })
+	end
 
 	local pop = New("Frame", {
 		Visible = false, Size = UDim2.fromOffset(200, 100), Parent = Overlay, Theme = { BackgroundColor3 = "Background" },
@@ -2234,26 +2389,58 @@ function Elements:AddDropdown(o)
 		TextXAlignment = Enum.TextXAlignment.Left, Font = Enum.Font.GothamMedium, Parent = pop,
 	}, { Corner(5), Stroke("Outline"), Pad(8, 0, 8, 0) })
 
-	local items = {}
+	local items, order = {}, {}
 	local function IsSelected(v)
 		if D.Multi then return D.Value[v] == true end
 		return D.Value == v
 	end
-	local function Render()
-		if D.Multi then
-			local sel = {}
-			for _, v in ipairs(D.Values) do if D.Value[v] then table.insert(sel, v) end end
-			valueText.Text = #sel > 0 and table.concat(sel, ", ") or "--"
-		else
-			valueText.Text = D.Value ~= nil and tostring(D.Value) or "--"
-		end
-		valueText.TextColor3 = (valueText.Text == "--") and Lumen.Theme.TextDim or Lumen.Theme.Label
-		for v, b in pairs(items) do
-			b.TextColor3 = IsSelected(v) and Lumen.Theme.AccentText or Lumen.Theme.Label
-			b.BackgroundTransparency = IsSelected(v) and 0 or 1
+	local quick = TweenInfo.new(0.16, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
+	local pop2 = TweenInfo.new(0.3, Enum.EasingStyle.Back, Enum.EasingDirection.Out)
+	-- each row has three looks: resting, "about to pick" (hover / press) and picked
+	local function PaintItem(it, instant)
+		local T = Lumen.Theme
+		local on = IsSelected(it.Value)
+		local goals = {
+			{ it.Sel, { BackgroundTransparency = on and 0 or 1 } },
+			{ it.Hover, { BackgroundTransparency = (it.Hovered and not on) and 0 or 1 } },
+			{ it.Bar, { Size = UDim2.fromOffset(2, on and 14 or (it.Hovered and 7 or 0)), BackgroundTransparency = on and 0 or (it.Hovered and 0.35 or 1) } },
+			{ it.Label, { Position = UDim2.fromOffset(it.Hovered and 15 or 11, 0),
+				TextColor3 = on and T.AccentText or (it.Hovered and T.Text or T.Label) } },
+			{ it.CheckScale, { Scale = on and 1 or 0 } },
+		}
+		for _, g in ipairs(goals) do
+			if instant then
+				for k, val in pairs(g[2]) do g[1][k] = val end
+			else
+				TweenService:Create(g[1], (g[1] == it.CheckScale and on) and pop2 or quick, g[2]):Play()
+			end
 		end
 	end
-	table.insert(Refreshers, Render)
+	local lastText
+	local function Render(instant)
+		local txt
+		if D.Multi then
+			local sel = {}
+			for _, v in ipairs(D.Values) do if D.Value[v] then table.insert(sel, tostring(v)) end end
+			txt = #sel > 0 and table.concat(sel, ", ") or "--"
+		else
+			txt = D.Value ~= nil and tostring(D.Value) or "--"
+		end
+		if txt ~= lastText then
+			valueText.Text = txt
+			-- the new value slides up into place
+			if lastText ~= nil and not instant then
+				valueText.Position = UDim2.fromOffset(10, 9)
+				valueText.TextTransparency = 1
+				TweenService:Create(valueText, TweenInfo.new(0.28, Enum.EasingStyle.Quint, Enum.EasingDirection.Out),
+					{ Position = UDim2.fromOffset(10, 0), TextTransparency = 0 }):Play()
+			end
+			lastText = txt
+		end
+		valueText.TextColor3 = (txt == "--") and Lumen.Theme.TextDim or Lumen.Theme.Label
+		for _, it in pairs(items) do PaintItem(it, instant) end
+	end
+	table.insert(Refreshers, function() Render(true) end)
 	local function PopupSize()
 		local s2 = WantsSearch()
 		search.Visible = s2
@@ -2263,21 +2450,45 @@ function Elements:AddDropdown(o)
 	end
 	local function Filter()
 		local q = search.Text:lower()
-		for v, b in pairs(items) do
-			b.Visible = q == "" or tostring(v):lower():find(q, 1, true) ~= nil
+		for v, it in pairs(items) do
+			it.Button.Visible = q == "" or tostring(v):lower():find(q, 1, true) ~= nil
 		end
 	end
 	Connect(search:GetPropertyChangedSignal("Text"), Filter)
 	local function Build()
-		for _, b in pairs(items) do b:Destroy() end
-		items = {}
+		for _, it in pairs(items) do it.Button:Destroy() end
+		items, order = {}, {}
 		for i, v in ipairs(D.Values) do
-			local b = New("TextButton", {
-				Size = UDim2.new(1, 0, 0, 24), Text = tostring(v), TextXAlignment = Enum.TextXAlignment.Left,
-				LayoutOrder = i, Parent = scroll, Theme = { BackgroundColor3 = "TabActive" },
-			}, { Corner(5), Pad(8, 0, 8, 0) })
-			items[v] = b
+			local b = New("TextButton", { Size = UDim2.new(1, 0, 0, 24), LayoutOrder = i, Parent = scroll })
+			local it = { Value = v, Button = b }
+			it.Hover = New("Frame", { Size = UDim2.fromScale(1, 1), BackgroundTransparency = 1, Parent = b, Theme = { BackgroundColor3 = "ControlHover" } }, { Corner(5) })
+			it.Sel = New("Frame", { Size = UDim2.fromScale(1, 1), BackgroundTransparency = 1, Parent = b, Theme = { BackgroundColor3 = "TabActive" } }, { Corner(5) })
+			it.Bar = New("Frame", { AnchorPoint = Vector2.new(0, 0.5), Position = UDim2.new(0, 3, 0.5, 0), Size = UDim2.fromOffset(2, 0),
+				BackgroundTransparency = 1, ZIndex = 3, Parent = b, Theme = { BackgroundColor3 = "Accent" } }, { CornerFixed(1) })
+			it.Label = New("TextLabel", { Position = UDim2.fromOffset(11, 0), Size = UDim2.new(1, -36, 1, 0), Text = tostring(v),
+				TextXAlignment = Enum.TextXAlignment.Left, TextTruncate = Enum.TextTruncate.AtEnd, ZIndex = 3, Parent = b })
+			local check = Icon("check", b, 12, "AccentText")
+			check.AnchorPoint = Vector2.new(0.5, 0.5)
+			check.Position = UDim2.new(1, -13, 0.5, 0)
+			check.ZIndex = 3
+			it.CheckScale = New("UIScale", { Scale = 0, Parent = check })
+			it.Press = New("UIScale", { Scale = 1, Parent = b })
+			items[v] = it
+			order[i] = it
+			Connect(b.MouseEnter, function() it.Hovered = true PaintItem(it) end)
+			Connect(b.MouseLeave, function()
+				it.Hovered = false
+				TweenService:Create(it.Press, quick, { Scale = 1 }):Play()
+				PaintItem(it)
+			end)
+			-- pressing squeezes the row slightly: the "about to pick" moment
+			Connect(b.MouseButton1Down, function() TweenService:Create(it.Press, TweenInfo.new(0.08), { Scale = 0.96 }):Play() end)
+			Connect(b.MouseButton1Up, function() TweenService:Create(it.Press, pop2, { Scale = 1 }):Play() end)
 			Connect(b.MouseButton1Click, function()
+				-- a quick accent flash confirms the pick
+				it.Sel.BackgroundColor3 = Lumen.Theme.Accent:Lerp(Lumen.Theme.Background, 0.55)
+				it.Sel.BackgroundTransparency = 0
+				TweenService:Create(it.Sel, TweenInfo.new(0.35, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), { BackgroundColor3 = Lumen.Theme.TabActive }):Play()
 				if D.Multi then
 					local nv = {}
 					for k in pairs(D.Value) do nv[k] = true end
@@ -2285,12 +2496,29 @@ function Elements:AddDropdown(o)
 					D:Set(nv)
 				else
 					D:Set(v)
-					ClosePopup()
+					task.delay(0.14, function() if OpenPopup and OpenPopup.Frame == pop then ClosePopup() end end)
 				end
 			end)
 		end
 		PopupSize()
-		Render()
+		Render(true)
+	end
+	-- rows cascade in when the list opens
+	local function Cascade()
+		local n = 0
+		for _, it in ipairs(order) do
+			if it.Button.Visible then
+				n = n + 1
+				it.Label.TextTransparency = 1
+				it.Label.Position = UDim2.fromOffset(22, 0)
+				local delay = math.min(n, 10) * 0.022
+				task.delay(delay, function()
+					if not it.Label.Parent then return end
+					TweenService:Create(it.Label, TweenInfo.new(0.26, Enum.EasingStyle.Quint, Enum.EasingDirection.Out),
+						{ TextTransparency = 0, Position = UDim2.fromOffset(it.Hovered and 15 or 11, 0) }):Play()
+				end)
+			end
+		end
 	end
 
 	function D:Set(v, silent)
@@ -2324,7 +2552,9 @@ function Elements:AddDropdown(o)
 			PopupSize()
 			search.Text = ""
 			Filter()
-			ShowPopup(pop, box)
+			ShowPopup(pop, box, function() SetOpen(false) end)
+			SetOpen(true)
+			Cascade()
 			if search.Visible then task.defer(function() pcall(function() search:CaptureFocus() end) end) end
 		end
 	end)
@@ -2333,7 +2563,7 @@ function Elements:AddDropdown(o)
 	if o.Default ~= nil then D:Set(o.Default, true) end
 	Register(D, o.Flag)
 	CatalogAdd(self, D, o.Text or "Dropdown")
-	Render()
+	Render(true)
 	if o.Disabled then D:SetDisabled(true) end
 	if o.Description then D:SetDescription(o.Description) end
 	return D
@@ -2647,7 +2877,7 @@ function Elements:AddViewport(o)
 		esp.Root = New("Frame", { BackgroundTransparency = 1, Size = UDim2.fromScale(1, 1), ZIndex = 3, Parent = row })
 		esp.Box = New("Frame", { BackgroundTransparency = 1, ZIndex = 3, Parent = esp.Root })
 		if (E.Box or "Full") == "Full" then
-			New("UIStroke", { Color = col, Thickness = 1, Parent = esp.Box })
+			esp.BoxStroke = New("UIStroke", { Color = col, Thickness = 1, Parent = esp.Box })
 			New("Frame", { BackgroundTransparency = 1, Size = UDim2.new(1, 2, 1, 2), Position = UDim2.fromOffset(-1, -1), ZIndex = 3, Parent = esp.Box },
 				{ New("UIStroke", { Color = Color3.new(0, 0, 0), Transparency = 0.55, Thickness = 1 }) })
 		else
@@ -2755,6 +2985,93 @@ function Elements:AddViewport(o)
 		dist = math.max(sz.X, sz.Y, sz.Z) * 0.5 / math.tan(math.rad(cam.FieldOfView / 2)) * 1.25 + sz.Z * 0.5
 		Place()
 	end
+	-- Highlight preview. Roblox Highlights don't render inside ViewportFrames, so the effect is rebuilt from layers:
+	-- four flat silhouette copies nudged a couple of pixels up/down/left/right make the outline, the real model is drawn
+	-- over them, and one more silhouette on top at FillTransparency makes the fill. Every layer fades in and out.
+	local hl = { Enabled = false, Fill = Color3.fromRGB(255, 70, 110), FillTransparency = 0.55,
+		Outline = Color3.new(1, 1, 1), OutlineTransparency = 0, Thickness = 2 }
+	local layers = nil
+	local HlToken = 0
+	local WHITE = Color3.new(1, 1, 1)
+	local function Silhouette(src)
+		local c = src:Clone()
+		local list = c:GetDescendants()
+		table.insert(list, c)
+		for _, d in ipairs(list) do
+			if d:IsA("BasePart") then
+				d.Color = WHITE
+				d.Material = Enum.Material.SmoothPlastic
+				pcall(function() d.TextureID = "" end)
+			elseif d:IsA("Decal") or d:IsA("Texture") or d:IsA("SurfaceAppearance") or d:IsA("Clothing") or d:IsA("ShirtGraphic") then
+				d:Destroy()
+			elseif d:IsA("SpecialMesh") then
+				pcall(function() d.TextureId = "" end)
+			end
+		end
+		return c
+	end
+	local function Layer(z, dx, dy, flat)
+		local l = New("ViewportFrame", {
+			BackgroundTransparency = 1, Size = UDim2.fromScale(1, 1), Position = UDim2.fromOffset(dx, dy), ImageTransparency = 1,
+			ZIndex = vf.ZIndex + z, Parent = vf,
+		})
+		l.CurrentCamera = cam
+		if flat then
+			-- full ambient, no directional light: the copy renders as one flat colour, tinted by ImageColor3
+			l.Ambient = WHITE
+			l.LightColor = Color3.new(0, 0, 0)
+		else
+			l.Ambient, l.LightColor = vf.Ambient, vf.LightColor
+			pcall(function() l.LightDirection = vf.LightDirection end)
+		end
+		return l
+	end
+	local OFFSETS = { { -1, 0 }, { 1, 0 }, { 0, -1 }, { 0, 1 } }
+	local function DestroyLayers()
+		if not layers then return end
+		if model and model.Parent == layers.Top then model.Parent = vf end
+		for _, l in ipairs(layers.Outlines) do l:Destroy() end
+		layers.Top:Destroy()
+		layers.Fill:Destroy()
+		layers = nil
+	end
+	local function BuildLayers()
+		if layers or not model then return end
+		layers = { Outlines = {} }
+		for i, off in ipairs(OFFSETS) do
+			local l = Layer(1, off[1] * hl.Thickness, off[2] * hl.Thickness, true)
+			Silhouette(model).Parent = l
+			layers.Outlines[i] = l
+		end
+		layers.Top = Layer(2, 0, 0, false)
+		layers.Top.ImageTransparency = 0
+		model.Parent = layers.Top
+		layers.Fill = Layer(3, 0, 0, true)
+		Silhouette(model).Parent = layers.Fill
+	end
+	local function ApplyHighlight(instant)
+		HlToken = HlToken + 1
+		local mine = HlToken
+		local info = TweenInfo.new(instant and 0.01 or 0.35, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
+		if hl.Enabled and model then
+			BuildLayers()
+			for i, l in ipairs(layers.Outlines) do
+				local off = OFFSETS[i]
+				TweenService:Create(l, info, {
+					ImageColor3 = hl.Outline, ImageTransparency = hl.OutlineTransparency,
+					Position = UDim2.fromOffset(off[1] * hl.Thickness, off[2] * hl.Thickness),
+				}):Play()
+			end
+			TweenService:Create(layers.Fill, info, { ImageColor3 = hl.Fill, ImageTransparency = hl.FillTransparency }):Play()
+		elseif layers then
+			for _, l in ipairs(layers.Outlines) do TweenService:Create(l, info, { ImageTransparency = 1 }):Play() end
+			TweenService:Create(layers.Fill, info, { ImageTransparency = 1 }):Play()
+			task.delay(instant and 0 or 0.36, function()
+				if mine == HlToken and not hl.Enabled then DestroyLayers() end
+			end)
+		end
+	end
+
 	local function CharacterClone()
 		local ch = Players.LocalPlayer and Players.LocalPlayer.Character
 		if not ch then return nil end
@@ -2762,6 +3079,11 @@ function Elements:AddViewport(o)
 		return ok and c or nil
 	end
 	Prepare(o.Object or (o.Character and CharacterClone()) or nil)
+	if o.Highlight then
+		if type(o.Highlight) == "table" then for k, v in pairs(o.Highlight) do hl[k] = v end end
+		if type(o.Highlight) ~= "table" or o.Highlight.Enabled == nil then hl.Enabled = true end
+		ApplyHighlight(true)
+	end
 
 	local function BeginDrag(i)
 		if IsPress(i) then
@@ -2797,12 +3119,29 @@ function Elements:AddViewport(o)
 		Place()
 	end)
 
-	function V:SetObject(obj) Prepare(obj) end
+	function V:SetObject(obj)
+		DestroyLayers()
+		Prepare(obj)
+		if hl.Enabled then ApplyHighlight(true) end
+	end
+	-- viewport:SetHighlight({Enabled = true, Fill = Color3, FillTransparency = 0-1, Outline = Color3, OutlineTransparency = 0-1, Thickness = px})
+	function V:SetHighlight(t)
+		for k, v in pairs(t or {}) do hl[k] = v end
+		ApplyHighlight(false)
+	end
 	-- live-update the ESP preview: V:SetESP({Health = 0.4, Name = "Enemy", DistanceText = "42m"})
 	function V:SetESP(t)
 		if not esp then return end
 		for k, v in pairs(t or {}) do esp.E[k] = v end
 		if esp.Name and t and t.Name then esp.Name.Text = tostring(t.Name) end
+		if t and typeof(t.Color) == "Color3" then
+			-- recolour the box, name and distance smoothly
+			local c, ti = t.Color, 0.25
+			if esp.BoxStroke then Tween(esp.BoxStroke, ti, { Color = c }) end
+			for _, f in ipairs(esp.Corners or {}) do Tween(f, ti, { BackgroundColor3 = c }) end
+			if esp.Name then Tween(esp.Name, ti, { TextColor3 = c }) end
+			if esp.Dist then Tween(esp.Dist, ti, { TextColor3 = c }) end
+		end
 		UpdateESP()
 	end
 	V.Viewport = vf
@@ -2962,8 +3301,28 @@ function Lumen:CreatePanel(o)
 	MakeDraggable(header, frame, Front)
 	Front()
 
+	local pscale = frame:FindFirstChildOfClass("UIScale")
+	local PToken = 0
 	function P:SetVisible(v)
-		frame.Visible = v
+		PToken = PToken + 1
+		local mine = PToken
+		if v then
+			if not frame.Visible and pscale then
+				pscale.Scale = Lumen.Scale * 0.94
+				TweenService:Create(pscale, TweenInfo.new(0.32, Enum.EasingStyle.Back, Enum.EasingDirection.Out), { Scale = Lumen.Scale }):Play()
+			end
+			frame.Visible = true
+			Front()
+		elseif frame.Visible then
+			if pscale then
+				TweenService:Create(pscale, TweenInfo.new(0.15, Enum.EasingStyle.Quad, Enum.EasingDirection.In), { Scale = Lumen.Scale * 0.94 }):Play()
+				task.delay(0.16, function()
+					if mine == PToken then frame.Visible = false pscale.Scale = Lumen.Scale Lumen:_UpdateDock() end
+				end)
+			else
+				frame.Visible = false
+			end
+		end
 		Lumen:_UpdateDock()
 	end
 	function P:Toggle() self:SetVisible(not frame.Visible) end
@@ -3022,7 +3381,7 @@ function Lumen:CreateCredits(o)
 	o = o or {}
 	local P = self:CreatePanel({
 		Title = o.Title or "CREDITS", Subtitle = o.Subtitle or "People behind this script",
-		Width = o.Width or 340, Height = o.Height, Position = o.Position, Dock = o.Dock,
+		Width = o.Width or 340, Height = o.Height, Position = o.Position, Dock = o.Dock, Visible = o.Visible,
 	})
 	function P:AddEntry(e) return BuildCreditCard(self._container, e) end
 	for _, e in ipairs(o.Entries or {}) do P:AddEntry(e) end
@@ -3185,7 +3544,7 @@ function Lumen:CreateKeySystem(o)
 		}
 	end
 	local P = self:CreatePanel({
-		Title = o.Title or "Key System", Width = o.Width or 440, Position = o.Position, HeaderIcon = header, Dock = o.Dock,
+		Title = o.Title or "Key System", Width = o.Width or 440, Position = o.Position, HeaderIcon = header, Dock = o.Dock, Visible = o.Visible,
 	})
 	if o.Note then P:AddLabel(o.Note, { Dim = true }) end
 	local input = P:AddInput({ Placeholder = o.Placeholder or "Enter your key...", Realtime = true })
@@ -3254,7 +3613,7 @@ function Lumen:_Apply(data)
 	if data.Lumen_Preset and self.Options.Lumen_Preset then
 		local fade = self.ThemeTransition
 		self.ThemeTransition = 0
-		pcall(function() self.Options.Lumen_Preset:Set(data.Lumen_Preset.v) end)
+		pcall(function() self.Options.Lumen_Preset:Set(PresetLabel(PresetName(data.Lumen_Preset.v))) end)
 		self.ThemeTransition = fade
 		local rest = {}
 		for k, v in pairs(data) do if k ~= "Lumen_Preset" then rest[k] = v end end
@@ -3353,6 +3712,24 @@ local FlashFrame = New("Frame", {
 	Size = UDim2.fromScale(1, 1), BackgroundColor3 = Color3.fromRGB(215, 228, 255), BackgroundTransparency = 1, ZIndex = 3, Parent = BackdropFrame,
 })
 
+-- vignette (film themes): soft dark edges built from four gradient strips
+local Vignette = {}
+for i, spec in ipairs({
+	{ UDim2.new(0, 0, 0, 0), UDim2.new(1, 0, 0.3, 0), 90, false }, { UDim2.new(0, 0, 0.7, 0), UDim2.new(1, 0, 0.3, 0), 90, true },
+	{ UDim2.new(0, 0, 0, 0), UDim2.new(0.25, 0, 1, 0), 0, false }, { UDim2.new(0.75, 0, 0, 0), UDim2.new(0.25, 0, 1, 0), 0, true },
+}) do
+	local fr = New("Frame", { Position = spec[1], Size = spec[2], BackgroundColor3 = Color3.new(0, 0, 0), BackgroundTransparency = 1, ZIndex = 2, Parent = BackdropFrame })
+	New("UIGradient", { Rotation = spec[3], Transparency = NumberSequence.new(spec[4] and 1 or 0.15, spec[4] and 0.15 or 1), Parent = fr })
+	Vignette[i] = fr
+end
+local function StyleVignette()
+	local to = Lumen.Style
+	local from = StyleBlend and StyleBlend.From or to
+	local a = StyleBlend and StyleBlend.A or 1
+	local p = (from.Vignette and 1 or 0) * (1 - a) + (to.Vignette and 1 or 0) * a
+	for _, fr in ipairs(Vignette) do fr.BackgroundTransparency = 1 - p end
+end
+
 local function AnyWindowVisible()
 	for _, w in ipairs(Lumen.Windows) do
 		if w.Visible then return true end
@@ -3367,7 +3744,7 @@ function Lumen:_UpdateSnow()
 	if any and (Snow.Enabled or Backdrop.Dim > 0) then BackdropFrame.Visible = true end
 	TweenService:Create(DimFrame, TweenInfo.new(0.35, Enum.EasingStyle.Sine, Enum.EasingDirection.Out),
 		{ BackgroundTransparency = any and (1 - math.clamp(Backdrop.Dim, 0, 1)) or 1 }):Play()
-	local target = any and Backdrop.Blur or 0
+	local target = any and math.max(Backdrop.Blur, Lumen.Style.Blur or 0) or 0
 	if target > 0 and not BlurEffect then
 		pcall(function()
 			BlurEffect = Instance.new("BlurEffect")
@@ -3646,7 +4023,220 @@ KINDS.Neon = {
 	end,
 }
 
-local BUILTIN_KINDS = { "Snow", "Bubbles", "Petals", "Embers", "Fireflies", "Stars", "Glyphs", "Rain", "Confetti", "Sparkles", "Pixels", "Starfield", "Crystals", "Neon" }
+-- blueprint: drafting marks (crosshairs, circles, dimension lines) drifting slowly and fading in and out
+KINDS.Drafting = {
+	Build = function(f, c, p)
+		f.Speed = 0.006 + math.random() * 0.01
+		f.Pulse = 0.3 + math.random() * 0.8
+		f.Base = 0.4
+		f.NoSelf = true
+		local size = math.random(8, 15)
+		f.Frame = New("Frame", { BackgroundTransparency = 1, Size = UDim2.fromOffset(size, size), Parent = p })
+		local function Line(pos, sz, anchor)
+			return New("Frame", { AnchorPoint = anchor or Vector2.new(0.5, 0.5), Position = pos, Size = sz, BackgroundColor3 = c, Parent = f.Frame })
+		end
+		local r = math.random()
+		if r < 0.45 then
+			-- crosshair
+			local a = Line(UDim2.fromScale(0.5, 0.5), UDim2.new(1, 0, 0, 1))
+			local b = Line(UDim2.fromScale(0.5, 0.5), UDim2.new(0, 1, 1, 0))
+			f.Extra = { { a, "BackgroundTransparency" }, { b, "BackgroundTransparency" } }
+		elseif r < 0.75 then
+			-- circle with a centre mark
+			local ring = New("Frame", { BackgroundTransparency = 1, Size = UDim2.fromScale(1, 1), Parent = f.Frame }, { CornerFixed(size) })
+			local st = New("UIStroke", { Color = c, Thickness = 1, Parent = ring })
+			local dot = Line(UDim2.fromScale(0.5, 0.5), UDim2.fromOffset(2, 2))
+			f.Extra = { { st, "Transparency" }, { dot, "BackgroundTransparency" } }
+		else
+			-- dimension line: a span with end ticks
+			f.Frame.Size = UDim2.fromOffset(size * 2, 7)
+			local a = Line(UDim2.fromScale(0.5, 0.5), UDim2.new(1, 0, 0, 1))
+			local b = Line(UDim2.fromScale(0, 0.5), UDim2.new(0, 1, 1, 0), Vector2.new(0, 0.5))
+			local d = Line(UDim2.fromScale(1, 0.5), UDim2.new(0, 1, 1, 0), Vector2.new(1, 0.5))
+			f.Extra = { { a, "BackgroundTransparency" }, { b, "BackgroundTransparency" }, { d, "BackgroundTransparency" } }
+		end
+	end,
+	Update = function(f, dt, t, sp)
+		f.X = (f.X + f.Speed * 0.5 * sp * dt) % 1
+		f.Y = f.Y - f.Speed * sp * dt
+		if f.Y < -0.04 then f.Y = 1.04 end
+		f.Frame.Position = UDim2.fromScale(f.X, f.Y)
+		return 0.35 + 0.55 * (0.5 + 0.5 * math.sin(t * f.Pulse + f.Phase))
+	end,
+}
+-- noir: film grain that jumps every few frames, and the odd vertical scratch flickering across the screen
+KINDS.FilmGrain = {
+	Build = function(f, c, p)
+		f.Scratch = math.random() < 0.08
+		f.Next = math.random() * 0.2
+		if f.Scratch then
+			f.Frame = New("Frame", { Size = UDim2.new(0, 1, 1, 0), BackgroundColor3 = c, BackgroundTransparency = 1, Parent = p })
+			f.Base = 1
+		else
+			local sz = math.random(1, 3)
+			f.Frame = New("Frame", { Size = UDim2.fromOffset(sz, sz), BackgroundColor3 = c, Parent = p }, sz > 1 and { CornerFixed(sz) } or nil)
+			f.Base = 0.6
+		end
+	end,
+	Update = function(f, dt, t, sp)
+		f.Next = f.Next - dt * sp
+		if f.Scratch then
+			if f.Next <= 0 then
+				f.Show = (math.random() < 0.35) and (0.06 + math.random() * 0.2) or 0
+				f.Next = 0.25 + math.random() * 0.7
+				f.Frame.Position = UDim2.fromScale(math.random(), 0)
+			end
+			f.Show = (f.Show or 0) - dt
+			return f.Show > 0 and 0.55 or 1
+		end
+		if f.Next <= 0 then
+			f.Next = 0.05 + math.random() * 0.12
+			f.Frame.Position = UDim2.fromScale(math.random(), math.random())
+			f.Tr = 0.35 + math.random() * 0.55
+		end
+		return f.Tr or 0.6
+	end,
+}
+-- prism: glassy shards that rise, turn and shift through the spectrum
+KINDS.Prisms = {
+	Build = function(f, c, p)
+		local size = math.random(5, 11)
+		f.Speed = 0.015 + math.random() * 0.03
+		f.Spin, f.Rot = (math.random() - 0.5) * 120, math.random() * 360
+		f.Base = 0.25 + math.random() * 0.35
+		f.Hue = math.random()
+		f.Frame = New("Frame", {
+			AnchorPoint = Vector2.new(0.5, 0.5), Size = UDim2.fromOffset(size, math.floor(size * 1.6)),
+			BackgroundColor3 = Color3.fromHSV(f.Hue, 0.45, 1), BackgroundTransparency = f.Base, Parent = p,
+		}, { CornerFixed(1), New("UIGradient", { Rotation = 35, Transparency = NumberSequence.new({
+			NumberSequenceKeypoint.new(0, 0), NumberSequenceKeypoint.new(0.5, 0.55), NumberSequenceKeypoint.new(1, 0.1) }) }) })
+	end,
+	Update = function(f, dt, t, sp)
+		Fall(f, dt, sp, -1)
+		f.Rot = f.Rot + f.Spin * sp * dt
+		f.Frame.Rotation = f.Rot
+		f.Frame.BackgroundColor3 = Color3.fromHSV((f.Hue + t * 0.06) % 1, 0.45, 1)
+		f.Frame.Position = UDim2.fromScale(f.X + math.sin(t * f.Sway + f.Phase) * 0.01, f.Y)
+		return f.Base + 0.3 * (0.5 + 0.5 * math.sin(t * 2.3 + f.Phase))
+	end,
+}
+-- hazard: welding sparks that burst up and out, arc under gravity, cool from white-hot to orange and die
+KINDS.Sparks = {
+	Build = function(f, c, p)
+		f.Color = c
+		f.Frame = New("Frame", { AnchorPoint = Vector2.new(0.5, 0.5), Size = UDim2.fromOffset(2, 7), BackgroundColor3 = c, Parent = p }, { CornerFixed(1) })
+		f.Base = 1
+		f.Dead, f.Life = true, math.random() * 1.6
+	end,
+	Update = function(f, dt, t, sp)
+		dt = dt * sp
+		if f.Dead then
+			f.Life = f.Life - dt
+			if f.Life > 0 then return 1 end
+			f.X, f.Y = 0.1 + math.random() * 0.8, 0.1 + math.random() * 0.35
+			local ang = math.rad(-90 + (math.random() - 0.5) * 140)
+			local spd = 0.25 + math.random() * 0.35
+			-- x is scaled down so the arc looks right on a wide screen
+			f.VX, f.VY = math.cos(ang) * spd * 0.56, math.sin(ang) * spd
+			f.Age, f.MaxAge, f.Dead = 0, 0.7 + math.random() * 0.9, false
+		end
+		f.Age = f.Age + dt
+		f.VY = f.VY + 0.9 * dt
+		f.X, f.Y = f.X + f.VX * dt, f.Y + f.VY * dt
+		f.Frame.Position = UDim2.fromScale(f.X, f.Y)
+		f.Frame.Rotation = math.deg(atan2(f.VY, f.VX / 0.56)) + 90
+		local k = f.Age / f.MaxAge
+		f.Frame.BackgroundColor3 = Color3.fromRGB(255, 250, 225):Lerp(f.Color:Lerp(Color3.fromRGB(255, 90, 20), 0.6), math.min(1, k * 1.4))
+		if k >= 1 or f.Y > 1.05 then
+			f.Dead, f.Life = true, math.random() * 0.8
+			return 1
+		end
+		return k * k
+	end,
+}
+-- glass: big soft out-of-focus circles of light drifting upward and breathing
+KINDS.Bokeh = {
+	Build = function(f, c, p)
+		local size = math.random(28, 90)
+		f.Speed = 0.004 + math.random() * 0.008
+		f.Pulse = 0.2 + math.random() * 0.5
+		f.Base = 0.9
+		local col = c:Lerp(Color3.fromHSV(math.random(), 0.35, 1), 0.35)
+		f.Frame = New("Frame", { AnchorPoint = Vector2.new(0.5, 0.5), Size = UDim2.fromOffset(size, size), BackgroundColor3 = col,
+			BackgroundTransparency = 0.9, Parent = p }, { CornerFixed(size) })
+		local core = New("Frame", { AnchorPoint = Vector2.new(0.5, 0.5), Position = UDim2.fromScale(0.5, 0.5), Size = UDim2.fromScale(0.62, 0.62),
+			BackgroundColor3 = col, BackgroundTransparency = 0.88, Parent = f.Frame }, { CornerFixed(size) })
+		local rim = New("UIStroke", { Color = col, Thickness = 1, Transparency = 0.75, Parent = f.Frame })
+		f.Extra = { { core, "BackgroundTransparency", 0.88 }, { rim, "Transparency", 0.75 } }
+	end,
+	Update = function(f, dt, t, sp)
+		f.X = (f.X + math.sin(t * 0.2 + f.Phase) * f.Speed * sp * dt) % 1
+		f.Y = f.Y - f.Speed * sp * dt
+		if f.Y < -0.1 then f.Y = 1.1 end
+		f.Frame.Position = UDim2.fromScale(f.X, f.Y)
+		return 0.86 + 0.08 * math.sin(t * f.Pulse + f.Phase)
+	end,
+}
+-- haunted: bats flapping across the screen; each wing is hinged at the body
+KINDS.Bats = {
+	Build = function(f, c, p)
+		local sz = math.random(7, 13)
+		f.Speed = (0.035 + math.random() * 0.05) * (math.random() < 0.5 and -1 or 1)
+		f.Flap = 9 + math.random() * 6
+		f.Base = 0.15 + math.random() * 0.35
+		f.NoSelf = true
+		f.Y = math.random() * 0.7
+		f.Frame = New("Frame", { AnchorPoint = Vector2.new(0.5, 0.5), BackgroundTransparency = 1, Size = UDim2.fromOffset(sz * 3, sz * 2), Parent = p })
+		local body = New("Frame", { AnchorPoint = Vector2.new(0.5, 0.5), Position = UDim2.fromScale(0.5, 0.5), Size = UDim2.fromOffset(math.max(2, sz * 0.45), sz * 0.8),
+			BackgroundColor3 = c, Parent = f.Frame }, { CornerFixed(sz) })
+		local function Wing(side)
+			local hinge = New("Frame", { AnchorPoint = Vector2.new(0.5, 0.5), Position = UDim2.fromScale(0.5, 0.45), Size = UDim2.fromOffset(sz * 2.6, sz * 0.5),
+				BackgroundTransparency = 1, Parent = f.Frame })
+			local w = New("Frame", { Position = UDim2.fromScale(side < 0 and 0 or 0.5, 0), Size = UDim2.fromScale(0.5, 1), BackgroundColor3 = c, Parent = hinge },
+				{ CornerFixed(math.max(1, sz * 0.25)) })
+			return hinge, w
+		end
+		f.HL, f.WL = Wing(-1)
+		f.HR, f.WR = Wing(1)
+		f.Extra = { { body, "BackgroundTransparency" }, { f.WL, "BackgroundTransparency" }, { f.WR, "BackgroundTransparency" } }
+	end,
+	Update = function(f, dt, t, sp)
+		f.X = f.X + f.Speed * sp * dt
+		if f.X > 1.08 then f.X, f.Y = -0.08, math.random() * 0.7 elseif f.X < -0.08 then f.X, f.Y = 1.08, math.random() * 0.7 end
+		local flap = math.sin(t * f.Flap * sp + f.Phase)
+		f.HL.Rotation = flap * 30
+		f.HR.Rotation = -flap * 30
+		f.Frame.Position = UDim2.fromScale(f.X, f.Y + math.sin(t * 1.3 + f.Phase) * 0.03)
+		return f.Base
+	end,
+}
+-- parchment: autumn leaves tumbling down, turning over as they fall
+local LEAF_COLORS = { Color3.fromRGB(214, 120, 40), Color3.fromRGB(190, 70, 40), Color3.fromRGB(228, 170, 60), Color3.fromRGB(150, 90, 40), Color3.fromRGB(200, 140, 60) }
+KINDS.Leaves = {
+	Build = function(f, c, p)
+		local sz = math.random(9, 15)
+		f.Speed = 0.02 + math.random() * 0.03
+		f.Spin, f.Rot, f.Flip = (math.random() - 0.5) * 140, math.random() * 360, math.random() * 6
+		f.Base = 0.05 + math.random() * 0.3
+		f.W = sz
+		local col = LEAF_COLORS[math.random(#LEAF_COLORS)]:Lerp(c, 0.25)
+		f.Frame = New("Frame", { AnchorPoint = Vector2.new(0.5, 0.5), Size = UDim2.fromOffset(sz, math.floor(sz * 0.55)), BackgroundColor3 = col,
+			BackgroundTransparency = f.Base, Parent = p }, { CornerFixed(sz) })
+		local rib = New("Frame", { AnchorPoint = Vector2.new(0.5, 0.5), Position = UDim2.fromScale(0.5, 0.5), Size = UDim2.new(0.8, 0, 0, 1),
+			BackgroundColor3 = col:Lerp(Color3.new(0, 0, 0), 0.35), Parent = f.Frame })
+		f.Extra = { { rib, "BackgroundTransparency", 0.3 } }
+	end,
+	Update = function(f, dt, t, sp)
+		Fall(f, dt, sp)
+		f.Rot = f.Rot + f.Spin * sp * dt
+		f.Frame.Rotation = f.Rot
+		f.Frame.Size = UDim2.fromOffset(math.max(2, math.floor(f.W * (0.35 + 0.65 * math.abs(math.cos(t * 1.7 + f.Flip))) + 0.5)), math.floor(f.W * 0.55))
+		f.Frame.Position = UDim2.fromScale(f.X + math.sin(t * f.Sway * 0.9 + f.Phase) * 0.04, f.Y)
+	end,
+}
+
+local BUILTIN_KINDS = { "Snow", "Bubbles", "Petals", "Embers", "Fireflies", "Stars", "Glyphs", "Rain", "Confetti", "Sparkles", "Pixels", "Starfield", "Crystals", "Neon",
+	"Drafting", "FilmGrain", "Prisms", "Sparks", "Bokeh", "Bats", "Leaves" }
 Lumen.ParticleKinds = { "Theme" }
 for _, k in ipairs(BUILTIN_KINDS) do table.insert(Lumen.ParticleKinds, k) end
 Lumen._particleDropdowns = {}
@@ -3663,7 +4253,7 @@ local function ApplyFlake(f, tr, alpha)
 	end
 	if f.Extra then
 		for _, x in ipairs(f.Extra) do
-			x[1][x[2]] = 1 - (1 - (f.NoSelf and math.clamp(tr, 0, 1) or x[3])) * alpha
+			x[1][x[2]] = 1 - (1 - ((f.NoSelf or x[3] == nil) and math.clamp(tr, 0, 1) or x[3])) * alpha
 		end
 	end
 end
@@ -3680,7 +4270,9 @@ local function BuildFlakes()
 		color = ({ Bubbles = Color3.fromRGB(140, 205, 255), Petals = Color3.fromRGB(242, 150, 186), Embers = Color3.fromRGB(255, 150, 70),
 			Fireflies = Color3.fromRGB(180, 255, 150), Glyphs = Color3.fromRGB(205, 205, 205), Rain = Color3.fromRGB(170, 200, 240),
 			Sparkles = Color3.fromRGB(255, 214, 120), Pixels = Color3.fromRGB(90, 255, 170), Crystals = Color3.fromRGB(215, 240, 255),
-			Neon = Color3.fromRGB(0, 229, 255) })[kind] or color
+			Neon = Color3.fromRGB(0, 229, 255), Drafting = Color3.fromRGB(210, 230, 255), FilmGrain = Color3.fromRGB(230, 230, 230),
+			Sparks = Color3.fromRGB(255, 210, 90), Bokeh = Color3.fromRGB(180, 210, 255), Bats = Color3.fromRGB(130, 90, 170),
+			Leaves = Color3.fromRGB(200, 110, 50) })[kind] or color
 	end
 	local L = { Kind = kind, Def = def, Color = color, Flakes = {}, Alpha = 0, Target = 1,
 		Folder = New("Frame", { BackgroundTransparency = 1, Size = UDim2.fromScale(1, 1), ZIndex = 1, Parent = BackdropFrame }) }
@@ -3844,6 +4436,7 @@ function Lumen:SetStyle(st, fade)
 	local function Paint()
 		for _, e in ipairs(Surfaces) do StyleSurface(e) end
 		for _, e in ipairs(AccentFills) do if e.Frame.Parent then PaintAccent(e) end end
+		StyleVignette()
 	end
 	if fade > 0 then
 		StyleBlend = { From = old, To = new, A = 0 }
@@ -3863,6 +4456,7 @@ function Lumen:SetStyle(st, fade)
 		Paint()
 	end
 	self:_RefreshParticles()
+	if (new.Blur or 0) ~= (old.Blur or 0) then self:_UpdateSnow() end
 	self.Events.StyleChanged:Fire(new)
 end
 
@@ -3937,17 +4531,13 @@ function Lumen:AddDockButton(o)
 		Parent = dock, Theme = { BackgroundColor3 = "TabActive" },
 	}, { Corner(8) })
 	local entry = { Button = b, Active = o.Active, Name = o.Name or o.Tooltip or ic }
-	local px = PIXEL_ICONS["dock_" .. ic]
-	if px then
-		entry.Icon = PixelIcon("dock_" .. ic, b, "Label")
-		entry.Icon.Position = UDim2.fromOffset(px.ox, px.oy)
-	elseif ic:find("rbxasset") or ic:find("rbxthumb") then
+	if ic:find("rbxasset") or ic:find("rbxthumb") then
 		entry.Image = New("ImageLabel", {
 			BackgroundTransparency = 1, AnchorPoint = Vector2.new(0.5, 0.5), Position = UDim2.fromScale(0.5, 0.5),
 			Size = UDim2.fromOffset(17, 17), Image = ic, Parent = b,
 		})
 	else
-		entry.Icon = Icon(ic, b, 17)
+		entry.Icon = Icon(ic, b, 18)
 		entry.Icon.AnchorPoint = Vector2.new(0.5, 0.5)
 		entry.Icon.Position = UDim2.fromScale(0.5, 0.5)
 	end
@@ -4315,10 +4905,39 @@ function Lumen:CreateWindow(o)
 	local indHolder = New("Frame", {
 		BackgroundTransparency = 1, Position = tabbar.Position, Size = tabbar.Size, ClipsDescendants = true, ZIndex = 0, Parent = main,
 	})
+	-- hover ghost: a faint pill under the tab you're pointing at
+	local ghost = New("Frame", {
+		Size = UDim2.fromOffset(0, 28), BackgroundTransparency = 1, ZIndex = 0, Parent = indHolder, Theme = { BackgroundColor3 = "ControlHover" },
+	}, { Corner(7) })
 	local ind = New("Frame", {
 		Size = UDim2.fromOffset(0, 28), BackgroundTransparency = 1, ZIndex = 0, Parent = indHolder, Theme = { BackgroundColor3 = "TabActive" },
 	}, { Corner(7) })
+	-- the pill: soft top sheen, a hairline accent border and a small glowing accent underline
+	New("UIStroke", { Thickness = 1, Transparency = 0.55, Parent = ind, Theme = { Color = "AccentBorder" } })
+	New("Frame", { Size = UDim2.fromScale(1, 1), BackgroundColor3 = Color3.new(1, 1, 1), ZIndex = 0, Parent = ind }, {
+		Corner(7), New("UIGradient", { Rotation = 90, Transparency = NumberSequence.new({
+			NumberSequenceKeypoint.new(0, 0.93), NumberSequenceKeypoint.new(0.5, 1), NumberSequenceKeypoint.new(1, 1) }) }),
+	})
+	local under = New("Frame", {
+		AnchorPoint = Vector2.new(0.5, 1), Position = UDim2.new(0.5, 0, 1, -3), Size = UDim2.new(0.42, 0, 0, 2), ZIndex = 1, Parent = ind,
+	}, { CornerFixed(1) })
+	AccentOverlay(under, 1, true)
+	Glow(under, "Accent", 1, true):Set(0.8)
 	local indTween = nil
+	local function Ghost(t)
+		if not t or t == W.Active or not t.Button.Parent then
+			Tween(ghost, 0.18, { BackgroundTransparency = 1 })
+			return
+		end
+		local sc = (W._scale and W._scale.Scale) or Lumen.Scale
+		if sc <= 0 then return end
+		local b = t.Button
+		local pos = UDim2.fromOffset((b.AbsolutePosition.X - indHolder.AbsolutePosition.X) / sc, 0)
+		local size = UDim2.fromOffset(b.AbsoluteSize.X / sc, 28)
+		if ghost.BackgroundTransparency > 0.95 then ghost.Position, ghost.Size = pos, size end
+		TweenService:Create(ghost, TweenInfo.new(0.22, Enum.EasingStyle.Quint, Enum.EasingDirection.Out),
+			{ Position = pos, Size = size, BackgroundTransparency = 0.45 }):Play()
+	end
 
 	local content = New("Frame", {
 		BackgroundTransparency = 1, ClipsDescendants = true, Position = UDim2.fromOffset(17, 87),
@@ -4455,6 +5074,7 @@ function Lumen:CreateWindow(o)
 		self.Active = t
 		TabToken = TabToken + 1
 		local mine = TabToken
+		Ghost(nil)
 		self:_StyleTabs(true)
 		local function Finish()
 			for _, x in ipairs(self.Tabs) do
@@ -4618,7 +5238,7 @@ function Lumen:CreateWindow(o)
 					BackgroundTransparency = 1, Size = UDim2.new(1, 0, 0, 20), LayoutOrder = 0, Parent = frame,
 				}, { Pad(6, 0, 0, 0), List(8, Enum.FillDirection.Horizontal, Enum.HorizontalAlignment.Left, Enum.VerticalAlignment.Center) })
 				if icon then
-					local ic = (icon == "command" and PixelIcon("group_command", titleRow, "Label")) or Icon(icon, titleRow, 15, "Label")
+					local ic = Icon(icon, titleRow, 15, "Label")
 					ic.LayoutOrder = 1
 				end
 				New("TextLabel", {
@@ -4646,6 +5266,11 @@ function Lumen:CreateWindow(o)
 			local subInd = New("Frame", {
 				Size = UDim2.fromOffset(0, 24), BackgroundTransparency = 1, ZIndex = 0, Parent = barWrap, Theme = { BackgroundColor3 = "TabActive" },
 			}, { Corner(6) })
+			New("UIStroke", { Thickness = 1, Transparency = 0.6, Parent = subInd, Theme = { Color = "AccentBorder" } })
+			New("Frame", { Size = UDim2.fromScale(1, 1), BackgroundColor3 = Color3.new(1, 1, 1), ZIndex = 0, Parent = subInd }, {
+				Corner(6), New("UIGradient", { Rotation = 90, Transparency = NumberSequence.new({
+					NumberSequenceKeypoint.new(0, 0.93), NumberSequenceKeypoint.new(0.5, 1), NumberSequenceKeypoint.new(1, 1) }) }),
+			})
 			local bar = New("Frame", {
 				BackgroundTransparency = 1, Size = UDim2.fromScale(1, 1), ZIndex = 1, Parent = barWrap,
 			}, { List(3, Enum.FillDirection.Horizontal, Enum.HorizontalAlignment.Left, Enum.VerticalAlignment.Center) })
@@ -4828,9 +5453,11 @@ function Lumen:CreateWindow(o)
 		Connect(T.Button.MouseButton1Click, function() W:SelectTab(T) end)
 		Connect(T.Button.MouseEnter, function()
 			if W.Active ~= T then Tween(T.Button, 0.12, { TextColor3 = Lumen.Theme.Label }) end
+			Ghost(T)
 		end)
 		Connect(T.Button.MouseLeave, function()
 			if W.Active ~= T then Tween(T.Button, 0.12, { TextColor3 = Lumen.Theme.TextDim }) end
+			Ghost(nil)
 		end)
 		Connect(T.Button:GetPropertyChangedSignal("AbsoluteSize"), function() if W.Active == T then MoveIndicator(true) end end)
 		Connect(T.Button:GetPropertyChangedSignal("AbsolutePosition"), function() if W.Active == T then MoveIndicator(true) end end)
@@ -4874,7 +5501,8 @@ function Lumen:CreateWindow(o)
 			Description = "Makes the menu, panels and pop-ups bigger or smaller. Handy on small screens or 4K monitors.",
 			Flag = "Lumen_Scale", Callback = function(v) Lumen:SetScale(v) end })
 		Lumen._fontDropdown = menu:AddDropdown({ Text = "Font",
-			Values = { "Inter", "Gotham", "Mono", "Michroma", "Jura", "Merriweather", "FredokaOne", "Arcade", "TitilliumWeb", "Oswald", "Ubuntu", "Nunito", "SourceSans" },
+			Values = { "Inter", "Gotham", "Mono", "Michroma", "Jura", "Merriweather", "FredokaOne", "Arcade", "TitilliumWeb", "Oswald", "Ubuntu", "Nunito", "SourceSans",
+				"PatrickHand", "SpecialElite", "Sarpanch", "Creepster", "Fondamento" },
 			Default = Lumen.FontName,
 			Description = "The typeface used everywhere. Themes pick one automatically; choose here to override it.",
 			Callback = function(v)
@@ -4932,28 +5560,50 @@ function Lumen:CreateWindow(o)
 				Lumen:Notify({ Title = "HUD", Content = "Current positions saved as home.", Type = "Success" })
 			end })
 
-		-- turn tabs and sections on or off (rebuilt every time this tab is opened)
+		-- turn tabs, sections, panels and dock buttons on or off: three multi-select dropdowns (ticked = shown)
 		local layout = tab:AddGroup("Layout", "Left")
-		local layoutOpts = {}
-		local function RefreshLayout()
-			for _, op in ipairs(layoutOpts) do op:Destroy() end
-			layoutOpts = {}
-			local function Add(text, default, cb)
-				table.insert(layoutOpts, layout:AddToggle({ Text = text, Default = default, Callback = cb }))
+		local maps = { Tabs = {}, Sections = {}, Extras = {} }
+		local drops = {}
+		local function Apply(kind, picked)
+			for label, e in pairs(maps[kind]) do
+				local want = picked[label] == true
+				if e.Get() ~= want then e.Set(want) end
 			end
+		end
+		drops.Tabs = layout:AddDropdown({ Text = "Visible tabs", Multi = true, Values = {},
+			Description = "Tick the tabs you want in the tab bar. Unticked tabs are hidden, not deleted.",
+			Callback = function(v) Apply("Tabs", v) end })
+		drops.Sections = layout:AddDropdown({ Text = "Visible sections", Multi = true, Values = {},
+			Description = "Every group and tabbox, listed as Tab / Section. Untick one to hide it.",
+			Callback = function(v) Apply("Sections", v) end })
+		drops.Extras = layout:AddDropdown({ Text = "Panels & dock buttons", Multi = true, Values = {},
+			Description = "Floating panels (credits, previews...) and the buttons on the dock.",
+			Callback = function(v) Apply("Extras", v) end })
+		local function RefreshLayout()
+			maps = { Tabs = {}, Sections = {}, Extras = {} }
 			for _, t in ipairs(W.Tabs) do
 				if t ~= tab then
-					Add("Tab: " .. t.Name, not t.Hidden, function(v) t:SetVisible(v) end)
+					maps.Tabs[t.Name] = { Get = function() return not t.Hidden end, Set = function(v) t:SetVisible(v) end }
 					for _, sec in ipairs(t.Sections) do
-						Add("   " .. t.Name .. " / " .. sec.Get(), sec.IsVisible(), function(v) sec.Set(v) end)
+						maps.Sections[t.Name .. " / " .. sec.Get()] = { Get = sec.IsVisible, Set = sec.Set }
 					end
 				end
 			end
 			for _, pnl in ipairs(Lumen._Panels) do
-				Add("Panel: " .. pnl.Name, pnl.Frame.Visible, function(v) pnl:SetVisible(v) end)
+				maps.Extras["Panel: " .. pnl.Name] = { Get = function() return pnl.Frame.Visible end, Set = function(v) pnl:SetVisible(v) end }
 			end
 			for _, e in ipairs(Lumen:GetDockButtons()) do
-				Add("Dock: " .. e.Name, e.Button.Visible, function(v) e.Button.Visible = v end)
+				maps.Extras["Dock: " .. e.Name] = { Get = function() return e.Button.Visible end, Set = function(v) e.Button.Visible = v end }
+			end
+			for kind, d in pairs(drops) do
+				local list, picked = {}, {}
+				for label, e in pairs(maps[kind]) do
+					table.insert(list, label)
+					if e.Get() then picked[label] = true end
+				end
+				table.sort(list)
+				d:SetValues(list)
+				d:Set(picked, true)
 			end
 		end
 		tab.OnSelect = RefreshLayout
@@ -4965,8 +5615,11 @@ function Lumen:CreateWindow(o)
 			for k, pk in pairs(pickers) do pk:Set(Lumen.Theme[k], true) end
 		end
 		local names = {}
-		for n in pairs(Lumen.Presets) do table.insert(names, n) end
-		table.sort(names)
+		for n in pairs(Lumen.Presets) do table.insert(names, PresetLabel(n)) end
+		table.sort(names, function(x, y)
+			if x == "Lavender (Default)" then return true elseif y == "Lavender (Default)" then return false end
+			return x < y
+		end)
 		local DESCRIPTIONS = {
 			Lavender = "The reference look: soft lilac, snow.",
 			Ocean = "Rounder, deep-water glow, rising bubbles.",
@@ -4981,15 +5634,22 @@ function Lumen:CreateWindow(o)
 			Arcade = "8-bit pixel font, square corners, a thick yellow border, CRT scanlines, stepping pixels.",
 			Cosmos = "Deep space, a violet nebula band, a slowly turning aurora border, stars and shooting stars.",
 			Storm = "Slate and steel, condensed type, slanted rain and distant lightning.",
+			Blueprint = "Drafting paper: navy blue, a white grid, a ruled double border, handwritten labels, drafting marks.",
+			Noir = "Film noir: black, white and one red, typewriter type, a dark vignette and flickering film grain.",
+			Prism = "A turning rainbow border, accents that cycle through the spectrum, rising glass shards.",
+			Hazard = "Industrial yellow and black, a striped warning-tape border, square corners, welding sparks.",
+			Glass = "See-through frosted surfaces over a blurred world, soft rounded type, drifting bokeh lights.",
+			Haunted = "Pumpkin orange on midnight purple, dripping type, ghostly green fog, bats overhead.",
+			Parchment = "A light theme: aged paper, ink-brown text, a wax-seal red accent, calligraphy, falling leaves.",
 		}
 		local desc
-		local presetDrop = th:AddDropdown({ Text = "Preset", Values = names, Default = Lumen.Preset, Flag = "Lumen_Preset",
+		local presetDrop = th:AddDropdown({ Text = "Preset", Values = names, Default = PresetLabel(Lumen.Preset), Flag = "Lumen_Preset",
 			Description = "A complete look: colours, corner shape, glow, font, window lighting and particles.",
 			Callback = function(v)
 				if v then
 					Lumen:ApplyPreset(v)
 					SyncPickers()
-					if desc then desc:SetText(DESCRIPTIONS[v] or "") end
+					if desc then desc:SetText(DESCRIPTIONS[PresetName(v)] or "") end
 				end
 			end })
 		table.insert(Lumen._presetDropdowns, presetDrop)
@@ -5011,6 +5671,7 @@ function Lumen:CreateWindow(o)
 		th:AddButton({ Text = "Reset theme", Description = "Go back to the default Lavender look.", Callback = function()
 			Lumen:ApplyPreset("Lavender")
 			SyncPickers()
+			if desc then desc:SetText(DESCRIPTIONS.Lavender) end
 		end })
 
 		local tests = tab:AddGroup("Tests", "Right")
@@ -5258,8 +5919,11 @@ function Lumen:RegisterTheme(name, def, description)
 	self.Presets[name] = def
 	if description and self._presetDescriptions then self._presetDescriptions[name] = description end
 	local names = {}
-	for n in pairs(self.Presets) do table.insert(names, n) end
-	table.sort(names)
+	for n in pairs(self.Presets) do table.insert(names, PresetLabel(n)) end
+	table.sort(names, function(x, y)
+		if x == "Lavender (Default)" then return true elseif y == "Lavender (Default)" then return false end
+		return x < y
+	end)
 	for _, d in ipairs(self._presetDropdowns) do pcall(function() d:SetValues(names, true) end) end
 end
 
@@ -5287,6 +5951,68 @@ do
 	Lumen.ThemeTransition = fade
 	if LoadOptions.Font then pcall(function() Lumen:SetFont(LoadOptions.Font) end) end
 	if LoadOptions.NotifyPosition then pcall(function() Lumen:SetNotifyPosition(LoadOptions.NotifyPosition) end) end
+end
+
+-- High-res icons: fetched once (GitHub, then the jsDelivr mirror), cached on disk, then swapped in with a fade
+local ICON_BASES = {
+	"https://raw.githubusercontent.com/Irakli17/Ui-Library-Test/main/assets/icons/",
+	"https://cdn.jsdelivr.net/gh/Irakli17/Ui-Library-Test@main/assets/icons/",
+}
+-- your own host (a fork, a CDN) is tried first
+if type(LoadOptions.AssetBase) == "string" then table.insert(ICON_BASES, 1, LoadOptions.AssetBase) end
+function Lumen:_LoadIcons()
+	if not (writefile and readfile and isfile and isfolder and makefolder and getcustomasset) then return false end
+	local dir = self.Folder .. "/icons"
+	local ok = pcall(function()
+		if not isfolder(self.Folder) then makefolder(self.Folder) end
+		if not isfolder(dir) then makefolder(dir) end
+		dir = dir .. "/" .. ICON_VERSION
+		if not isfolder(dir) then makefolder(dir) end
+	end)
+	if not ok then return false end
+	local pending, got = #ICON_NAMES, 0
+	for _, name in ipairs(ICON_NAMES) do
+		task.spawn(function()
+			if not IconImages[name] then
+				pcall(function()
+					local path = dir .. "/" .. name .. ".png"
+					if not isfile(path) then
+						for _, base in ipairs(ICON_BASES) do
+							local okGet, data = pcall(function() return game:HttpGet(base .. name .. ".png") end)
+							if okGet and type(data) == "string" and data:sub(1, 4) == "\137PNG" then
+								writefile(path, data)
+								break
+							end
+						end
+					end
+					if isfile(path) then
+						IconImages[name] = getcustomasset(path)
+						got = got + 1
+					end
+				end)
+			end
+			pending = pending - 1
+		end)
+	end
+	local t0 = os.clock()
+	while pending > 0 and os.clock() - t0 < 30 and not self.Unloaded do task.wait(0.1) end
+	if self.Unloaded then return false end
+	-- swap every vector icon still on screen for its image
+	for f, info in pairs(LiveIcons) do
+		if f.Parent and IconImages[info.Kind] then
+			for _, c in ipairs(f:GetChildren()) do
+				if c:IsA("GuiObject") then c:Destroy() end
+			end
+			IconImage(f, info.Kind, info.Key, true)
+		end
+		LiveIcons[f] = nil
+	end
+	for _, fn in ipairs(Refreshers) do pcall(fn) end
+	return got > 0
+end
+
+if not LoadOptions.NoImages then
+	task.spawn(function() Lumen:_LoadIcons() end)
 end
 
 -- Inter font: downloaded once into the Lumen folder (needs writefile + getcustomasset), otherwise Gotham stays.

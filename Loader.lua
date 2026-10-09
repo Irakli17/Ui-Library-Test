@@ -3,7 +3,7 @@
 
 	local Lumen = loadstring(game:HttpGet("https://raw.githubusercontent.com/Irakli17/Ui-Library-Test/main/Loader.lua"))()({
 		Id = "MyHub",          -- any Lumen load option (Id, Theme, Folder, Font, ...)
-		Version = "main",      -- branch or tag to load, e.g. "v0.0.2-stable" to pin a release
+		Version = "main",      -- branch or tag to load, e.g. "v0.0.3-stable" to pin a release
 	})
 
 	What it does:
@@ -65,6 +65,9 @@ return function(options)
 	if not chunk then
 		warn("[Lumen] failed to compile: " .. tostring(compileErr))
 		return nil, compileErr
+	end
+	if options.AssetBase == nil then
+		options.AssetBase = ("https://raw.githubusercontent.com/%s/%s/assets/icons/"):format(REPO, version)
 	end
 	local ok, lib = pcall(chunk, options)
 	if not ok then
