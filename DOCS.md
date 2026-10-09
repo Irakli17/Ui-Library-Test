@@ -1,14 +1,55 @@
-# Lumen v0.0.1-stable - API Reference
+# Lumen v0.0.2-stable - API Reference
+
+## Loading
 
 ```lua
+-- simplest
 local Lumen = loadstring(game:HttpGet("https://raw.githubusercontent.com/Irakli17/Ui-Library-Test/main/Lumen.lua"))()
+
+-- with options (passed straight into the loaded chunk)
+local Lumen = loadstring(game:HttpGet("https://raw.githubusercontent.com/Irakli17/Ui-Library-Test/main/Lumen.lua"))({
+  Id = "MyHub", Theme = "Cosmos", Folder = "MyHub",
+})
+
+-- sturdiest: GitHub, then the jsDelivr mirror, then a cached copy on disk; returns nil + error instead of crashing
+local Lumen, err = loadstring(game:HttpGet("https://raw.githubusercontent.com/Irakli17/Ui-Library-Test/main/Loader.lua"))()({
+  Id = "MyHub", Version = "main",   -- or a tag like "v0.0.2-stable" to pin a release
+})
+if not Lumen then return warn(err) end
 ```
 
-Loading the script again unloads the previous copy. Set `getgenv().LumenNoInter = true` before loading to skip the Inter font download.
+### Load options
+
+| Option | Default | What it does |
+|---|---|---|
+| `Id` | `"default"` | Each Id is its own instance. Re-running a script replaces **its own** previous UI (handy while developing) and leaves other scripts' UIs alone. |
+| `Reuse` | `false` | If an instance with this Id is already running, return it instead of replacing it (lets several scripts share one UI). |
+| `Theme` | `"Lavender"` | Start in any preset. |
+| `Folder` | `"Lumen"` | Folder for configs, fonts and the loader cache. |
+| `Font` | `"Inter"` | Any font name (see Themes). |
+| `Scale` | `1` | UI scale. |
+| `NotifyPosition` | `"TopRight"` | `TopRight`, `BottomRight`, `TopLeft`, `BottomLeft`. |
+| `NotifyErrors` | `true` | Show a red notification when one of your callbacks errors. |
+| `Hints` | `true` | Hover explanations. |
+| `NoInter` | `false` | Skip the one-time Inter font download. |
+| `Parent` | auto | Where the ScreenGui goes. By default: `gethui()`, then CoreGui, then PlayerGui. |
+| `DisplayOrder`, `Name` | `10000`, `"LumenUI"` | ScreenGui properties. |
+
+You can also set `getgenv().LumenOptions = {...}` before loading; it is read once and cleared so the next script starts clean.
+
+### Studio / ModuleScript
+
+`Lumen.lua` also works as a **ModuleScript**: put it in ReplicatedStorage and `local Lumen = require(path.Lumen)` from a LocalScript. Executor-only features (configs on disk, the Inter download, HTTP, clipboard) switch themselves off when the functions aren't there; everything else works the same.
+
+### Safe callbacks
+
+Every callback (elements, buttons, notification actions, events) runs in its own thread inside `xpcall`. If one errors, the traceback is printed with the element's name, a red "Script error" notification appears (turn off with `NotifyErrors = false` or in the config tab), and the rest of your script keeps running.
 
 ## Structure
 
 `Lumen` -> `Window` -> `Tab` -> `Group` / `Tabbox` -> elements. Free-floating `Panel`s sit outside windows.
+
+Everything you create is a plain Lua object you can keep and change later (`:Set`, `:SetText`, `:SetVisible`, `:SetDisabled`, `:SetDescription`, `:Destroy`).
 
 ## Window
 
@@ -33,11 +74,15 @@ local Window = Lumen:CreateWindow({
 | `Window:AddConfigTab(name?)` | Settings tab, see below |
 | `Window:SelectTab(tab)` | Switch tab |
 | `Window:SetTabVisible(name, bool)` | Hide or show a tab by name |
+| `Window:CycleTab(step)` | Next (`1`) / previous (`-1`) visible tab. Also **Ctrl+Tab** / **Ctrl+Shift+Tab** |
+| `Window:SetCollapsed(bool)` / `IsCollapsed()` | Fold the window down to its title bar. Also **double-click the title bar** |
 | `Window:Toggle()` / `SetVisible(bool)` | Show or hide the window |
 | `Window:SetTitle / SetSubtitle / SetFooter(text)` | Update header and footer |
 | `Window:Destroy()` | Remove just this window |
 
-Draggable by its header or its footer strip, resizable from the bottom-right grip.
+Draggable by its header or its footer strip, resizable from the bottom-right grip. Opening pops the window up, closing shrinks it away; the backdrop fades with it.
+
+**Tab switching.** The highlight is one pill that slides to the clicked tab; the old page drifts out under a soft veil and the new one slides in from the side you're moving towards. Sub-tabs inside tabboxes do the same.
 
 ## Tab
 
@@ -68,16 +113,27 @@ The config tab also has a **Layout** group with a toggle for every tab and secti
 
 ## Elements (available on any Group)
 
-Every element takes an options table. `Flag` stores the value in `Lumen.Flags[flag]`, makes it saveable in configs and registers it in `Lumen.Options[flag]`. `Callback` fires on change. All elements also have `:OnChanged(fn)`, `:SetVisible(bool)`, `:SetDisabled(bool)` and `:Destroy()`. Pass `Disabled = true` to start dimmed and non-interactive. All named elements are searchable from the command palette.
+Every element takes an options table. `Flag` stores the value in `Lumen.Flags[flag]`, makes it saveable in configs and registers it in `Lumen.Options[flag]`. `Callback` fires on change. All elements also have `:OnChanged(fn)`, `:SetVisible(bool)`, `:SetDisabled(bool)`, `:SetDescription(text)`, `:Get()` and `:Destroy()`. Pass `Disabled = true` to start dimmed and non-interactive. All named elements are searchable from the command palette.
+
+**`Description = "..."`** on any element adds a hover explanation (see **Hover explanations**).
 
 ### AddToggle
-`{Text, Default, Flag, Callback, Tooltip, Disabled}`. `:Set(bool)`, `.Value`. Addons: `:AddKeybind`, `:AddColorPicker`, `:AddTooltip(text)`.
+`{Text, Default, Flag, Callback, Tooltip, Description, Disabled, Risky}`. `:Set(bool)`, `:SetText(text)`, `.Value`. `Risky = true` tints the label red. The box squashes and pops when toggled, and the fill fades in (in the theme's accent gradient when it has one). Addons: `:AddKeybind`, `:AddColorPicker`, `:AddTooltip(text)`.
 
 ### AddSlider
-`{Text, Min, Max, Default, Increment, Suffix, Flag, Callback}`. `:Set(n)`.
+`{Text, Min, Max, Default, Increment, Suffix, Flag, Callback, Description}`. `:Set(n)`. **Click the value to type an exact number.** Values set from code glide to their spot.
 
 ### AddDropdown
-`{Text, Values, Default, Multi, Flag, Callback}`. Single mode value is a string, multi mode is `{[name] = true}`. `:Set(v)`, `:SetValues(list, keepSelection?)`.
+`{Text, Values, Default, Multi, Search, Flag, Callback, Description}`. Single mode value is a string, multi mode is `{[name] = true}`. `:Set(v)`, `:SetValues(list, keepSelection?)`. Lists longer than 8 entries get a **search box** (force it with `Search = true`, hide it with `Search = false`). The list unfolds open and folds closed.
+
+### AddPlayerDropdown
+A dropdown of everyone in the server that updates itself as players join and leave. Same options as AddDropdown plus `IncludeLocal` (default `false`). `:GetPlayer()` returns the `Player` (or a list in Multi mode).
+
+### AddProgress
+`{Text, Default, Max = 100, Suffix, Color, Description}`. An animated bar with a moving sheen; it brightens briefly when it fills. `:Set(v)`, `:Increment(n)`, `:SetMax(m)`, `:SetText(t)`. Without `Suffix` it shows a percentage.
+
+### AddParagraph
+`{Title, Content}` (or just a string). A titled block of wrapping text. `:SetTitle(t)`, `:SetContent(t)`.
 
 ### AddInput
 `{Text, Placeholder, Default, Numeric, MaxLength, Realtime, Dynamic, Flag, Callback}`. Fires on focus lost, or on every keystroke with `Realtime = true`. `.Value` is always current.
@@ -85,7 +141,7 @@ Every element takes an options table. `Flag` stores the value in `Lumen.Flags[fl
 `Dynamic = true` makes a live text box that grows taller as the text wraps (up to 130px), fires on every keystroke, and submits on Enter.
 
 ### AddButton
-`{Text, Callback, Tooltip, DoubleClick, Confirm}`. `DoubleClick = true` asks for a second click. `Confirm = {Title, Text, Type, Confirm, Cancel, Hold}` opens a confirmation dialog first and only runs `Callback` if accepted (see **Confirmation dialog**). `:AddSubButton({Text, Callback, Confirm})` splits the row.
+`{Text, Callback, Tooltip, Description, DoubleClick, Confirm}`. Pressing sends a ripple across the button. `DoubleClick = true` asks for a second click. `Confirm = {Title, Text, Type, Confirm, Cancel, Hold}` opens a confirmation dialog first and only runs `Callback` if accepted (see **Confirmation dialog**). `:AddSubButton({Text, Callback, Confirm})` splits the row.
 
 ### AddCredits
 `group:AddCredits({{Name, Role, RoleColor, Description}, ...})` puts credit cards inside any group or tab. Returns an object with `:Add(entry)`.
@@ -143,6 +199,17 @@ Lumen:SetDockVisible(false)
 
 `Order` sorts the buttons (menu = 1, panel buttons default 20, hotkeys = 30, particles = 34, palette = 40, custom default 50).
 
+## Hover explanations
+
+Rest the mouse on anything with a `Description` (or `Tooltip`) and, after a short pause, a card fades and lifts in under it with the element's name and the explanation. Moving to another explained element makes the card glide over instead of popping again; leaving fades it out. Every setting in the config tab has one.
+
+```lua
+Group:AddToggle({Text = "Fullbright", Description = "Lights the whole map evenly so dark areas are visible."})
+someElement:SetDescription("Changed text")
+Lumen.HintDelay = 0.35   -- seconds before it appears
+Lumen.Hints = false      -- turn them all off (also in the config tab)
+```
+
 ## Confirmation dialog
 
 ```lua
@@ -155,11 +222,11 @@ Lumen:Confirm({
 })
 ```
 
-Dims the screen, shows a centred card with a glowing status badge, and closes on Esc or a click outside. Returns `{Close = function}`.
+Dims the screen, shows a centred card with a glowing status badge (circle for success/info, diamond for warning, rounded square for errors), and closes on Esc or a click outside. Returns `{Close = function}`.
 
 ## Command palette
 
-Press **Ctrl+K** or click the dock command button. Search every named option, see its path (`MainWindow/Tab/Group`) and current value. Up/Down to move, Enter or click to act: toggles flip, buttons run, everything else jumps to its tab. Esc closes. API: `Lumen:OpenPalette()`, `ClosePalette()`, `TogglePalette()`.
+Press **Ctrl+K** or click the dock command button. Search every named option, see its path (`MainWindow/Tab/Group`) and current value. Up/Down to move, Enter or click to act: toggles flip, buttons run, everything else jumps to its tab, opens the right sub-tab, scrolls it into view and pulses a highlight around it. Esc closes. API: `Lumen:OpenPalette()`, `ClosePalette()`, `TogglePalette()`.
 
 ## HUD
 
@@ -178,74 +245,92 @@ Lumen:SetHudHome()          -- make the current spots the new home
 ## Notifications
 
 ```lua
-Lumen:Notify("test notif")                                                   -- compact, reference style
-Lumen:Notify({Title = "Saved", Content = "Settings applied.", Type = "Success"})  -- green
-Lumen:Notify({Title = "Careful", Content = "May be unstable.", Type = "Warning"}) -- yellow
-Lumen:Notify({Title = "Failed", Content = "Server unreachable.", Type = "Error"})  -- red
-Lumen:Notify({Title = "Tip", Content = "Ctrl+K searches.", Type = "Info"})          -- blue
+Lumen:Notify("test notif")                                                   -- compact, reference style (the bell rings)
+Lumen:Notify({Title = "Saved", Content = "Settings applied.", Type = "Success"})  -- green circle, the check spins in
+Lumen:Notify({Title = "Careful", Content = "May be unstable.", Type = "Warning"}) -- yellow diamond, the ! wobbles
+Lumen:Notify({Title = "Failed", Content = "Server unreachable.", Type = "Error"})  -- red square, the card shakes
+Lumen:Notify({Title = "Tip", Content = "Ctrl+K searches.", Type = "Info"})          -- blue circle, the i drops in
 
 local n = Lumen:Notify({Title = "Loading", Content = "Fetching...", Type = "Loading"})   -- spinner, waits
 n:Update({Title = "Done", Content = "Loaded.", Type = "Success"})                         -- morphs in place
 n:Dismiss()
+
+Lumen:Notify({Title = "Update available", Content = "v0.0.3 is out.", Type = "Info", Duration = 8,
+  Actions = {{Text = "Changelog", Callback = function() end}, {Text = "Later"}}})       -- buttons inside the card
+
+Lumen:SetNotifyPosition("BottomRight")   -- TopRight, BottomRight, TopLeft, BottomLeft
 ```
 
-Nothing is static: cards slide in from the right with a slight overshoot, a light sweep passes over them, the icon pops in, the accent bar on the left breathes (harder for warnings and errors), errors give a short shake, and the countdown bar drains. The stack reflows smoothly when one leaves. **Hover pauses** the countdown, **click dismisses**. At most six are shown at once.
+Each type has its own badge **shape** as well as colour, so they're readable at a glance, and the glyphs are drawn centred in the badge. Cards slide in from their screen edge with a slight overshoot, a pulse ring expands out of the badge, a light sweep passes over the card, the accent bar breathes (harder for warnings and errors), and the countdown bar drains with a bright head. The stack reflows smoothly when one leaves. **Hover pauses** the countdown, **click dismisses**. At most six are shown at once.
 
-Types: `Success`, `Warning` (alias `Caution`), `Error` (alias `Danger`), `Info`, `Loading`. Colours come from the theme keys `Success`, `Caution`, `Error`, `Info` and `Accent`. Options: `Title`, `Content`, `Type`, `Duration`, `Progress` (force the countdown bar on or off). Disable all with `Lumen.ShowNotifications = false`.
+Types: `Success`, `Warning` (alias `Caution`), `Error` (alias `Danger`), `Info`, `Loading`. Colours come from the theme keys `Success`, `Caution`, `Error`, `Info` and `Accent`. Options: `Title`, `Content` (rich text), `Type`, `Duration`, `Progress`, `Actions`. Disable all with `Lumen.ShowNotifications = false`.
 
 ## Particles and backdrop
 
 ```lua
 Lumen:SetSnow(true, {Count = 100, Speed = 1.5, Kind = "Theme"})
-Lumen:SetParticles("Petals")     -- Theme, Snow, Bubbles, Petals, Embers, Fireflies, Stars, Glyphs
+Lumen:SetParticles("Confetti")
 Lumen:SetSnowOptions({Count = 50})
 Lumen:SetBackdrop({Dim = 0.5, Blur = 12})
 ```
 
-`Theme` (the default) uses whatever the active theme ships with. Drawn behind the UI and only while a window is open.
+Kinds: `Theme` (whatever the active theme ships with), `Snow`, `Bubbles`, `Petals`, `Embers`, `Fireflies`, `Stars`, `Glyphs`, `Rain`, `Confetti`, `Sparkles`, `Pixels`, `Starfield` (with shooting stars), `Crystals`, `Neon`. Switching kind, amount or theme **crossfades** the old particles out and the new ones in. The whole backdrop fades in when a window opens and out when the last one closes.
 
 ## Themes, fonts and scale
 
-Every preset changes the **shape and feel**, not just the colours:
+Every preset changes the **shape and feel** of every element, not just the colours: corner roundness, glow strength, font and text size, window lighting, borders, accent gradients and particles. Switching blends all of it over `Lumen.ThemeTransition` seconds (0.3 by default, **Theme fade** in the config tab): colours blend, corners morph, glow fades, text dips and comes back in the new font, the window lighting crossfades and the particles crossfade.
 
-| Preset | Corners | Glow | Font | Surface | Particles |
+| Preset | Shape | Font | Surface & border | Accent | Particles |
 |---|---|---|---|---|---|
-| Lavender | reference | reference | Inter | flat, as in the reference | Snow |
-| Ocean | rounder (1.35x) | stronger | Inter | deep-water glow from below, cyan-to-blue light along the top edge | Bubbles rising |
-| Rose | very round (1.75x) | strongest | Inter | pink haze from above, pink-to-peach top light | Petals spinning down |
-| Emerald | slightly rounder | strong | Inter | aurora band across the top | Fireflies drifting and pulsing |
-| Sunset | reference | strong | Inter | warm glow from below, orange-to-magenta top light | Embers rising and flickering |
-| Mono | sharp (0.25x) | none | Mono | scanlines | Glyph rain |
-
-Switching presets blends the whole palette over `Lumen.ThemeTransition` seconds (0.3 by default, adjustable as **Theme fade** in the config tab) instead of snapping.
+| Lavender | reference | Inter | flat, as in the reference | solid | Snow |
+| Ocean | rounder | Inter | deep-water glow from below, cyan-blue top light | solid | Bubbles rising |
+| Rose | very round, strong glow | Inter | pink haze from above, pink-peach top light | solid | Petals spinning down |
+| Emerald | slightly rounder | Inter | aurora band across the top | solid | Fireflies |
+| Sunset | reference | Inter | warm glow from below | solid | Embers rising |
+| Mono | sharp, no glow | RobotoMono | scanlines | solid | Glyph rain |
+| **Synthwave** | tighter, heavy glow | Michroma | pink glow from below, **spinning neon border** | pink-to-cyan gradient | Neon streaks rising |
+| **Frost** | round | Jura | icy top light, **frosted inner border** | white-to-ice gradient | Spinning ice crystals |
+| **Royal** | sharp-ish | Merriweather (serif) | gold top light, **gilded double border** | gold gradient | Glinting sparkles |
+| **Candy** | extra round, big glow | Fredoka One | mint glow from below, **slow pastel border** | pink-to-peach gradient | Tumbling confetti |
+| **Arcade** | square | Press Start (pixel) | CRT scanlines, **thick yellow border** | solid | Stepping pixels |
+| **Cosmos** | round | Titillium Web | violet nebula band, **slowly turning aurora border** | violet-to-cyan gradient | Stars + shooting stars |
+| **Storm** | reference | Oswald (condensed) | steel top light | solid | Slanted rain + distant lightning |
 
 ```lua
-Lumen:ApplyPreset("Rose")
+Lumen:ApplyPreset("Cosmos")
 Lumen:SetTheme({Accent = Color3.fromRGB(255, 90, 120)})             -- colours only (instant)
 Lumen:SetTheme({Accent = Color3.fromRGB(255, 90, 120)}, 0.4)        -- colours, blended
-Lumen:SetStyle({Radius = 1.4, Glow = 1.3, Font = "Inter", Particles = "Fireflies",
-  ParticleColor = Color3.fromRGB(180, 255, 150), Tint = Color3.fromRGB(60, 200, 150), TintPlace = "Aurora",
-  TintAmount = 0.2, TopLine = {Color3.fromRGB(90, 230, 160), Color3.fromRGB(60, 190, 220)}, Scanlines = false})
+Lumen:SetStyle({Radius = 1.4, Glow = 1.3, Font = "Nunito"}, 0.4)    -- shape / feel, blended
 Lumen:SetScale(1.15)           -- windows, panels and popups (0.6 - 1.6)
-Lumen:SetFont("Inter")         -- "Inter", "Gotham" or "Mono"
+Lumen:SetFont("Michroma", 0.35) -- any Roblox font name, "Inter", "Gotham" or "Mono"; optional fade
 ```
 
-Add your own preset by putting a table in `Lumen.Presets` with colour keys plus a `Style` table; it shows up in the config dropdown.
+**Style keys** (all optional): `Radius` (corner scale), `Glow` (0 = off), `Font`, `TextScale`, `Particles`, `ParticleColor`, `Tint` + `TintPlace` (`"Top"`, `"Bottom"`, `"Aurora"`) + `TintAmount`, `TopLine = {c1, c2}`, `Scanlines`, `Aura = {c1, c2, ...}` + `AuraSpeed` + `AuraThickness`, `InnerLine = Color3`, `AccentGradient = {c1, c2}`, `Lightning`.
 
-Theme keys: `Background, Group, GroupBorder, Control, ControlHover, Border, Outline, Text, Label, TextDim, TextMuted, Chip, ChipText, Accent, AccentText, AccentBorder, Toggle, TabActive, Success, Warning, Danger, Info, Caution, Error`. Setting `Accent` or `Background` also derives `AccentText`, `AccentBorder`, `Toggle` and `TabActive` unless you pass them. The default theme was sampled from the reference screenshots.
+**Your own theme:**
 
-**Fonts.** Inter is downloaded once from GitHub into your `Lumen/fonts` folder (needs `writefile` and `getcustomasset`). Until it is ready, or if your executor can't do it, Gotham is used. Mono uses Roblox's RobotoMono. Applying a preset switches to its font; you can still pick another in the config tab.
+```lua
+Lumen:RegisterTheme("Matcha", {
+  Accent = Color3.fromRGB(140, 200, 120), Background = Color3.fromRGB(14, 17, 13), Group = Color3.fromRGB(18, 22, 17),
+  Style = { Radius = 1.3, Font = "Nunito", Particles = "Petals", ParticleColor = Color3.fromRGB(190, 230, 160),
+    Tint = Color3.fromRGB(110, 180, 90), TintPlace = "Bottom", AccentGradient = {Color3.fromRGB(170, 230, 140), Color3.fromRGB(90, 160, 90)} },
+}, "Soft greens and drifting leaves.")   -- shows up in the config tab's Preset dropdown with this description
+```
+
+Theme keys: `Background, Group, GroupBorder, Control, ControlHover, Border, Outline, Text, Label, TextDim, TextMuted, Chip, ChipText, Accent, AccentText, AccentBorder, Toggle, TabActive, Success, Warning, Danger, Info, Caution, Error`. Setting `Accent` or `Background` also derives `AccentText`, `AccentBorder`, `Toggle` and `TabActive` unless you pass them.
+
+**Fonts.** Inter is downloaded once from GitHub into your `Lumen/fonts` folder (needs `writefile` and `getcustomasset`); until it is ready, or if your executor can't do it, Gotham is used. Any other name is looked up as a built-in Roblox font (`Michroma`, `Jura`, `Merriweather`, `FredokaOne`, `Arcade`, `TitilliumWeb`, `Oswald`, `Ubuntu`, `Nunito`, `SourceSans`, ...). Unknown names fall back to Gotham.
 
 ## Config tab
 
-`Window:AddConfigTab()` builds a settings tab where everything is adjustable:
+`Window:AddConfigTab()` builds a settings tab where everything is adjustable, and every setting explains itself on hover:
 
-- **Menu**: menu key, dock, watermark, hotkey list, notifications, UI scale, font, screen watermark, unload
+- **Menu**: menu key, dock, watermark, hotkey list, notifications, notification position, hover explanations, script error alerts, UI scale, font, screen watermark, unload
 - **Effects**: particles on/off, particle style, amount, speed, backdrop dim and blur
 - **HUD Positions**: return-to-place on/off, delay, which pieces (dock, hotkey list, watermark), Return now, Set as home
 - **Layout**: a toggle for every tab, section, floating panel and dock button
 - **Theme**: preset dropdown with a one-line description of each look, theme fade time, a colour picker for each theme colour, reset button
-- **Tests**: Success, Warning, Error and Info notifications, a Loading -> Done notification, a plain one, and a hold-to-confirm dialog
+- **Tests**: Success, Warning, Error and Info notifications, Loading -> Done, plain, with action buttons, a deliberate script error, and a hold-to-confirm dialog
 - **Configs**: save, load, delete, autoload
 - **Credits** (optional): `Window:AddConfigTab("Config", {Credits = {...entries}})`
 
@@ -262,17 +347,107 @@ Lumen:LoadAutoload()            -- call once, after building your UI
 
 Only elements with a `Flag` are saved. The theme preset is saved too and is applied before your custom colours when a config loads.
 
+## Events
+
+```lua
+Lumen.Events.FlagChanged:Connect(function(flag, value) end)
+Lumen.Events.ThemeChanged:Connect(function(theme) end)
+Lumen.Events.StyleChanged:Connect(function(style) end)
+Lumen.Events.TabChanged:Connect(function(tabName, window) end)
+Lumen.Events.VisibilityChanged:Connect(function(visible, window) end)
+Lumen.Events.Notified:Connect(function(options) end)
+Lumen.Events.Unloading:Connect(function() end)   -- runs before the UI is removed: restore anything your script changed
+```
+
+Each signal has `:Connect(fn)` (returns a handle with `:Disconnect()`), `:Once(fn)` and `:Wait()`. Make your own with `Lumen.Signal()`.
+
+## Flags
+
+```lua
+Lumen:GetFlag("Speed")                      -- same as Lumen.Flags.Speed
+Lumen:SetFlag("Speed", 50)                  -- moves the slider and fires its callback
+Lumen:OnFlagChanged("Speed", function(v) end)
+```
+
+## Helpers
+
+```lua
+local res, err = Lumen:Request({Url = url, Method = "POST", Headers = {["Content-Type"] = "application/json"}, Body = json})
+-- uses request / http_request / syn.request / http.request, whichever the executor has; nil + message if none
+
+Lumen:Clipboard("text")   -- setclipboard / toclipboard; returns false if unsupported
+```
+
+## Extending Lumen
+
+Add your own elements, particles and icons. They get the theme, flags, configs, hover explanations and the command palette for free.
+
+```lua
+-- a +/- number stepper available as group:AddStepper({...})
+Lumen:RegisterElement("Stepper", function(group, o, api)
+  local opt = api.NewOption("Stepper", o)          -- gives :OnChanged, :SetVisible, :SetDescription, ...
+  opt.Value = o.Default or 0
+  local row = api.Row(group._container, 24)
+  opt.Row = row
+  local label = api.New("TextLabel", {Text = (o.Text or "Stepper") .. ": " .. opt.Value, Size = UDim2.fromScale(1, 1),
+    TextXAlignment = Enum.TextXAlignment.Left, Parent = row})
+  function opt:Set(v, silent)
+    self.Value = v
+    label.Text = (o.Text or "Stepper") .. ": " .. v
+    if not silent then api.Fire(self, v) end
+  end
+  api.Register(opt, o.Flag)                        -- saved in configs
+  api.Catalog(group, opt, o.Text)                  -- searchable in Ctrl+K
+  if o.Description then opt:SetDescription(o.Description) end
+  return opt
+end)
+
+-- a particle style
+Lumen:RegisterParticles("Leaves", {
+  Build = function(f, color, parent)               -- f.X, f.Y (0-1), f.Phase, f.Sway are pre-filled
+    f.Speed, f.Base = 0.03 + math.random() * 0.03, 0.3
+    f.Frame = Instance.new("Frame")
+    f.Frame.Size = UDim2.fromOffset(10, 6)
+    f.Frame.BackgroundColor3 = color
+    f.Frame.Parent = parent
+  end,
+  Update = function(f, dt, t, speed)               -- may return a transparency; fading is handled for you
+    f.Y = (f.Y + f.Speed * speed * dt) % 1
+    f.Frame.Rotation = t * 60 + f.Phase * 50
+    f.Frame.Position = UDim2.fromScale(f.X + math.sin(t + f.Phase) * 0.03, f.Y)
+  end,
+})
+
+-- an icon, drawn on a 16x16 grid with rounded segments and dots
+Lumen:RegisterIcon("heart", function(frame, size, colorKey, h)
+  h.Dot(5.5, 6, 5); h.Dot(10.5, 6, 5); h.Seg(3.4, 8.2, 8, 13, 3); h.Seg(12.6, 8.2, 8, 13, 3)
+end)
+```
+
+`api` contains `New, Corner, Stroke, Pad, List, Row, Tween, Glow, Icon, NewOption, Register, Fire, Connect, Describe, Catalog, AccentOverlay, SafeCall, Theme, Gui, Overlay, ShowPopup, ClosePopup, Dragger`. `api.New(class, props, children)` accepts `Theme = {BackgroundColor3 = "Group"}` to follow theme changes automatically.
+
 ## Misc
 
-`Lumen:Unload()` removes everything and disconnects all events. Set `Lumen.OnUnload = function() ... end` for your own cleanup. Read your own state from `Lumen.Flags.YourFlag`.
+`Lumen:Unload()` runs `Events.Unloading` handlers, then removes everything and disconnects all events. `Lumen.OnUnload = function() end` still works. Read your own state from `Lumen.Flags.YourFlag`.
 
 ## Changelog
 
+**v0.0.2-stable**
+- Integration: load options as a loadstring argument, per-script instances (`Id`, `Reuse`), `Loader.lua` with a CDN mirror and offline cache, ModuleScript/Studio support, `Parent`/`DisplayOrder` options
+- Events, flag helpers, `Request` and `Clipboard` helpers, safe callbacks with error notifications
+- Extension API: `RegisterElement`, `RegisterTheme`, `RegisterParticles`, `RegisterIcon`, `Lumen.API`
+- Seven new themes (Synthwave, Frost, Royal, Candy, Arcade, Cosmos, Storm) with their own fonts, borders, accent gradients and particles; seven new particle styles; any Roblox font
+- Everything morphs when the theme changes: colours, corners, glow, fonts, window lighting, borders and particles
+- Sliding tab and sub-tab indicators, page transitions, window open/close and collapse animations, unfolding popups, backdrop fade, button ripples
+- Hover explanations on every element and config setting
+- New elements: player dropdown, progress bar, paragraph; searchable dropdowns; type-in slider values; risky toggles
+- Notifications: distinct badge shapes, centred glyphs, per-type motion, action buttons, four screen positions
+- Command palette jumps to the element and highlights it; Ctrl+Tab switches tabs
+
 **v0.0.1-stable** - first stable release
 - Themes change shape, glow, font, surface and particles, not just colour; switching blends smoothly
-- Seven particle styles (snow, bubbles, petals, embers, fireflies, stars, glyph rain), selectable or theme-driven
+- Seven particle styles, selectable or theme-driven
 - Dock and hotkey list glide back to their spot after dragging (configurable delay and targets)
 - Animated notifications: success / warning / error / info / loading, morphing handles, hover-to-pause, click-to-dismiss
 - ESP preview overlay on viewports (box, name, health, distance)
 - Watermark button removed from the dock
-- Everything from the earlier development builds: pixel-traced dock icons, command palette, confirmation dialogs, dynamic input, credits, layout toggles, config system

@@ -3,9 +3,9 @@
 A dark, compact Roblox UI library in a single file. Loads with `loadstring`, no dependencies.
 
 ```lua
-local Lumen = loadstring(game:HttpGet("https://raw.githubusercontent.com/Irakli17/Ui-Library-Test/main/Lumen.lua"))()
+local Lumen = loadstring(game:HttpGet("https://raw.githubusercontent.com/Irakli17/Ui-Library-Test/main/Lumen.lua"))({ Id = "MyHub" })
 
-local Window = Lumen:CreateWindow({ Title = "My Hub", Tag = "Pro", Version = "v0.0.1", Snow = true })
+local Window = Lumen:CreateWindow({ Title = "My Hub", Tag = "Pro", Version = "v0.0.2", Snow = true })
 local Tab = Window:AddTab("Main")
 local Group = Tab:AddGroup("Hello")
 
@@ -18,25 +18,22 @@ Window:AddConfigTab("Config")
 
 ## Features
 
-- Tabs, tabboxes (sub-tabs), titled groups with icons, banners, equal-height column layout, tabs and sections you can switch off
-- Toggle (with glow, disabled state), slider, dropdown (multi), input, button (with sub-buttons), label, image, selectable image grid
-- 3D viewport you can orbit with the mouse in any direction; it returns to auto-rotating when released
-- Keybinds (toggle / hold / press / always) and color pickers as addons, plus tooltips
-- Top dock with pixel-traced icons, command palette (Ctrl+K), animated success / warning / error / info / loading notifications, draggable watermark and hotkey list
-- Confirmation dialogs (hold-to-confirm), dynamic input, credits inside any group
-- Dimmed and blurred backdrop with seven particle styles (snow, bubbles, petals, embers, fireflies, stars, glyph rain)
-- Floating panels, credits panel, key prompt panel with Discord icon
-- Themes that change shape, glow, font, surface and particles (not just colour), blended smoothly when you switch
-- Dock and hotkey list glide back into place after you drag them
-- ESP preview overlay on viewports
-- Everything adjustable in the built-in settings tab, including a full theme editor with presets
-- Inter font (downloaded once, falls back to Gotham), UI scale, config save / load / autoload
-- Draggable, resizable window; safe reload
+- **Built for loadstring:** options passed into the call, one instance per script (`Id`), safe re-running, `Loader.lua` with a CDN mirror and offline cache, works as a ModuleScript too
+- **Easy to extend:** add your own elements, themes, particle styles and icons; events, flag helpers, HTTP and clipboard helpers; every callback is crash-safe
+- **13 themes** that change shape, glow, font, borders, window lighting and particles (not just colour), morphing smoothly when you switch
+- **Every element:** toggle, slider (type-in), dropdown (multi, searchable), player dropdown, input (dynamic), button (sub-buttons, confirm, ripple), label, paragraph, progress bar, image, image grid, 3D viewport with ESP overlay, keybinds, colour pickers, credits
+- **Motion everywhere:** sliding tab highlight and page transitions, window open/close/collapse, unfolding popups, backdrop fade, particle crossfades
+- **Hover explanations** on any element and every setting
+- **Notifications:** success, warning, error, info and loading, each with its own badge shape and motion, action buttons, four positions
+- Tabs, tabboxes, groups with icons, banners, equal-height columns, everything switchable on and off
+- Top dock with pixel-traced icons, command palette (Ctrl+K) that jumps to and highlights any setting, Ctrl+Tab tab switching
+- Draggable watermark and hotkey list that glide back into place, floating panels, key system, credits
+- Built-in settings tab: theme editor, particles, backdrop, layout, HUD, notifications, tests, configs with autoload
 
 ## Docs
 
-See [DOCS.md](DOCS.md) for the API and [Example.lua](Example.lua) for a full demo.
+See [DOCS.md](DOCS.md) for the API, [Example.lua](Example.lua) for a full demo, and [Loader.lua](Loader.lua) for the sturdier loader.
 
 ## Versioning
 
-`vX.X.X`. Current version: **v0.0.1-stable**.
+`vX.X.X`. Current version: **v0.0.2-stable**.

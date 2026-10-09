@@ -1,18 +1,40 @@
 --!nocheck
 --!nolint
 --[[
-	Lumen UI Library  v0.0.1-stable
-	Single file, no dependencies, loadstring-ready.
+	Lumen UI Library  v0.0.2-stable
+	Single file, no dependencies, loadstring-ready. Also works as a ModuleScript (require) in Studio.
 
 	local Lumen = loadstring(game:HttpGet("https://raw.githubusercontent.com/Irakli17/Ui-Library-Test/main/Lumen.lua"))()
 
+	Load options can be passed straight into the loadstring call:
+	local Lumen = loadstring(game:HttpGet(URL))({ Id = "MyHub", Theme = "Cosmos", Folder = "MyHub" })
+
 	See DOCS.md for the full API and Example.lua for a complete demo.
-	Set getgenv().LumenNoInter = true before loading to skip the one-time Inter font download.
 ]]
 
+local LoadArgs = { ... }
 local env = (getgenv and getgenv()) or _G
-if env.LumenUI and type(env.LumenUI.Unload) == "function" then
-	pcall(function() env.LumenUI:Unload() end)
+
+-- Options: first argument of the chunk, or getgenv().LumenOptions (read once, then cleared so the next script starts clean)
+local LoadOptions = {}
+do
+	local src = (type(LoadArgs[1]) == "table" and LoadArgs[1]) or (type(env.LumenOptions) == "table" and env.LumenOptions) or nil
+	if src then for k, v in pairs(src) do LoadOptions[k] = v end end
+	if src ~= nil and src == env.LumenOptions then env.LumenOptions = nil end
+	if env.LumenNoInter then LoadOptions.NoInter = true end
+end
+
+-- Every script gets its own instance, keyed by Id. Re-running a script replaces its own previous copy
+-- (handy while developing) and leaves other scripts' interfaces alone. Reuse = true returns the running copy instead.
+local InstanceId = tostring(LoadOptions.Id or "default")
+env.LumenInstances = type(env.LumenInstances) == "table" and env.LumenInstances or {}
+do
+	local prev = env.LumenInstances[InstanceId]
+	if prev == nil and InstanceId == "default" and type(env.LumenUI) == "table" and not env.LumenUI.Id then prev = env.LumenUI end
+	if type(prev) == "table" and type(prev.Unload) == "function" and not prev.Unloaded then
+		if LoadOptions.Reuse then return prev end
+		pcall(function() prev:Unload() end)
+	end
 end
 
 local cloneref = cloneref or function(o) return o end
@@ -25,24 +47,31 @@ local RunService = Service("RunService")
 local HttpService = Service("HttpService")
 local Stats = Service("Stats")
 local Lighting = Service("Lighting")
+local TextService = Service("TextService")
 
 local Lumen = {
-	Version = "v0.0.1-stable",
+	Version = "v0.0.2-stable",
+	Id = InstanceId,
+	LoadOptions = LoadOptions,
+	NotifyErrors = LoadOptions.NotifyErrors ~= false,   -- a crashing callback shows a red notification
+	Hints = LoadOptions.Hints ~= false,                 -- hover explanations
+	HintDelay = 0.35,
+	NotifyPosition = "TopRight",
 	Flags = {},
 	Options = {},
 	Windows = {},
-	Folder = "Lumen",
+	Folder = LoadOptions.Folder or "Lumen",
 	Unloaded = false,
 	ShowWatermark = true,
 	ShowHotkeys = true,
 	ShowNotifications = true,
 	ShowDock = true,
-	Scale = 1,
+	Scale = LoadOptions.Scale or 1,
 	FontName = "Inter",
 	ThemeTransition = 0.3,          -- seconds colours blend when the theme changes (0 = instant)
 	Preset = "Lavender",
 	-- the non-colour half of a theme: shape, glow, font, particles, surface tint
-	Style = { Radius = 1, Glow = 1, Font = "Inter", Particles = "Snow", ParticleColor = Color3.new(1, 1, 1) },
+	Style = { Radius = 1, Glow = 1, Font = "Inter", TextScale = 1, Particles = "Snow", ParticleColor = Color3.new(1, 1, 1) },
 	-- dragged HUD pieces glide back home after a delay
 	SnapBack = { Enabled = true, Delay = 5, Dock = true, Hotkeys = true, Watermark = false },
 	-- colours sampled from the reference UI
@@ -85,11 +114,104 @@ local Lumen = {
 			Style = { Radius = 1, Glow = 1.3, Font = "Inter", Particles = "Embers", ParticleColor = Color3.fromRGB(255, 150, 70), Tint = Color3.fromRGB(235, 110, 60), TintPlace = "Bottom", TintAmount = 0.2, TopLine = { Color3.fromRGB(255, 160, 80), Color3.fromRGB(230, 80, 140) } } },
 		Mono = { Accent = Color3.fromRGB(190, 190, 196), Background = Color3.fromRGB(12, 12, 12), Group = Color3.fromRGB(17, 17, 17), GroupBorder = Color3.fromRGB(26, 26, 26), Control = Color3.fromRGB(25, 25, 25), ControlHover = Color3.fromRGB(36, 36, 36), Border = Color3.fromRGB(52, 52, 52), Outline = Color3.fromRGB(41, 41, 41), Text = Color3.fromRGB(222, 222, 222), Label = Color3.fromRGB(194, 194, 194), TextDim = Color3.fromRGB(136, 136, 136), TextMuted = Color3.fromRGB(106, 106, 106),
 			Style = { Radius = 0.25, Glow = 0, Font = "Mono", Particles = "Glyphs", ParticleColor = Color3.fromRGB(205, 205, 205), Scanlines = true } },
+		-- neon pink and cyan, wide futuristic type, an animated rainbow border and rising light streaks
+		Synthwave = { Accent = Color3.fromRGB(255, 92, 205), Background = Color3.fromRGB(16, 10, 26), Group = Color3.fromRGB(22, 14, 36), GroupBorder = Color3.fromRGB(38, 24, 58), Control = Color3.fromRGB(30, 19, 46), ControlHover = Color3.fromRGB(44, 28, 66), Border = Color3.fromRGB(86, 52, 120), Outline = Color3.fromRGB(58, 36, 84), Text = Color3.fromRGB(245, 232, 255), Label = Color3.fromRGB(225, 205, 245), TextDim = Color3.fromRGB(170, 140, 200), TextMuted = Color3.fromRGB(130, 104, 160),
+			Style = { Radius = 0.8, Glow = 1.8, Font = "Michroma", TextScale = 0.86, Particles = "Neon", ParticleColor = Color3.fromRGB(0, 229, 255), Tint = Color3.fromRGB(255, 60, 190), TintPlace = "Bottom", TintAmount = 0.22, TopLine = { Color3.fromRGB(0, 229, 255), Color3.fromRGB(255, 92, 205) }, Aura = { Color3.fromRGB(255, 92, 205), Color3.fromRGB(0, 229, 255), Color3.fromRGB(140, 90, 255), Color3.fromRGB(255, 92, 205) }, AuraSpeed = 0.5, AccentGradient = { Color3.fromRGB(255, 92, 205), Color3.fromRGB(0, 229, 255) } } },
+		-- pale ice, thin rounded type, a frosted inner border and slowly spinning crystals
+		Frost = { Accent = Color3.fromRGB(150, 215, 255), Background = Color3.fromRGB(12, 18, 26), Group = Color3.fromRGB(16, 24, 34), GroupBorder = Color3.fromRGB(26, 38, 52), Control = Color3.fromRGB(22, 32, 44), ControlHover = Color3.fromRGB(32, 46, 62), Border = Color3.fromRGB(60, 86, 112), Outline = Color3.fromRGB(42, 60, 80), Text = Color3.fromRGB(232, 244, 255), Label = Color3.fromRGB(205, 224, 240), TextDim = Color3.fromRGB(140, 166, 190), TextMuted = Color3.fromRGB(105, 128, 150),
+			Style = { Radius = 1.25, Glow = 1.2, Font = "Jura", TextScale = 1.08, Particles = "Crystals", ParticleColor = Color3.fromRGB(215, 240, 255), Tint = Color3.fromRGB(120, 190, 255), TintPlace = "Top", TintAmount = 0.14, TopLine = { Color3.fromRGB(230, 248, 255), Color3.fromRGB(120, 190, 255) }, InnerLine = Color3.fromRGB(170, 215, 255), AccentGradient = { Color3.fromRGB(235, 248, 255), Color3.fromRGB(120, 190, 255) } } },
+		-- midnight navy and gold, serif type, a gilded double border and glinting sparkles
+		Royal = { Accent = Color3.fromRGB(222, 184, 92), Background = Color3.fromRGB(11, 13, 24), Group = Color3.fromRGB(15, 18, 32), GroupBorder = Color3.fromRGB(26, 28, 46), Control = Color3.fromRGB(20, 24, 40), ControlHover = Color3.fromRGB(30, 34, 56), Border = Color3.fromRGB(92, 78, 44), Outline = Color3.fromRGB(48, 46, 60), Text = Color3.fromRGB(244, 236, 214), Label = Color3.fromRGB(222, 212, 186), TextDim = Color3.fromRGB(160, 150, 126), TextMuted = Color3.fromRGB(120, 112, 94),
+			Style = { Radius = 0.6, Glow = 1.1, Font = "Merriweather", TextScale = 0.94, Particles = "Sparkles", ParticleColor = Color3.fromRGB(255, 214, 120), Tint = Color3.fromRGB(200, 160, 70), TintPlace = "Top", TintAmount = 0.1, TopLine = { Color3.fromRGB(255, 214, 120), Color3.fromRGB(180, 130, 50) }, InnerLine = Color3.fromRGB(222, 184, 92), AccentGradient = { Color3.fromRGB(255, 226, 150), Color3.fromRGB(196, 148, 58) } } },
+		-- bubblegum pastels, a soft rounded display font, extra-round shapes and tumbling confetti
+		Candy = { Accent = Color3.fromRGB(255, 128, 190), Background = Color3.fromRGB(24, 16, 26), Group = Color3.fromRGB(32, 21, 35), GroupBorder = Color3.fromRGB(48, 32, 52), Control = Color3.fromRGB(42, 28, 46), ControlHover = Color3.fromRGB(58, 38, 62), Border = Color3.fromRGB(98, 66, 104), Outline = Color3.fromRGB(70, 46, 76), Text = Color3.fromRGB(255, 240, 250), Label = Color3.fromRGB(250, 220, 240), TextDim = Color3.fromRGB(200, 160, 190), TextMuted = Color3.fromRGB(160, 122, 150),
+			Style = { Radius = 2.2, Glow = 1.7, Font = "FredokaOne", TextScale = 1, Particles = "Confetti", ParticleColor = Color3.fromRGB(255, 128, 190), Tint = Color3.fromRGB(130, 255, 210), TintPlace = "Bottom", TintAmount = 0.14, TopLine = { Color3.fromRGB(255, 128, 190), Color3.fromRGB(130, 255, 210) }, Aura = { Color3.fromRGB(255, 128, 190), Color3.fromRGB(130, 255, 210), Color3.fromRGB(255, 220, 120), Color3.fromRGB(255, 128, 190) }, AuraSpeed = 0.25, AccentGradient = { Color3.fromRGB(255, 128, 190), Color3.fromRGB(255, 190, 120) } } },
+		-- 8-bit: pixel font, square corners, a thick yellow border, CRT scanlines and stepping pixels
+		Arcade = { Accent = Color3.fromRGB(255, 214, 0), Background = Color3.fromRGB(8, 8, 14), Group = Color3.fromRGB(12, 12, 22), GroupBorder = Color3.fromRGB(30, 30, 58), Control = Color3.fromRGB(18, 18, 32), ControlHover = Color3.fromRGB(28, 28, 50), Border = Color3.fromRGB(70, 70, 140), Outline = Color3.fromRGB(44, 44, 90), Text = Color3.fromRGB(240, 240, 255), Label = Color3.fromRGB(210, 210, 240), TextDim = Color3.fromRGB(140, 140, 190), TextMuted = Color3.fromRGB(100, 100, 150),
+			Style = { Radius = 0, Glow = 0.6, Font = "Arcade", TextScale = 0.72, Particles = "Pixels", ParticleColor = Color3.fromRGB(90, 255, 170), Scanlines = true, Aura = { Color3.fromRGB(255, 214, 0), Color3.fromRGB(255, 214, 0) }, AuraSpeed = 0, AuraThickness = 2 } },
+		-- deep space: violet nebula band, a slowly turning aurora border, stars and shooting stars
+		Cosmos = { Accent = Color3.fromRGB(150, 120, 255), Background = Color3.fromRGB(8, 8, 18), Group = Color3.fromRGB(12, 12, 26), GroupBorder = Color3.fromRGB(24, 22, 46), Control = Color3.fromRGB(18, 17, 36), ControlHover = Color3.fromRGB(28, 26, 54), Border = Color3.fromRGB(64, 56, 120), Outline = Color3.fromRGB(40, 36, 78), Text = Color3.fromRGB(236, 234, 255), Label = Color3.fromRGB(210, 206, 245), TextDim = Color3.fromRGB(150, 144, 200), TextMuted = Color3.fromRGB(110, 104, 160),
+			Style = { Radius = 1.15, Glow = 1.5, Font = "TitilliumWeb", TextScale = 1.05, Particles = "Starfield", ParticleColor = Color3.fromRGB(230, 230, 255), Tint = Color3.fromRGB(110, 70, 255), TintPlace = "Aurora", TintAmount = 0.18, TopLine = { Color3.fromRGB(150, 120, 255), Color3.fromRGB(80, 200, 255) }, Aura = { Color3.fromRGB(150, 120, 255), Color3.fromRGB(80, 200, 255), Color3.fromRGB(255, 120, 220), Color3.fromRGB(150, 120, 255) }, AuraSpeed = 0.15, AccentGradient = { Color3.fromRGB(170, 130, 255), Color3.fromRGB(80, 200, 255) } } },
+		-- slate and steel, condensed type, slanted rain and distant lightning
+		Storm = { Accent = Color3.fromRGB(120, 180, 255), Background = Color3.fromRGB(13, 15, 19), Group = Color3.fromRGB(18, 21, 26), GroupBorder = Color3.fromRGB(28, 32, 40), Control = Color3.fromRGB(24, 28, 35), ControlHover = Color3.fromRGB(34, 39, 48), Border = Color3.fromRGB(62, 72, 88), Outline = Color3.fromRGB(42, 48, 60), Text = Color3.fromRGB(226, 232, 242), Label = Color3.fromRGB(200, 208, 222), TextDim = Color3.fromRGB(140, 150, 168), TextMuted = Color3.fromRGB(104, 112, 128),
+			Style = { Radius = 0.9, Glow = 1.25, Font = "Oswald", TextScale = 1.05, Particles = "Rain", ParticleColor = Color3.fromRGB(170, 200, 240), Tint = Color3.fromRGB(90, 120, 170), TintPlace = "Top", TintAmount = 0.16, TopLine = { Color3.fromRGB(200, 225, 255), Color3.fromRGB(120, 180, 255) }, Lightning = true } },
 	},
 }
+env.LumenInstances[InstanceId] = Lumen
 env.LumenUI = Lumen
 
 local Connections, Themed, Refreshers, Keybinds, FontObjs, Gradients = {}, {}, {}, {}, {}, {}
+
+------------------------------------------------------------------------------
+-- Signals + events (connect from your own code: Lumen.Events.ThemeChanged:Connect(fn))
+------------------------------------------------------------------------------
+
+local function NewSignal()
+	local S = { _h = {} }
+	function S:Connect(fn)
+		local h = { Fn = fn, Connected = true }
+		function h:Disconnect() self.Connected = false end
+		table.insert(self._h, h)
+		return h
+	end
+	function S:Once(fn)
+		local h
+		h = self:Connect(function(...) h:Disconnect() fn(...) end)
+		return h
+	end
+	function S:Fire(...)
+		for i = #self._h, 1, -1 do
+			if not self._h[i].Connected then table.remove(self._h, i) end
+		end
+		for _, h in ipairs(self._h) do
+			if h.Connected then
+				local fn, args = h.Fn, table.pack(...)
+				task.spawn(function()
+					local ok, err = pcall(fn, table.unpack(args, 1, args.n))
+					if not ok then warn("[Lumen] event handler error: " .. tostring(err)) end
+				end)
+			end
+		end
+	end
+	function S:Wait()
+		local co = coroutine.running()
+		self:Once(function(...) task.spawn(co, ...) end)
+		return coroutine.yield()
+	end
+	return S
+end
+Lumen.Signal = NewSignal
+Lumen.Events = {
+	ThemeChanged = NewSignal(),       -- (themeTable)
+	StyleChanged = NewSignal(),       -- (styleTable)
+	FlagChanged = NewSignal(),        -- (flag, value)
+	VisibilityChanged = NewSignal(),  -- (visible, window)
+	TabChanged = NewSignal(),         -- (tabName, window)
+	Notified = NewSignal(),           -- (options)
+	Unloading = NewSignal(),          -- ()
+}
+
+-- Runs a user callback in its own thread. Errors are caught, printed with a traceback and (optionally) shown as a notification,
+-- so one broken feature never takes the whole script down.
+local function FirstLine(s) return (tostring(s):match("^[^\n]*") or tostring(s)):sub(1, 140) end
+local function SafeCall(label, fn, ...)
+	if type(fn) ~= "function" then return end
+	local args = table.pack(...)
+	task.spawn(function()
+		local ok, err = xpcall(function() return fn(table.unpack(args, 1, args.n)) end, function(e)
+			return (debug and debug.traceback) and debug.traceback(tostring(e), 2) or tostring(e)
+		end)
+		if not ok then
+			warn("[Lumen] error in " .. tostring(label) .. ": " .. tostring(err))
+			if Lumen.NotifyErrors and not Lumen.Unloaded and Lumen.Notify then
+				pcall(function()
+					Lumen:Notify({ Title = "Script error", Content = tostring(label) .. ": " .. FirstLine(err), Type = "Error", Duration = 7 })
+				end)
+			end
+		end
+	end)
+end
+Lumen.SafeCall = SafeCall
 local Gui, Overlay, OpenPopup
 local ZCounter = 10
 local Elements = {}
@@ -109,27 +231,66 @@ local WeightEnum = {
 local EnumToWeight = {}
 for w, e in pairs(GothamByWeight) do EnumToWeight[e] = w end
 
+-- Any Roblox font works: "Inter" (downloaded), "Gotham", "Mono", or an Enum.Font name like "Michroma", "FredokaOne", "Arcade".
+local FamilyCache = {}
+local function FamilyFor(name)
+	if name == "Inter" then return Lumen._interAsset end
+	if name == nil or name == "Gotham" then return nil end
+	if name == "Mono" then name = "RobotoMono" end
+	if FamilyCache[name] ~= nil then return FamilyCache[name] or nil end
+	local fam = false
+	pcall(function() fam = Font.fromEnum(Enum.Font[name]).Family end)
+	FamilyCache[name] = fam
+	return fam or nil
+end
+
 local function ApplyFont(obj, weight)
-	if Lumen.FontName == "Mono" then
-		obj.Font = Enum.Font.RobotoMono
-		return
-	end
-	local asset = Lumen._fontAsset
-	if asset then
-		local ok = pcall(function() obj.FontFace = Font.new(asset, WeightEnum[weight]) end)
+	local base = obj:GetAttribute("TS")
+	if base then obj.TextSize = math.max(6, math.floor(base * (Lumen._textScale or 1) + 0.5)) end
+	local fam = Lumen._fontFamily
+	if fam then
+		local ok = pcall(function() obj.FontFace = Font.new(fam, WeightEnum[weight]) end)
 		if ok then return end
 	end
 	obj.Font = GothamByWeight[weight]
 end
 
-function Lumen:SetFont(name)
+local FontToken = 0
+-- fade (seconds, optional): text dips, the font swaps at the bottom of the dip, text rises again
+function Lumen:SetFont(name, fade)
 	self.FontName = name
-	self._fontAsset = (name == "Inter") and self._interAsset or nil
-	if self._fontDropdown then self._fontDropdown:Set(name, true) end
-	for i = #FontObjs, 1, -1 do
-		local e = FontObjs[i]
-		if e[1].Parent == nil then table.remove(FontObjs, i) else ApplyFont(e[1], e[2]) end
+	self._fontFamily = FamilyFor(name)
+	if self._fontDropdown then pcall(function() self._fontDropdown:Set(name, true) end) end
+	local function Swap()
+		for i = #FontObjs, 1, -1 do
+			local e = FontObjs[i]
+			if e[1].Parent == nil then table.remove(FontObjs, i) else ApplyFont(e[1], e[2]) end
+		end
 	end
+	FontToken = FontToken + 1
+	local mine = FontToken
+	fade = fade or 0
+	if fade <= 0 or #FontObjs > 6000 then Swap() return end
+	local half = fade / 2
+	local dip = TweenInfo.new(half, Enum.EasingStyle.Sine, Enum.EasingDirection.In)
+	local rise = TweenInfo.new(half, Enum.EasingStyle.Sine, Enum.EasingDirection.Out)
+	local items = {}
+	for _, e in ipairs(FontObjs) do
+		local o = e[1]
+		if o.Parent and o:IsDescendantOf(Gui) then
+			local t0 = o:GetAttribute("TT0")
+			if t0 == nil then t0 = o.TextTransparency o:SetAttribute("TT0", t0) end
+			table.insert(items, { o, t0 })
+			TweenService:Create(o, dip, { TextTransparency = math.min(1, t0 + 0.9) }):Play()
+		end
+	end
+	task.delay(half, function()
+		if mine ~= FontToken or Lumen.Unloaded then return end
+		Swap()
+		for _, it in ipairs(items) do
+			if it[1].Parent then TweenService:Create(it[1], rise, { TextTransparency = it[2] }):Play() end
+		end
+	end)
 end
 
 local INTER_URL = "https://raw.githubusercontent.com/rsms/inter/v3.19/docs/font-files/Inter-"
@@ -215,7 +376,8 @@ local function New(class, props, children)
 		end
 		local w = EnumToWeight[obj.Font] or "SemiBold"
 		table.insert(FontObjs, { obj, w })
-		if Lumen._fontAsset or Lumen.FontName == "Mono" then ApplyFont(obj, w) end
+		obj:SetAttribute("TS", obj.TextSize)
+		if Lumen._fontFamily or (Lumen._textScale or 1) ~= 1 then ApplyFont(obj, w) end
 	end
 	for _, c in ipairs(children or {}) do c.Parent = obj end
 	if parent then obj.Parent = parent end
@@ -284,10 +446,13 @@ local function Glow(host, color, radius, fixed)
 		}, { (fixed and CornerFixed or Corner)((radius or 5) + i), st })
 		G.rings[i] = st
 	end
-	function G:Set(mult)
+	function G:Set(mult, info)
 		self.mult = mult
 		local k = Lumen.Style.Glow or 1
-		for i, st in ipairs(self.rings) do st.Transparency = 1 - math.min(1, GLOW_ALPHA[i] * mult * k) end
+		for i, st in ipairs(self.rings) do
+			local tr = 1 - math.min(1, GLOW_ALPHA[i] * mult * k)
+			if info then TweenService:Create(st, info, { Transparency = tr }):Play() else st.Transparency = tr end
+		end
 	end
 	G:Set(1)
 	function G:SetColor(c)
@@ -296,59 +461,178 @@ local function Glow(host, color, radius, fixed)
 	return G
 end
 
--- Surfaces: windows, panels and the dock take the theme's tint gradient, top light and scanlines.
+-- While a theme morphs, StyleBlend holds the old style, the new one and how far along it is (A = 0..1).
+local StyleBlend = nil
+
+-- Accent overlays: a white frame with a gradient laid over anything that shows the accent colour, so themes with
+-- AccentGradient = {c1, c2} paint toggles, slider fills and progress bars with that gradient (and blend it smoothly).
+local AccentFills = {}
+local function AccentEnds()
+	local acc = Lumen.Theme.Accent
+	local to = Lumen.Style
+	local from = StyleBlend and StyleBlend.From or to
+	local a = StyleBlend and StyleBlend.A or 1
+	local function ends(st)
+		local g = st.AccentGradient
+		if g then return g[1], g[2] or g[1] end
+		return acc, acc
+	end
+	local f1, f2 = ends(from)
+	local t1, t2 = ends(to)
+	return f1:Lerp(t1, a), f2:Lerp(t2, a)
+end
+local function PaintAccent(e)
+	local c1, c2 = AccentEnds()
+	e.Grad.Color = ColorSequence.new(c1, c2)
+end
+local function AccentOverlay(host, radius, fixedCorner, visible)
+	local ov = New("Frame", {
+		Size = UDim2.fromScale(1, 1), BackgroundColor3 = Color3.new(1, 1, 1), BackgroundTransparency = visible == false and 1 or 0,
+		ZIndex = host.ZIndex, Parent = host,
+	}, { (fixedCorner and CornerFixed or Corner)(radius or 4) })
+	local e = { Frame = ov, Grad = New("UIGradient", { Parent = ov }) }
+	table.insert(AccentFills, e)
+	PaintAccent(e)
+	return ov
+end
+table.insert(Refreshers, function()
+	for i = #AccentFills, 1, -1 do
+		if AccentFills[i].Frame.Parent then PaintAccent(AccentFills[i]) else table.remove(AccentFills, i) end
+	end
+end)
+
+-- Surfaces: windows, panels and the dock take the theme's tint gradient, top light, scanlines, aura border and inner line.
 local Surfaces = {}
+
+local function TintSeq(base, tint, amt, place)
+	if not tint or amt <= 0.001 then return ColorSequence.new(base) end
+	local tc = base:Lerp(tint, amt)
+	if place == "Bottom" then
+		return ColorSequence.new({ ColorSequenceKeypoint.new(0, base), ColorSequenceKeypoint.new(0.5, base), ColorSequenceKeypoint.new(1, tc) })
+	elseif place == "Aurora" then
+		return ColorSequence.new({ ColorSequenceKeypoint.new(0, base:Lerp(tint, amt * 0.5)), ColorSequenceKeypoint.new(0.1, tc),
+			ColorSequenceKeypoint.new(0.32, base), ColorSequenceKeypoint.new(1, base) })
+	end
+	return ColorSequence.new({ ColorSequenceKeypoint.new(0, tc), ColorSequenceKeypoint.new(0.45, base), ColorSequenceKeypoint.new(1, base) })
+end
+
+local function MultiSeq(list)
+	if #list == 1 then return ColorSequence.new(list[1]) end
+	local kps = {}
+	for i, c in ipairs(list) do table.insert(kps, ColorSequenceKeypoint.new((i - 1) / (#list - 1), c)) end
+	return ColorSequence.new(kps)
+end
+
 local function StyleSurface(e)
 	if not e.Frame.Parent then return end
-	local st, T = Lumen.Style, Lumen.Theme
-	local base = T.Background
-	local tint = st.Tint
-	local amt = (st.TintAmount or 0.15) * (e.Kind == "Window" and 1 or 0.75)
+	local base = Lumen.Theme.Background
+	local to = Lumen.Style
+	local from = StyleBlend and StyleBlend.From or to
+	local a = StyleBlend and StyleBlend.A or 1
+	local k = (e.Kind == "Window" and 1 or 0.75)
+	local function presence(key) return (from[key] and 1 or 0) * (1 - a) + (to[key] and 1 or 0) * a end
+
+	-- tint: blend colour/amount when both themes tint the same side, otherwise fade one out and the other in
+	local ft, tt = from.Tint, to.Tint
+	local fa, ta = (from.TintAmount or 0.15) * k, (to.TintAmount or 0.15) * k
+	local fp, tp = from.TintPlace or "Top", to.TintPlace or "Top"
 	local seq
-	if tint then
-		local tc = base:Lerp(tint, amt)
-		local place = st.TintPlace or "Top"
-		if place == "Bottom" then
-			seq = ColorSequence.new({ ColorSequenceKeypoint.new(0, base), ColorSequenceKeypoint.new(0.5, base), ColorSequenceKeypoint.new(1, tc) })
-		elseif place == "Aurora" then
-			seq = ColorSequence.new({ ColorSequenceKeypoint.new(0, base:Lerp(tint, amt * 0.5)), ColorSequenceKeypoint.new(0.1, tc),
-				ColorSequenceKeypoint.new(0.32, base), ColorSequenceKeypoint.new(1, base) })
-		else
-			seq = ColorSequence.new({ ColorSequenceKeypoint.new(0, tc), ColorSequenceKeypoint.new(0.45, base), ColorSequenceKeypoint.new(1, base) })
-		end
-	else
+	if not ft and not tt then
 		seq = ColorSequence.new(base)
+	elseif ft and tt and fp == tp then
+		seq = TintSeq(base, ft:Lerp(tt, a), fa + (ta - fa) * a, tp)
+	elseif ft and tt then
+		if a < 0.5 then seq = TintSeq(base, ft, fa * (1 - a * 2), fp) else seq = TintSeq(base, tt, ta * (a * 2 - 1), tp) end
+	elseif tt then
+		seq = TintSeq(base, tt, ta * a, tp)
+	else
+		seq = TintSeq(base, ft, fa * (1 - a), fp)
 	end
 	e.Frame.BackgroundColor3 = Color3.new(1, 1, 1)
 	e.Gradient.Color = seq
+
+	-- light along the window's top edge
 	if e.Line then
-		local tl = st.TopLine
-		e.Line.Visible = tl ~= nil
-		e.Leak.Visible = tl ~= nil
-		if tl then
-			local cs = ColorSequence.new(tl[1], tl[2] or tl[1])
+		local p = presence("TopLine")
+		local fl, tl = from.TopLine, to.TopLine
+		e.Line.Visible = p > 0.01
+		e.Leak.Visible = p > 0.01
+		if fl or tl then
+			local c1, c2
+			if fl and tl then
+				c1 = fl[1]:Lerp(tl[1], a)
+				c2 = (fl[2] or fl[1]):Lerp(tl[2] or tl[1], a)
+			else
+				local l = tl or fl
+				c1, c2 = l[1], l[2] or l[1]
+			end
+			local cs = ColorSequence.new(c1, c2)
 			e.LineGrad.Color = cs
 			e.LeakGrad.Color = cs
 		end
+		e.Line.BackgroundTransparency = 1 - p
+		e.Leak.BackgroundTransparency = 1 - p
 	end
+
+	-- scanlines (windows)
 	if e.Kind == "Window" then
-		if st.Scanlines and not e.Scan then
+		local p = presence("Scanlines")
+		if p > 0.01 and not e.Scan then
 			e.Scan = New("Frame", {
 				BackgroundTransparency = 1, Size = UDim2.fromScale(1, 1), ClipsDescendants = true, ZIndex = 0, Parent = e.Frame,
 			})
-			for y = 0, 900, 3 do
-				New("Frame", {
+			e.ScanLines = {}
+			for y = 0, 1200, 3 do
+				table.insert(e.ScanLines, New("Frame", {
 					Position = UDim2.fromOffset(0, y), Size = UDim2.new(1, 0, 0, 1), BackgroundColor3 = Color3.new(1, 1, 1),
-					BackgroundTransparency = 0.972, ZIndex = 0, Parent = e.Scan,
-				})
+					BackgroundTransparency = 1, ZIndex = 0, Parent = e.Scan,
+				}))
+			end
+			e.ScanP = -1
+		end
+		if e.Scan then
+			e.Scan.Visible = p > 0.01
+			if math.abs((e.ScanP or -1) - p) > 0.004 then
+				e.ScanP = p
+				for _, ln in ipairs(e.ScanLines) do ln.BackgroundTransparency = 1 - 0.028 * p end
 			end
 		end
-		if e.Scan then e.Scan.Visible = st.Scanlines == true end
+	end
+
+	-- aura: an animated gradient border (rotation driven by the style's AuraSpeed)
+	local ap = presence("Aura")
+	if ap > 0.01 and not e.Aura then
+		e.Aura = New("Frame", { BackgroundTransparency = 1, Size = UDim2.fromScale(1, 1), ZIndex = 20, Parent = e.Frame }, { Corner(e.Radius) })
+		e.AuraStroke = New("UIStroke", { Thickness = 1.5, Transparency = 1, Color = Color3.new(1, 1, 1), Parent = e.Aura })
+		e.AuraGrad = New("UIGradient", { Parent = e.AuraStroke })
+	end
+	if e.Aura then
+		local list = to.Aura or from.Aura
+		e.Aura.Visible = ap > 0.01
+		if list then e.AuraGrad.Color = MultiSeq(list) end
+		e.AuraStroke.Thickness = (to.Aura and to.AuraThickness) or (from.Aura and from.AuraThickness) or 1.5
+		e.AuraStroke.Transparency = 1 - ap * 0.9
+		e.AuraSpeed = (to.Aura and (to.AuraSpeed or 0.3)) or (from.AuraSpeed or 0.3)
+	end
+
+	-- inner line: a thin second border inset from the edge
+	local ip = presence("InnerLine")
+	if ip > 0.01 and not e.Inner then
+		e.Inner = New("Frame", {
+			BackgroundTransparency = 1, Position = UDim2.fromOffset(4, 4), Size = UDim2.new(1, -8, 1, -8), ZIndex = 19, Parent = e.Frame,
+		}, { Corner(math.max(e.Radius - 3, 2)) })
+		e.InnerStroke = New("UIStroke", { Thickness = 1, Transparency = 1, Color = Color3.new(1, 1, 1), Parent = e.Inner })
+	end
+	if e.Inner then
+		local fc, tc = from.InnerLine, to.InnerLine
+		e.Inner.Visible = ip > 0.01
+		e.InnerStroke.Color = (fc and tc) and fc:Lerp(tc, a) or (tc or fc or Color3.new(1, 1, 1))
+		e.InnerStroke.Transparency = 1 - ip * 0.45
 	end
 end
 
-local function RegisterSurface(frame, kind)
-	local e = { Frame = frame, Kind = kind, Gradient = New("UIGradient", { Rotation = 90, Parent = frame }) }
+local function RegisterSurface(frame, kind, radius)
+	local e = { Frame = frame, Kind = kind, Radius = radius or 10, Gradient = New("UIGradient", { Rotation = 90, Parent = frame }) }
 	if kind == "Window" then
 		e.LineGrad = New("UIGradient", { Transparency = NumberSequence.new({
 			NumberSequenceKeypoint.new(0, 1), NumberSequenceKeypoint.new(0.5, 0), NumberSequenceKeypoint.new(1, 1) }) })
@@ -370,6 +654,14 @@ end
 table.insert(Refreshers, function()
 	for i = #Surfaces, 1, -1 do
 		if Surfaces[i].Frame.Parent then StyleSurface(Surfaces[i]) else table.remove(Surfaces, i) end
+	end
+end)
+Connect(RunService.RenderStepped, function()
+	local t = os.clock()
+	for _, e in ipairs(Surfaces) do
+		if e.Aura and e.Aura.Visible and (e.AuraSpeed or 0) > 0 and e.Frame.Visible then
+			e.AuraGrad.Rotation = (t * e.AuraSpeed * 360) % 360
+		end
 	end
 end)
 
@@ -421,11 +713,34 @@ local function PixelIcon(name, parent, colorKey)
 end
 
 -- Vector icons drawn from frames: window, keyboard, command, scan, bell, user, gear, snow, list, discord
+local CustomIcons = {}
+local atan2 = math.atan2 or function(y, x) return math.atan(y, x) end
 local function Icon(kind, parent, size, colorKey)
 	size = size or 16
 	colorKey = colorKey or "Label"
 	local s = size / 16
 	local f = New("Frame", { BackgroundTransparency = 1, Size = UDim2.fromOffset(size, size), Parent = parent })
+	-- a rounded line from (x1, y1) to (x2, y2), positioned by its centre so glyphs come out exactly centred
+	local function Seg(x1, y1, x2, y2, th)
+		local dx, dy = x2 - x1, y2 - y1
+		local len = math.sqrt(dx * dx + dy * dy)
+		return New("Frame", {
+			AnchorPoint = Vector2.new(0.5, 0.5), Position = UDim2.fromOffset((x1 + x2) / 2 * s, (y1 + y2) / 2 * s),
+			Size = UDim2.fromOffset((len + th) * s, th * s), Rotation = math.deg(atan2(dy, dx)), Parent = f,
+			Theme = { BackgroundColor3 = colorKey },
+		}, { CornerFixed(th / 2 * s) })
+	end
+	local function Dot(cx, cy, d)
+		return New("Frame", {
+			AnchorPoint = Vector2.new(0.5, 0.5), Position = UDim2.fromOffset(cx * s, cy * s), Size = UDim2.fromOffset(d * s, d * s),
+			Parent = f, Theme = { BackgroundColor3 = colorKey },
+		}, { CornerFixed(d / 2 * s) })
+	end
+	if CustomIcons[kind] then
+		local ok, err = pcall(CustomIcons[kind], f, size, colorKey, { Seg = Seg, Dot = Dot })
+		if not ok then warn("[Lumen] icon '" .. tostring(kind) .. "' failed: " .. tostring(err)) end
+		return f
+	end
 	local function Bar(x, y, w, h, r, key)
 		local b = New("Frame", {
 			Position = UDim2.fromOffset(x * s, y * s), Size = UDim2.fromOffset(w * s, h * s), Parent = f,
@@ -478,19 +793,21 @@ local function Icon(kind, parent, size, colorKey)
 	elseif kind == "list" then
 		Bar(2, 3.5, 12, 1.6); Bar(2, 7.2, 12, 1.6); Bar(2, 10.9, 12, 1.6)
 	elseif kind == "check" then
-		local a = Bar(3, 8.9, 5.4, 2, 1); a.Rotation = 45
-		local b = Bar(5.4, 7.2, 9.6, 2, 1); b.Rotation = -52
+		Seg(3.4, 8.4, 6.6, 11.6, 2.4)
+		Seg(6.6, 11.6, 12.8, 4.8, 2.4)
 	elseif kind == "cross" then
-		Bar(2.5, 7, 11, 2, 1).Rotation = 45
-		Bar(2.5, 7, 11, 2, 1).Rotation = -45
+		Seg(4.4, 4.4, 11.6, 11.6, 2.4)
+		Seg(11.6, 4.4, 4.4, 11.6, 2.4)
 	elseif kind == "warn" then
-		Ring(1.2, 1.2, 13.6, 13.6, 6.8, 1.6)
-		Bar(7.1, 4.2, 1.8, 5.2, 0.9)
-		Bar(7.1, 10.4, 1.8, 1.8, 0.9)
+		-- exclamation mark: tall bar + dot
+		Seg(8, 3.4, 8, 9.2, 2.8)
+		Dot(8, 12.6, 3)
 	elseif kind == "info" then
-		Ring(1.2, 1.2, 13.6, 13.6, 6.8, 1.6)
-		Bar(7.1, 7, 1.8, 5.2, 0.9)
-		Bar(7.1, 4, 1.8, 1.8, 0.9)
+		-- a serif "i": dot, stem, small cap on the left, foot
+		Dot(8, 3.4, 2.8)
+		Seg(8, 7.2, 8, 12.4, 2.4)
+		Seg(6.2, 7.2, 8, 7.2, 2)
+		Seg(5.8, 12.6, 10.2, 12.6, 2)
 	elseif kind == "discord" then
 		Bar(2.4, 1.8, 4, 4, 2); Bar(9.6, 1.8, 4, 4, 2)
 		Bar(1, 3.8, 14, 9.4, 4.7)
@@ -645,7 +962,8 @@ function Lumen:ApplyPreset(name)
 	local colors = {}
 	for k, v in pairs(p) do if k ~= "Style" then colors[k] = v end end
 	self:SetTheme(colors, self.ThemeTransition)
-	self:SetStyle(p.Style or {})
+	self:SetStyle(p.Style or {}, self.ThemeTransition)
+	SyncOption("Lumen_Preset", name)
 end
 
 local ThemeToken = 0
@@ -682,6 +1000,7 @@ function Lumen:SetTheme(t, fade)
 	ThemeToken = ThemeToken + 1
 	local mine = ThemeToken
 	fade = fade or 0
+	self.Events.ThemeChanged:Fire(N)
 	if fade <= 0 or #Themed > 9000 then
 		self._themeTarget = nil
 		for k, v in pairs(N) do T[k] = v end
@@ -713,15 +1032,16 @@ end
 ------------------------------------------------------------------------------
 
 Gui = Instance.new("ScreenGui")
-Gui.Name = "LumenUI"
+Gui.Name = LoadOptions.Name or (InstanceId == "default" and "LumenUI" or ("LumenUI_" .. InstanceId))
 Gui.ResetOnSpawn = false
 Gui.IgnoreGuiInset = true
-Gui.DisplayOrder = 10000
+Gui.DisplayOrder = LoadOptions.DisplayOrder or 10000
 Gui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 do
 	if syn and syn.protect_gui then pcall(syn.protect_gui, Gui) end
 	local ok = false
-	if gethui then ok = pcall(function() Gui.Parent = gethui() end) end
+	if typeof(LoadOptions.Parent) == "Instance" then ok = pcall(function() Gui.Parent = LoadOptions.Parent end) end
+	if (not ok or not Gui.Parent) and gethui then ok = pcall(function() Gui.Parent = gethui() end) end
 	if not ok or not Gui.Parent then ok = pcall(function() Gui.Parent = Service("CoreGui") end) end
 	if not ok or not Gui.Parent then Gui.Parent = Players.LocalPlayer:WaitForChild("PlayerGui") end
 end
@@ -730,17 +1050,31 @@ Overlay = New("Frame", {
 	Name = "Overlay", BackgroundTransparency = 1, Size = UDim2.fromScale(1, 1), ZIndex = 50, Parent = Gui,
 })
 
+Lumen.Gui = Gui
+
 local PopupCatcher = New("TextButton", {
 	Name = "PopupCatcher", BackgroundTransparency = 1, Size = UDim2.fromScale(1, 1), Visible = false, ZIndex = 1,
 	Active = true, Parent = Overlay,
 })
+
+local PopupInfoOpen = TweenInfo.new(0.22, Enum.EasingStyle.Quint, Enum.EasingDirection.Out)
+local PopupInfoClose = TweenInfo.new(0.12, Enum.EasingStyle.Quad, Enum.EasingDirection.In)
 
 local function ClosePopup()
 	PopupCatcher.Visible = false
 	if OpenPopup then
 		local p = OpenPopup
 		OpenPopup = nil
-		p.Frame.Visible = false
+		local f, full = p.Frame, p.Full
+		local tok = (f:GetAttribute("PopTok") or 0) + 1
+		f:SetAttribute("PopTok", tok)
+		TweenService:Create(f, PopupInfoClose, { Size = UDim2.fromOffset(full.X.Offset, 0) }):Play()
+		task.delay(0.13, function()
+			if f:GetAttribute("PopTok") == tok then
+				f.Visible = false
+				f.Size = full
+			end
+		end)
 		if p.OnClose then p.OnClose() end
 	end
 end
@@ -748,42 +1082,134 @@ end
 Connect(PopupCatcher.MouseButton1Down, function() ClosePopup() end)
 Connect(PopupCatcher.MouseButton2Down, function() ClosePopup() end)
 
+-- popups unfold downward from their trigger (and fold back up when closed) instead of popping in
 local function ShowPopup(frame, trigger, onClose)
 	ClosePopup()
 	local sc = frame:FindFirstChildOfClass("UIScale")
 	if not sc then sc = New("UIScale", { Parent = frame }) end
 	sc.Scale = Lumen.Scale
+	local full = frame.Size
 	local vp = Gui.AbsoluteSize
-	local w, h = frame.Size.X.Offset * Lumen.Scale, frame.Size.Y.Offset * Lumen.Scale
+	local w, h = full.X.Offset * Lumen.Scale, full.Y.Offset * Lumen.Scale
 	local tp, ts = trigger.AbsolutePosition, trigger.AbsoluteSize
 	local x = math.clamp(tp.X, 6, math.max(6, vp.X - w - 6))
 	local y = tp.Y + ts.Y + 4
 	if y + h > vp.Y - 6 then y = math.max(6, tp.Y - h - 4) end
 	frame.Position = UDim2.fromOffset(x, y)
 	frame.ZIndex = 5
+	frame.ClipsDescendants = true
+	local tok = (frame:GetAttribute("PopTok") or 0) + 1
+	frame:SetAttribute("PopTok", tok)
+	frame.Size = UDim2.fromOffset(full.X.Offset, 0)
 	PopupCatcher.Visible = true
 	frame.Visible = true
-	OpenPopup = { Frame = frame, Trigger = trigger, OnClose = onClose }
+	TweenService:Create(frame, PopupInfoOpen, { Size = full }):Play()
+	OpenPopup = { Frame = frame, Trigger = trigger, OnClose = onClose, Full = full }
 end
 
-local TooltipFrame = New("Frame", {
-	Visible = false, AutomaticSize = Enum.AutomaticSize.XY, Size = UDim2.fromOffset(0, 0),
-	ZIndex = 200, Parent = Gui, Theme = { BackgroundColor3 = "Background" },
-}, { Corner(5), Stroke("Border"), Pad(9, 6, 9, 6) })
-local TooltipLabel = New("TextLabel", {
-	AutomaticSize = Enum.AutomaticSize.XY, Size = UDim2.fromOffset(0, 0), TextSize = 11, Parent = TooltipFrame,
+-- Hover explanations: a card that fades and lifts in after a short rest, glides between elements,
+-- and fades out when the mouse leaves. Used by Description = "..." on any element, tooltips, dock buttons and chips.
+local Hint = { Token = 0 }
+local HintCard = New("CanvasGroup", {
+	Visible = false, Size = UDim2.fromOffset(240, 0), AutomaticSize = Enum.AutomaticSize.Y, GroupTransparency = 1,
+	BackgroundTransparency = 1, ZIndex = 300, Parent = Gui,
+})
+local HintScale = New("UIScale", { Scale = 1, Parent = HintCard })
+New("Frame", { Size = UDim2.fromScale(1, 1), ZIndex = 300, Parent = HintCard, Theme = { BackgroundColor3 = "Background" } }, { Corner(8) })
+-- border drawn 1px inside so the canvas never clips it
+New("Frame", { Position = UDim2.fromOffset(1, 1), Size = UDim2.new(1, -2, 1, -2), BackgroundTransparency = 1, ZIndex = 301, Parent = HintCard },
+	{ Corner(7), Stroke("Border") })
+local HintStrip = New("Frame", {
+	Position = UDim2.fromOffset(0, 8), Size = UDim2.new(0, 2, 1, -16), ZIndex = 302, Parent = HintCard, Theme = { BackgroundColor3 = "Accent" },
+}, { CornerFixed(1) })
+local HintBody = New("Frame", {
+	BackgroundTransparency = 1, Size = UDim2.new(1, 0, 0, 0), AutomaticSize = Enum.AutomaticSize.Y, ZIndex = 302, Parent = HintCard,
+}, { Pad(13, 9, 12, 10), List(3) })
+local HintTitle = New("TextLabel", {
+	Size = UDim2.new(1, 0, 0, 0), AutomaticSize = Enum.AutomaticSize.Y, TextWrapped = true, TextSize = 12, Font = Enum.Font.GothamBold,
+	TextXAlignment = Enum.TextXAlignment.Left, ZIndex = 303, LayoutOrder = 1, TextColor3 = Lumen.Theme.Text, Parent = HintBody,
+})
+local HintText = New("TextLabel", {
+	Size = UDim2.new(1, 0, 0, 0), AutomaticSize = Enum.AutomaticSize.Y, TextWrapped = true, TextSize = 11, Font = Enum.Font.GothamMedium,
+	TextXAlignment = Enum.TextXAlignment.Left, ZIndex = 303, LayoutOrder = 2, TextColor3 = Lumen.Theme.TextDim, Parent = HintBody,
 })
 
-local function AttachTooltip(inst, text)
-	Connect(inst.MouseEnter, function()
-		TooltipLabel.Text = text
-		local ap, sz = inst.AbsolutePosition, inst.AbsoluteSize
-		local vp = Gui.AbsoluteSize
-		TooltipFrame.Position = UDim2.fromOffset(math.clamp(ap.X, 6, math.max(6, vp.X - 260)), ap.Y + sz.Y + 6)
-		TooltipFrame.Visible = true
+local function HintWidth(title, body)
+	local w = 0
+	pcall(function()
+		w = TextService:GetTextSize(body, 11, Enum.Font.GothamMedium, Vector2.new(214, 10000)).X
+		if title and title ~= "" then
+			w = math.max(w, TextService:GetTextSize(title, 12, Enum.Font.GothamBold, Vector2.new(214, 10000)).X)
+		end
 	end)
-	Connect(inst.MouseLeave, function() TooltipFrame.Visible = false end)
+	if not w or w <= 0 then w = 214 end
+	return math.clamp(math.ceil(w) + 30, 110, 246)
 end
+
+local function HintSpot(anchor)
+	local vp = Gui.AbsoluteSize
+	local ap, sz = anchor.AbsolutePosition, anchor.AbsoluteSize
+	local w = HintCard.Size.X.Offset
+	local h = math.max(HintCard.AbsoluteSize.Y, 34)
+	local x = math.clamp(ap.X, 8, math.max(8, vp.X - w - 8))
+	local y = ap.Y + sz.Y + 6
+	if y + h > vp.Y - 8 then y = math.max(8, ap.Y - h - 6) end
+	return x, y
+end
+
+local function ShowHint(anchor, title, body)
+	if not Lumen.Hints or type(body) ~= "string" or body == "" then return end
+	Hint.Token = Hint.Token + 1
+	local mine = Hint.Token
+	local gliding = HintCard.Visible and HintCard.GroupTransparency < 0.6
+	task.delay(gliding and 0.04 or Lumen.HintDelay, function()
+		if mine ~= Hint.Token or Lumen.Unloaded or not anchor.Parent then return end
+		HintTitle.Text = title or ""
+		HintTitle.Visible = title ~= nil and title ~= ""
+		HintText.Text = body
+		HintCard.Size = UDim2.fromOffset(HintWidth(title, body), 0)
+		local x, y = HintSpot(anchor)
+		if gliding then
+			TweenService:Create(HintCard, TweenInfo.new(0.22, Enum.EasingStyle.Quint, Enum.EasingDirection.Out),
+				{ Position = UDim2.fromOffset(x, y), GroupTransparency = 0 }):Play()
+			TweenService:Create(HintScale, TweenInfo.new(0.2, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), { Scale = 1 }):Play()
+		else
+			HintCard.Position = UDim2.fromOffset(x, y + 7)
+			HintScale.Scale = 0.95
+			HintCard.GroupTransparency = 1
+			HintCard.Visible = true
+			TweenService:Create(HintCard, TweenInfo.new(0.24, Enum.EasingStyle.Quint, Enum.EasingDirection.Out),
+				{ Position = UDim2.fromOffset(x, y), GroupTransparency = 0 }):Play()
+			TweenService:Create(HintScale, TweenInfo.new(0.28, Enum.EasingStyle.Back, Enum.EasingDirection.Out), { Scale = 1 }):Play()
+		end
+	end)
+end
+
+local function HideHint()
+	Hint.Token = Hint.Token + 1
+	local mine = Hint.Token
+	task.delay(0.07, function()
+		if mine ~= Hint.Token then return end
+		TweenService:Create(HintCard, TweenInfo.new(0.15, Enum.EasingStyle.Quad, Enum.EasingDirection.In), { GroupTransparency = 1 }):Play()
+		TweenService:Create(HintScale, TweenInfo.new(0.15, Enum.EasingStyle.Quad, Enum.EasingDirection.In), { Scale = 0.97 }):Play()
+		task.delay(0.16, function() if mine == Hint.Token then HintCard.Visible = false end end)
+	end)
+end
+Lumen.ShowHint, Lumen.HideHint = function(_, anchor, title, body) ShowHint(anchor, title, body) end, function() HideHint() end
+
+-- title / body may be strings or functions (read each time the hint opens)
+local function AttachHint(inst, title, body)
+	Connect(inst.MouseEnter, function()
+		local t = type(title) == "function" and title() or title
+		local b = type(body) == "function" and body() or body
+		ShowHint(inst, t, b)
+	end)
+	Connect(inst.MouseLeave, HideHint)
+	Connect(inst.InputBegan, function(i)
+		if i.UserInputType == Enum.UserInputType.MouseButton1 or i.UserInputType == Enum.UserInputType.Touch then HideHint() end
+	end)
+end
+local function AttachTooltip(inst, text) AttachHint(inst, nil, text) end
 
 ------------------------------------------------------------------------------
 -- Option base (shared by every element)
@@ -800,6 +1226,18 @@ function OptBase:OnChanged(fn)
 	table.insert(self.Listeners, fn)
 	return self
 end
+
+-- hover explanation for any element: element:SetDescription("What this does")
+function OptBase:SetDescription(text)
+	self.Description = text
+	if not self._hinted and self.Row then
+		self._hinted = true
+		AttachHint(self.Row, function() return self._text end, function() return self.Description end)
+	end
+	return self
+end
+
+function OptBase:Get() return self.Value end
 
 function OptBase:SetVisible(v)
 	if self.Row then self.Row.Visible = v end
@@ -835,17 +1273,23 @@ local function Register(opt, flag)
 end
 
 local function Fire(opt, ...)
-	if opt.Flag then Lumen.Flags[opt.Flag] = opt.Value end
-	if opt.Callback then task.spawn(opt.Callback, ...) end
-	for _, cb in ipairs(opt.Listeners) do task.spawn(cb, ...) end
+	local label = tostring(opt.Type) .. " '" .. tostring(opt._text or opt.Flag or opt.Name or "?") .. "'"
+	if opt.Flag then
+		Lumen.Flags[opt.Flag] = opt.Value
+		Lumen.Events.FlagChanged:Fire(opt.Flag, opt.Value)
+	end
+	if opt.Callback then SafeCall(label, opt.Callback, ...) end
+	for _, cb in ipairs(opt.Listeners) do SafeCall(label, cb, ...) end
 end
 
 -- everything searchable from the command palette
 Lumen._Catalog = {}
 Lumen._Panels = {}
+Lumen._presetDropdowns = {}
 local function CatalogAdd(group, opt, name)
 	if not name then return end
-	table.insert(Lumen._Catalog, { Opt = opt, Name = name, Path = group._path or "", Tab = group._tab })
+	opt._text = opt._text or name
+	table.insert(Lumen._Catalog, { Opt = opt, Name = name, Path = group._path or "", Tab = group._tab, Group = group })
 end
 
 -- addon holder (keybind chip / color swatches / tooltip chip, right aligned in a row)
@@ -866,69 +1310,132 @@ local NotifHolder = New("Frame", {
 }, { List(0, Enum.FillDirection.Vertical, Enum.HorizontalAlignment.Right) })
 
 local NOTIFY_KINDS = {
-	Success = { Key = "Success", Icon = "check" },
-	Warning = { Key = "Caution", Icon = "warn" },
-	Caution = { Key = "Caution", Icon = "warn" },
-	Danger = { Key = "Error", Icon = "cross" },
-	Error = { Key = "Error", Icon = "cross" },
-	Info = { Key = "Info", Icon = "info" },
-	Loading = { Key = "Accent", Icon = "spinner" },
+	Success = { Key = "Success", Icon = "check", Shape = "circle" },
+	Warning = { Key = "Caution", Icon = "warn", Shape = "diamond" },
+	Caution = { Key = "Caution", Icon = "warn", Shape = "diamond" },
+	Danger = { Key = "Error", Icon = "cross", Shape = "square" },
+	Error = { Key = "Error", Icon = "cross", Shape = "square" },
+	Info = { Key = "Info", Icon = "info", Shape = "circle" },
+	Loading = { Key = "Accent", Icon = "spinner", Shape = "circle" },
 }
 local NotifyCount = 0
 local LiveNotifs = {}
+local NOTIFY_POS = { TopRight = { 1, 0 }, BottomRight = { 1, 1 }, TopLeft = { 0, 0 }, BottomLeft = { 0, 1 } }
+Lumen.NotifyPositions = { "TopRight", "BottomRight", "TopLeft", "BottomLeft" }
 
 local function Spinner(parent, color)
-	local f = New("Frame", { BackgroundTransparency = 1, Size = UDim2.fromOffset(14, 14), Parent = parent }, {
+	return New("Frame", { BackgroundTransparency = 1, Size = UDim2.fromOffset(14, 14), Parent = parent }, {
 		CornerFixed(7),
 		New("UIStroke", { Thickness = 2, Color = color }, {
 			New("UIGradient", { Transparency = NumberSequence.new({
 				NumberSequenceKeypoint.new(0, 0), NumberSequenceKeypoint.new(0.5, 0.15), NumberSequenceKeypoint.new(0.52, 1), NumberSequenceKeypoint.new(1, 1) }) }),
 		}),
 	})
-	return f
 end
 
--- o: string, or {Title, Content, Type = "Success" | "Warning" | "Error" | "Info" | "Loading", Duration, Progress}
+-- A coloured status badge: circle (success / info), diamond (warning) or rounded square (error), with a centred glyph.
+-- Distinct shapes as well as colours, so the type reads at a glance.
+local function StatusBadge(parent, kind, size)
+	size = size or 26
+	local T = Lumen.Theme
+	local color = T[kind.Key] or T.Accent
+	local holder = New("Frame", { BackgroundTransparency = 1, Size = UDim2.fromOffset(size, size), Parent = parent })
+	local plate
+	if kind.Shape == "diamond" then
+		local d = math.floor(size * 0.76 + 0.5)
+		plate = New("Frame", {
+			AnchorPoint = Vector2.new(0.5, 0.5), Position = UDim2.fromScale(0.5, 0.5), Size = UDim2.fromOffset(d, d), Rotation = 45,
+			BackgroundColor3 = color:Lerp(T.Background, 0.78), Parent = holder,
+		}, { CornerFixed(math.floor(size * 0.2)), New("UIStroke", { Color = color:Lerp(T.Background, 0.35), Thickness = 1 }) })
+	else
+		plate = New("Frame", {
+			AnchorPoint = Vector2.new(0.5, 0.5), Position = UDim2.fromScale(0.5, 0.5), Size = UDim2.fromScale(1, 1),
+			BackgroundColor3 = color:Lerp(T.Background, 0.78), Parent = holder,
+		}, { CornerFixed(kind.Shape == "square" and math.floor(size * 0.3) or math.ceil(size / 2)),
+			New("UIStroke", { Color = color:Lerp(T.Background, 0.35), Thickness = 1 }) })
+	end
+	local glyph
+	if kind.Icon == "spinner" then
+		glyph = Spinner(holder, color)
+	else
+		glyph = Icon(kind.Icon, holder, math.floor(size * 0.6 + 0.5), kind.Key)
+	end
+	glyph.AnchorPoint = Vector2.new(0.5, 0.5)
+	glyph.Position = UDim2.fromScale(0.5, 0.5)
+	glyph.ZIndex = plate.ZIndex + 1
+	return holder, plate, glyph, color
+end
+Lumen.StatusBadge = StatusBadge
+
+function Lumen:SetNotifyPosition(pos)
+	local p = NOTIFY_POS[pos]
+	if not p then pos, p = "TopRight", NOTIFY_POS.TopRight end
+	self.NotifyPosition = pos
+	NotifHolder.AnchorPoint = Vector2.new(p[1], p[2])
+	NotifHolder.Position = UDim2.new(p[1], p[1] == 1 and -12 or 12, p[2], p[2] == 1 and -12 or 12)
+	local layout = NotifHolder:FindFirstChildOfClass("UIListLayout")
+	if layout then
+		layout.HorizontalAlignment = p[1] == 1 and Enum.HorizontalAlignment.Right or Enum.HorizontalAlignment.Left
+		layout.VerticalAlignment = p[2] == 1 and Enum.VerticalAlignment.Bottom or Enum.VerticalAlignment.Top
+	end
+	SyncOption("Lumen_NotifyPos", pos)
+end
+
+-- o: string, or {
+--   Title, Content, Type = "Success" | "Warning" | "Error" | "Info" | "Loading", Duration, Progress (bool),
+--   Actions = {{Text = "Undo", Callback = fn}, ...}   -- small buttons under the text; clicking one closes the card
+-- }
 -- Returns a handle: handle:Update({...}) morphs it in place (e.g. Loading -> Success), handle:Dismiss() closes it.
--- Hovering pauses the countdown, clicking dismisses.
+-- Hover pauses the countdown, clicking the card dismisses it.
 function Lumen:Notify(o, duration)
 	if type(o) == "string" then o = { Content = o, Duration = duration } end
+	o = o or {}
 	local H = { Closed = false }
 	function H:Update() end
 	function H:Dismiss() end
-	if not self.ShowNotifications then return H end
+	if not self.ShowNotifications or self.Unloaded then return H end
+	self.Events.Notified:Fire(o)
 
+	local side = NOTIFY_POS[self.NotifyPosition] or NOTIFY_POS.TopRight
+	local offX = side[1] == 1 and 320 or -320
 	NotifyCount = NotifyCount + 1
 	local holder = New("Frame", {
 		BackgroundTransparency = 1, Size = UDim2.fromOffset(290, 0), LayoutOrder = NotifyCount, Parent = NotifHolder,
 	})
 	local card = New("CanvasGroup", {
-		Size = UDim2.fromOffset(280, 34), Position = UDim2.fromOffset(310, 0), GroupTransparency = 1, AnchorPoint = Vector2.new(0, 0),
+		Size = UDim2.fromOffset(280, 34), Position = UDim2.fromOffset(offX, 0), GroupTransparency = 1,
 		Parent = holder, Theme = { BackgroundColor3 = "Background" },
-	}, { Corner(8) })
-	New("UIStroke", { Thickness = 1, ApplyStrokeMode = Enum.ApplyStrokeMode.Border, Theme = { Color = "Outline" }, Parent = card })
+	}, { Corner(9) })
+	if side[1] == 1 then card.Position = UDim2.fromOffset(offX, 0) end
+	-- border drawn 1px inside so the canvas can't clip it
+	New("Frame", { Position = UDim2.fromOffset(1, 1), Size = UDim2.new(1, -2, 1, -2), BackgroundTransparency = 1, ZIndex = 8, Parent = card },
+		{ Corner(8), Stroke("Outline") })
+	local hit = New("TextButton", { Size = UDim2.fromScale(1, 1), ZIndex = 1, Parent = card })
 	local body = New("Frame", {
-		BackgroundTransparency = 1, Size = UDim2.new(1, 0, 0, 0), AutomaticSize = Enum.AutomaticSize.Y, ZIndex = 2, Parent = card,
-	}, { Pad(12, 9, 12, 9), New("UISizeConstraint", { MinSize = Vector2.new(0, 34) }),
-		List(10, Enum.FillDirection.Horizontal, Enum.HorizontalAlignment.Left, Enum.VerticalAlignment.Center) })
-	local bar = New("Frame", { Size = UDim2.new(0, 3, 1, 0), BackgroundColor3 = Color3.new(1, 1, 1), Visible = false, ZIndex = 3, Parent = card })
-	local barGrad = New("UIGradient", { Rotation = 90, Transparency = NumberSequence.new({
-		NumberSequenceKeypoint.new(0, 0.6), NumberSequenceKeypoint.new(0.5, 0), NumberSequenceKeypoint.new(1, 0.6) }), Parent = bar })
-	local wash = New("Frame", { Size = UDim2.fromScale(1, 1), BackgroundColor3 = Color3.new(1, 1, 1), BackgroundTransparency = 1, ZIndex = 1, Parent = card })
-	local washGrad = New("UIGradient", { Transparency = NumberSequence.new({
-		NumberSequenceKeypoint.new(0, 0.86), NumberSequenceKeypoint.new(0.45, 1), NumberSequenceKeypoint.new(1, 1) }), Parent = wash })
+		BackgroundTransparency = 1, Size = UDim2.new(1, 0, 0, 0), AutomaticSize = Enum.AutomaticSize.Y, ZIndex = 3, Parent = card,
+	}, { Pad(12, 9, 12, 10), New("UISizeConstraint", { MinSize = Vector2.new(0, 34) }),
+		List(11, Enum.FillDirection.Horizontal, Enum.HorizontalAlignment.Left, Enum.VerticalAlignment.Center) })
+	local bar = New("Frame", { Size = UDim2.new(0, 3, 1, -12), Position = UDim2.fromOffset(0, 6), BackgroundColor3 = Color3.new(1, 1, 1),
+		Visible = false, ZIndex = 4, Parent = card }, { CornerFixed(2) })
+	local wash = New("Frame", { Size = UDim2.fromScale(1, 1), BackgroundColor3 = Color3.new(1, 1, 1), BackgroundTransparency = 1, ZIndex = 2, Parent = card })
+	New("UIGradient", { Transparency = NumberSequence.new({
+		NumberSequenceKeypoint.new(0, 0.84), NumberSequenceKeypoint.new(0.5, 1), NumberSequenceKeypoint.new(1, 1) }), Parent = wash })
 	local shine = New("Frame", {
-		Size = UDim2.new(0.45, 0, 1, 0), Position = UDim2.new(-0.6, 0, 0, 0), BackgroundColor3 = Color3.new(1, 1, 1), ZIndex = 4, Parent = card,
+		Size = UDim2.new(0.45, 0, 1, 0), Position = UDim2.new(-0.6, 0, 0, 0), BackgroundColor3 = Color3.new(1, 1, 1), ZIndex = 6, Parent = card,
 	}, { New("UIGradient", { Rotation = 18, Transparency = NumberSequence.new({
-		NumberSequenceKeypoint.new(0, 1), NumberSequenceKeypoint.new(0.5, 0.9), NumberSequenceKeypoint.new(1, 1) }) }) })
+		NumberSequenceKeypoint.new(0, 1), NumberSequenceKeypoint.new(0.5, 0.88), NumberSequenceKeypoint.new(1, 1) }) }) })
 	local track = New("Frame", {
-		AnchorPoint = Vector2.new(0, 1), Position = UDim2.new(0, 0, 1, 0), Size = UDim2.new(1, 0, 0, 2), Visible = false, ZIndex = 3,
+		AnchorPoint = Vector2.new(0, 1), Position = UDim2.new(0, 0, 1, 0), Size = UDim2.new(1, 0, 0, 2), Visible = false, ZIndex = 5,
 		Parent = card, Theme = { BackgroundColor3 = "Outline" },
 	})
-	local fill = New("Frame", { Size = UDim2.fromScale(1, 1), BackgroundColor3 = Color3.new(1, 1, 1), ZIndex = 3, Parent = track })
+	local fill = New("Frame", { Size = UDim2.fromScale(1, 1), BackgroundColor3 = Color3.new(1, 1, 1), ZIndex = 5, Parent = track })
+	-- bright head on the countdown bar
+	local head = New("Frame", { AnchorPoint = Vector2.new(0.5, 0.5), Position = UDim2.new(1, 0, 0.5, 0), Size = UDim2.fromOffset(10, 2),
+		BackgroundColor3 = Color3.new(1, 1, 1), BackgroundTransparency = 0.2, ZIndex = 6, Parent = fill }, { CornerFixed(1) })
 
-	local kind, color, dur, remaining, hovered, shakeT = nil, nil, 4, 4, false, 0
-	local iconScale, spin
+	local kind, color, dur, remaining, hovered = nil, nil, 4, 4, false
+	local anim = { t = 0 }
+	local glyph, plate, iconFrame, spin, ring
 	local conn
 
 	local function Fit()
@@ -938,51 +1445,85 @@ function Lumen:Notify(o, duration)
 	end
 	Connect(body:GetPropertyChangedSignal("AbsoluteSize"), Fit)
 
+	local function Close()
+		if H.Closed then return end
+		H.Closed = true
+		if conn then conn:Disconnect() end
+		for i, n in ipairs(LiveNotifs) do if n == H then table.remove(LiveNotifs, i) break end end
+		TweenService:Create(card, TweenInfo.new(0.3, Enum.EasingStyle.Quint, Enum.EasingDirection.In),
+			{ Position = UDim2.fromOffset(offX, 0), GroupTransparency = 1 }):Play()
+		task.delay(0.24, function()
+			if holder.Parent then Tween(holder, 0.24, { Size = UDim2.fromOffset(290, 0) }) end
+		end)
+		task.delay(0.55, function() holder:Destroy() end)
+	end
+
 	local function Build(opts)
 		for _, c in ipairs(body:GetChildren()) do
 			if c:IsA("GuiObject") then c:Destroy() end
 		end
-		spin = nil
+		spin, ring, glyph, plate = nil, nil, nil, nil
 		kind = NOTIFY_KINDS[opts.Type or ""]
-		color = kind and Lumen.Theme[kind.Key] or Lumen.Theme.Label
-		-- icon: tinted badge for typed notifications, the reference bell for plain ones
-		local iconHolder = New("Frame", { BackgroundTransparency = 1, Size = UDim2.fromOffset(kind and 24 or 16, kind and 24 or 16), LayoutOrder = 1, Parent = body })
-		iconScale = New("UIScale", { Scale = 1, Parent = iconHolder })
+		local T = Lumen.Theme
+		color = kind and T[kind.Key] or T.Label
+
+		-- icon
 		if kind then
-			local badge = New("Frame", {
-				Size = UDim2.fromScale(1, 1), BackgroundColor3 = color:Lerp(Lumen.Theme.Background, 0.8), Parent = iconHolder,
-			}, { CornerFixed(12), New("UIStroke", { Color = color:Lerp(Lumen.Theme.Background, 0.45), Thickness = 1 }) })
-			if kind.Icon == "spinner" then
-				spin = Spinner(badge, color)
-				spin.AnchorPoint = Vector2.new(0.5, 0.5)
-				spin.Position = UDim2.fromScale(0.5, 0.5)
-			else
-				local ic = Icon(kind.Icon, badge, 14, kind.Key)
-				ic.AnchorPoint = Vector2.new(0.5, 0.5)
-				ic.Position = UDim2.fromScale(0.5, 0.5)
-			end
+			local holderB
+			holderB, plate, glyph = StatusBadge(body, kind, 26)
+			holderB.LayoutOrder = 1
+			iconFrame = holderB
+			if kind.Icon == "spinner" then spin = glyph end
+			-- pulse ring that expands out of the badge
+			ring = New("Frame", {
+				AnchorPoint = Vector2.new(0.5, 0.5), Position = UDim2.fromScale(0.5, 0.5), Size = UDim2.fromOffset(26, 26),
+				BackgroundTransparency = 1, ZIndex = 1, Parent = holderB,
+			}, { CornerFixed(999), New("UIStroke", { Color = color, Thickness = 1.5, Transparency = 0.25 }) })
+			TweenService:Create(ring, TweenInfo.new(0.75, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), { Size = UDim2.fromOffset(52, 52) }):Play()
+			TweenService:Create(ring:FindFirstChildOfClass("UIStroke"), TweenInfo.new(0.75, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), { Transparency = 1 }):Play()
 		else
-			local bell = PixelIcon("bell", iconHolder, "Label")
-			bell.Position = UDim2.fromOffset(1, 0)
+			iconFrame = New("Frame", { BackgroundTransparency = 1, Size = UDim2.fromOffset(16, 16), LayoutOrder = 1, Parent = body })
+			glyph = PixelIcon("bell", iconFrame, "Label")
+			glyph.Position = UDim2.fromOffset(1, 0)
 		end
+
+		-- text
 		local text = New("Frame", {
-			BackgroundTransparency = 1, Size = UDim2.new(1, -(kind and 34 or 26), 0, 0), AutomaticSize = Enum.AutomaticSize.Y,
+			BackgroundTransparency = 1, Size = UDim2.new(1, -(kind and 37 or 27), 0, 0), AutomaticSize = Enum.AutomaticSize.Y,
 			LayoutOrder = 2, Parent = body,
 		}, { List(2) })
 		if opts.Title then
 			New("TextLabel", {
-				Size = UDim2.new(1, 0, 0, 16), Text = opts.Title, TextColor3 = kind and color or Lumen.Theme.Text,
-				TextXAlignment = Enum.TextXAlignment.Left, LayoutOrder = 1, Parent = text,
+				Size = UDim2.new(1, 0, 0, 0), AutomaticSize = Enum.AutomaticSize.Y, TextWrapped = true, Text = opts.Title,
+				TextColor3 = kind and color or T.Text, TextXAlignment = Enum.TextXAlignment.Left, LayoutOrder = 1, Parent = text,
 			})
 		end
 		if opts.Content then
 			New("TextLabel", {
-				Size = UDim2.new(1, 0, 0, 0), AutomaticSize = Enum.AutomaticSize.Y, Text = opts.Content, TextWrapped = true,
+				Size = UDim2.new(1, 0, 0, 0), AutomaticSize = Enum.AutomaticSize.Y, Text = opts.Content, TextWrapped = true, RichText = true,
 				TextXAlignment = Enum.TextXAlignment.Left, LayoutOrder = 2, TextSize = opts.Title and 11 or 12,
 				Font = opts.Title and Enum.Font.GothamMedium or Enum.Font.GothamSemibold,
-				TextColor3 = opts.Title and Lumen.Theme.TextDim or Lumen.Theme.Label, Parent = text,
+				TextColor3 = opts.Title and T.TextDim or T.Label, Parent = text,
 			})
 		end
+		if type(opts.Actions) == "table" and #opts.Actions > 0 then
+			local row = New("Frame", { BackgroundTransparency = 1, Size = UDim2.new(1, 0, 0, 22), LayoutOrder = 3, Parent = text },
+				{ Pad(0, 4, 0, 0), List(6, Enum.FillDirection.Horizontal, Enum.HorizontalAlignment.Left, Enum.VerticalAlignment.Center) })
+			for i, act in ipairs(opts.Actions) do
+				local b = New("TextButton", {
+					AutomaticSize = Enum.AutomaticSize.X, Size = UDim2.fromOffset(0, 20), Text = tostring(act.Text or "OK"), TextSize = 11,
+					BackgroundTransparency = 0, LayoutOrder = i, ZIndex = 7, TextColor3 = kind and color or T.Label,
+					BackgroundColor3 = (kind and color or T.Accent):Lerp(T.Background, 0.82), Parent = row,
+				}, { Corner(6), Pad(9, 0, 9, 0), New("UIStroke", { Color = (kind and color or T.Accent):Lerp(T.Background, 0.5), Thickness = 1 }) })
+				Connect(b.MouseEnter, function() Tween(b, 0.1, { BackgroundColor3 = (kind and color or T.Accent):Lerp(T.Background, 0.66) }) end)
+				Connect(b.MouseLeave, function() Tween(b, 0.1, { BackgroundColor3 = (kind and color or T.Accent):Lerp(T.Background, 0.82) }) end)
+				Connect(b.MouseButton1Click, function()
+					SafeCall("notification action '" .. tostring(act.Text) .. "'", act.Callback)
+					Close()
+				end)
+			end
+		end
+
 		-- accent bar, colour wash and countdown only for typed notifications
 		bar.Visible = kind ~= nil
 		bar.BackgroundColor3 = color
@@ -993,29 +1534,27 @@ function Lumen:Notify(o, duration)
 		remaining = dur
 		track.Visible = (opts.Progress ~= false) and (kind ~= nil or opts.Progress == true) and not loading
 		fill.BackgroundColor3 = color
+		head.BackgroundColor3 = color:Lerp(Color3.new(1, 1, 1), 0.5)
 		fill.Size = UDim2.fromScale(1, 1)
-		-- entrance flourishes
-		iconScale.Scale = 0.35
-		Tween(iconScale, 0.5, { Scale = 1 })
-		pcall(function()
-			TweenService:Create(iconScale, TweenInfo.new(0.5, Enum.EasingStyle.Back, Enum.EasingDirection.Out), { Scale = 1 }):Play()
-		end)
+
+		-- entrance: every type has its own little motion
+		anim.t = 0
+		anim.kind = kind and kind.Icon or "bell"
+		local sc = New("UIScale", { Scale = 0.3, Parent = glyph })
+		TweenService:Create(sc, TweenInfo.new(0.5, Enum.EasingStyle.Back, Enum.EasingDirection.Out), { Scale = 1 }):Play()
+		if anim.kind == "check" then
+			glyph.Rotation = -35
+			TweenService:Create(glyph, TweenInfo.new(0.55, Enum.EasingStyle.Back, Enum.EasingDirection.Out), { Rotation = 0 }):Play()
+		elseif anim.kind == "cross" then
+			glyph.Rotation = 90
+			TweenService:Create(glyph, TweenInfo.new(0.5, Enum.EasingStyle.Back, Enum.EasingDirection.Out), { Rotation = 0 }):Play()
+		elseif anim.kind == "info" then
+			glyph.Position = UDim2.new(0.5, 0, 0.5, -9)
+			TweenService:Create(glyph, TweenInfo.new(0.6, Enum.EasingStyle.Bounce, Enum.EasingDirection.Out), { Position = UDim2.fromScale(0.5, 0.5) }):Play()
+		end
 		shine.Position = UDim2.new(-0.6, 0, 0, 0)
 		TweenService:Create(shine, TweenInfo.new(0.9, Enum.EasingStyle.Sine, Enum.EasingDirection.Out), { Position = UDim2.new(1.2, 0, 0, 0) }):Play()
-		if kind and kind.Key == "Error" then shakeT = 0.45 end
 		Fit()
-	end
-
-	local function Close()
-		if H.Closed then return end
-		H.Closed = true
-		if conn then conn:Disconnect() end
-		for i, n in ipairs(LiveNotifs) do if n == H then table.remove(LiveNotifs, i) break end end
-		TweenService:Create(card, TweenInfo.new(0.28, Enum.EasingStyle.Quad, Enum.EasingDirection.In), { Position = UDim2.fromOffset(310, 0), GroupTransparency = 1 }):Play()
-		task.delay(0.22, function()
-			if holder.Parent then Tween(holder, 0.22, { Size = UDim2.fromOffset(290, 0) }) end
-		end)
-		task.delay(0.5, function() holder:Destroy() end)
 	end
 
 	function H:Update(o2)
@@ -1028,26 +1567,33 @@ function Lumen:Notify(o, duration)
 
 	Connect(card.MouseEnter, function()
 		hovered = true
-		Tween(card, 0.15, { Position = UDim2.fromOffset(-4, 0) })
+		Tween(card, 0.18, { Position = UDim2.fromOffset(side[1] == 1 and -5 or 5, 0) })
 	end)
 	Connect(card.MouseLeave, function()
 		hovered = false
-		if not H.Closed then Tween(card, 0.15, { Position = UDim2.fromOffset(0, 0) }) end
+		if not H.Closed then Tween(card, 0.18, { Position = UDim2.fromOffset(0, 0) }) end
 	end)
-	Connect(card.InputBegan, function(i) if IsPress(i) then Close() end end)
+	Connect(hit.MouseButton1Click, Close)
 
 	conn = RunService.RenderStepped:Connect(function(dt)
 		if H.Closed then return end
-		local t = os.clock()
-		if spin then spin.Rotation = (spin.Rotation + dt * 360) % 360 end
+		anim.t = anim.t + dt
+		local t, at = os.clock(), anim.t
+		if spin then spin.Rotation = (spin.Rotation + dt * 380) % 360 end
 		if kind then
 			-- the accent bar breathes; warnings and errors breathe harder
-			local k = (kind.Key == "Caution" or kind.Key == "Error") and 0.35 or 0.18
-			bar.BackgroundTransparency = k * (0.5 + 0.5 * math.sin(t * 4))
+			local k = (kind.Key == "Caution" or kind.Key == "Error") and 0.4 or 0.2
+			bar.BackgroundTransparency = k * (0.5 + 0.5 * math.sin(t * 4.5))
 		end
-		if shakeT > 0 then
-			shakeT = math.max(0, shakeT - dt)
-			card.Position = UDim2.fromOffset(math.sin(shakeT * 70) * 7 * (shakeT / 0.45), 0)
+		if anim.kind == "warn" and glyph and at < 1.1 then
+			-- the exclamation mark wobbles, settling over a second
+			glyph.Rotation = math.sin(at * 22) * 16 * (1 - at / 1.1)
+		elseif anim.kind == "bell" and glyph and at < 1.2 then
+			-- the bell rings
+			glyph.Rotation = math.sin(at * 26) * 20 * (1 - at / 1.2)
+		elseif anim.kind == "cross" and at < 0.5 then
+			-- errors shake the whole card
+			card.Position = UDim2.fromOffset(math.sin(at * 70) * 7 * (1 - at / 0.5), 0)
 		end
 		if not hovered and remaining ~= math.huge then
 			remaining = remaining - dt
@@ -1058,10 +1604,10 @@ function Lumen:Notify(o, duration)
 	table.insert(Connections, conn)
 
 	Build(o)
-	-- slide in from the right with a little overshoot
-	card.Position = UDim2.fromOffset(310, 0)
+	-- slide in from the screen edge with a little overshoot
+	card.Position = UDim2.fromOffset(offX, 0)
 	card.GroupTransparency = 1
-	TweenService:Create(card, TweenInfo.new(0.5, Enum.EasingStyle.Back, Enum.EasingDirection.Out), { Position = UDim2.fromOffset(0, 0) }):Play()
+	TweenService:Create(card, TweenInfo.new(0.55, Enum.EasingStyle.Back, Enum.EasingDirection.Out), { Position = UDim2.fromOffset(0, 0) }):Play()
 	Tween(card, 0.3, { GroupTransparency = 0 })
 
 	table.insert(LiveNotifs, H)
@@ -1223,7 +1769,7 @@ local function MakeColorPicker(holder, o, owner)
 			NumberSequenceKeypoint.new(0, 0.97), NumberSequenceKeypoint.new(0.4, 0.88), NumberSequenceKeypoint.new(0.62, 0.97),
 			NumberSequenceKeypoint.new(1, 0.9) }) }) }) })
 	local glow = { SetColor = function() end }
-	if o.Tooltip then AttachTooltip(swatch, o.Tooltip) end
+	if o.Tooltip or o.Description then AttachHint(swatch, o.Title, o.Description or o.Tooltip) end
 
 	local pop = New("Frame", {
 		Visible = false, Size = UDim2.fromOffset(196, 172), Parent = Overlay, Theme = { BackgroundColor3 = "Group" },
@@ -1453,6 +1999,7 @@ function Elements:AddLabel(text, o)
 	})
 	function L:SetText(t) lbl.Text = t; self._text = t end
 	function L:SetColor(c) lbl.TextColor3 = c end
+	if o.Description then L:SetDescription(o.Description) end
 	return L
 end
 
@@ -1495,6 +2042,9 @@ function Elements:AddToggle(o)
 		Theme = { BackgroundColor3 = "Toggle" },
 	}, { Corner(5), stroke })
 	local glow = Glow(box, "Accent", 5)
+	-- the "on" fill is an overlay that fades in, so themes with accent gradients paint it smoothly
+	local onFill = AccentOverlay(box, 5, false, false)
+	local boxScale = New("UIScale", { Parent = box })
 	local lbl = New("TextLabel", {
 		Text = T._text, Position = UDim2.fromOffset(26, 0), Size = UDim2.new(1, -26, 1, 0),
 		TextXAlignment = Enum.TextXAlignment.Left, ZIndex = 2, Parent = row,
@@ -1505,13 +2055,20 @@ function Elements:AddToggle(o)
 		if T.Disabled then
 			return TH.Toggle:Lerp(TH.Background, 0.55), TH.AccentBorder:Lerp(TH.Background, 0.7), TH.TextMuted
 		end
-		return T.Value and TH.Accent or TH.Toggle, TH.AccentBorder, TH.Label
+		return TH.Toggle, TH.AccentBorder, o.Risky and TH.Error or TH.Label
 	end
 	local function Render(instant)
-		local fill, border, text = Colors()
+		local base, border, text = Colors()
 		stroke.Color = border
 		lbl.TextColor3 = text
-		if instant then box.BackgroundColor3 = fill else Tween(box, 0.12, { BackgroundColor3 = fill }) end
+		local onT = T.Value and (T.Disabled and 0.55 or 0) or 1
+		if instant then
+			box.BackgroundColor3 = base
+			onFill.BackgroundTransparency = onT
+		else
+			Tween(box, 0.12, { BackgroundColor3 = base })
+			TweenService:Create(onFill, TweenInfo.new(0.16, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), { BackgroundTransparency = onT }):Play()
+		end
 		glow:Set(T.Disabled and 0 or 1)
 	end
 	T._onDisabled = function() Render() end
@@ -1522,26 +2079,32 @@ function Elements:AddToggle(o)
 		if self.Value == v then return end
 		self.Value = v
 		Render()
+		-- a little squash-and-pop on the box
+		boxScale.Scale = 0.82
+		TweenService:Create(boxScale, TweenInfo.new(0.3, Enum.EasingStyle.Back, Enum.EasingDirection.Out), { Scale = 1 }):Play()
 		if not silent then Fire(self, v) end
 		if self._kb then Lumen:_UpdateHotkeys() end
 	end
 	Connect(btn.MouseButton1Click, function() T:Set(not T.Value) end)
 	Connect(btn.MouseEnter, function()
-		if not T.Disabled then Tween(box, 0.1, { BackgroundColor3 = (Colors()):Lerp(Color3.new(1, 1, 1), 0.07) }) end
+		if not T.Disabled then Tween(box, 0.1, { BackgroundColor3 = (Colors()):Lerp(Color3.new(1, 1, 1), 0.08) }) end
 	end)
 	Connect(btn.MouseLeave, function() Render() end)
 
+	function T:SetText(t) self._text = t lbl.Text = t end
 	Register(T, o.Flag)
 	CatalogAdd(self, T, T._text)
 	Render(true)
 	if o.Disabled then T:SetDisabled(true) end
 	if o.Tooltip then T:AddTooltip(o.Tooltip) end
+	if o.Description then T:SetDescription(o.Description) end
 	return T
 end
 
 function Elements:AddSlider(o)
 	o = o or {}
 	local S = NewOpt("Slider", o)
+	S._text = o.Text or "Slider"
 	S.Min, S.Max, S.Inc, S.Suffix = o.Min or 0, o.Max or 100, o.Increment or 1, o.Suffix or ""
 	S.Value = math.clamp(o.Default or S.Min, S.Min, S.Max)
 	local dec = #((tostring(S.Inc):match("%.(%d+)")) or "")
@@ -1551,9 +2114,10 @@ function Elements:AddSlider(o)
 	New("TextLabel", {
 		Text = o.Text or "Slider", Size = UDim2.new(0.6, 0, 0, 16), TextXAlignment = Enum.TextXAlignment.Left, Parent = row,
 	})
-	local valueLabel = New("TextLabel", {
-		AnchorPoint = Vector2.new(1, 0), Position = UDim2.new(1, 0, 0, 0), Size = UDim2.new(0.4, 0, 0, 16),
-		TextXAlignment = Enum.TextXAlignment.Right, Parent = row,
+	-- the value is a text box: click it to type an exact number
+	local valueLabel = New("TextBox", {
+		AnchorPoint = Vector2.new(1, 0), Position = UDim2.new(1, 0, 0, 0), Size = UDim2.new(0.4, 0, 0, 16), BackgroundTransparency = 1,
+		ClearTextOnFocus = false, TextXAlignment = Enum.TextXAlignment.Right, Text = "", ZIndex = 3, Parent = row,
 	})
 	local track = New("Frame", {
 		Position = UDim2.fromOffset(0, 22), Size = UDim2.new(1, 0, 0, 4), Parent = row, Theme = { BackgroundColor3 = "Group" },
@@ -1561,6 +2125,7 @@ function Elements:AddSlider(o)
 	local fill = New("Frame", {
 		Size = UDim2.new(0, 0, 1, 0), Parent = track, Theme = { BackgroundColor3 = "Accent" },
 	}, { Corner(3) })
+	AccentOverlay(fill, 3)
 	local knob = New("Frame", {
 		Size = UDim2.fromOffset(8, 8), AnchorPoint = Vector2.new(0.5, 0.5), Position = UDim2.new(1, 0, 0.5, 0),
 		BackgroundColor3 = Color3.new(1, 1, 1), ZIndex = 3, Parent = fill,
@@ -1568,10 +2133,15 @@ function Elements:AddSlider(o)
 	Glow(knob, Color3.new(1, 1, 1), 4, true):Set(0.2)
 	local hit = New("TextButton", { Position = UDim2.fromOffset(0, 14), Size = UDim2.new(1, 0, 0, 18), Parent = row })
 
-	local function Render()
+	local dragging = false
+	local function Render(animate)
 		local a = (S.Value - S.Min) / math.max(S.Max - S.Min, 1e-9)
-		fill.Size = UDim2.new(a, 0, 1, 0)
-		valueLabel.Text = string.format("%." .. dec .. "f", S.Value) .. S.Suffix
+		if animate then
+			TweenService:Create(fill, TweenInfo.new(0.28, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), { Size = UDim2.new(a, 0, 1, 0) }):Play()
+		else
+			fill.Size = UDim2.new(a, 0, 1, 0)
+		end
+		if not valueLabel:IsFocused() then valueLabel.Text = string.format("%." .. dec .. "f", S.Value) .. S.Suffix end
 	end
 	function S:Set(v, silent)
 		v = tonumber(v)
@@ -1580,17 +2150,31 @@ function Elements:AddSlider(o)
 		v = tonumber(string.format("%." .. dec .. "f", v))
 		if v == S.Value then return end
 		S.Value = v
-		Render()
+		Render(not dragging)
 		if not silent then Fire(S, v) end
 	end
+	function S:SetText(t) self._text = t end
+	Connect(valueLabel.Focused, function()
+		valueLabel.Text = string.format("%." .. dec .. "f", S.Value)
+		Tween(valueLabel, 0.12, { TextColor3 = Lumen.Theme.AccentText })
+	end)
+	Connect(valueLabel.FocusLost, function()
+		local n = tonumber((valueLabel.Text:gsub("[^%d%.%-]", "")))
+		Tween(valueLabel, 0.12, { TextColor3 = Lumen.Theme.Label })
+		if n then S:Set(n) end
+		valueLabel.Text = string.format("%." .. dec .. "f", S.Value) .. S.Suffix
+	end)
 	Dragger(hit, function(x)
+		dragging = true
 		local a = math.clamp((x - track.AbsolutePosition.X) / math.max(track.AbsoluteSize.X, 1), 0, 1)
 		S:Set(S.Min + a * (S.Max - S.Min))
 	end)
+	Connect(UIS.InputEnded, function(i) if IsPress(i) then dragging = false end end)
 	Register(S, o.Flag)
 	CatalogAdd(self, S, o.Text or "Slider")
 	Render()
 	if o.Disabled then S:SetDisabled(true) end
+	if o.Description then S:SetDescription(o.Description) end
 	return S
 end
 
@@ -1611,6 +2195,7 @@ end
 function Elements:AddDropdown(o)
 	o = o or {}
 	local D = NewOpt("Dropdown", o)
+	D._text = o.Text or "Dropdown"
 	D.Values = o.Values or {}
 	D.Multi = o.Multi == true
 	D.Value = D.Multi and {} or nil
@@ -1640,6 +2225,14 @@ function Elements:AddDropdown(o)
 		Size = UDim2.fromScale(1, 1), BackgroundTransparency = 1, ScrollBarThickness = 2, CanvasSize = UDim2.new(),
 		AutomaticCanvasSize = Enum.AutomaticSize.Y, Parent = pop, Theme = { ScrollBarImageColor3 = "Accent" },
 	}, { Pad(4), List(2) })
+	-- long lists get a search box at the top (or force it with Search = true)
+	local search
+	local function WantsSearch() return o.Search == true or (o.Search ~= false and #D.Values > 8) end
+	search = New("TextBox", {
+		Position = UDim2.fromOffset(4, 4), Size = UDim2.new(1, -8, 0, 26), BackgroundTransparency = 1, Text = "",
+		PlaceholderText = "Search...", PlaceholderColor3 = Lumen.Theme.TextMuted, ClearTextOnFocus = false, Visible = false,
+		TextXAlignment = Enum.TextXAlignment.Left, Font = Enum.Font.GothamMedium, Parent = pop,
+	}, { Corner(5), Stroke("Outline"), Pad(8, 0, 8, 0) })
 
 	local items = {}
 	local function IsSelected(v)
@@ -1662,8 +2255,19 @@ function Elements:AddDropdown(o)
 	end
 	table.insert(Refreshers, Render)
 	local function PopupSize()
-		pop.Size = UDim2.fromOffset(math.max(box.AbsoluteSize.X / Lumen.Scale, 120), math.min(#D.Values * 26 + 8, 184))
+		local s2 = WantsSearch()
+		search.Visible = s2
+		scroll.Position = UDim2.fromOffset(0, s2 and 32 or 0)
+		scroll.Size = UDim2.new(1, 0, 1, s2 and -32 or 0)
+		pop.Size = UDim2.fromOffset(math.max(box.AbsoluteSize.X / Lumen.Scale, 120), math.min(#D.Values * 26 + 8, 184) + (s2 and 32 or 0))
 	end
+	local function Filter()
+		local q = search.Text:lower()
+		for v, b in pairs(items) do
+			b.Visible = q == "" or tostring(v):lower():find(q, 1, true) ~= nil
+		end
+	end
+	Connect(search:GetPropertyChangedSignal("Text"), Filter)
 	local function Build()
 		for _, b in pairs(items) do b:Destroy() end
 		items = {}
@@ -1718,7 +2322,10 @@ function Elements:AddDropdown(o)
 			ClosePopup()
 		else
 			PopupSize()
+			search.Text = ""
+			Filter()
 			ShowPopup(pop, box)
+			if search.Visible then task.defer(function() pcall(function() search:CaptureFocus() end) end) end
 		end
 	end)
 
@@ -1728,12 +2335,14 @@ function Elements:AddDropdown(o)
 	CatalogAdd(self, D, o.Text or "Dropdown")
 	Render()
 	if o.Disabled then D:SetDisabled(true) end
+	if o.Description then D:SetDescription(o.Description) end
 	return D
 end
 
 function Elements:AddInput(o)
 	o = type(o) == "string" and { Text = o } or o or {}
 	local I = NewOpt("Input", o)
+	I._text = o.Text or "Input"
 	I.Value = tostring(o.Default or "")
 	local h = o.Text and 48 or 28
 	local row = Row(self._container, h)
@@ -1790,12 +2399,14 @@ function Elements:AddInput(o)
 	Register(I, o.Flag)
 	CatalogAdd(self, I, o.Text or "Input")
 	if o.Disabled then I:SetDisabled(true) end
+	if o.Description then I:SetDescription(o.Description) end
 	return I
 end
 
 function Elements:AddButton(o)
 	o = type(o) == "string" and { Text = o } or o or {}
 	local B = NewOpt("Button", {})
+	B._text = o.Text or "Button"
 	local row = Row(self._container, 28)
 	B.Row = row
 	New("UIListLayout", {
@@ -1822,7 +2433,7 @@ function Elements:AddButton(o)
 		})
 		table.insert(buttons, b)
 		Layout()
-		if opts.Tooltip then AttachTooltip(b, opts.Tooltip) end
+		if opts.Tooltip or opts.Description then AttachHint(b, opts.Text, opts.Description or opts.Tooltip) end
 		local confirming = false
 		local original = b.Text
 		Connect(b.MouseEnter, function() Tween(b, 0.1, { BackgroundColor3 = Lumen.Theme.ControlHover }) end)
@@ -1831,7 +2442,7 @@ function Elements:AddButton(o)
 			if opts.Confirm then
 				local c = {}
 				for k, v in pairs(opts.Confirm) do c[k] = v end
-				c.Callback = function(ok) if ok and opts.Callback then opts.Callback() end end
+				c.Callback = function(ok) if ok and opts.Callback then SafeCall("Button '" .. tostring(opts.Text or "Button") .. "'", opts.Callback) end end
 				Lumen:Confirm(c)
 				return
 			end
@@ -1855,7 +2466,16 @@ function Elements:AddButton(o)
 			end
 			b.BackgroundColor3 = Lumen.Theme.TabActive
 			Tween(b, 0.25, { BackgroundColor3 = Lumen.Theme.ControlHover })
-			if opts.Callback then task.spawn(opts.Callback) end
+			-- press ripple
+			local rip = New("Frame", {
+				AnchorPoint = Vector2.new(0.5, 0.5), Position = UDim2.fromScale(0.5, 0.5), Size = UDim2.fromOffset(6, 6),
+				BackgroundColor3 = Lumen.Theme.Accent, BackgroundTransparency = 0.7, ZIndex = b.ZIndex, Parent = b,
+			}, { CornerFixed(999) })
+			b.ClipsDescendants = true
+			TweenService:Create(rip, TweenInfo.new(0.45, Enum.EasingStyle.Quad, Enum.EasingDirection.Out),
+				{ Size = UDim2.fromOffset(b.AbsoluteSize.X * 1.3, b.AbsoluteSize.X * 1.3), BackgroundTransparency = 1 }):Play()
+			task.delay(0.5, function() rip:Destroy() end)
+			if opts.Callback then SafeCall("Button '" .. tostring(opts.Text or "Button") .. "'", opts.Callback) end
 		end
 		Connect(b.MouseButton1Click, Press)
 		return b, Press
@@ -1872,6 +2492,129 @@ function Elements:AddButton(o)
 	CatalogAdd(self, B, o.Text or "Button")
 	if o.Disabled then B:SetDisabled(true) end
 	return B
+end
+
+-- A titled block of wrapping text. Returns { SetTitle, SetContent }.
+function Elements:AddParagraph(o)
+	if type(o) == "string" then o = { Content = o } end
+	o = o or {}
+	local order = (self._container:GetAttribute("Order") or 0) + 1
+	self._container:SetAttribute("Order", order)
+	local card = New("Frame", {
+		Size = UDim2.new(1, 0, 0, 0), AutomaticSize = Enum.AutomaticSize.Y, BackgroundTransparency = 1, LayoutOrder = order,
+		Parent = self._container,
+	}, { Corner(6), Stroke("Outline"), Pad(10, 8, 10, 9), List(3) })
+	local title = New("TextLabel", {
+		Text = o.Title or "", Visible = o.Title ~= nil, Size = UDim2.new(1, 0, 0, 0), AutomaticSize = Enum.AutomaticSize.Y,
+		TextWrapped = true, TextXAlignment = Enum.TextXAlignment.Left, TextColor3 = Lumen.Theme.Text, LayoutOrder = 1, Parent = card,
+	})
+	local body = New("TextLabel", {
+		Text = o.Content or "", Size = UDim2.new(1, 0, 0, 0), AutomaticSize = Enum.AutomaticSize.Y, TextWrapped = true, RichText = true,
+		TextSize = 11, Font = Enum.Font.GothamMedium, TextXAlignment = Enum.TextXAlignment.Left, TextColor3 = Lumen.Theme.TextDim,
+		LayoutOrder = 2, Parent = card,
+	})
+	return {
+		Row = card,
+		SetTitle = function(_, t) title.Text = t or "" title.Visible = t ~= nil end,
+		SetContent = function(_, t) body.Text = t or "" end,
+		SetVisible = function(_, v) card.Visible = v end,
+		Destroy = function() card:Destroy() end,
+	}
+end
+
+-- Animated progress bar. Options: Text, Default, Max (default 100), Suffix ("%" by default shows a percentage),
+-- Color (fixed colour instead of the accent). Methods: :Set(value), :SetText(text), :Increment(by).
+local ProgressBars = {}
+function Elements:AddProgress(o)
+	o = o or {}
+	local Pg = NewOpt("Progress", o)
+	Pg._text = o.Text or "Progress"
+	Pg.Max = o.Max or 100
+	Pg.Value = math.clamp(o.Default or 0, 0, Pg.Max)
+	local hasText = o.Text ~= nil
+	local row = Row(self._container, hasText and 34 or 12)
+	Pg.Row = row
+	local label = hasText and New("TextLabel", {
+		Text = o.Text, Size = UDim2.new(0.65, 0, 0, 16), TextXAlignment = Enum.TextXAlignment.Left, Parent = row,
+	})
+	local valueLabel = New("TextLabel", {
+		AnchorPoint = Vector2.new(1, 0), Position = UDim2.new(1, 0, 0, 0), Size = UDim2.new(0.35, 0, 0, 16), Visible = hasText,
+		TextXAlignment = Enum.TextXAlignment.Right, TextColor3 = Lumen.Theme.TextDim, Font = Enum.Font.GothamMedium, Parent = row,
+	})
+	local track = New("Frame", {
+		Position = UDim2.fromOffset(0, hasText and 22 or 2), Size = UDim2.new(1, 0, 0, 8), ClipsDescendants = true, Parent = row,
+		Theme = { BackgroundColor3 = "Group" },
+	}, { Corner(4), Stroke("Outline") })
+	local fill = New("Frame", { Size = UDim2.new(0, 0, 1, 0), Parent = track, Theme = { BackgroundColor3 = "Accent" } }, { Corner(4) })
+	local ov = AccentOverlay(fill, 4)
+	if o.Color then ov.BackgroundColor3 = o.Color ov:FindFirstChildOfClass("UIGradient").Enabled = false end
+	-- a soft highlight that sweeps along the filled part
+	local sheen = New("Frame", { Size = UDim2.fromScale(1, 1), BackgroundColor3 = Color3.new(1, 1, 1), ZIndex = fill.ZIndex + 1, Parent = fill }, { Corner(4) })
+	local sheenGrad = New("UIGradient", { Transparency = NumberSequence.new({
+		NumberSequenceKeypoint.new(0, 1), NumberSequenceKeypoint.new(0.45, 1), NumberSequenceKeypoint.new(0.5, 0.75),
+		NumberSequenceKeypoint.new(0.55, 1), NumberSequenceKeypoint.new(1, 1) }), Parent = sheen })
+	table.insert(ProgressBars, { Grad = sheenGrad, Row = row })
+	local function Text()
+		if o.Suffix then return string.format("%d", math.floor(Pg.Value + 0.5)) .. o.Suffix end
+		return string.format("%d%%", math.floor(Pg.Value / Pg.Max * 100 + 0.5))
+	end
+	function Pg:Set(v, silent)
+		v = math.clamp(tonumber(v) or 0, 0, self.Max)
+		local was = self.Value
+		self.Value = v
+		TweenService:Create(fill, TweenInfo.new(0.45, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), { Size = UDim2.new(v / self.Max, 0, 1, 0) }):Play()
+		valueLabel.Text = Text()
+		if v >= self.Max and was < self.Max then
+			-- finished: a brief brighten
+			sheen.BackgroundTransparency = 0.55
+			TweenService:Create(sheen, TweenInfo.new(0.6, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), { BackgroundTransparency = 0 }):Play()
+			task.delay(0.6, function() sheen.BackgroundTransparency = 0 end)
+		end
+		if not silent then Fire(self, v) end
+	end
+	function Pg:Increment(by) self:Set(self.Value + (by or 1)) end
+	function Pg:SetText(t) self._text = t if label then label.Text = t end end
+	function Pg:SetMax(m) self.Max = math.max(m, 1e-9) self:Set(self.Value, true) end
+	fill.Size = UDim2.new(Pg.Value / Pg.Max, 0, 1, 0)
+	valueLabel.Text = Text()
+	if o.Description then Pg:SetDescription(o.Description) end
+	return Pg
+end
+Connect(RunService.RenderStepped, function()
+	local t = os.clock()
+	for i = #ProgressBars, 1, -1 do
+		local p = ProgressBars[i]
+		if not p.Row.Parent then table.remove(ProgressBars, i) else p.Grad.Offset = Vector2.new(((t * 0.6) % 2) - 1, 0) end
+	end
+end)
+
+-- Dropdown that lists the players in the server and keeps itself up to date as people join and leave.
+-- Options: everything AddDropdown takes, plus IncludeLocal (default false). :GetPlayer() returns the Player (or a list when Multi).
+function Elements:AddPlayerDropdown(o)
+	o = o or {}
+	local function Names()
+		local t = {}
+		for _, p in ipairs(Players:GetPlayers()) do
+			if o.IncludeLocal or p ~= Players.LocalPlayer then table.insert(t, p.Name) end
+		end
+		table.sort(t, function(a, b) return a:lower() < b:lower() end)
+		return t
+	end
+	o.Values = Names()
+	o.Text = o.Text or "Player"
+	local D = self:AddDropdown(o)
+	local function Refresh() if D.Row and D.Row.Parent then D:SetValues(Names(), true) end end
+	Connect(Players.PlayerAdded, Refresh)
+	Connect(Players.PlayerRemoving, function() task.defer(Refresh) end)
+	function D:GetPlayer()
+		if self.Multi then
+			local out = {}
+			for n in pairs(self.Value) do local p = Players:FindFirstChild(n) if p then table.insert(out, p) end end
+			return out
+		end
+		return self.Value and Players:FindFirstChild(self.Value) or nil
+	end
+	return D
 end
 
 -- 3D preview. Options: Height, Object (Model/BasePart to display), Character (use your avatar), Rotate (auto-rotate, default true),
@@ -2210,7 +2953,7 @@ function Lumen:CreatePanel(o)
 	}, { List(6) })
 	P._container, P.Frame = content, frame
 	RegisterScale(frame)
-	RegisterSurface(frame, "Panel")
+	RegisterSurface(frame, "Panel", 10)
 
 	local function Front()
 		ZCounter = ZCounter + 1
@@ -2324,13 +3067,11 @@ function Lumen:Confirm(o)
 
 	local top = New("Frame", { BackgroundTransparency = 1, Size = UDim2.new(1, 0, 0, 0), AutomaticSize = Enum.AutomaticSize.Y, LayoutOrder = 1, Parent = body },
 		{ List(14, Enum.FillDirection.Horizontal, Enum.HorizontalAlignment.Left, Enum.VerticalAlignment.Top) })
-	local badge = New("Frame", {
-		Size = UDim2.fromOffset(44, 44), BackgroundColor3 = color:Lerp(T.Background, 0.78), LayoutOrder = 1, Parent = top,
-	}, { CornerFixed(22), New("UIStroke", { Color = color:Lerp(T.Background, 0.45), Thickness = 1 }) })
-	Glow(badge, color, 22, true)
-	local badgeIcon = Icon(symbol, badge, 22, key)
-	badgeIcon.AnchorPoint = Vector2.new(0.5, 0.5)
-	badgeIcon.Position = UDim2.fromScale(0.5, 0.5)
+	local badge, badgePlate, badgeGlyph = StatusBadge(top, kind, 44)
+	badge.LayoutOrder = 1
+	Glow(badgePlate, color, kind.Shape == "square" and 13 or 22, true)
+	local bsc = New("UIScale", { Scale = 0.4, Parent = badgeGlyph })
+	TweenService:Create(bsc, TweenInfo.new(0.55, Enum.EasingStyle.Back, Enum.EasingDirection.Out), { Scale = 1 }):Play()
 	local texts = New("Frame", {
 		BackgroundTransparency = 1, Size = UDim2.new(1, -58, 0, 0), AutomaticSize = Enum.AutomaticSize.Y, LayoutOrder = 2, Parent = top,
 	}, { List(5) })
@@ -2597,14 +3338,7 @@ end
 -- Backdrop (dim + blur + snow). Shown only while a window is open.
 ------------------------------------------------------------------------------
 
-local Snow = { Enabled = false, Count = 70, Speed = 1, Kind = "Theme", Flakes = {}, Time = 0, Built = nil }
-Lumen.ParticleKinds = { "Theme", "Snow", "Bubbles", "Petals", "Embers", "Fireflies", "Stars", "Glyphs" }
-local KIND_COLORS = {
-	Snow = Color3.new(1, 1, 1), Bubbles = Color3.fromRGB(140, 205, 255), Petals = Color3.fromRGB(242, 150, 186),
-	Embers = Color3.fromRGB(255, 150, 70), Fireflies = Color3.fromRGB(180, 255, 150), Stars = Color3.new(1, 1, 1),
-	Glyphs = Color3.fromRGB(205, 205, 205),
-}
-local GLYPH_CHARS = { "0", "1", "0", "1", "A", "F", "7", "3", "#", "*" }
+local Snow = { Enabled = false, Count = 70, Speed = 1, Kind = "Theme", Layers = {}, Time = 0, Show = 0, ShowTarget = 0, NextBolt = 6 }
 local Backdrop = { Dim = 0.35, Blur = 0 }
 local BlurEffect
 
@@ -2615,6 +3349,9 @@ local BackdropFrame = New("Frame", {
 local DimFrame = New("Frame", {
 	Size = UDim2.fromScale(1, 1), BackgroundColor3 = Color3.new(0, 0, 0), BackgroundTransparency = 1, Parent = BackdropFrame,
 })
+local FlashFrame = New("Frame", {
+	Size = UDim2.fromScale(1, 1), BackgroundColor3 = Color3.fromRGB(215, 228, 255), BackgroundTransparency = 1, ZIndex = 3, Parent = BackdropFrame,
+})
 
 local function AnyWindowVisible()
 	for _, w in ipairs(Lumen.Windows) do
@@ -2623,10 +3360,13 @@ local function AnyWindowVisible()
 	return false
 end
 
+-- the backdrop (dim, blur, particles) fades in when a window opens and out when the last one closes
 function Lumen:_UpdateSnow()
 	local any = AnyWindowVisible()
-	BackdropFrame.Visible = any and (Snow.Enabled or Backdrop.Dim > 0)
-	DimFrame.BackgroundTransparency = 1 - math.clamp(Backdrop.Dim, 0, 1)
+	Snow.ShowTarget = any and 1 or 0
+	if any and (Snow.Enabled or Backdrop.Dim > 0) then BackdropFrame.Visible = true end
+	TweenService:Create(DimFrame, TweenInfo.new(0.35, Enum.EasingStyle.Sine, Enum.EasingDirection.Out),
+		{ BackgroundTransparency = any and (1 - math.clamp(Backdrop.Dim, 0, 1)) or 1 }):Play()
 	local target = any and Backdrop.Blur or 0
 	if target > 0 and not BlurEffect then
 		pcall(function()
@@ -2635,77 +3375,329 @@ function Lumen:_UpdateSnow()
 			BlurEffect.Parent = Lighting
 		end)
 	end
-	if BlurEffect then Tween(BlurEffect, 0.25, { Size = target }) end
+	if BlurEffect then Tween(BlurEffect, 0.35, { Size = target }) end
 	self:_UpdateDock()
 end
+
+------------------------------------------------------------------------------
+-- Particle kinds. Each has Build(f, color) (create f.Frame, set f.Base = resting transparency)
+-- and Update(f, dt, t, speed) (move it; may return a transparency). Register your own with Lumen:RegisterParticles.
+------------------------------------------------------------------------------
+
+local GLYPH_CHARS = { "0", "1", "0", "1", "A", "F", "7", "3", "#", "*" }
+local CONFETTI = { Color3.fromRGB(255, 128, 190), Color3.fromRGB(130, 255, 210), Color3.fromRGB(255, 220, 120), Color3.fromRGB(150, 170, 255), Color3.fromRGB(255, 160, 110) }
+local function Dot(parent, size, color, tr)
+	return New("Frame", { Size = UDim2.fromOffset(size, size), BackgroundColor3 = color, BackgroundTransparency = tr, Parent = parent }, { CornerFixed(size) })
+end
+local function Fall(f, dt, sp, dir)
+	f.Y = f.Y + f.Speed * sp * dt * (dir or 1)
+	if f.Y > 1.05 then f.Y = -0.05 f.X = math.random() elseif f.Y < -0.05 then f.Y = 1.05 f.X = math.random() end
+end
+
+local KINDS = {}
+KINDS.Snow = {
+	Build = function(f, c, p)
+		local size = math.random(4, 13)
+		f.Speed = 0.03 + (size / 13) * 0.07
+		f.Base = 0.3 + math.random() * 0.5
+		f.Frame = Dot(p, size, c, f.Base)
+	end,
+	Update = function(f, dt, t, sp)
+		Fall(f, dt, sp)
+		f.Frame.Position = UDim2.fromScale(f.X + math.sin(t * f.Sway + f.Phase) * 0.008, f.Y)
+	end,
+}
+KINDS.Bubbles = {
+	Build = function(f, c, p)
+		local size = math.random(6, 20)
+		f.Speed = 0.025 + (size / 20) * 0.05
+		f.Base = 0.92
+		f.Frame = Dot(p, size, c, 0.92)
+		f.Extra = { { New("UIStroke", { Color = c, Thickness = 1.2, Transparency = 0.5, Parent = f.Frame }), "Transparency", 0.35 + math.random() * 0.4 },
+			{ Dot(f.Frame, math.max(2, math.floor(size / 4)), Color3.new(1, 1, 1), 0.45), "BackgroundTransparency", 0.45 } }
+		f.Extra[2][1].Position = UDim2.fromScale(0.22, 0.2)
+	end,
+	Update = function(f, dt, t, sp)
+		Fall(f, dt, sp, -1)
+		f.Frame.Position = UDim2.fromScale(f.X + math.sin(t * f.Sway * 1.6 + f.Phase) * 0.012, f.Y)
+	end,
+}
+KINDS.Petals = {
+	Build = function(f, c, p)
+		local size = math.random(6, 12)
+		f.Speed = 0.025 + math.random() * 0.03
+		f.Spin, f.Rot = (math.random() - 0.5) * 160, math.random() * 360
+		f.Base = 0.15 + math.random() * 0.4
+		f.Frame = New("Frame", { Size = UDim2.fromOffset(math.floor(size * 1.5), size), BackgroundColor3 = c:Lerp(Color3.new(1, 1, 1), math.random() * 0.3),
+			BackgroundTransparency = f.Base, Parent = p }, { CornerFixed(size) })
+	end,
+	Update = function(f, dt, t, sp)
+		Fall(f, dt, sp)
+		f.Rot = f.Rot + f.Spin * sp * dt
+		f.Frame.Position = UDim2.fromScale(f.X + math.sin(t * f.Sway + f.Phase) * 0.035, f.Y)
+		f.Frame.Rotation = f.Rot
+	end,
+}
+KINDS.Embers = {
+	Build = function(f, c, p)
+		local size = math.random(2, 5)
+		f.Speed = 0.05 + math.random() * 0.07
+		f.Base = 0.2
+		f.Frame = New("Frame", { Size = UDim2.fromOffset(size, size), BackgroundColor3 = c:Lerp(Color3.fromRGB(255, 230, 150), math.random() * 0.5),
+			BackgroundTransparency = 0.2, Parent = p }, { CornerFixed(1) })
+	end,
+	Update = function(f, dt, t, sp)
+		Fall(f, dt, sp, -1)
+		f.Frame.Position = UDim2.fromScale(f.X + math.sin(t * f.Sway * 2 + f.Phase) * 0.018, f.Y)
+		return math.clamp(0.1 + (1 - f.Y) * 0.75 + 0.15 * math.sin(t * 13 + f.Phase), 0, 1)
+	end,
+}
+KINDS.Fireflies = {
+	Build = function(f, c, p)
+		local size = math.random(3, 6)
+		f.Pulse = 1.2 + math.random() * 2
+		f.Base = 0.2
+		f.Frame = Dot(p, size, c, 0.2)
+		local halo = Dot(f.Frame, size * 4, c, 0.88)
+		halo.AnchorPoint = Vector2.new(0.5, 0.5)
+		halo.Position = UDim2.fromScale(0.5, 0.5)
+		f.Extra = { { halo, "BackgroundTransparency", 0.88 } }
+	end,
+	Update = function(f, dt, t, sp)
+		f.X = (f.X + math.sin(t * f.Sway * 0.7 + f.Phase) * 0.018 * sp * dt) % 1
+		f.Y = (f.Y + math.cos(t * f.Sway * 0.5 + f.Phase * 2) * 0.014 * sp * dt) % 1
+		f.Frame.Position = UDim2.fromScale(f.X, f.Y)
+		return 0.15 + 0.75 * (0.5 + 0.5 * math.sin(t * f.Pulse + f.Phase))
+	end,
+}
+KINDS.Stars = {
+	Build = function(f, c, p)
+		local size = math.random(1, 3)
+		f.Pulse = 0.6 + math.random() * 2.2
+		f.Base = 0.3
+		f.Frame = Dot(p, size, c, 0.3)
+		f.Frame.Position = UDim2.fromScale(f.X, f.Y)
+	end,
+	Update = function(f, dt, t, sp)
+		return 0.15 + 0.75 * (0.5 + 0.5 * math.sin(t * f.Pulse * sp + f.Phase))
+	end,
+}
+KINDS.Glyphs = {
+	Build = function(f, c, p)
+		f.Speed = 0.06 + math.random() * 0.1
+		f.Base = 0.3 + math.random() * 0.55
+		-- plain Instance.new so theme font changes never touch these
+		local tl = Instance.new("TextLabel")
+		tl.BackgroundTransparency = 1
+		tl.Size = UDim2.fromOffset(14, 16)
+		tl.Font = Enum.Font.RobotoMono
+		tl.TextSize = math.random(10, 16)
+		tl.TextColor3 = c
+		tl.TextTransparency = f.Base
+		tl.Text = GLYPH_CHARS[math.random(#GLYPH_CHARS)]
+		tl.Parent = p
+		f.Frame = tl
+	end,
+	Update = function(f, dt, t, sp)
+		Fall(f, dt, sp)
+		if math.random() < dt * 1.5 then f.Frame.Text = GLYPH_CHARS[math.random(#GLYPH_CHARS)] end
+		f.Frame.Position = UDim2.fromScale(f.X, f.Y)
+	end,
+}
+-- rain streaks falling at a slant (the Storm theme adds distant lightning)
+KINDS.Rain = {
+	Build = function(f, c, p)
+		local len = math.random(14, 30)
+		f.Speed = 0.55 + math.random() * 0.45
+		f.Base = 0.45 + math.random() * 0.35
+		f.Frame = New("Frame", { Size = UDim2.fromOffset(1, len), Rotation = 14, BackgroundColor3 = c, BackgroundTransparency = f.Base, Parent = p })
+	end,
+	Update = function(f, dt, t, sp)
+		Fall(f, dt, sp)
+		f.X = f.X - f.Speed * sp * dt * 0.25
+		if f.X < -0.02 then f.X = f.X + 1.04 end
+		f.Frame.Position = UDim2.fromScale(f.X, f.Y)
+	end,
+}
+-- tumbling multicolour confetti (ignores the particle colour)
+KINDS.Confetti = {
+	Build = function(f, c, p)
+		f.Speed = 0.04 + math.random() * 0.05
+		f.Spin, f.Rot, f.Flip = (math.random() - 0.5) * 300, math.random() * 360, math.random() * 6
+		f.Base = 0.05 + math.random() * 0.25
+		f.W = math.random(4, 7)
+		f.Frame = New("Frame", { Size = UDim2.fromOffset(f.W, f.W * 2), BackgroundColor3 = CONFETTI[math.random(#CONFETTI)],
+			BackgroundTransparency = f.Base, Parent = p }, { CornerFixed(1) })
+	end,
+	Update = function(f, dt, t, sp)
+		Fall(f, dt, sp)
+		f.Rot = f.Rot + f.Spin * sp * dt
+		f.Frame.Rotation = f.Rot
+		-- flutter: the width breathes as if the piece turns over in the air
+		f.Frame.Size = UDim2.fromOffset(math.max(1, math.floor(f.W * math.abs(math.cos(t * 3 + f.Flip)) + 0.5)), f.W * 2)
+		f.Frame.Position = UDim2.fromScale(f.X + math.sin(t * f.Sway * 1.4 + f.Phase) * 0.02, f.Y)
+	end,
+}
+-- four-point twinkles that grow, glint and fade in place
+KINDS.Sparkles = {
+	Build = function(f, c, p)
+		local size = math.random(8, 16)
+		f.Pulse = 0.5 + math.random() * 1.1
+		f.Base = 0.15
+		f.Frame = New("Frame", { BackgroundTransparency = 1, Size = UDim2.fromOffset(size, size), Position = UDim2.fromScale(f.X, f.Y), Parent = p })
+		local a = New("Frame", { AnchorPoint = Vector2.new(0.5, 0.5), Position = UDim2.fromScale(0.5, 0.5), Size = UDim2.new(1, 0, 0, 2),
+			BackgroundColor3 = c, Parent = f.Frame }, { CornerFixed(1) })
+		local b = New("Frame", { AnchorPoint = Vector2.new(0.5, 0.5), Position = UDim2.fromScale(0.5, 0.5), Size = UDim2.new(0, 2, 1, 0),
+			BackgroundColor3 = c, Parent = f.Frame }, { CornerFixed(1) })
+		f.Scale = New("UIScale", { Parent = f.Frame })
+		f.Extra = { { a, "BackgroundTransparency", 0 }, { b, "BackgroundTransparency", 0 } }
+		f.NoSelf = true
+	end,
+	Update = function(f, dt, t, sp)
+		local w = 0.5 + 0.5 * math.sin(t * f.Pulse * sp + f.Phase)
+		f.Scale.Scale = 0.2 + w * 0.8
+		f.Frame.Rotation = (t * 20 + f.Phase * 50) % 90
+		if w < 0.03 and math.random() < 0.5 then f.X, f.Y = math.random(), math.random() f.Frame.Position = UDim2.fromScale(f.X, f.Y) end
+		return 1 - w * 0.9
+	end,
+}
+-- chunky square pixels drifting upward, blinking now and then
+KINDS.Pixels = {
+	Build = function(f, c, p)
+		local size = math.random(1, 3) * 3
+		f.Speed = 0.02 + math.random() * 0.04
+		f.Base = 0.2 + math.random() * 0.4
+		f.Frame = New("Frame", { Size = UDim2.fromOffset(size, size), BackgroundColor3 = c, BackgroundTransparency = f.Base, Parent = p })
+	end,
+	Update = function(f, dt, t, sp)
+		Fall(f, dt, sp, -1)
+		-- snap to a coarse grid so the motion steps like old hardware
+		local px = math.floor(f.X * 160) / 160
+		local py = math.floor(f.Y * 90) / 90
+		f.Frame.Position = UDim2.fromScale(px, py)
+		if math.sin(t * 2 + f.Phase * 9) > 0.97 then return 1 end
+	end,
+}
+-- twinkling stars with the occasional shooting star
+KINDS.Starfield = {
+	Build = function(f, c, p)
+		local size = math.random(1, 3)
+		f.Pulse = 0.4 + math.random() * 1.6
+		f.Base = 0.2
+		f.Frame = Dot(p, size, c, 0.2)
+		f.Frame.Position = UDim2.fromScale(f.X, f.Y)
+	end,
+	Update = function(f, dt, t, sp)
+		return 0.1 + 0.8 * (0.5 + 0.5 * math.sin(t * f.Pulse * sp + f.Phase))
+	end,
+	Layer = function(layer, dt, t, sp, color)
+		layer.NextShot = layer.NextShot or (t + 1.5)
+		if t >= layer.NextShot then
+			layer.NextShot = t + 1.6 + math.random() * 3.5
+			local x0, y0 = math.random() * 0.8, math.random() * 0.4
+			local streak = New("Frame", {
+				Size = UDim2.fromOffset(90, 2), Rotation = 25, Position = UDim2.fromScale(x0, y0), BackgroundColor3 = color,
+				BackgroundTransparency = 1 - layer.Alpha * Snow.Show, Parent = layer.Folder,
+			}, { CornerFixed(1), New("UIGradient", { Transparency = NumberSequence.new({
+				NumberSequenceKeypoint.new(0, 1), NumberSequenceKeypoint.new(0.85, 0.1), NumberSequenceKeypoint.new(1, 0) }) }) })
+			TweenService:Create(streak, TweenInfo.new(0.9, Enum.EasingStyle.Quad, Enum.EasingDirection.Out),
+				{ Position = UDim2.fromScale(x0 + 0.22, y0 + 0.13), BackgroundTransparency = 1 }):Play()
+			task.delay(0.95, function() streak:Destroy() end)
+		end
+	end,
+}
+-- slowly spinning six-armed ice crystals
+KINDS.Crystals = {
+	Build = function(f, c, p)
+		local size = math.random(8, 16)
+		f.Speed = 0.02 + (size / 16) * 0.04
+		f.Spin, f.Rot = (math.random() - 0.5) * 50, math.random() * 60
+		f.Base = 0.25 + math.random() * 0.45
+		f.Frame = New("Frame", { BackgroundTransparency = 1, Size = UDim2.fromOffset(size, size), Parent = p })
+		f.Extra = {}
+		for _, r in ipairs({ 0, 60, 120 }) do
+			local arm = New("Frame", { AnchorPoint = Vector2.new(0.5, 0.5), Position = UDim2.fromScale(0.5, 0.5), Size = UDim2.new(1, 0, 0, 1),
+				Rotation = r, BackgroundColor3 = c, BackgroundTransparency = f.Base, Parent = f.Frame })
+			table.insert(f.Extra, { arm, "BackgroundTransparency", f.Base })
+		end
+		f.NoSelf = true
+	end,
+	Update = function(f, dt, t, sp)
+		Fall(f, dt, sp)
+		f.Rot = f.Rot + f.Spin * sp * dt
+		f.Frame.Rotation = f.Rot
+		f.Frame.Position = UDim2.fromScale(f.X + math.sin(t * f.Sway * 0.6 + f.Phase) * 0.01, f.Y)
+	end,
+}
+-- neon light streaks rising, alternating the theme's two neon colours
+KINDS.Neon = {
+	Build = function(f, c, p)
+		local len = math.random(18, 46)
+		f.Speed = 0.12 + math.random() * 0.18
+		f.Base = 0.15 + math.random() * 0.4
+		local col = (math.random() < 0.5) and c or ((Lumen.Style.Aura and Lumen.Style.Aura[1]) or c)
+		f.Frame = New("Frame", { Size = UDim2.fromOffset(2, len), BackgroundColor3 = col, BackgroundTransparency = f.Base, Parent = p },
+			{ CornerFixed(1), New("UIGradient", { Rotation = 90, Transparency = NumberSequence.new({
+				NumberSequenceKeypoint.new(0, 0), NumberSequenceKeypoint.new(1, 1) }) }) })
+	end,
+	Update = function(f, dt, t, sp)
+		Fall(f, dt, sp, -1)
+		f.Frame.Position = UDim2.fromScale(f.X, f.Y)
+	end,
+}
+
+local BUILTIN_KINDS = { "Snow", "Bubbles", "Petals", "Embers", "Fireflies", "Stars", "Glyphs", "Rain", "Confetti", "Sparkles", "Pixels", "Starfield", "Crystals", "Neon" }
+Lumen.ParticleKinds = { "Theme" }
+for _, k in ipairs(BUILTIN_KINDS) do table.insert(Lumen.ParticleKinds, k) end
+Lumen._particleDropdowns = {}
 
 local function CurrentKind()
 	if Snow.Kind == "Theme" then return Lumen.Style.Particles or "Snow" end
 	return Snow.Kind
 end
 
+local function ApplyFlake(f, tr, alpha)
+	local final = 1 - (1 - math.clamp(tr, 0, 1)) * alpha
+	if not f.NoSelf then
+		if f.Frame:IsA("TextLabel") then f.Frame.TextTransparency = final else f.Frame.BackgroundTransparency = final end
+	end
+	if f.Extra then
+		for _, x in ipairs(f.Extra) do
+			x[1][x[2]] = 1 - (1 - (f.NoSelf and math.clamp(tr, 0, 1) or x[3])) * alpha
+		end
+	end
+end
+
+-- Rebuilding never pops: the old layer fades out while the new one fades in.
 local function BuildFlakes()
-	for _, f in ipairs(Snow.Flakes) do f.Frame:Destroy() end
-	Snow.Flakes = {}
-	Snow.Built = nil
+	for _, L in ipairs(Snow.Layers) do L.Target = 0 end
 	if not Snow.Enabled then return end
 	local kind = CurrentKind()
-	if not KIND_COLORS[kind] then kind = "Snow" end
-	Snow.Built = kind
-	local color = (Snow.Kind == "Theme" and Lumen.Style.ParticleColor) or KIND_COLORS[kind]
-	for i = 1, Snow.Count do
-		local f = { X = math.random(), Y = math.random(), Phase = math.random() * 6.28, Sway = 0.4 + math.random() * 0.8 }
-		if kind == "Snow" then
-			local size = math.random(4, 13)
-			f.Speed = 0.03 + (size / 13) * 0.07
-			f.Frame = New("Frame", { Size = UDim2.fromOffset(size, size), BackgroundColor3 = color,
-				BackgroundTransparency = 0.3 + math.random() * 0.5, Parent = BackdropFrame }, { CornerFixed(size) })
-		elseif kind == "Bubbles" then
-			local size = math.random(6, 20)
-			f.Speed = 0.025 + (size / 20) * 0.05
-			f.Frame = New("Frame", { Size = UDim2.fromOffset(size, size), BackgroundColor3 = color, BackgroundTransparency = 0.92, Parent = BackdropFrame },
-				{ CornerFixed(size), New("UIStroke", { Color = color, Thickness = 1.2, Transparency = 0.35 + math.random() * 0.4 }),
-				  New("Frame", { Size = UDim2.fromOffset(math.max(2, size / 4), math.max(2, size / 4)), Position = UDim2.fromScale(0.22, 0.2),
-					BackgroundColor3 = Color3.new(1, 1, 1), BackgroundTransparency = 0.45 }, { CornerFixed(size) }) })
-		elseif kind == "Petals" then
-			local size = math.random(6, 12)
-			f.Speed = 0.025 + math.random() * 0.03
-			f.Spin = (math.random() - 0.5) * 160
-			f.Rot = math.random() * 360
-			f.Frame = New("Frame", { Size = UDim2.fromOffset(math.floor(size * 1.5), size), BackgroundColor3 = color:Lerp(Color3.new(1, 1, 1), math.random() * 0.3),
-				BackgroundTransparency = 0.15 + math.random() * 0.4, Parent = BackdropFrame }, { CornerFixed(size) })
-		elseif kind == "Embers" then
-			local size = math.random(2, 5)
-			f.Speed = 0.05 + math.random() * 0.07
-			f.Frame = New("Frame", { Size = UDim2.fromOffset(size, size), BackgroundColor3 = color:Lerp(Color3.fromRGB(255, 230, 150), math.random() * 0.5),
-				BackgroundTransparency = 0.2, Parent = BackdropFrame }, { CornerFixed(1) })
-		elseif kind == "Fireflies" then
-			local size = math.random(3, 6)
-			f.Pulse = 1.2 + math.random() * 2
-			f.Frame = New("Frame", { Size = UDim2.fromOffset(size, size), BackgroundColor3 = color, BackgroundTransparency = 0.2, Parent = BackdropFrame },
-				{ CornerFixed(size), New("Frame", { AnchorPoint = Vector2.new(0.5, 0.5), Position = UDim2.fromScale(0.5, 0.5),
-					Size = UDim2.fromOffset(size * 4, size * 4), BackgroundColor3 = color, BackgroundTransparency = 0.88 }, { CornerFixed(size * 2) }) })
-		elseif kind == "Stars" then
-			local size = math.random(1, 3)
-			f.Pulse = 0.6 + math.random() * 2.2
-			f.Frame = New("Frame", { Size = UDim2.fromOffset(size, size), BackgroundColor3 = color, BackgroundTransparency = 0.3,
-				Position = UDim2.fromScale(f.X, f.Y), Parent = BackdropFrame }, { CornerFixed(size) })
-		elseif kind == "Glyphs" then
-			f.Speed = 0.06 + math.random() * 0.1
-			-- plain Instance.new so the global font switch never touches these
-			local t = Instance.new("TextLabel")
-			t.BackgroundTransparency = 1
-			t.Size = UDim2.fromOffset(14, 16)
-			t.Font = Enum.Font.RobotoMono
-			t.TextSize = math.random(10, 16)
-			t.TextColor3 = color
-			t.TextTransparency = 0.3 + math.random() * 0.55
-			t.Text = GLYPH_CHARS[math.random(#GLYPH_CHARS)]
-			t.Parent = BackdropFrame
-			f.Frame = t
-		end
-		table.insert(Snow.Flakes, f)
+	local def = KINDS[kind]
+	if not def then kind, def = "Snow", KINDS.Snow end
+	local color = (Snow.Kind == "Theme" and Lumen.Style.ParticleColor) or Color3.new(1, 1, 1)
+	if Snow.Kind ~= "Theme" then
+		color = ({ Bubbles = Color3.fromRGB(140, 205, 255), Petals = Color3.fromRGB(242, 150, 186), Embers = Color3.fromRGB(255, 150, 70),
+			Fireflies = Color3.fromRGB(180, 255, 150), Glyphs = Color3.fromRGB(205, 205, 205), Rain = Color3.fromRGB(170, 200, 240),
+			Sparkles = Color3.fromRGB(255, 214, 120), Pixels = Color3.fromRGB(90, 255, 170), Crystals = Color3.fromRGB(215, 240, 255),
+			Neon = Color3.fromRGB(0, 229, 255) })[kind] or color
 	end
+	local L = { Kind = kind, Def = def, Color = color, Flakes = {}, Alpha = 0, Target = 1,
+		Folder = New("Frame", { BackgroundTransparency = 1, Size = UDim2.fromScale(1, 1), ZIndex = 1, Parent = BackdropFrame }) }
+	for i = 1, Snow.Count do
+		local f = { X = math.random(), Y = math.random(), Phase = math.random() * 6.28, Sway = 0.4 + math.random() * 0.8, Speed = 0.05, Base = 0.3 }
+		local ok, err = pcall(def.Build, f, color, L.Folder)
+		if not ok then
+			warn("[Lumen] particle '" .. kind .. "' failed to build: " .. tostring(err))
+			break
+		end
+		if f.Frame then
+			if not f.Frame.Parent then f.Frame.Parent = L.Folder end
+			ApplyFlake(f, f.Base, 0)
+			table.insert(L.Flakes, f)
+		end
+	end
+	table.insert(Snow.Layers, L)
 end
 
 function Lumen:_RefreshParticles()
@@ -2734,10 +3726,20 @@ function Lumen:SetSnowOptions(opts)
 	if (opts.Kind or opts.Count) and Snow.Enabled then BuildFlakes() end
 end
 
--- "Theme" follows the active theme; or "Snow", "Bubbles", "Petals", "Embers", "Fireflies", "Stars", "Glyphs"
+-- "Theme" follows the active theme; or any name in Lumen.ParticleKinds
 function Lumen:SetParticles(kind)
 	self:SetSnowOptions({ Kind = kind })
 	SyncOption("Lumen_Particles", kind)
+end
+
+-- Add your own particle style. def = { Build = function(f, color, parent) ... end, Update = function(f, dt, t, speed) ... end }
+-- Build must set f.Frame (a GuiObject) and may set f.Base (resting transparency). f.X / f.Y (0-1), f.Phase, f.Sway are pre-filled.
+-- Update moves it and may return a transparency (0-1). Fading in/out and the theme crossfade are handled for you.
+function Lumen:RegisterParticles(name, def)
+	assert(type(name) == "string" and type(def) == "table" and type(def.Build) == "function", "RegisterParticles(name, {Build = fn, Update = fn})")
+	KINDS[name] = def
+	if not table.find(self.ParticleKinds, name) then table.insert(self.ParticleKinds, name) end
+	for _, d in ipairs(self._particleDropdowns) do pcall(function() d:SetValues(self.ParticleKinds, true) end) end
 end
 
 -- opts: Dim (0-1 darkness of the backdrop), Blur (0-40 world blur)
@@ -2747,67 +3749,121 @@ function Lumen:SetBackdrop(opts)
 	self:_UpdateSnow()
 end
 
+local function Lightning()
+	-- a distant flash: quick rise, slow fade, sometimes a second flicker
+	FlashFrame.BackgroundTransparency = 1
+	TweenService:Create(FlashFrame, TweenInfo.new(0.06, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), { BackgroundTransparency = 0.8 }):Play()
+	task.delay(0.07, function()
+		TweenService:Create(FlashFrame, TweenInfo.new(0.55, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), { BackgroundTransparency = 1 }):Play()
+		if math.random() < 0.5 then
+			task.delay(0.18, function()
+				TweenService:Create(FlashFrame, TweenInfo.new(0.05), { BackgroundTransparency = 0.88 }):Play()
+				task.delay(0.06, function()
+					TweenService:Create(FlashFrame, TweenInfo.new(0.4), { BackgroundTransparency = 1 }):Play()
+				end)
+			end)
+		end
+	end)
+end
+
 Connect(RunService.RenderStepped, function(dt)
-	if not BackdropFrame.Visible or #Snow.Flakes == 0 then return end
+	if not BackdropFrame.Visible then return end
 	Snow.Time = Snow.Time + dt
-	local t, sp, kind = Snow.Time, Snow.Speed, Snow.Built
-	for _, f in ipairs(Snow.Flakes) do
-		if kind == "Snow" then
-			f.Y = f.Y + f.Speed * sp * dt
-			if f.Y > 1.03 then f.Y = -0.03 f.X = math.random() end
-			f.Frame.Position = UDim2.fromScale(f.X + math.sin(t * f.Sway + f.Phase) * 0.008, f.Y)
-		elseif kind == "Bubbles" then
-			f.Y = f.Y - f.Speed * sp * dt
-			if f.Y < -0.04 then f.Y = 1.04 f.X = math.random() end
-			f.Frame.Position = UDim2.fromScale(f.X + math.sin(t * f.Sway * 1.6 + f.Phase) * 0.012, f.Y)
-		elseif kind == "Petals" then
-			f.Y = f.Y + f.Speed * sp * dt
-			f.Rot = f.Rot + f.Spin * sp * dt
-			if f.Y > 1.05 then f.Y = -0.05 f.X = math.random() end
-			f.Frame.Position = UDim2.fromScale(f.X + math.sin(t * f.Sway + f.Phase) * 0.035, f.Y)
-			f.Frame.Rotation = f.Rot
-		elseif kind == "Embers" then
-			f.Y = f.Y - f.Speed * sp * dt
-			if f.Y < -0.03 then f.Y = 1.03 f.X = math.random() end
-			f.Frame.Position = UDim2.fromScale(f.X + math.sin(t * f.Sway * 2 + f.Phase) * 0.018, f.Y)
-			f.Frame.BackgroundTransparency = math.clamp(0.1 + (1 - f.Y) * 0.75 + 0.15 * math.sin(t * 13 + f.Phase), 0, 1)
-		elseif kind == "Fireflies" then
-			f.X = (f.X + math.sin(t * f.Sway * 0.7 + f.Phase) * 0.018 * sp * dt) % 1
-			f.Y = (f.Y + math.cos(t * f.Sway * 0.5 + f.Phase * 2) * 0.014 * sp * dt) % 1
-			f.Frame.Position = UDim2.fromScale(f.X, f.Y)
-			f.Frame.BackgroundTransparency = 0.15 + 0.75 * (0.5 + 0.5 * math.sin(t * f.Pulse + f.Phase))
-		elseif kind == "Stars" then
-			f.Frame.BackgroundTransparency = 0.15 + 0.75 * (0.5 + 0.5 * math.sin(t * f.Pulse * sp + f.Phase))
-		elseif kind == "Glyphs" then
-			f.Y = f.Y + f.Speed * sp * dt
-			if f.Y > 1.03 then f.Y = -0.03 f.X = math.random() end
-			if math.random() < dt * 1.5 then f.Frame.Text = GLYPH_CHARS[math.random(#GLYPH_CHARS)] end
-			f.Frame.Position = UDim2.fromScale(f.X, f.Y)
+	local t, sp = Snow.Time, Snow.Speed
+	-- whole-backdrop fade with the windows
+	local rate = dt / 0.35
+	if Snow.Show < Snow.ShowTarget then Snow.Show = math.min(Snow.ShowTarget, Snow.Show + rate)
+	elseif Snow.Show > Snow.ShowTarget then Snow.Show = math.max(Snow.ShowTarget, Snow.Show - rate) end
+	if Snow.Show <= 0 and Snow.ShowTarget == 0 then
+		BackdropFrame.Visible = false
+		return
+	end
+	for li = #Snow.Layers, 1, -1 do
+		local L = Snow.Layers[li]
+		local lr = dt / 0.7
+		if L.Alpha < L.Target then L.Alpha = math.min(L.Target, L.Alpha + lr) elseif L.Alpha > L.Target then L.Alpha = math.max(L.Target, L.Alpha - lr) end
+		if L.Alpha <= 0 and L.Target == 0 then
+			L.Folder:Destroy()
+			table.remove(Snow.Layers, li)
+		else
+			local alpha = L.Alpha * Snow.Show
+			for _, f in ipairs(L.Flakes) do
+				local ok, tr = pcall(L.Def.Update, f, dt, t, sp)
+				ApplyFlake(f, (ok and tr) or f.Base, alpha)
+			end
+			if L.Def.Layer then pcall(L.Def.Layer, L, dt, t, sp, L.Color) end
+			if L.Kind == "Rain" and L.Target == 1 and Lumen.Style.Lightning and t >= Snow.NextBolt then
+				Snow.NextBolt = t + 5 + math.random() * 8
+				Lightning()
+			end
 		end
 	end
 end)
 
--- The non-colour half of a theme. Keys (all optional):
---   Radius (corner scale), Glow (glow strength, 0 = off), Font ("Inter" | "Gotham" | "Mono"),
+------------------------------------------------------------------------------
+-- Style: the non-colour half of a theme. Keys (all optional):
+--   Radius (corner scale), Glow (glow strength, 0 = off), Font (any Roblox font name, "Inter", "Mono"), TextScale,
 --   Particles + ParticleColor, Tint + TintPlace ("Top" | "Bottom" | "Aurora") + TintAmount,
---   TopLine = {Color3, Color3} (light along the window's top edge), Scanlines (bool)
-function Lumen:SetStyle(st)
-	local new = { Radius = 1, Glow = 1, Particles = "Snow", ParticleColor = Color3.new(1, 1, 1) }
+--   TopLine = {c1, c2} (light along the window's top edge), Scanlines (bool),
+--   Aura = {c1, c2, ...} + AuraSpeed + AuraThickness (animated gradient border),
+--   InnerLine = Color3 (thin second border), AccentGradient = {c1, c2} (toggles, sliders, progress bars), Lightning (bool)
+-- fade (seconds): corners, glow, fonts, surfaces and particles all blend instead of switching.
+------------------------------------------------------------------------------
+
+local StyleToken = 0
+function Lumen:SetStyle(st, fade)
+	fade = fade or 0
+	local new = { Radius = 1, Glow = 1, TextScale = 1, Particles = "Snow", ParticleColor = Color3.new(1, 1, 1) }
 	for k, v in pairs(st or {}) do new[k] = v end
+	local old = self.Style
 	self.Style = new
+	local fontChanged = (new.Font and new.Font ~= self.FontName) or (new.TextScale or 1) ~= (self._textScale or 1)
+	self._textScale = new.TextScale or 1
+
+	local info = fade > 0 and TweenInfo.new(fade, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut) or nil
+	-- corners morph
 	for _, d in ipairs(Gui:GetDescendants()) do
 		if d:IsA("UICorner") then
 			local r = d:GetAttribute("R")
-			if r then d.CornerRadius = UDim.new(0, math.floor(r * new.Radius + 0.5)) end
+			if r then
+				local goal = UDim.new(0, math.floor(r * new.Radius + 0.5))
+				if info then TweenService:Create(d, info, { CornerRadius = goal }):Play() else d.CornerRadius = goal end
+			end
 		end
 	end
+	-- glow strength
 	for i = #Glows, 1, -1 do
 		local g = Glows[i]
-		if g.rings[1] and g.rings[1].Parent and g.rings[1].Parent.Parent then g:Set(g.mult) else table.remove(Glows, i) end
+		if g.rings[1] and g.rings[1].Parent and g.rings[1].Parent.Parent then g:Set(g.mult, info) else table.remove(Glows, i) end
 	end
-	if new.Font then self:SetFont(new.Font) end
-	for _, e in ipairs(Surfaces) do StyleSurface(e) end
+	-- font + text size
+	if fontChanged then self:SetFont(new.Font or self.FontName, fade > 0 and math.max(fade, 0.35) or 0) end
+	-- surfaces and accent gradients blend step by step
+	StyleToken = StyleToken + 1
+	local mine = StyleToken
+	local function Paint()
+		for _, e in ipairs(Surfaces) do StyleSurface(e) end
+		for _, e in ipairs(AccentFills) do if e.Frame.Parent then PaintAccent(e) end end
+	end
+	if fade > 0 then
+		StyleBlend = { From = old, To = new, A = 0 }
+		task.spawn(function()
+			local steps = math.max(2, math.floor(fade * 30))
+			for i = 1, steps do
+				if mine ~= StyleToken or Lumen.Unloaded then return end
+				local a = i / steps
+				StyleBlend.A = a * a * (3 - 2 * a)
+				if i == steps then StyleBlend = nil end
+				Paint()
+				if i < steps then task.wait(fade / steps) end
+			end
+		end)
+	else
+		StyleBlend = nil
+		Paint()
+	end
 	self:_RefreshParticles()
+	self.Events.StyleChanged:Fire(new)
 end
 
 -- faint diagonal text tiled over the whole screen (anti-leak watermark). Pass nil to remove.
@@ -2844,7 +3900,7 @@ local function EnsureDock()
 		Theme = { BackgroundColor3 = "Background" },
 	}, { Corner(11), Stroke(nil, true), Pad(7, 7, 7, 7),
 		List(6, Enum.FillDirection.Horizontal, Enum.HorizontalAlignment.Left, Enum.VerticalAlignment.Center) })
-	RegisterSurface(Dock, "Dock")
+	RegisterSurface(Dock, "Dock", 11)
 	MakeDraggable(Dock, Dock, nil, "Dock")
 	SnapHomes[Dock] = Dock.Position
 	return Dock
@@ -3013,8 +4069,39 @@ local function PaletteActivate(e)
 		if tab and tab.Window then
 			tab.Window:SetVisible(true)
 			tab.Window:SelectTab(tab)
+			task.delay(0.15, function()
+				if e.Group and e.Group._activate then e.Group._activate() end
+				task.delay(0.12, function() Lumen:_Spotlight(opt.Row, tab.Page) end)
+			end)
 		end
 	end
+end
+
+-- scroll an element into view and pulse a highlight around it
+function Lumen:_Spotlight(row, page)
+	if not row or not row.Parent then return end
+	if page and row:IsDescendantOf(page) then
+		local sc = math.max(self.Scale, 0.01)
+		local y = (row.AbsolutePosition.Y - page.AbsolutePosition.Y) / sc + page.CanvasPosition.Y
+		TweenService:Create(page, TweenInfo.new(0.4, Enum.EasingStyle.Quint, Enum.EasingDirection.Out),
+			{ CanvasPosition = Vector2.new(0, math.max(0, y - 70)) }):Play()
+	end
+	local hl = New("Frame", {
+		Size = UDim2.new(1, 10, 1, 8), Position = UDim2.fromOffset(-5, -4), BackgroundTransparency = 1, ZIndex = 0, Parent = row,
+		Theme = { BackgroundColor3 = "Accent" },
+	}, { Corner(7) })
+	local st = New("UIStroke", { Thickness = 1.5, Transparency = 1, Parent = hl, Theme = { Color = "Accent" } })
+	task.spawn(function()
+		for _ = 1, 2 do
+			TweenService:Create(hl, TweenInfo.new(0.22, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), { BackgroundTransparency = 0.82 }):Play()
+			TweenService:Create(st, TweenInfo.new(0.22, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), { Transparency = 0.2 }):Play()
+			task.wait(0.25)
+			TweenService:Create(hl, TweenInfo.new(0.45, Enum.EasingStyle.Quad, Enum.EasingDirection.In), { BackgroundTransparency = 1 }):Play()
+			TweenService:Create(st, TweenInfo.new(0.45, Enum.EasingStyle.Quad, Enum.EasingDirection.In), { Transparency = 1 }):Play()
+			task.wait(0.46)
+		end
+		hl:Destroy()
+	end)
 end
 
 function PaletteRefresh()
@@ -3191,8 +4278,8 @@ function Lumen:CreateWindow(o)
 		Position = o.Position or UDim2.new(0.5, -size.X / 2, 0.5, -size.Y / 2),
 		Parent = Gui, Theme = { BackgroundColor3 = "Background" },
 	}, { Corner(10), Stroke(nil, true) })
-	RegisterScale(main)
-	RegisterSurface(main, "Window")
+	W._scale = RegisterScale(main)
+	RegisterSurface(main, "Window", 10)
 	W.Frame = main
 
 	local header = New("Frame", { BackgroundTransparency = 1, Size = UDim2.new(1, 0, 0, 50), Parent = main })
@@ -3224,9 +4311,23 @@ function Lumen:CreateWindow(o)
 		ScrollingDirection = Enum.ScrollingDirection.X, Parent = main,
 	}, { List(5, Enum.FillDirection.Horizontal, Enum.HorizontalAlignment.Left, Enum.VerticalAlignment.Center) })
 
+	-- the active-tab highlight is one pill that slides between tabs
+	local indHolder = New("Frame", {
+		BackgroundTransparency = 1, Position = tabbar.Position, Size = tabbar.Size, ClipsDescendants = true, ZIndex = 0, Parent = main,
+	})
+	local ind = New("Frame", {
+		Size = UDim2.fromOffset(0, 28), BackgroundTransparency = 1, ZIndex = 0, Parent = indHolder, Theme = { BackgroundColor3 = "TabActive" },
+	}, { Corner(7) })
+	local indTween = nil
+
 	local content = New("Frame", {
 		BackgroundTransparency = 1, ClipsDescendants = true, Position = UDim2.fromOffset(17, 87),
 		Size = UDim2.new(1, -34, 1, -122), Parent = main,
+	})
+	-- veil used to soften page changes
+	local veil = New("Frame", {
+		Size = UDim2.fromScale(1, 1), BackgroundTransparency = 1, Visible = false, ZIndex = 10, Parent = content,
+		Theme = { BackgroundColor3 = "Background" },
 	})
 
 	-- footer strip (slightly lighter than the window, soft top edge)
@@ -3268,27 +4369,128 @@ function Lumen:CreateWindow(o)
 		Connect(UIS.InputEnded, function(i) if IsPress(i) then resizing = false end end)
 	end
 
+	-- double-click the title bar to fold the window down to its header (and again to unfold)
+	local collapsed, fullSize, lastClick = false, nil, -math.huge
+	function W:SetCollapsed(v)
+		if v == collapsed then return end
+		collapsed = v
+		ClosePopup()
+		if v then
+			fullSize = main.Size
+			main.ClipsDescendants = true
+			grip.Visible = false
+			TweenService:Create(main, TweenInfo.new(0.34, Enum.EasingStyle.Quint, Enum.EasingDirection.Out),
+				{ Size = UDim2.new(fullSize.X.Scale, fullSize.X.Offset, 0, 50) }):Play()
+		else
+			local tw = TweenService:Create(main, TweenInfo.new(0.38, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), { Size = fullSize })
+			tw:Play()
+			task.delay(0.4, function()
+				if not collapsed then
+					main.ClipsDescendants = false
+					grip.Visible = true
+				end
+			end)
+		end
+	end
+	function W:IsCollapsed() return collapsed end
+	Connect(header.InputBegan, function(i)
+		if i.UserInputType ~= Enum.UserInputType.MouseButton1 then return end
+		local now = os.clock()
+		if now - lastClick < 0.32 then
+			lastClick = -math.huge
+			W:SetCollapsed(not collapsed)
+		else
+			lastClick = now
+		end
+	end)
+
 	function W:SetTitle(t) self.Title = t; titleLabel.Text = t end
 	function W:SetSubtitle(t) subtitle.Text = t end
 	function W:SetFooter(t) footer.Text = t end
 
-	function W:_StyleTabs()
-		for _, t in ipairs(self.Tabs) do
-			local on = (t == self.Active) and not t.Hidden
-			t.Page.Visible = on
-			Tween(t.Button, 0.12, {
-				BackgroundTransparency = on and 0 or 1,
-				TextColor3 = on and Lumen.Theme.AccentText or Lumen.Theme.TextDim,
-			})
+	local function MoveIndicator(instant)
+		local t = W.Active
+		if not t or t.Hidden or not t.Button.Parent then
+			Tween(ind, 0.15, { BackgroundTransparency = 1 })
+			return
+		end
+		local sc = (W._scale and W._scale.Scale) or Lumen.Scale
+		if sc <= 0 then return end
+		local b = t.Button
+		local x = (b.AbsolutePosition.X - indHolder.AbsolutePosition.X) / sc
+		local w = b.AbsoluteSize.X / sc
+		local goal = { Position = UDim2.fromOffset(x, 0), Size = UDim2.fromOffset(w, 28), BackgroundTransparency = 0 }
+		if instant then
+			if indTween then return end
+			ind.Position, ind.Size, ind.BackgroundTransparency = goal.Position, goal.Size, 0
+		else
+			if indTween then indTween:Cancel() end
+			indTween = TweenService:Create(ind, TweenInfo.new(0.34, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), goal)
+			local mine = indTween
+			indTween.Completed:Connect(function() if indTween == mine then indTween = nil end end)
+			indTween:Play()
+			task.delay(0.4, function() if indTween == mine then indTween = nil end end)
 		end
 	end
+	W._MoveIndicator = MoveIndicator
+	Connect(tabbar:GetPropertyChangedSignal("CanvasPosition"), function() MoveIndicator(true) end)
+
+	function W:_StyleTabs(skipPages)
+		for _, t in ipairs(self.Tabs) do
+			local on = (t == self.Active) and not t.Hidden
+			if not skipPages then t.Page.Visible = on end
+			t.Button.BackgroundTransparency = 1
+			Tween(t.Button, 0.18, { TextColor3 = on and Lumen.Theme.AccentText or Lumen.Theme.TextDim })
+		end
+		MoveIndicator(false)
+	end
+
+	local TabToken = 0
+	local function IndexOf(t) for i, x in ipairs(W.Tabs) do if x == t then return i end end return 0 end
+	-- switching tabs: the highlight slides over, the old page drifts out under a soft veil, the new one slides in
 	function W:SelectTab(t)
 		if t.Hidden then return end
 		ClosePopup()
+		local prev = self.Active
 		self.Active = t
-		self:_StyleTabs()
-		if t._Relayout then t._Relayout() end
-		if t.OnSelect then t.OnSelect() end
+		TabToken = TabToken + 1
+		local mine = TabToken
+		self:_StyleTabs(true)
+		local function Finish()
+			for _, x in ipairs(self.Tabs) do
+				if x ~= t then x.Page.Visible = false x.Page.Position = UDim2.new() end
+			end
+			t.Page.Visible = true
+			if t._Relayout then t._Relayout() end
+		end
+		if prev and prev ~= t and prev.Page.Parent and main.Visible then
+			local dir = IndexOf(t) >= IndexOf(prev) and 1 or -1
+			veil.Visible = true
+			TweenService:Create(veil, TweenInfo.new(0.1, Enum.EasingStyle.Quad, Enum.EasingDirection.In), { BackgroundTransparency = 0.2 }):Play()
+			TweenService:Create(prev.Page, TweenInfo.new(0.1, Enum.EasingStyle.Quad, Enum.EasingDirection.In), { Position = UDim2.fromOffset(-dir * 14, 0) }):Play()
+			task.delay(0.1, function()
+				if mine ~= TabToken then return end
+				Finish()
+				t.Page.Position = UDim2.fromOffset(dir * 22, 0)
+				TweenService:Create(t.Page, TweenInfo.new(0.34, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), { Position = UDim2.new() }):Play()
+				TweenService:Create(veil, TweenInfo.new(0.26, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), { BackgroundTransparency = 1 }):Play()
+				task.delay(0.27, function() if mine == TabToken then veil.Visible = false end end)
+			end)
+		else
+			Finish()
+			t.Page.Position = UDim2.new()
+		end
+		if t.OnSelect then SafeCall("tab '" .. tostring(t.Name) .. "' OnSelect", t.OnSelect) end
+		Lumen.Events.TabChanged:Fire(t.Name, W)
+	end
+
+	-- next / previous visible tab (Ctrl+Tab and Ctrl+Shift+Tab call these)
+	function W:CycleTab(step)
+		local list = {}
+		for _, x in ipairs(self.Tabs) do if not x.Hidden then table.insert(list, x) end end
+		if #list == 0 then return end
+		local cur = table.find(list, self.Active) or 1
+		self:SelectTab(list[((cur - 1 + step) % #list) + 1])
 	end
 	table.insert(Refreshers, function() W:_StyleTabs() end)
 
@@ -3298,11 +4500,38 @@ function Lumen:CreateWindow(o)
 		end
 	end
 
+	local VisToken = 0
+	-- opening pops the window up from 94%, closing shrinks it away before hiding
 	function W:SetVisible(v)
+		if self.Visible == v and main.Visible == v then return end
 		self.Visible = v
-		main.Visible = v
-		if not v then ClosePopup() TooltipFrame.Visible = false end
+		VisToken = VisToken + 1
+		local mine = VisToken
+		local sc = self._scale
+		if v then
+			main.Visible = true
+			if sc then
+				sc.Scale = Lumen.Scale * 0.94
+				TweenService:Create(sc, TweenInfo.new(0.34, Enum.EasingStyle.Back, Enum.EasingDirection.Out), { Scale = Lumen.Scale }):Play()
+			end
+			task.delay(0.36, function() if mine == VisToken then MoveIndicator(true) end end)
+		else
+			ClosePopup()
+			HideHint()
+			if sc then
+				TweenService:Create(sc, TweenInfo.new(0.16, Enum.EasingStyle.Quad, Enum.EasingDirection.In), { Scale = Lumen.Scale * 0.94 }):Play()
+				task.delay(0.17, function()
+					if mine == VisToken and not self.Visible then
+						main.Visible = false
+						sc.Scale = Lumen.Scale
+					end
+				end)
+			else
+				main.Visible = false
+			end
+		end
 		Lumen:_UpdateSnow()
+		Lumen.Events.VisibilityChanged:Fire(v, W)
 	end
 	function W:Toggle() self:SetVisible(not self.Visible) end
 	function W:Destroy()
@@ -3411,23 +4640,81 @@ function Lumen:CreateWindow(o)
 
 		function T:AddTabbox(side)
 			local frame = NewBox(side)
-			local bar = New("Frame", {
+			local barWrap = New("Frame", {
 				BackgroundTransparency = 1, Size = UDim2.new(1, 0, 0, 24), LayoutOrder = 0, Parent = frame,
+			})
+			local subInd = New("Frame", {
+				Size = UDim2.fromOffset(0, 24), BackgroundTransparency = 1, ZIndex = 0, Parent = barWrap, Theme = { BackgroundColor3 = "TabActive" },
+			}, { Corner(6) })
+			local bar = New("Frame", {
+				BackgroundTransparency = 1, Size = UDim2.fromScale(1, 1), ZIndex = 1, Parent = barWrap,
 			}, { List(3, Enum.FillDirection.Horizontal, Enum.HorizontalAlignment.Left, Enum.VerticalAlignment.Center) })
 			local body = New("Frame", {
-				BackgroundTransparency = 1, Size = UDim2.new(1, 0, 0, 0), AutomaticSize = Enum.AutomaticSize.Y,
+				BackgroundTransparency = 1, Size = UDim2.new(1, 0, 0, 0), AutomaticSize = Enum.AutomaticSize.Y, ClipsDescendants = true,
 				LayoutOrder = 1, Parent = frame,
 			})
+			local bodyVeil = New("Frame", {
+				Size = UDim2.fromScale(1, 1), BackgroundTransparency = 1, Visible = false, ZIndex = 10, Parent = body,
+				Theme = { BackgroundColor3 = "Group" },
+			})
 			local Box, subs, active = { Frame = frame }, {}, nil
+			local subTween
+			local function MoveSub(instant)
+				if not active or not active.Button.Parent then
+					Tween(subInd, 0.15, { BackgroundTransparency = 1 })
+					return
+				end
+				local sc = (W._scale and W._scale.Scale) or Lumen.Scale
+				if sc <= 0 then return end
+				local b = active.Button
+				local goal = {
+					Position = UDim2.fromOffset((b.AbsolutePosition.X - barWrap.AbsolutePosition.X) / sc, 0),
+					Size = UDim2.fromOffset(b.AbsoluteSize.X / sc, 24), BackgroundTransparency = 0,
+				}
+				if instant then
+					if subTween then return end
+					subInd.Position, subInd.Size, subInd.BackgroundTransparency = goal.Position, goal.Size, 0
+				else
+					if subTween then subTween:Cancel() end
+					local tw = TweenService:Create(subInd, TweenInfo.new(0.3, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), goal)
+					subTween = tw
+					tw:Play()
+					task.delay(0.32, function() if subTween == tw then subTween = nil end end)
+				end
+			end
 			local function Style()
 				for _, sub in ipairs(subs) do
 					local on = (sub == active)
 					sub.Container.Visible = on
-					Tween(sub.Button, 0.12, {
-						BackgroundTransparency = on and 0 or 1,
-						TextColor3 = on and Lumen.Theme.AccentText or Lumen.Theme.Label,
-					})
+					sub.Button.BackgroundTransparency = 1
+					Tween(sub.Button, 0.15, { TextColor3 = on and Lumen.Theme.AccentText or Lumen.Theme.Label })
 				end
+				MoveSub(false)
+			end
+			local SubToken = 0
+			local function SelectSub(sub)
+				if sub == active or sub.Hidden then return end
+				ClosePopup()
+				local prev = active
+				active = sub
+				SubToken = SubToken + 1
+				local mine = SubToken
+				for _, x in ipairs(subs) do
+					Tween(x.Button, 0.15, { TextColor3 = (x == active) and Lumen.Theme.AccentText or Lumen.Theme.Label })
+				end
+				MoveSub(false)
+				if not prev or not prev.Container.Parent then Style() return end
+				local dir = (table.find(subs, sub) or 0) >= (table.find(subs, prev) or 0) and 1 or -1
+				bodyVeil.Visible = true
+				TweenService:Create(bodyVeil, TweenInfo.new(0.09, Enum.EasingStyle.Quad, Enum.EasingDirection.In), { BackgroundTransparency = 0 }):Play()
+				task.delay(0.09, function()
+					if mine ~= SubToken then return end
+					for _, x in ipairs(subs) do x.Container.Visible = (x == active) end
+					sub.Container.Position = UDim2.fromOffset(dir * 16, 0)
+					TweenService:Create(sub.Container, TweenInfo.new(0.3, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), { Position = UDim2.new() }):Play()
+					TweenService:Create(bodyVeil, TweenInfo.new(0.22, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), { BackgroundTransparency = 1 }):Play()
+					task.delay(0.23, function() if mine == SubToken then bodyVeil.Visible = false end end)
+				end)
 			end
 			local function PickActive()
 				if active and not active.Hidden then return end
@@ -3458,14 +4745,14 @@ function Lumen:CreateWindow(o)
 					Visible = false, Parent = body,
 				}, { Pad(6, 6, 6, 0), List(5) })
 				table.insert(subs, sub)
-				Connect(sub.Button.MouseButton1Click, function()
-					ClosePopup()
-					active = sub
-					Style()
-				end)
+				Connect(sub.Button.MouseButton1Click, function() SelectSub(sub) end)
+				Connect(sub.Button:GetPropertyChangedSignal("AbsoluteSize"), function() if active == sub then MoveSub(true) end end)
+				Connect(sub.Button:GetPropertyChangedSignal("AbsolutePosition"), function() if active == sub then MoveSub(true) end end)
 				if not active then active = sub end
 				Style()
+				task.defer(function() MoveSub(true) end)
 				local g = NewGroupObject(sub.Container, frame, W.Id .. "/" .. name .. "/" .. tabName, T)
+				g._activate = function() SelectSub(sub) end
 				function g:SetVisible(v)
 					sub.Hidden = not v
 					sub.Button.Visible = v
@@ -3539,8 +4826,16 @@ function Lumen:CreateWindow(o)
 		end
 
 		Connect(T.Button.MouseButton1Click, function() W:SelectTab(T) end)
+		Connect(T.Button.MouseEnter, function()
+			if W.Active ~= T then Tween(T.Button, 0.12, { TextColor3 = Lumen.Theme.Label }) end
+		end)
+		Connect(T.Button.MouseLeave, function()
+			if W.Active ~= T then Tween(T.Button, 0.12, { TextColor3 = Lumen.Theme.TextDim }) end
+		end)
+		Connect(T.Button:GetPropertyChangedSignal("AbsoluteSize"), function() if W.Active == T then MoveIndicator(true) end end)
+		Connect(T.Button:GetPropertyChangedSignal("AbsolutePosition"), function() if W.Active == T then MoveIndicator(true) end end)
 		table.insert(W.Tabs, T)
-		if not W.Active then W:SelectTab(T) end
+		if not W.Active then W:SelectTab(T) task.defer(function() MoveIndicator(true) end) end
 		return T
 	end
 
@@ -3550,59 +4845,88 @@ function Lumen:CreateWindow(o)
 		tab.Fill = false
 
 		local menu = tab:AddGroup("Menu", "Left")
-		menu:AddLabel("Menu keybind"):AddKeybind({
+		menu:AddLabel({ Text = "Menu keybind", Description = "The key that shows and hides the whole menu. Click the chip, then press a new key." }):AddKeybind({
 			Default = self.MenuKey, Mode = "Press", Flag = "Lumen_MenuKey", ShowInList = false,
 			ChangedCallback = function(k) if k then W.MenuKey = k end end,
 		})
 		menu:AddToggle({ Text = "Show dock", Default = Lumen.ShowDock, Flag = "Lumen_Dock",
+			Description = "The icon bar at the top of the screen. It stays visible when the menu is hidden, so you can reopen the menu with a click.",
 			Callback = function(v) Lumen:SetDockVisible(v) end })
 		menu:AddToggle({ Text = "Show watermark", Default = Lumen.ShowWatermark, Flag = "Lumen_Watermark",
+			Description = "The bar in the top-left corner showing the script name, your username, FPS and ping.",
 			Callback = function(v) Lumen:SetWatermarkVisible(v) end })
 		menu:AddToggle({ Text = "Show hotkey list", Default = Lumen.ShowHotkeys, Flag = "Lumen_Hotkeys",
+			Description = "A small panel listing every keybind and whether it is currently active.",
 			Callback = function(v) Lumen:SetHotkeysVisible(v) end })
 		menu:AddToggle({ Text = "Notifications", Default = Lumen.ShowNotifications, Flag = "Lumen_Notifs",
+			Description = "Turns every pop-up message on or off. Errors are still printed to the console.",
 			Callback = function(v) Lumen.ShowNotifications = v end })
+		menu:AddDropdown({ Text = "Notification position", Values = Lumen.NotifyPositions, Default = Lumen.NotifyPosition, Flag = "Lumen_NotifyPos",
+			Description = "Which corner of the screen messages slide in from.",
+			Callback = function(v) if v then Lumen:SetNotifyPosition(v) end end })
+		menu:AddToggle({ Text = "Hover explanations", Default = Lumen.Hints, Flag = "Lumen_Hints",
+			Description = "Shows a short explanation, like this one, when you rest the mouse on a setting.",
+			Callback = function(v) Lumen.Hints = v if not v then HideHint() end end })
+		menu:AddToggle({ Text = "Script error alerts", Default = Lumen.NotifyErrors, Flag = "Lumen_NotifyErrors",
+			Description = "If a feature's code crashes, show a red notification with the error instead of failing silently. Errors are always printed to the console.",
+			Callback = function(v) Lumen.NotifyErrors = v end })
 		menu:AddSlider({ Text = "UI scale", Min = 0.7, Max = 1.4, Default = Lumen.Scale, Increment = 0.05, Suffix = "x",
+			Description = "Makes the menu, panels and pop-ups bigger or smaller. Handy on small screens or 4K monitors.",
 			Flag = "Lumen_Scale", Callback = function(v) Lumen:SetScale(v) end })
-		Lumen._fontDropdown = menu:AddDropdown({ Text = "Font", Values = { "Inter", "Gotham", "Mono" }, Default = Lumen.FontName,
+		Lumen._fontDropdown = menu:AddDropdown({ Text = "Font",
+			Values = { "Inter", "Gotham", "Mono", "Michroma", "Jura", "Merriweather", "FredokaOne", "Arcade", "TitilliumWeb", "Oswald", "Ubuntu", "Nunito", "SourceSans" },
+			Default = Lumen.FontName,
+			Description = "The typeface used everywhere. Themes pick one automatically; choose here to override it.",
 			Callback = function(v)
 				if v == "Inter" and not Lumen._interAsset then
 					Lumen:Notify({ Title = "Font", Content = "Inter needs file support in your executor. Using Gotham.", Type = "Warning" })
 				end
-				if v then Lumen:SetFont(v) end
+				if v then Lumen:SetFont(v, 0.35) end
 			end })
 		menu:AddInput({ Text = "Screen watermark", Placeholder = "text tiled over the screen (empty = off)",
+			Description = "Faint text tiled over the whole screen, e.g. your name, to discourage reposted screenshots.",
 			Callback = function(v) Lumen:SetScreenWatermark(v) end })
 		menu:AddDivider()
-		menu:AddButton({ Text = "Unload",
+		menu:AddButton({ Text = "Unload", Description = "Removes the interface and stops everything it was doing.",
 			Confirm = { Title = "Unload Lumen?", Text = "This removes the whole interface until you run the script again.", Type = "Danger", Confirm = "Unload" },
 			Callback = function() Lumen:Unload() end })
 
 		local fx = tab:AddGroup("Effects", "Left")
 		fx:AddToggle({ Text = "Particles", Default = Snow.Enabled, Flag = "Lumen_Snow",
+			Description = "Animated shapes drifting behind the menu while it is open.",
 			Callback = function(v) Lumen:SetSnow(v) end })
-		fx:AddDropdown({ Text = "Particle style", Values = Lumen.ParticleKinds, Default = Snow.Kind, Flag = "Lumen_Particles",
-			Callback = function(v) if v then Lumen:SetSnowOptions({ Kind = v }) end end })
+		table.insert(Lumen._particleDropdowns, fx:AddDropdown({ Text = "Particle style", Values = Lumen.ParticleKinds, Default = Snow.Kind, Flag = "Lumen_Particles",
+			Description = "\"Theme\" uses whatever the current theme ships with. Pick another to mix and match; switching crossfades.",
+			Callback = function(v) if v then Lumen:SetSnowOptions({ Kind = v }) end end }))
 		fx:AddSlider({ Text = "Amount", Min = 10, Max = 200, Default = Snow.Count, Flag = "Lumen_SnowCount",
+			Description = "How many particles are on screen. Lower it if your frame rate drops.",
 			Callback = function(v) Lumen:SetSnowOptions({ Count = v }) end })
 		fx:AddSlider({ Text = "Speed", Min = 0.2, Max = 3, Default = Snow.Speed, Increment = 0.1, Suffix = "x",
+			Description = "How fast particles move and twinkle.",
 			Flag = "Lumen_SnowSpeed", Callback = function(v) Lumen:SetSnowOptions({ Speed = v }) end })
 		fx:AddSlider({ Text = "Backdrop dim", Min = 0, Max = 90, Default = math.floor(Backdrop.Dim * 100), Suffix = "%",
+			Description = "How much the game behind the menu is darkened while the menu is open.",
 			Flag = "Lumen_Dim", Callback = function(v) Lumen:SetBackdrop({ Dim = v / 100 }) end })
 		fx:AddSlider({ Text = "Backdrop blur", Min = 0, Max = 40, Default = Backdrop.Blur,
+			Description = "How much the game behind the menu is blurred while the menu is open. 0 turns it off.",
 			Flag = "Lumen_Blur", Callback = function(v) Lumen:SetBackdrop({ Blur = v }) end })
 
 		-- HUD pieces glide back to their spot after you drag them
 		local hud = tab:AddGroup("HUD Positions", "Left")
 		local sb = Lumen.SnapBack
 		hud:AddToggle({ Text = "Return to place after dragging", Default = sb.Enabled, Flag = "Lumen_Snap",
+			Description = "After you drag the dock or hotkey list somewhere, it glides back to its spot after a few seconds.",
 			Callback = function(v) sb.Enabled = v end })
 		hud:AddSlider({ Text = "Return after", Min = 1, Max = 30, Default = sb.Delay, Suffix = "s", Flag = "Lumen_SnapDelay",
+			Description = "How many seconds a moved panel waits before gliding back.",
 			Callback = function(v) sb.Delay = v end })
-		hud:AddToggle({ Text = "Dock", Default = sb.Dock, Flag = "Lumen_SnapDock", Callback = function(v) sb.Dock = v end })
-		hud:AddToggle({ Text = "Hotkey list", Default = sb.Hotkeys, Flag = "Lumen_SnapHotkeys", Callback = function(v) sb.Hotkeys = v end })
-		hud:AddToggle({ Text = "Watermark", Default = sb.Watermark, Flag = "Lumen_SnapWatermark", Callback = function(v) sb.Watermark = v end })
-		hud:AddButton({ Text = "Return now", Callback = function() Lumen:ResetHudPositions() end })
+		hud:AddToggle({ Text = "Dock", Default = sb.Dock, Flag = "Lumen_SnapDock", Description = "Whether the dock glides back after you move it.",
+			Callback = function(v) sb.Dock = v end })
+		hud:AddToggle({ Text = "Hotkey list", Default = sb.Hotkeys, Flag = "Lumen_SnapHotkeys", Description = "Whether the hotkey list glides back after you move it.",
+			Callback = function(v) sb.Hotkeys = v end })
+		hud:AddToggle({ Text = "Watermark", Default = sb.Watermark, Flag = "Lumen_SnapWatermark", Description = "Whether the watermark glides back after you move it.",
+			Callback = function(v) sb.Watermark = v end })
+		hud:AddButton({ Text = "Return now", Description = "Glide every moved panel back to its home spot right away.", Callback = function() Lumen:ResetHudPositions() end })
 			:AddSubButton({ Text = "Set as home", Callback = function()
 				Lumen:SetHudHome()
 				Lumen:Notify({ Title = "HUD", Content = "Current positions saved as home.", Type = "Success" })
@@ -3650,9 +4974,17 @@ function Lumen:CreateWindow(o)
 			Emerald = "Aurora band up top, fireflies.",
 			Sunset = "Warm glow from below, rising embers.",
 			Mono = "Sharp corners, no glow, monospace, scanlines, glyph rain.",
+			Synthwave = "Neon pink and cyan, wide futuristic type, a spinning neon border, rising light streaks.",
+			Frost = "Pale ice, thin rounded type, a frosted double border, spinning ice crystals.",
+			Royal = "Midnight navy and gold, serif type, a gilded double border, glinting sparkles.",
+			Candy = "Bubblegum pastels, a soft rounded font, extra-round shapes, tumbling confetti.",
+			Arcade = "8-bit pixel font, square corners, a thick yellow border, CRT scanlines, stepping pixels.",
+			Cosmos = "Deep space, a violet nebula band, a slowly turning aurora border, stars and shooting stars.",
+			Storm = "Slate and steel, condensed type, slanted rain and distant lightning.",
 		}
 		local desc
-		th:AddDropdown({ Text = "Preset", Values = names, Default = Lumen.Preset, Flag = "Lumen_Preset",
+		local presetDrop = th:AddDropdown({ Text = "Preset", Values = names, Default = Lumen.Preset, Flag = "Lumen_Preset",
+			Description = "A complete look: colours, corner shape, glow, font, window lighting and particles.",
 			Callback = function(v)
 				if v then
 					Lumen:ApplyPreset(v)
@@ -3660,8 +4992,11 @@ function Lumen:CreateWindow(o)
 					if desc then desc:SetText(DESCRIPTIONS[v] or "") end
 				end
 			end })
+		table.insert(Lumen._presetDropdowns, presetDrop)
 		desc = th:AddLabel(DESCRIPTIONS[Lumen.Preset] or "", { Dim = true })
-		th:AddSlider({ Text = "Theme fade", Min = 0, Max = 1, Default = Lumen.ThemeTransition, Increment = 0.05, Suffix = "s",
+		Lumen._presetDescriptions = DESCRIPTIONS
+		th:AddSlider({ Text = "Theme fade", Min = 0, Max = 1.5, Default = Lumen.ThemeTransition, Increment = 0.05, Suffix = "s",
+			Description = "How long switching themes takes. Colours, corners, glow, fonts and particles all blend over this time. 0 makes theme changes instant.",
 			Flag = "Lumen_ThemeFade", Callback = function(v) Lumen.ThemeTransition = v end })
 		for _, entry in ipairs({ { "Accent", "Accent" }, { "Background", "Window" }, { "Group", "Panels" },
 			{ "Control", "Controls" }, { "Outline", "Outlines" }, { "Border", "Borders" },
@@ -3669,10 +5004,11 @@ function Lumen:CreateWindow(o)
 			local key, label = entry[1], entry[2]
 			pickers[key] = th:AddLabel(label):AddColorPicker({
 				Default = Lumen.Theme[key], Flag = "Lumen_Theme_" .. key,
+				Title = label, Description = "Fine-tune one colour of the current theme. Picking a preset resets it.",
 				Callback = function(c) Lumen:SetTheme({ [key] = c }) end,
 			})
 		end
-		th:AddButton({ Text = "Reset theme", Callback = function()
+		th:AddButton({ Text = "Reset theme", Description = "Go back to the default Lavender look.", Callback = function()
 			Lumen:ApplyPreset("Lavender")
 			SyncPickers()
 		end })
@@ -3692,6 +5028,15 @@ function Lumen:CreateWindow(o)
 			local n = Lumen:Notify({ Title = "Loading", Content = "Fetching your config...", Type = "Loading" })
 			task.delay(2, function() n:Update({ Title = "Done", Content = "Config loaded.", Type = "Success" }) end)
 		end }):AddSubButton({ Text = "Plain", Callback = function() Lumen:Notify("test notif") end })
+		tests:AddButton({ Text = "With actions", Description = "A notification with buttons inside it.", Callback = function()
+			Lumen:Notify({ Title = "Config changed", Content = "You switched to a new theme.", Type = "Info", Duration = 8,
+				Actions = {
+					{ Text = "Undo", Callback = function() Lumen:ApplyPreset("Lavender") end },
+					{ Text = "Keep", Callback = function() end },
+				} })
+		end }):AddSubButton({ Text = "Script error", Description = "Shows what happens when a feature's code crashes.", Callback = function()
+			error("this is a test error")
+		end })
 		tests:AddButton({ Text = "Test confirmation", Callback = function()
 			Lumen:Confirm({
 				Title = "Run the confirmation test?", Type = "Warning", Confirm = "Confirm", Hold = 1,
@@ -3809,6 +5154,14 @@ Connect(UIS.InputBegan, function(input, gp)
 	end
 
 	if UIS:GetFocusedTextBox() then return end
+	if input.KeyCode == Enum.KeyCode.Tab and (UIS:IsKeyDown(Enum.KeyCode.LeftControl) or UIS:IsKeyDown(Enum.KeyCode.RightControl)) then
+		for _, w in ipairs(Lumen.Windows) do
+			if w.Visible then
+				w:CycleTab((UIS:IsKeyDown(Enum.KeyCode.LeftShift) or UIS:IsKeyDown(Enum.KeyCode.RightShift)) and -1 or 1)
+				return
+			end
+		end
+	end
 	local mouseBtn = input.UserInputType == Enum.UserInputType.MouseButton2 or input.UserInputType == Enum.UserInputType.MouseButton3
 	if mouseBtn and gp then return end
 
@@ -3840,18 +5193,106 @@ end)
 
 function Lumen:Unload()
 	if self.Unloaded then return end
-	self.Unloaded = true
+	-- handlers run synchronously here so your clean-up (restoring lighting, camera, etc.) happens before the UI goes away
+	for _, h in ipairs(self.Events.Unloading._h) do
+		if h.Connected then
+			local ok, err = pcall(h.Fn)
+			if not ok then warn("[Lumen] Unloading handler error: " .. tostring(err)) end
+		end
+	end
 	if self.OnUnload then pcall(self.OnUnload) end
+	self.Unloaded = true
 	for _, c in ipairs(Connections) do pcall(function() c:Disconnect() end) end
 	if BlurEffect then pcall(function() BlurEffect:Destroy() end) end
 	Gui:Destroy()
+	if env.LumenInstances and env.LumenInstances[self.Id] == self then env.LumenInstances[self.Id] = nil end
 	if env.LumenUI == self then env.LumenUI = nil end
 end
 
+------------------------------------------------------------------------------
+-- Integration API: flags, HTTP, clipboard, and extending the library from your own script
+------------------------------------------------------------------------------
+
+function Lumen:GetFlag(flag) return self.Flags[flag] end
+
+-- sets an option by flag (updates its control and fires its callback); unknown flags are just stored
+function Lumen:SetFlag(flag, value)
+	local o = self.Options[flag]
+	if o and o.Set then o:Set(value) else self.Flags[flag] = value self.Events.FlagChanged:Fire(flag, value) end
+end
+
+function Lumen:OnFlagChanged(flag, fn)
+	return self.Events.FlagChanged:Connect(function(f, v) if f == flag then fn(v) end end)
+end
+
+-- HTTP through whichever request function the executor provides (request, http_request, syn.request, ...).
+-- opts: {Url, Method = "GET", Headers = {}, Body = string}. Returns the response table, or nil + error.
+function Lumen:Request(opts)
+	local fn = (type(request) == "function" and request) or (type(http_request) == "function" and http_request)
+		or (syn and type(syn.request) == "function" and syn.request) or (http and type(http.request) == "function" and http.request)
+		or (fluxus and type(fluxus.request) == "function" and fluxus.request)
+	if not fn then return nil, "this executor has no HTTP request function" end
+	local ok, res = pcall(fn, opts)
+	if not ok then return nil, tostring(res) end
+	return res
+end
+
+-- copy text to the clipboard; returns true when the executor supports it
+function Lumen:Clipboard(text)
+	local fn = (type(setclipboard) == "function" and setclipboard) or (type(toclipboard) == "function" and toclipboard)
+		or (type(set_clipboard) == "function" and set_clipboard)
+	if not fn then return false end
+	return (pcall(fn, tostring(text)))
+end
+
+-- Add your own element type. builder(group, options, api) builds it inside group and returns an object.
+-- After Lumen:RegisterElement("Stepper", fn) every group has group:AddStepper({...}).
+function Lumen:RegisterElement(name, builder)
+	assert(type(name) == "string" and type(builder) == "function", "RegisterElement(name, function(group, options, api) ... end)")
+	Elements["Add" .. name] = function(group, o) return builder(group, o or {}, self.API) end
+end
+
+-- Add your own theme. def = colour keys (Accent, Background, ...) plus an optional Style table. It appears in the config dropdown.
+function Lumen:RegisterTheme(name, def, description)
+	assert(type(name) == "string" and type(def) == "table", "RegisterTheme(name, {Accent = ..., Style = {...}})")
+	self.Presets[name] = def
+	if description and self._presetDescriptions then self._presetDescriptions[name] = description end
+	local names = {}
+	for n in pairs(self.Presets) do table.insert(names, n) end
+	table.sort(names)
+	for _, d in ipairs(self._presetDropdowns) do pcall(function() d:SetValues(names, true) end) end
+end
+
+-- Add your own icon. draw(frame, size, colorKey, helpers): helpers.Seg(x1, y1, x2, y2, thickness) and helpers.Dot(x, y, d)
+-- draw in a 16x16 grid. Works everywhere icons do (groups, dock buttons, panel headers).
+function Lumen:RegisterIcon(name, draw)
+	assert(type(name) == "string" and type(draw) == "function", "RegisterIcon(name, function(frame, size, colorKey, helpers) ... end)")
+	CustomIcons[name] = draw
+end
+
+-- Building blocks for custom elements, so they match the theme and work with flags, configs, hints and the palette.
+Lumen.Elements = Elements
+Lumen.API = {
+	New = New, Corner = Corner, Stroke = Stroke, Pad = Pad, List = List, Row = Row, Tween = Tween, Glow = Glow, Icon = Icon,
+	NewOption = NewOpt, Register = Register, Fire = Fire, Connect = Connect, Describe = AttachHint, Catalog = CatalogAdd,
+	AccentOverlay = AccentOverlay, SafeCall = SafeCall, Theme = Lumen.Theme, Gui = Gui, Overlay = Overlay,
+	ShowPopup = ShowPopup, ClosePopup = ClosePopup, Dragger = Dragger,
+}
+
+-- Load options that need the whole library in place
+do
+	local fade = Lumen.ThemeTransition
+	Lumen.ThemeTransition = 0
+	if LoadOptions.Theme and Lumen.Presets[LoadOptions.Theme] then pcall(function() Lumen:ApplyPreset(LoadOptions.Theme) end) end
+	Lumen.ThemeTransition = fade
+	if LoadOptions.Font then pcall(function() Lumen:SetFont(LoadOptions.Font) end) end
+	if LoadOptions.NotifyPosition then pcall(function() Lumen:SetNotifyPosition(LoadOptions.NotifyPosition) end) end
+end
+
 -- Inter font: downloaded once into the Lumen folder (needs writefile + getcustomasset), otherwise Gotham stays.
-if not env.LumenNoInter then
+if not LoadOptions.NoInter then
 	task.spawn(function()
-		if Lumen:_LoadInter() and not Lumen.Unloaded and Lumen.FontName == "Inter" then Lumen:SetFont("Inter") end
+		if Lumen:_LoadInter() and not Lumen.Unloaded and Lumen.FontName == "Inter" then Lumen:SetFont("Inter", 0.4) end
 	end)
 end
 
