@@ -22,7 +22,8 @@ Window:AddConfigTab("Config")
 - Toggle (with glow, disabled state), slider, dropdown (multi), input, button (with sub-buttons), label, image, selectable image grid
 - 3D viewport you can orbit with the mouse in any direction; it returns to auto-rotating when released
 - Keybinds (toggle / hold / press / always) and color pickers as addons, plus tooltips
-- Top dock, command palette (Ctrl+K), compact notifications, draggable watermark and hotkey list
+- Top dock with pixel-traced icons, command palette (Ctrl+K), success / failure / warning / info notifications, draggable watermark and hotkey list
+- Confirmation dialogs (hold-to-confirm), dynamic input, credits inside any group
 - Dimmed and blurred backdrop with falling snow
 - Floating panels, credits panel, key prompt panel with Discord icon
 - Everything adjustable in the built-in settings tab, including a full theme editor with presets
@@ -35,4 +36,4 @@ See [DOCS.md](DOCS.md) for the API and [Example.lua](Example.lua) for a full dem
 
 ## Versioning
 
-`vX.X.X`. Current version: **v2.2.0**.
+`vX.X.X`. Current version: **v2.3.0**.

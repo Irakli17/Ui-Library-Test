@@ -1,4 +1,4 @@
-# Lumen v2.2.0 - API Reference
+# Lumen v2.3.0 - API Reference
 
 ```lua
 local Lumen = loadstring(game:HttpGet("https://raw.githubusercontent.com/Irakli17/Ui-Library-Test/main/Lumen.lua"))()
@@ -37,7 +37,7 @@ local Window = Lumen:CreateWindow({
 | `Window:SetTitle / SetSubtitle / SetFooter(text)` | Update header and footer |
 | `Window:Destroy()` | Remove just this window |
 
-Draggable by its header, resizable from the bottom-right grip.
+Draggable by its header or its footer strip, resizable from the bottom-right grip.
 
 ## Tab
 
@@ -80,10 +80,15 @@ Every element takes an options table. `Flag` stores the value in `Lumen.Flags[fl
 `{Text, Values, Default, Multi, Flag, Callback}`. Single mode value is a string, multi mode is `{[name] = true}`. `:Set(v)`, `:SetValues(list, keepSelection?)`.
 
 ### AddInput
-`{Text, Placeholder, Default, Numeric, MaxLength, Realtime, Flag, Callback}`. Fires on focus lost, or on every keystroke with `Realtime = true`. `.Value` is always current.
+`{Text, Placeholder, Default, Numeric, MaxLength, Realtime, Dynamic, Flag, Callback}`. Fires on focus lost, or on every keystroke with `Realtime = true`. `.Value` is always current.
+
+`Dynamic = true` makes a live text box that grows taller as the text wraps (up to 130px), fires on every keystroke, and submits on Enter.
 
 ### AddButton
-`{Text, Callback, Tooltip, DoubleClick}`. `DoubleClick = true` asks for a second click. `:AddSubButton({Text, Callback})` splits the row.
+`{Text, Callback, Tooltip, DoubleClick, Confirm}`. `DoubleClick = true` asks for a second click. `Confirm = {Title, Text, Type, Confirm, Cancel, Hold}` opens a confirmation dialog first and only runs `Callback` if accepted (see **Confirmation dialog**). `:AddSubButton({Text, Callback, Confirm})` splits the row.
+
+### AddCredits
+`group:AddCredits({{Name, Role, RoleColor, Description}, ...})` puts credit cards inside any group or tab. Returns an object with `:Add(entry)`.
 
 ### AddLabel
 `AddLabel(text, {Dim, Bold, Box})`. `:SetText`, `:SetColor`. Supports `:AddKeybind` and `:AddColorPicker` for standalone ones.
@@ -127,7 +132,7 @@ p:SetVisible(false); p:Toggle(); p:Destroy()
 
 ## Dock
 
-The icon bar at the top centre. Built-in buttons: menu, hotkey list, watermark, snow and command palette, plus any panel with a `Dock` option. Choose which built-ins to create with `Dock = {"menu", "hotkeys", "watermark", "snow", "palette"}` in `CreateWindow`, or `Dock = false` for none. Active buttons are highlighted. It stays visible when the window is hidden, so it doubles as the mobile toggle. Drag it to move it.
+The icon bar at the top centre. The `window`, `scan`, `keyboard`, `command` and `user` icons are traced pixel-for-pixel from the reference, so a default setup (menu, a preview panel, hotkeys, palette, a credits panel) looks exactly like it. Built-in buttons: menu, hotkey list and command palette are shown by default; watermark and snow buttons also exist but start hidden. Choose which built-ins are shown with `Dock = {"menu", "hotkeys", "palette", "watermark", "snow"}` in `CreateWindow`, or `Dock = false` for none. Every dock button can also be switched on or off from the config tab's Layout group, or with `Lumen:SetDockButtonVisible(name, bool)` (name = its tooltip). Active buttons are highlighted. It stays visible when the window is hidden, so it doubles as the mobile toggle. Drag it to move it.
 
 ```lua
 Lumen:AddDockButton({Icon = "gear", Tooltip = "Settings", Order = 50, Callback = function() end, Active = function() return true end})
@@ -135,6 +140,20 @@ Lumen:SetDockVisible(false)
 ```
 
 `Order` sorts the buttons (menu = 1, panel buttons default 20, hotkeys = 30, watermark = 32, snow = 34, palette = 40, custom default 50).
+
+## Confirmation dialog
+
+```lua
+Lumen:Confirm({
+  Title = "Reset everything?", Text = "This can't be undone.",
+  Type = "Danger",          -- Warning (default), Danger, Info, Success: sets the colour, icon and glow
+  Confirm = "Reset", Cancel = "Cancel",
+  Hold = 1,                 -- seconds the confirm button must be held (0 = plain click, Enter confirms)
+  Callback = function(accepted) end,   -- or OnConfirm / OnCancel
+})
+```
+
+Dims the screen, shows a centred card with a glowing status badge, and closes on Esc or a click outside. Returns `{Close = function}`.
 
 ## Command palette
 
@@ -153,7 +172,7 @@ Lumen:Notify({Title = "Hi", Content = "Hello", Type = "Success", Duration = 4})
 Lumen:Notify("Quick message")
 ```
 
-Types: default (gray bell), `Success`, `Warning`, `Danger`, `Info`. Options: `Title`, `Content`, `Type`, `Duration`, `Progress`. Disable all with `Lumen.ShowNotifications = false`.
+Types: default (the reference bell icon), `Success` (check), `Danger` (cross), `Warning`, `Info`. Typed notifications get a coloured title and a countdown bar. Options: `Title`, `Content`, `Type`, `Duration`, `Progress` (force the bar on or off). Disable all with `Lumen.ShowNotifications = false`.
 
 ## Snow and backdrop
 
@@ -184,9 +203,11 @@ Theme keys: `Background, Group, GroupBorder, Control, ControlHover, Border, Outl
 
 - **Menu**: menu key, dock, watermark, hotkey list, notifications, UI scale, font, screen watermark, unload
 - **Effects**: snow on/amount/speed, backdrop dim and blur
-- **Layout**: a toggle for every tab and section
+- **Layout**: a toggle for every tab, section, floating panel and dock button
 - **Theme**: preset dropdown and a colour picker for each theme colour, reset button
+- **Tests**: Success, Failure, Warning and Info notifications, and a hold-to-confirm dialog
 - **Configs**: save, load, delete, autoload
+- **Credits** (optional): `Window:AddConfigTab("Config", {Credits = {...entries}})`
 
 ## Configs
 
@@ -204,3 +225,14 @@ Only elements with a `Flag` are saved.
 ## Misc
 
 `Lumen:Unload()` removes everything and disconnects all events. Set `Lumen.OnUnload = function() ... end` for your own cleanup. Read your own state from `Lumen.Flags.YourFlag`.
+
+## Changelog
+
+**v2.3.0**
+- Dropdowns, colour pickers and tooltips no longer close or misfire on clicks; this was why the Font dropdown and the Rose / Sunset presets could not be picked on some executors (the pointer was offset by the top-bar inset). Popups now close with a full-screen click catcher, and sliders / pickers calibrate the pointer on press.
+- Dock and notification icons traced pixel-for-pixel from the reference; default dock now shows the reference's buttons
+- Hotkey panel sized to its longest entry (no more endless stretch to the right)
+- Confirmation dialog (`Lumen:Confirm`, `Button.Confirm`), Tests group in the config tab
+- Dynamic input, credits inside groups (`AddCredits`)
+- Success / failure / warning / info notifications with their own icons
+- Window draggable from the footer; panels and dock buttons toggleable from the Layout group

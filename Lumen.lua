@@ -1,7 +1,7 @@
 --!nocheck
 --!nolint
 --[[
-	Lumen UI Library  v2.2.0
+	Lumen UI Library  v2.3.0
 	Single file, no dependencies, loadstring-ready.
 
 	local Lumen = loadstring(game:HttpGet("https://raw.githubusercontent.com/Irakli17/Ui-Library-Test/main/Lumen.lua"))()
@@ -27,7 +27,7 @@ local Stats = Service("Stats")
 local Lighting = Service("Lighting")
 
 local Lumen = {
-	Version = "v2.2.0",
+	Version = "v2.3.0",
 	Flags = {},
 	Options = {},
 	Windows = {},
@@ -290,6 +290,31 @@ local function SyncOption(flag, v)
 	if o and o.Value ~= v then o:Set(v, true) end
 end
 
+-- Icons traced pixel-for-pixel from the reference UI: alpha runs {x, y, width, alpha/16}. They recolour like any other icon.
+local PIXEL_ICONS = {
+	dock_window = { w = 27, h = 25, ox = 2, oy = 3, runs = {{5,4,1,3},{6,4,16,5},{22,4,1,3},{4,5,1,2},{5,5,1,12},{6,5,16,16},{22,5,1,12},{23,5,1,2},{4,6,1,2},{5,6,1,15},{6,6,16,16},{22,6,1,15},{23,6,1,2},{4,7,1,2},{5,7,1,15},{6,7,1,14},{7,7,14,12},{21,7,1,14},{22,7,1,15},{23,7,1,2},{4,8,1,2},{5,8,1,14},{6,8,1,8},{7,8,14,3},{21,8,1,8},{22,8,1,14},{23,8,1,2},{4,9,1,2},{5,9,1,14},{6,9,1,6},{21,9,1,6},{22,9,1,14},{23,9,1,2},{4,10,1,2},{5,10,1,14},{6,10,1,6},{12,10,1,10},{13,10,6,13},{19,10,1,6},{21,10,1,6},{22,10,1,14},{23,10,1,2},{4,11,1,2},{5,11,1,14},{6,11,1,6},{12,11,2,13},{14,11,3,9},{17,11,1,10},{18,11,1,14},{19,11,1,8},{21,11,1,6},{22,11,1,14},{23,11,1,2},{4,12,1,2},{5,12,1,14},{6,12,1,6},{12,12,1,13},{13,12,1,9},{14,12,1,1},{17,12,1,4},{18,12,1,12},{19,12,1,8},{21,12,1,6},{22,12,1,14},{23,12,1,2},{4,13,1,2},{5,13,1,14},{6,13,1,6},{12,13,1,13},{13,13,1,12},{14,13,3,9},{17,13,1,10},{18,13,1,14},{19,13,1,8},{21,13,1,6},{22,13,1,14},{23,13,1,2},{4,14,1,2},{5,14,1,14},{6,14,1,6},{12,14,1,9},{13,14,5,12},{18,14,1,11},{19,14,1,5},{21,14,1,6},{22,14,1,14},{23,14,1,2},{4,15,1,2},{5,15,1,14},{6,15,1,6},{21,15,1,6},{22,15,1,14},{23,15,1,2},{4,16,1,2},{5,16,1,14},{6,16,1,6},{21,16,1,6},{22,16,1,14},{23,16,1,2},{4,17,1,2},{5,17,1,14},{6,17,1,8},{7,17,14,4},{21,17,1,8},{22,17,1,14},{23,17,1,2},{4,18,1,2},{5,18,1,12},{6,18,1,14},{7,18,14,13},{21,18,1,14},{22,18,1,12},{23,18,1,2},{5,19,1,3},{6,19,16,5},{22,19,1,3}} },
+	dock_scan = { w = 27, h = 25, ox = 2, oy = 3, runs = {{5,2,1,2},{6,2,3,3},{9,2,1,2},{18,2,1,2},{19,2,3,3},{22,2,1,2},{4,3,1,2},{5,3,1,12},{6,3,1,16},{7,3,2,15},{9,3,1,12},{10,3,1,3},{17,3,1,3},{18,3,1,12},{19,3,2,15},{21,3,1,16},{22,3,1,12},{23,3,1,2},{4,4,1,3},{5,4,1,16},{6,4,1,10},{7,4,2,6},{9,4,1,5},{10,4,1,1},{17,4,1,1},{18,4,1,5},{19,4,2,6},{21,4,1,10},{22,4,1,16},{23,4,1,3},{4,5,1,3},{5,5,1,15},{6,5,1,6},{21,5,1,6},{22,5,1,15},{23,5,1,3},{4,6,1,3},{5,6,1,15},{6,6,1,6},{12,6,1,5},{13,6,2,8},{15,6,1,5},{21,6,1,6},{22,6,1,15},{23,6,1,3},{4,7,1,2},{5,7,1,12},{6,7,1,5},{11,7,1,5},{12,7,1,13},{13,7,2,14},{15,7,1,13},{16,7,1,5},{21,7,1,5},{22,7,1,12},{23,7,1,2},{5,8,1,3},{6,8,1,1},{11,8,1,11},{12,8,1,13},{13,8,2,5},{15,8,1,13},{16,8,1,11},{21,8,1,1},{22,8,1,3},{11,9,1,12},{12,9,1,11},{13,9,2,1},{15,9,2,12},{11,10,1,9},{12,10,1,15},{13,10,2,10},{15,10,1,15},{16,10,1,8},{11,11,1,1},{12,11,1,10},{13,11,2,16},{15,11,1,10},{16,11,1,1},{12,12,4,2},{9,13,1,2},{10,13,1,6},{11,13,1,11},{12,13,1,14},{13,13,2,15},{15,13,1,14},{16,13,1,11},{17,13,1,6},{18,13,1,2},{8,14,1,3},{9,14,1,12},{10,14,1,14},{11,14,1,12},{12,14,1,9},{13,14,2,7},{15,14,1,9},{16,14,1,12},{17,14,1,14},{18,14,1,12},{19,14,1,3},{5,15,1,3},{6,15,1,1},{8,15,1,8},{9,15,1,15},{10,15,1,9},{11,15,1,5},{12,15,4,4},{16,15,1,5},{17,15,1,9},{18,15,1,15},{19,15,1,8},{21,15,1,1},{22,15,1,3},{4,16,1,2},{5,16,1,12},{6,16,1,5},{8,16,1,8},{9,16,1,16},{10,16,1,14},{11,16,6,13},{17,16,1,14},{18,16,1,16},{19,16,1,8},{21,16,1,5},{22,16,1,12},{23,16,1,2},{4,17,1,3},{5,17,1,15},{6,17,1,6},{8,17,1,4},{9,17,1,8},{10,17,8,9},{18,17,1,8},{19,17,1,4},{21,17,1,6},{22,17,1,15},{23,17,1,3},{4,18,1,3},{5,18,1,15},{6,18,1,6},{21,18,1,6},{22,18,1,15},{23,18,1,3},{4,19,1,3},{5,19,1,16},{6,19,1,10},{7,19,2,6},{9,19,1,5},{10,19,1,1},{17,19,1,1},{18,19,1,5},{19,19,2,6},{21,19,1,10},{22,19,1,16},{23,19,1,3},{4,20,1,2},{5,20,1,12},{6,20,1,16},{7,20,2,15},{9,20,1,12},{10,20,1,3},{17,20,1,3},{18,20,1,12},{19,20,2,15},{21,20,1,16},{22,20,1,12},{23,20,1,2},{5,21,1,2},{6,21,3,3},{9,21,1,2},{18,21,1,2},{19,21,3,3},{22,21,1,2}} },
+	dock_keyboard = { w = 27, h = 25, ox = 2, oy = 3, runs = {{5,5,1,5},{6,5,1,7},{7,5,14,8},{21,5,1,7},{22,5,1,5},{4,6,1,2},{5,6,1,13},{6,6,1,14},{7,6,14,13},{21,6,2,14},{23,6,1,2},{4,7,1,3},{5,7,1,16},{6,7,1,9},{7,7,14,4},{21,7,1,9},{22,7,1,16},{23,7,1,3},{4,8,1,3},{5,8,1,16},{6,8,1,7},{7,8,1,4},{8,8,1,6},{9,8,1,2},{10,8,1,5},{11,8,1,6},{12,8,1,1},{13,8,2,6},{15,8,1,1},{16,8,1,6},{17,8,1,5},{18,8,1,2},{19,8,1,6},{20,8,1,4},{21,8,1,7},{22,8,1,16},{23,8,1,3},{4,9,1,3},{5,9,1,16},{6,9,1,7},{7,9,1,4},{8,9,1,7},{9,9,1,2},{10,9,1,5},{11,9,1,7},{12,9,1,1},{13,9,2,6},{15,9,1,1},{16,9,2,6},{18,9,1,2},{19,9,1,7},{20,9,1,4},{21,9,1,7},{22,9,1,16},{23,9,1,3},{4,10,1,3},{5,10,1,16},{6,10,1,7},{11,10,1,1},{16,10,1,1},{21,10,1,7},{22,10,1,16},{23,10,1,3},{4,11,1,3},{5,11,1,16},{6,11,1,7},{7,11,1,4},{8,11,1,7},{9,11,1,2},{10,11,1,6},{11,11,1,7},{12,11,1,1},{13,11,2,7},{16,11,2,6},{18,11,1,2},{19,11,1,7},{20,11,1,4},{21,11,1,7},{22,11,1,16},{23,11,1,3},{4,12,1,3},{5,12,1,16},{6,12,1,7},{7,12,1,4},{8,12,1,7},{9,12,1,2},{10,12,1,5},{11,12,1,7},{12,12,1,1},{13,12,2,7},{16,12,2,6},{18,12,1,2},{19,12,1,7},{20,12,1,4},{21,12,1,7},{22,12,1,16},{23,12,1,3},{4,13,1,3},{5,13,1,16},{6,13,1,7},{10,13,8,2},{21,13,1,7},{22,13,1,16},{23,13,1,3},{4,14,1,3},{5,14,1,16},{6,14,1,6},{9,14,1,2},{10,14,1,10},{11,14,6,12},{17,14,1,10},{18,14,1,2},{21,14,1,6},{22,14,1,16},{23,14,1,3},{4,15,1,3},{5,15,1,16},{6,15,1,7},{9,15,1,2},{10,15,1,8},{11,15,6,11},{17,15,1,8},{18,15,1,2},{21,15,1,7},{22,15,1,16},{23,15,1,3},{4,16,1,3},{5,16,1,16},{6,16,1,9},{7,16,14,4},{21,16,1,9},{22,16,1,16},{23,16,1,3},{4,17,1,2},{5,17,2,14},{7,17,14,13},{21,17,1,14},{22,17,1,13},{23,17,1,2},{5,18,1,5},{6,18,1,7},{7,18,14,8},{21,18,1,7},{22,18,1,5}} },
+	dock_command = { w = 27, h = 25, ox = 2, oy = 3, runs = {{7,3,1,3},{8,3,2,4},{10,3,1,2},{17,3,1,2},{18,3,2,4},{20,3,1,3},{6,4,1,5},{7,4,1,13},{8,4,1,15},{9,4,1,14},{10,4,1,9},{11,4,1,2},{16,4,1,2},{17,4,1,9},{18,4,1,14},{19,4,1,15},{20,4,1,12},{21,4,1,5},{5,5,1,3},{6,5,1,13},{7,5,1,12},{8,5,1,7},{9,5,1,9},{10,5,1,15},{11,5,1,7},{16,5,1,7},{17,5,1,15},{18,5,1,9},{19,5,1,7},{20,5,2,12},{22,5,1,3},{5,6,1,4},{6,6,1,15},{7,6,1,7},{9,6,1,2},{10,6,1,13},{11,6,1,11},{12,6,1,1},{15,6,1,2},{16,6,1,11},{17,6,1,13},{18,6,1,2},{20,6,1,7},{21,6,1,15},{22,6,1,4},{5,7,1,4},{6,7,1,14},{7,7,1,9},{8,7,1,2},{10,7,1,12},{11,7,1,11},{12,7,1,2},{15,7,1,2},{16,7,1,11},{17,7,1,12},{19,7,1,2},{20,7,1,9},{21,7,1,14},{22,7,1,4},{5,8,1,2},{6,8,1,9},{7,8,1,15},{8,8,1,13},{9,8,1,12},{10,8,2,16},{12,8,1,13},{13,8,2,12},{15,8,1,13},{16,8,2,16},{18,8,1,12},{19,8,1,13},{20,8,1,15},{21,8,1,9},{22,8,1,2},{6,9,1,2},{7,9,1,7},{8,9,2,11},{10,9,2,16},{12,9,1,12},{13,9,2,11},{15,9,1,12},{16,9,2,16},{18,9,2,11},{20,9,1,7},{21,9,1,2},{8,10,1,1},{9,10,1,2},{10,10,1,13},{11,10,1,12},{12,10,1,3},{13,10,2,2},{15,10,1,3},{16,10,1,12},{17,10,1,13},{18,10,1,2},{19,10,1,1},{10,11,1,12},{11,11,1,11},{12,11,1,2},{15,11,1,2},{16,11,1,11},{17,11,1,12},{10,12,1,12},{11,12,1,11},{12,12,1,2},{15,12,1,2},{16,12,1,11},{17,12,1,12},{8,13,1,1},{9,13,1,2},{10,13,1,13},{11,13,1,12},{12,13,1,3},{13,13,2,2},{15,13,1,3},{16,13,1,12},{17,13,1,13},{18,13,1,2},{19,13,1,1},{6,14,1,2},{7,14,1,7},{8,14,2,11},{10,14,2,16},{12,14,1,12},{13,14,2,11},{15,14,1,12},{16,14,2,16},{18,14,2,11},{20,14,1,7},{21,14,1,2},{5,15,1,2},{6,15,1,9},{7,15,1,15},{8,15,1,13},{9,15,1,12},{10,15,2,16},{12,15,1,13},{13,15,2,12},{15,15,1,13},{16,15,2,16},{18,15,1,12},{19,15,1,13},{20,15,1,15},{21,15,1,9},{22,15,1,2},{5,16,1,4},{6,16,1,14},{7,16,1,9},{8,16,1,2},{10,16,1,12},{11,16,1,11},{12,16,1,2},{15,16,1,2},{16,16,1,11},{17,16,1,12},{19,16,1,2},{20,16,1,9},{21,16,1,14},{22,16,1,4},{5,17,1,4},{6,17,1,15},{7,17,1,7},{9,17,1,2},{10,17,1,13},{11,17,1,11},{12,17,1,1},{15,17,1,1},{16,17,1,11},{17,17,1,13},{18,17,1,2},{20,17,1,7},{21,17,1,14},{22,17,1,4},{5,18,1,3},{6,18,1,12},{7,18,1,13},{8,18,1,7},{9,18,1,9},{10,18,1,15},{11,18,1,7},{16,18,1,7},{17,18,1,15},{18,18,1,9},{19,18,1,7},{20,18,2,12},{22,18,1,3},{6,19,1,5},{7,19,1,12},{8,19,1,15},{9,19,1,14},{10,19,1,9},{11,19,1,2},{16,19,1,2},{17,19,1,9},{18,19,1,14},{19,19,1,15},{20,19,1,12},{21,19,1,5},{7,20,1,3},{8,20,2,4},{10,20,1,2},{17,20,1,2},{18,20,2,4},{20,20,1,3}} },
+	dock_user = { w = 27, h = 25, ox = 2, oy = 3, runs = {{12,4,1,1},{13,4,2,3},{15,4,1,1},{11,5,1,3},{12,5,1,8},{13,5,2,11},{15,5,1,8},{16,5,1,3},{10,6,1,2},{11,6,1,10},{12,6,1,15},{13,6,2,16},{15,6,1,15},{16,6,1,10},{17,6,1,2},{10,7,1,6},{11,7,1,14},{12,7,4,16},{16,7,1,14},{17,7,1,6},{10,8,1,8},{11,8,1,15},{12,8,4,16},{16,8,1,15},{17,8,1,8},{10,9,1,6},{11,9,1,14},{12,9,4,16},{16,9,1,14},{17,9,1,6},{10,10,1,2},{11,10,1,12},{12,10,1,15},{13,10,2,16},{15,10,1,15},{16,10,1,12},{17,10,1,2},{11,11,1,3},{12,11,1,10},{13,11,2,14},{15,11,1,10},{16,11,1,3},{17,12,1,1},{9,13,1,1},{10,13,1,3},{11,13,1,5},{12,13,1,7},{13,13,1,8},{14,13,1,1},{15,13,1,2},{16,13,1,10},{17,13,1,14},{18,13,1,10},{19,13,1,6},{20,13,1,11},{21,13,1,14},{22,13,1,8},{7,14,1,2},{8,14,1,6},{9,14,1,10},{10,14,1,14},{11,14,3,16},{14,14,1,5},{15,14,1,4},{16,14,6,16},{22,14,1,14},{23,14,1,2},{6,15,1,2},{7,15,1,9},{8,15,1,15},{9,15,5,16},{14,15,1,7},{15,15,1,4},{16,15,1,14},{17,15,5,16},{22,15,1,13},{23,15,1,2},{6,16,1,4},{7,16,1,14},{8,16,6,16},{14,16,1,12},{15,16,1,3},{16,16,1,7},{17,16,1,14},{18,16,3,16},{21,16,1,13},{22,16,1,6},{6,17,1,5},{7,17,7,16},{14,17,1,15},{15,17,1,9},{16,17,1,3},{17,17,1,7},{18,17,1,14},{19,17,1,16},{20,17,1,13},{21,17,1,6},{6,18,1,4},{7,18,1,13},{8,18,7,16},{15,18,1,14},{16,18,1,6},{17,18,1,2},{18,18,1,7},{19,18,1,10},{20,18,1,6},{7,19,1,4},{8,19,8,5},{16,19,1,2},{18,19,1,1},{19,19,1,2}} },
+	hotkeys_kb = { w = 19, h = 13, ox = 1, oy = 1, runs = {{1,0,1,8},{2,0,15,12},{17,0,1,8},{0,1,1,4},{1,1,1,16},{2,1,1,13},{3,1,13,11},{16,1,1,13},{17,1,1,16},{18,1,1,4},{0,2,1,4},{1,2,1,16},{2,2,1,6},{16,2,1,6},{17,2,1,16},{18,2,1,4},{0,3,1,4},{1,3,1,16},{2,3,1,6},{3,3,2,8},{6,3,1,10},{7,3,1,7},{8,3,1,4},{9,3,1,9},{10,3,1,4},{11,3,1,7},{12,3,1,11},{14,3,2,8},{16,3,1,6},{17,3,1,16},{18,3,1,4},{0,4,1,4},{1,4,1,16},{2,4,1,6},{3,4,2,4},{6,4,1,6},{7,4,1,4},{9,4,1,5},{11,4,1,4},{12,4,1,6},{14,4,2,4},{16,4,1,6},{17,4,1,16},{18,4,1,4},{0,5,1,4},{1,5,1,16},{2,5,1,6},{6,5,1,3},{12,5,1,3},{16,5,1,6},{17,5,1,16},{18,5,1,4},{0,6,1,4},{1,6,1,16},{2,6,3,6},{6,6,1,8},{7,6,1,5},{9,6,1,7},{11,6,1,5},{12,6,1,9},{14,6,3,6},{17,6,1,16},{18,6,1,4},{0,7,1,4},{1,7,1,16},{2,7,1,6},{6,7,1,3},{12,7,1,4},{16,7,1,6},{17,7,1,16},{18,7,1,4},{0,8,1,4},{1,8,1,16},{2,8,1,5},{6,8,7,10},{16,8,1,5},{17,8,1,16},{18,8,1,4},{0,9,1,4},{1,9,1,16},{2,9,1,5},{5,9,1,5},{6,9,1,15},{7,9,6,16},{13,9,1,5},{16,9,1,5},{17,9,1,16},{18,9,1,4},{0,10,1,4},{1,10,1,16},{2,10,1,6},{16,10,1,6},{17,10,1,16},{18,10,1,4},{0,11,1,4},{1,11,1,16},{2,11,1,13},{3,11,13,11},{16,11,1,13},{17,11,1,16},{18,11,1,4},{1,12,1,8},{2,12,15,12},{17,12,1,8}} },
+	bell = { w = 14, h = 16, ox = 2, oy = 1, runs = {{6,0,2,6},{2,1,1,7},{3,1,1,4},{5,1,1,5},{6,1,2,13},{8,1,1,5},{10,1,1,4},{11,1,1,7},{1,2,1,8},{2,2,1,10},{3,2,1,4},{4,2,1,7},{5,2,1,13},{6,2,2,15},{8,2,1,13},{9,2,1,7},{10,2,1,4},{11,2,1,10},{12,2,1,8},{1,3,1,12},{2,3,1,7},{3,3,1,8},{4,3,1,14},{5,3,1,15},{6,3,2,16},{8,3,1,15},{9,3,1,14},{10,3,1,8},{11,3,1,7},{12,3,1,12},{0,4,1,7},{1,4,1,10},{2,4,1,6},{3,4,1,13},{4,4,6,16},{10,4,1,13},{11,4,1,6},{12,4,1,10},{13,4,1,7},{0,5,1,9},{1,5,1,7},{2,5,1,8},{3,5,1,15},{4,5,6,16},{10,5,1,15},{11,5,1,8},{12,5,1,7},{13,5,1,9},{0,6,1,4},{2,6,1,8},{3,6,8,16},{11,6,1,8},{13,6,1,4},{2,7,1,8},{3,7,8,16},{11,7,1,8},{2,8,1,8},{3,8,8,16},{11,8,1,8},{2,9,1,8},{3,9,8,16},{11,9,1,8},{2,10,1,8},{3,10,8,16},{11,10,1,8},{2,11,1,9},{3,11,8,16},{11,11,1,9},{1,12,1,8},{2,12,1,12},{3,12,8,14},{11,12,1,12},{12,12,1,8},{1,13,4,4},{5,13,4,5},{9,13,4,4},{5,14,1,7},{6,14,2,14},{8,14,1,6},{6,15,2,6}} },
+	group_command = { w = 14, h = 14, ox = 4, oy = 6, runs = {{1,0,1,7},{2,0,2,10},{4,0,1,6},{9,0,1,6},{10,0,2,11},{12,0,1,8},{0,1,1,7},{1,1,1,14},{2,1,1,8},{3,1,1,10},{4,1,1,12},{5,1,1,7},{8,1,1,7},{9,1,1,13},{10,1,1,10},{11,1,1,9},{12,1,1,15},{13,1,1,7},{0,2,1,11},{1,2,1,8},{4,2,1,9},{5,2,1,12},{8,2,1,12},{9,2,1,9},{12,2,1,9},{13,2,1,10},{0,3,1,11},{1,3,1,10},{4,3,1,8},{5,3,1,13},{8,3,1,13},{9,3,1,8},{12,3,2,10},{0,4,1,6},{1,4,1,13},{2,4,1,10},{3,4,1,9},{4,4,1,12},{5,4,1,15},{6,4,2,8},{8,4,1,15},{9,4,1,12},{10,4,1,9},{11,4,1,10},{12,4,1,13},{13,4,1,6},{1,5,1,8},{2,5,1,12},{3,5,1,13},{4,5,1,15},{5,5,1,16},{6,5,2,13},{8,5,1,16},{9,5,1,15},{10,5,1,13},{11,5,1,12},{12,5,1,8},{4,6,1,9},{5,6,1,13},{8,6,1,13},{9,6,1,8},{4,7,1,9},{5,7,1,13},{8,7,1,13},{9,7,1,8},{1,8,1,7},{2,8,1,12},{3,8,1,13},{4,8,1,15},{5,8,1,16},{6,8,2,13},{8,8,1,16},{9,8,1,15},{10,8,1,13},{11,8,1,12},{12,8,1,7},{0,9,1,6},{1,9,1,12},{2,9,1,9},{3,9,1,8},{4,9,1,13},{5,9,1,15},{6,9,2,9},{8,9,1,15},{9,9,1,12},{10,9,1,8},{11,9,1,9},{12,9,1,13},{13,9,1,6},{0,10,2,10},{4,10,1,9},{5,10,1,13},{8,10,1,13},{9,10,1,8},{12,10,2,10},{0,11,1,11},{1,11,1,8},{4,11,1,9},{5,11,1,12},{8,11,1,12},{9,11,1,9},{12,11,1,8},{13,11,1,10},{0,12,1,7},{1,12,1,14},{2,12,1,8},{3,12,1,10},{4,12,1,13},{5,12,1,7},{8,12,1,7},{9,12,1,13},{10,12,1,10},{11,12,1,8},{12,12,1,14},{13,12,1,7},{1,13,1,7},{2,13,2,10},{4,13,1,6},{9,13,1,6},{10,13,2,10},{12,13,1,7}} },
+}
+
+local function PixelIcon(name, parent, colorKey)
+	local d = PIXEL_ICONS[name]
+	if not d then return nil end
+	local f = New("Frame", { BackgroundTransparency = 1, Size = UDim2.fromOffset(d.w, d.h), Parent = parent })
+	for _, r in ipairs(d.runs) do
+		New("Frame", {
+			Position = UDim2.fromOffset(r[1], r[2]), Size = UDim2.fromOffset(r[3], 1), BackgroundTransparency = 1 - r[4] / 16,
+			Parent = f, Theme = { BackgroundColor3 = colorKey or "Label" },
+		})
+	end
+	return f
+end
+
 -- Vector icons drawn from frames: window, keyboard, command, scan, bell, user, gear, snow, list, discord
 local function Icon(kind, parent, size, colorKey)
 	size = size or 16
@@ -347,6 +372,20 @@ local function Icon(kind, parent, size, colorKey)
 		for _, rot in ipairs({ 0, 60, 120 }) do Bar(1, 7.2, 14, 1.6).Rotation = rot end
 	elseif kind == "list" then
 		Bar(2, 3.5, 12, 1.6); Bar(2, 7.2, 12, 1.6); Bar(2, 10.9, 12, 1.6)
+	elseif kind == "check" then
+		local a = Bar(3, 8.9, 5.4, 2, 1); a.Rotation = 45
+		local b = Bar(5.4, 7.2, 9.6, 2, 1); b.Rotation = -52
+	elseif kind == "cross" then
+		Bar(2.5, 7, 11, 2, 1).Rotation = 45
+		Bar(2.5, 7, 11, 2, 1).Rotation = -45
+	elseif kind == "warn" then
+		Ring(1.2, 1.2, 13.6, 13.6, 6.8, 1.6)
+		Bar(7.1, 4.2, 1.8, 5.2, 0.9)
+		Bar(7.1, 10.4, 1.8, 1.8, 0.9)
+	elseif kind == "info" then
+		Ring(1.2, 1.2, 13.6, 13.6, 6.8, 1.6)
+		Bar(7.1, 7, 1.8, 5.2, 0.9)
+		Bar(7.1, 4, 1.8, 1.8, 0.9)
 	elseif kind == "discord" then
 		Bar(2.4, 1.8, 4, 4, 2); Bar(9.6, 1.8, 4, 4, 2)
 		Bar(1, 3.8, 14, 9.4, 4.7)
@@ -388,20 +427,28 @@ local function MouseInside(frame)
 	return m.X >= p.X and m.X <= p.X + s.X and m.Y >= p.Y and m.Y <= p.Y + s.Y
 end
 
--- Calls cb(mouseX, mouseY) while the pointer is held down that started on `frame`.
+-- Calls cb(x, y) in GUI coordinates while the pointer is held down that started on `frame`.
+-- The pointer position is read from the input object and calibrated on press, so it stays correct
+-- whether or not the executor/Roblox reports it with the top-bar inset.
 local function Dragger(frame, cb)
-	local active = false
+	local active, off = false, Vector2.new(0, 0)
+	local function Pos(i) return Vector2.new(i.Position.X, i.Position.Y) + off end
 	Connect(frame.InputBegan, function(i)
 		if IsPress(i) then
 			active = true
-			local m = UIS:GetMouseLocation()
-			cb(m.X, m.Y)
+			local a = UIS:GetMouseLocation()
+			local b = Vector2.new(i.Position.X, i.Position.Y)
+			local ap, sz = frame.AbsolutePosition, frame.AbsoluteSize
+			local inside = b.X >= ap.X and b.X <= ap.X + sz.X and b.Y >= ap.Y and b.Y <= ap.Y + sz.Y
+			off = inside and Vector2.new(0, 0) or (a - b)
+			local p = Pos(i)
+			cb(p.X, p.Y)
 		end
 	end)
 	Connect(UIS.InputChanged, function(i)
 		if active and (i.UserInputType == Enum.UserInputType.MouseMovement or i.UserInputType == Enum.UserInputType.Touch) then
-			local m = UIS:GetMouseLocation()
-			cb(m.X, m.Y)
+			local p = Pos(i)
+			cb(p.X, p.Y)
 		end
 	end)
 	Connect(UIS.InputEnded, function(i)
@@ -502,7 +549,13 @@ Overlay = New("Frame", {
 	Name = "Overlay", BackgroundTransparency = 1, Size = UDim2.fromScale(1, 1), ZIndex = 50, Parent = Gui,
 })
 
+local PopupCatcher = New("TextButton", {
+	Name = "PopupCatcher", BackgroundTransparency = 1, Size = UDim2.fromScale(1, 1), Visible = false, ZIndex = 1,
+	Active = true, Parent = Overlay,
+})
+
 local function ClosePopup()
+	PopupCatcher.Visible = false
 	if OpenPopup then
 		local p = OpenPopup
 		OpenPopup = nil
@@ -510,6 +563,9 @@ local function ClosePopup()
 		if p.OnClose then p.OnClose() end
 	end
 end
+
+Connect(PopupCatcher.MouseButton1Down, function() ClosePopup() end)
+Connect(PopupCatcher.MouseButton2Down, function() ClosePopup() end)
 
 local function ShowPopup(frame, trigger, onClose)
 	ClosePopup()
@@ -523,6 +579,8 @@ local function ShowPopup(frame, trigger, onClose)
 	local y = tp.Y + ts.Y + 4
 	if y + h > vp.Y - 6 then y = math.max(6, tp.Y - h - 4) end
 	frame.Position = UDim2.fromOffset(x, y)
+	frame.ZIndex = 5
+	PopupCatcher.Visible = true
 	frame.Visible = true
 	OpenPopup = { Frame = frame, Trigger = trigger, OnClose = onClose }
 end
@@ -538,13 +596,12 @@ local TooltipLabel = New("TextLabel", {
 local function AttachTooltip(inst, text)
 	Connect(inst.MouseEnter, function()
 		TooltipLabel.Text = text
+		local ap, sz = inst.AbsolutePosition, inst.AbsoluteSize
+		local vp = Gui.AbsoluteSize
+		TooltipFrame.Position = UDim2.fromOffset(math.clamp(ap.X, 6, math.max(6, vp.X - 260)), ap.Y + sz.Y + 6)
 		TooltipFrame.Visible = true
 	end)
 	Connect(inst.MouseLeave, function() TooltipFrame.Visible = false end)
-	Connect(inst.MouseMoved, function()
-		local m = UIS:GetMouseLocation()
-		TooltipFrame.Position = UDim2.fromOffset(m.X + 14, m.Y + 12)
-	end)
 end
 
 ------------------------------------------------------------------------------
@@ -604,6 +661,7 @@ end
 
 -- everything searchable from the command palette
 Lumen._Catalog = {}
+Lumen._Panels = {}
 local function CatalogAdd(group, opt, name)
 	if not name then return end
 	table.insert(Lumen._Catalog, { Opt = opt, Name = name, Path = group._path or "", Tab = group._tab })
@@ -631,7 +689,8 @@ function Lumen:Notify(o, duration)
 	if type(o) == "string" then o = { Content = o, Duration = duration } end
 	if not self.ShowNotifications then return end
 	local key = o.Type
-	if not key or not self.Theme[key] then key = "TextDim" end
+	if not key or not self.Theme[key] then key = "Label" end
+	local symbol = ({ Success = "check", Danger = "cross", Warning = "warn", Info = "info" })[o.Type or ""]
 	local dur = o.Duration or 4
 	local card = New("CanvasGroup", {
 		Size = UDim2.fromOffset(280, 0), AutomaticSize = Enum.AutomaticSize.Y, GroupTransparency = 1,
@@ -643,14 +702,19 @@ function Lumen:Notify(o, duration)
 	}, { Pad(12, 8, 12, 8), New("UISizeConstraint", { MinSize = Vector2.new(0, 32) }),
 		List(10, Enum.FillDirection.Horizontal, Enum.HorizontalAlignment.Left, Enum.VerticalAlignment.Center) })
 	local iconHolder = New("Frame", { BackgroundTransparency = 1, Size = UDim2.fromOffset(16, 16), LayoutOrder = 1, Parent = body })
-	Icon("bell", iconHolder, 16, key)
+	if symbol then
+		Icon(symbol, iconHolder, 16, key)
+	else
+		local bell = PixelIcon("bell", iconHolder, key)
+		bell.Position = UDim2.fromOffset(1, 0)
+	end
 	local text = New("Frame", {
 		BackgroundTransparency = 1, Size = UDim2.new(1, -28, 0, 0), AutomaticSize = Enum.AutomaticSize.Y,
 		LayoutOrder = 2, Parent = body,
 	}, { List(1) })
 	if o.Title then
 		New("TextLabel", {
-			Size = UDim2.new(1, 0, 0, 16), Text = o.Title, TextColor3 = self.Theme.Text,
+			Size = UDim2.new(1, 0, 0, 16), Text = o.Title, TextColor3 = symbol and self.Theme[key] or self.Theme.Text,
 			TextXAlignment = Enum.TextXAlignment.Left, LayoutOrder = 1, Parent = text,
 		})
 	end
@@ -661,7 +725,7 @@ function Lumen:Notify(o, duration)
 			TextColor3 = o.Title and self.Theme.TextDim or self.Theme.Label, Parent = text,
 		})
 	end
-	if o.Progress then
+	if o.Progress or (o.Progress == nil and symbol) then
 		local track = New("Frame", {
 			Size = UDim2.new(1, 0, 0, 2), LayoutOrder = 2, Parent = card, Theme = { BackgroundColor3 = "Outline" },
 		})
@@ -696,15 +760,15 @@ local WatermarkLabel = New("TextLabel", {
 })
 
 local HotkeyFrame = New("Frame", {
-	Position = UDim2.fromOffset(12, 56), Size = UDim2.fromOffset(0, 0), AutomaticSize = Enum.AutomaticSize.XY,
+	Position = UDim2.fromOffset(12, 56), Size = UDim2.fromOffset(170, 0), AutomaticSize = Enum.AutomaticSize.Y,
 	Visible = false, ZIndex = 5, Parent = Gui, Theme = { BackgroundColor3 = "Background" },
-}, { Corner(9), Stroke(nil, true), Pad(14, 10, 16, 12), List(8), New("UISizeConstraint", { MinSize = Vector2.new(160, 0) }) })
+}, { Corner(9), Stroke(nil, true), Pad(14, 10, 16, 12), List(8) })
 MakeDraggable(HotkeyFrame, HotkeyFrame)
 local HotkeyTitle = New("Frame", {
 	BackgroundTransparency = 1, Size = UDim2.fromOffset(0, 18), AutomaticSize = Enum.AutomaticSize.X,
 	LayoutOrder = 0, Parent = HotkeyFrame,
 }, { List(8, Enum.FillDirection.Horizontal, Enum.HorizontalAlignment.Left, Enum.VerticalAlignment.Center) })
-local HotkeyIcon = Icon("keyboard", HotkeyTitle, 15)
+local HotkeyIcon = PixelIcon("hotkeys_kb", HotkeyTitle, "Label")
 HotkeyIcon.LayoutOrder = 1
 local HotkeyTitleLabel = New("TextLabel", {
 	Text = "Hotkeys", AutomaticSize = Enum.AutomaticSize.X, Size = UDim2.fromOffset(0, 18),
@@ -715,6 +779,14 @@ local HotkeyList = New("Frame", {
 	BackgroundTransparency = 1, Size = UDim2.fromOffset(0, 0), AutomaticSize = Enum.AutomaticSize.XY,
 	LayoutOrder = 2, Parent = HotkeyFrame,
 }, { List(6) })
+
+-- the panel is as wide as its longest entry (never wider than 420px)
+local function FitHotkeys()
+	local w = math.max(HotkeyList.AbsoluteSize.X, HotkeyTitle.AbsoluteSize.X) + 30
+	HotkeyFrame.Size = UDim2.fromOffset(math.clamp(w, 150, 420), 0)
+end
+Connect(HotkeyList:GetPropertyChangedSignal("AbsoluteSize"), FitHotkeys)
+Connect(HotkeyTitle:GetPropertyChangedSignal("AbsoluteSize"), FitHotkeys)
 
 -- hotkey panel colours are the accent dimmed toward the background (as in the reference)
 local function StyleHotkeys()
@@ -1345,12 +1417,30 @@ function Elements:AddInput(o)
 		TextXAlignment = Enum.TextXAlignment.Left, ClipsDescendants = true, Font = Enum.Font.GothamMedium, Parent = row,
 	}, { Corner(6), stroke, Pad(11, 0, 11, 0) })
 
+	if o.Dynamic then
+		o.Realtime = true
+		box.MultiLine = true
+		box.TextWrapped = true
+		box.TextYAlignment = Enum.TextYAlignment.Top
+	end
+	local function Resize()
+		if not o.Dynamic then return end
+		local bh = math.clamp(box.TextBounds.Y + 14, 28, 130)
+		box.Size = UDim2.new(1, 0, 0, bh)
+		row.Size = UDim2.new(1, 0, 0, (o.Text and 20 or 0) + bh)
+	end
+	Connect(box:GetPropertyChangedSignal("TextBounds"), Resize)
 	Connect(box.Focused, function() Tween(stroke, 0.1, { Color = Lumen.Theme.AccentBorder }) end)
 	Connect(box.FocusLost, function()
 		Tween(stroke, 0.1, { Color = Lumen.Theme.Outline })
 		if not o.Realtime then Fire(I, I.Value) end
 	end)
 	Connect(box:GetPropertyChangedSignal("Text"), function()
+		if o.Dynamic and box.Text:find("\n") then
+			box.Text = box.Text:gsub("\n", "")
+			box:ReleaseFocus(true)
+			return
+		end
 		if o.Numeric then
 			local f = box.Text:gsub("[^%d%.%-]", "")
 			if f ~= box.Text then box.Text = f return end
@@ -1407,6 +1497,13 @@ function Elements:AddButton(o)
 		Connect(b.MouseEnter, function() Tween(b, 0.1, { BackgroundColor3 = Lumen.Theme.ControlHover }) end)
 		Connect(b.MouseLeave, function() Tween(b, 0.1, { BackgroundColor3 = Lumen.Theme.Control }) end)
 		local function Press()
+			if opts.Confirm then
+				local c = {}
+				for k, v in pairs(opts.Confirm) do c[k] = v end
+				c.Callback = function(ok) if ok and opts.Callback then opts.Callback() end end
+				Lumen:Confirm(c)
+				return
+			end
 			if opts.DoubleClick and not confirming then
 				confirming = true
 				b.Text = "Click again to confirm"
@@ -1695,7 +1792,14 @@ function Lumen:CreatePanel(o)
 		Lumen:_UpdateDock()
 	end
 	function P:Toggle() self:SetVisible(not frame.Visible) end
-	function P:Destroy() ClosePopup() frame:Destroy() Lumen:_UpdateDock() end
+	function P:Destroy()
+		ClosePopup()
+		frame:Destroy()
+		for i, q in ipairs(Lumen._Panels) do if q == P then table.remove(Lumen._Panels, i) break end end
+		Lumen:_UpdateDock()
+	end
+	P.Name = o.Title or "Panel"
+	table.insert(Lumen._Panels, P)
 	if o.Visible == false then frame.Visible = false end
 	if o.Dock then
 		Lumen:AddDockButton({
@@ -1706,39 +1810,190 @@ function Lumen:CreatePanel(o)
 	return P
 end
 
+local function BuildCreditCard(container, e)
+	local color = e.RoleColor or Lumen.Theme.Accent
+	local order = (container:GetAttribute("Order") or 0) + 1
+	container:SetAttribute("Order", order)
+	local card = New("Frame", {
+		Size = UDim2.new(1, 0, 0, 0), AutomaticSize = Enum.AutomaticSize.Y, LayoutOrder = order, Parent = container,
+		Theme = { BackgroundColor3 = "Group" },
+	}, { Corner(7), Stroke("Outline"), Pad(12, 9, 12, 10), List(5) })
+	local line = New("Frame", {
+		BackgroundTransparency = 1, Size = UDim2.new(1, 0, 0, 22), LayoutOrder = 1, Parent = card,
+	}, { List(9, Enum.FillDirection.Horizontal, Enum.HorizontalAlignment.Left, Enum.VerticalAlignment.Center) })
+	New("TextLabel", {
+		Text = e.Name or "Name", AutomaticSize = Enum.AutomaticSize.X, Size = UDim2.fromOffset(0, 22),
+		TextSize = 13, TextColor3 = Lumen.Theme.Text, LayoutOrder = 1, Parent = line,
+	})
+	if e.Role then Pill(line, e.Role:upper(), color, 2, 20, 10, Lumen.Theme.Group) end
+	if e.Description then
+		New("TextLabel", {
+			Text = e.Description, Size = UDim2.new(1, 0, 0, 0), AutomaticSize = Enum.AutomaticSize.Y, TextSize = 11,
+			TextColor3 = Lumen.Theme.TextMuted, TextWrapped = true, TextXAlignment = Enum.TextXAlignment.Left,
+			Font = Enum.Font.GothamMedium, LayoutOrder = 2, Parent = card,
+		})
+	end
+	return card
+end
+
+-- credits inside any group or tab: group:AddCredits({{Name, Role, RoleColor, Description}, ...})
+function Elements:AddCredits(entries)
+	local cards = {}
+	for _, e in ipairs(entries or {}) do table.insert(cards, BuildCreditCard(self._container, e)) end
+	return { Cards = cards, Add = function(_, e) local c = BuildCreditCard(self._container, e) table.insert(cards, c) return c end }
+end
+
 function Lumen:CreateCredits(o)
 	o = o or {}
 	local P = self:CreatePanel({
 		Title = o.Title or "CREDITS", Subtitle = o.Subtitle or "People behind this script",
 		Width = o.Width or 340, Height = o.Height, Position = o.Position, Dock = o.Dock,
 	})
-	function P:AddEntry(e)
-		local color = e.RoleColor or Lumen.Theme.Accent
-		local card = New("Frame", {
-			Size = UDim2.new(1, 0, 0, 0), AutomaticSize = Enum.AutomaticSize.Y,
-			LayoutOrder = (self._container:GetAttribute("Order") or 0) + 1, Parent = self._container,
-			Theme = { BackgroundColor3 = "Group" },
-		}, { Corner(7), Stroke("Outline"), Pad(12, 9, 12, 10), List(5) })
-		self._container:SetAttribute("Order", card.LayoutOrder)
-		local line = New("Frame", {
-			BackgroundTransparency = 1, Size = UDim2.new(1, 0, 0, 22), LayoutOrder = 1, Parent = card,
-		}, { List(9, Enum.FillDirection.Horizontal, Enum.HorizontalAlignment.Left, Enum.VerticalAlignment.Center) })
-		New("TextLabel", {
-			Text = e.Name or "Name", AutomaticSize = Enum.AutomaticSize.X, Size = UDim2.fromOffset(0, 22),
-			TextSize = 13, TextColor3 = Lumen.Theme.Text, LayoutOrder = 1, Parent = line,
-		})
-		if e.Role then Pill(line, e.Role:upper(), color, 2, 20, 10, Lumen.Theme.Group) end
-		if e.Description then
-			New("TextLabel", {
-				Text = e.Description, Size = UDim2.new(1, 0, 0, 0), AutomaticSize = Enum.AutomaticSize.Y, TextSize = 11,
-				TextColor3 = Lumen.Theme.TextMuted, TextWrapped = true, TextXAlignment = Enum.TextXAlignment.Left,
-				Font = Enum.Font.GothamMedium, LayoutOrder = 2, Parent = card,
-			})
-		end
-		return card
-	end
+	function P:AddEntry(e) return BuildCreditCard(self._container, e) end
 	for _, e in ipairs(o.Entries or {}) do P:AddEntry(e) end
 	return P
+end
+
+
+------------------------------------------------------------------------------
+-- Confirmation dialog
+------------------------------------------------------------------------------
+
+-- o: Title, Text, Type ("Warning" default, "Danger", "Info", "Success"), Confirm / Cancel (button labels),
+--    Hold (seconds the confirm button must be held, 0 = plain click), Callback(accepted), OnConfirm, OnCancel
+function Lumen:Confirm(o)
+	o = o or {}
+	local key = o.Type or "Warning"
+	if not self.Theme[key] then key = "Warning" end
+	local T = self.Theme
+	local color = T[key]
+	local symbol = ({ Success = "check", Danger = "cross", Warning = "warn", Info = "info" })[key] or "warn"
+	local hold = o.Hold or 0
+	local done = false
+	local keyConn
+
+	local dim = New("TextButton", {
+		Size = UDim2.fromScale(1, 1), BackgroundColor3 = Color3.new(0, 0, 0), BackgroundTransparency = 1,
+		Active = true, ZIndex = 70, Parent = Gui,
+	})
+	local card = New("CanvasGroup", {
+		AnchorPoint = Vector2.new(0.5, 0.5), Position = UDim2.new(0.5, 0, 0.5, 14), Size = UDim2.fromOffset(410, 0),
+		AutomaticSize = Enum.AutomaticSize.Y, GroupTransparency = 1, ZIndex = 71, Parent = Gui,
+		Theme = { BackgroundColor3 = "Background" },
+	}, { Corner(12), Stroke(nil, true), List(0) })
+	-- soft coloured light along the top edge
+	New("Frame", { Size = UDim2.new(1, 0, 0, 2), BackgroundColor3 = color, LayoutOrder = 0, Parent = card }, {
+		New("UIGradient", { Transparency = NumberSequence.new({ NumberSequenceKeypoint.new(0, 1), NumberSequenceKeypoint.new(0.5, 0.15), NumberSequenceKeypoint.new(1, 1) }) }),
+	})
+	local body = New("Frame", {
+		BackgroundTransparency = 1, Size = UDim2.new(1, 0, 0, 0), AutomaticSize = Enum.AutomaticSize.Y, LayoutOrder = 1, Parent = card,
+	}, { Pad(22, 20, 22, 18), List(16) })
+
+	local top = New("Frame", { BackgroundTransparency = 1, Size = UDim2.new(1, 0, 0, 0), AutomaticSize = Enum.AutomaticSize.Y, LayoutOrder = 1, Parent = body },
+		{ List(14, Enum.FillDirection.Horizontal, Enum.HorizontalAlignment.Left, Enum.VerticalAlignment.Top) })
+	local badge = New("Frame", {
+		Size = UDim2.fromOffset(44, 44), BackgroundColor3 = color:Lerp(T.Background, 0.78), LayoutOrder = 1, Parent = top,
+	}, { Corner(22), New("UIStroke", { Color = color:Lerp(T.Background, 0.45), Thickness = 1 }) })
+	Glow(badge, color, 22)
+	local badgeIcon = Icon(symbol, badge, 22, key)
+	badgeIcon.AnchorPoint = Vector2.new(0.5, 0.5)
+	badgeIcon.Position = UDim2.fromScale(0.5, 0.5)
+	local texts = New("Frame", {
+		BackgroundTransparency = 1, Size = UDim2.new(1, -58, 0, 0), AutomaticSize = Enum.AutomaticSize.Y, LayoutOrder = 2, Parent = top,
+	}, { List(5) })
+	New("TextLabel", {
+		Text = o.Title or "Are you sure?", Size = UDim2.new(1, 0, 0, 20), TextSize = 15, TextColor3 = T.Text,
+		TextXAlignment = Enum.TextXAlignment.Left, LayoutOrder = 1, Parent = texts,
+	})
+	if o.Text then
+		New("TextLabel", {
+			Text = o.Text, Size = UDim2.new(1, 0, 0, 0), AutomaticSize = Enum.AutomaticSize.Y, TextWrapped = true, TextSize = 12,
+			TextColor3 = T.TextDim, Font = Enum.Font.GothamMedium, TextXAlignment = Enum.TextXAlignment.Left,
+			TextYAlignment = Enum.TextYAlignment.Top, LayoutOrder = 2, Parent = texts,
+		})
+	end
+
+	local row = New("Frame", { BackgroundTransparency = 1, Size = UDim2.new(1, 0, 0, 34), LayoutOrder = 2, Parent = body },
+		{ List(8, Enum.FillDirection.Horizontal, Enum.HorizontalAlignment.Right, Enum.VerticalAlignment.Center) })
+	local cancelBtn = New("TextButton", {
+		Size = UDim2.fromOffset(104, 32), BackgroundTransparency = 0, Text = o.Cancel or "Cancel", LayoutOrder = 1, Parent = row,
+		Theme = { BackgroundColor3 = "Control" },
+	}, { Corner(7), Stroke("Outline") })
+	local confirmBtn = New("TextButton", {
+		Size = UDim2.fromOffset(hold > 0 and 150 or 120, 32), BackgroundTransparency = 0, BackgroundColor3 = color:Lerp(T.Background, 0.78),
+		Text = "", ClipsDescendants = true, LayoutOrder = 2, Parent = row,
+	}, { Corner(7), New("UIStroke", { Color = color:Lerp(T.Background, 0.45), Thickness = 1 }) })
+	Glow(confirmBtn, color, 7)
+	local fill = New("Frame", { Size = UDim2.new(0, 0, 1, 0), BackgroundColor3 = color:Lerp(T.Background, 0.45), Parent = confirmBtn })
+	local confirmLabel = New("TextLabel", {
+		Size = UDim2.fromScale(1, 1), Text = (o.Confirm or "Confirm") .. (hold > 0 and "  (hold)" or ""),
+		TextColor3 = color, Font = Enum.Font.GothamBold, ZIndex = 2, Parent = confirmBtn,
+	})
+	New("TextLabel", {
+		Size = UDim2.new(1, 0, 0, 14), Text = hold > 0 and "Hold to confirm  -  Esc to cancel" or "Enter to confirm  -  Esc to cancel",
+		TextSize = 10, TextColor3 = T.TextMuted, Font = Enum.Font.GothamMedium, LayoutOrder = 3, Parent = body,
+	})
+
+	local scale = New("UIScale", { Scale = 0.94, Parent = card })
+	Tween(dim, 0.18, { BackgroundTransparency = 0.45 })
+	Tween(card, 0.2, { GroupTransparency = 0, Position = UDim2.new(0.5, 0, 0.5, 0) })
+	Tween(scale, 0.2, { Scale = 1 })
+
+	local function Close(accepted)
+		if done then return end
+		done = true
+		if keyConn then keyConn:Disconnect() end
+		Tween(dim, 0.15, { BackgroundTransparency = 1 })
+		Tween(card, 0.15, { GroupTransparency = 1 })
+		Tween(scale, 0.15, { Scale = 0.96 })
+		task.delay(0.2, function()
+			dim:Destroy()
+			card:Destroy()
+		end)
+		if accepted then
+			if o.OnConfirm then task.spawn(o.OnConfirm) end
+		else
+			if o.OnCancel then task.spawn(o.OnCancel) end
+		end
+		if o.Callback then task.spawn(o.Callback, accepted) end
+	end
+
+	Connect(cancelBtn.MouseButton1Click, function() Close(false) end)
+	Connect(cancelBtn.MouseEnter, function() Tween(cancelBtn, 0.1, { BackgroundColor3 = Lumen.Theme.ControlHover }) end)
+	Connect(cancelBtn.MouseLeave, function() Tween(cancelBtn, 0.1, { BackgroundColor3 = Lumen.Theme.Control }) end)
+	Connect(dim.MouseButton1Click, function() Close(false) end)
+
+	if hold > 0 then
+		local holding, t0 = false, 0
+		local function Release()
+			holding = false
+			Tween(fill, 0.15, { Size = UDim2.new(0, 0, 1, 0) })
+		end
+		Connect(confirmBtn.MouseButton1Down, function()
+			holding = true
+			t0 = os.clock()
+			Tween(fill, hold, { Size = UDim2.new(1, 0, 1, 0) })
+			task.delay(hold, function()
+				if holding and os.clock() - t0 >= hold - 0.05 then Close(true) end
+			end)
+		end)
+		Connect(confirmBtn.MouseButton1Up, Release)
+		Connect(confirmBtn.MouseLeave, Release)
+	else
+		Connect(confirmBtn.MouseButton1Click, function() Close(true) end)
+		Connect(confirmBtn.MouseEnter, function() Tween(fill, 0.15, { Size = UDim2.new(1, 0, 1, 0) }) end)
+		Connect(confirmBtn.MouseLeave, function() Tween(fill, 0.15, { Size = UDim2.new(0, 0, 1, 0) }) end)
+	end
+
+	keyConn = UIS.InputBegan:Connect(function(input)
+		if input.KeyCode == Enum.KeyCode.Escape then
+			Close(false)
+		elseif input.KeyCode == Enum.KeyCode.Return and hold <= 0 then
+			Close(true)
+		end
+	end)
+	table.insert(Connections, keyConn)
+	return { Close = function() Close(false) end }
 end
 
 -- Generic key prompt. `Validate(key)` is YOUR function; it should return true (or false, "message").
@@ -2025,15 +2280,16 @@ local function EnsureDock()
 		AnchorPoint = Vector2.new(0.5, 0), Position = UDim2.new(0.5, 0, 0, 12), Size = UDim2.fromOffset(0, 0),
 		AutomaticSize = Enum.AutomaticSize.XY, ZIndex = 6, Visible = Lumen.ShowDock, Parent = Gui,
 		Theme = { BackgroundColor3 = "Background" },
-	}, { Corner(10), Stroke(nil, true), Pad(10, 7, 10, 7),
-		List(4, Enum.FillDirection.Horizontal, Enum.HorizontalAlignment.Left, Enum.VerticalAlignment.Center) })
+	}, { Corner(11), Stroke(nil, true), Pad(7, 7, 7, 7),
+		List(6, Enum.FillDirection.Horizontal, Enum.HorizontalAlignment.Left, Enum.VerticalAlignment.Center) })
 	MakeDraggable(Dock, Dock)
 	return Dock
 end
 
+-- active buttons get the lighter plate and an accent icon; inactive ones are a plain light-grey icon (as in the reference)
 function Lumen:_UpdateDock()
 	local T = self.Theme
-	local active = T.Accent:Lerp(T.Background, 0.1)
+	local offColor = T.Label:Lerp(T.Background, 0.1)
 	for i = #DockButtons, 1, -1 do
 		local e = DockButtons[i]
 		if e.Button.Parent == nil then
@@ -2042,25 +2298,30 @@ function Lumen:_UpdateDock()
 			local on = e.Active and e.Active() or false
 			e.Button.BackgroundColor3 = T.TabActive
 			Tween(e.Button, 0.12, { BackgroundTransparency = on and 0 or 1 })
-			if e.Icon then RecolorIcon(e.Icon, on and active or T.Label) end
-			if e.Image then e.Image.ImageColor3 = on and active or T.Label end
+			local c = on and T.Accent or offColor
+			if e.Icon then RecolorIcon(e.Icon, c) end
+			if e.Image then e.Image.ImageColor3 = c end
 		end
 	end
 end
 table.insert(Refreshers, function() Lumen:_UpdateDock() end)
 
--- o: Icon ("window","keyboard","command","scan","bell","user","gear","snow","list","discord" or an rbxassetid),
--- Tooltip, Callback, Active (function -> bool, highlights the button), Order
+-- o: Icon ("window","scan","keyboard","command","user" are the traced reference icons; also "bell","gear","snow","list","discord"
+-- or an rbxassetid), Tooltip, Name, Callback, Active (function -> bool), Order, Visible
 function Lumen:AddDockButton(o)
 	o = o or {}
 	local dock = EnsureDock()
-	local b = New("TextButton", {
-		Size = UDim2.fromOffset(32, 32), BackgroundTransparency = 1, LayoutOrder = o.Order or 50, Parent = dock,
-		Theme = { BackgroundColor3 = "TabActive" },
-	}, { Corner(8) })
-	local entry = { Button = b, Active = o.Active }
 	local ic = o.Icon or "window"
-	if ic:find("rbxasset") or ic:find("rbxthumb") then
+	local b = New("TextButton", {
+		Size = UDim2.fromOffset(31, 30), BackgroundTransparency = 1, LayoutOrder = o.Order or 50, Visible = o.Visible ~= false,
+		Parent = dock, Theme = { BackgroundColor3 = "TabActive" },
+	}, { Corner(8) })
+	local entry = { Button = b, Active = o.Active, Name = o.Name or o.Tooltip or ic }
+	local px = PIXEL_ICONS["dock_" .. ic]
+	if px then
+		entry.Icon = PixelIcon("dock_" .. ic, b, "Label")
+		entry.Icon.Position = UDim2.fromOffset(px.ox, px.oy)
+	elseif ic:find("rbxasset") or ic:find("rbxthumb") then
 		entry.Image = New("ImageLabel", {
 			BackgroundTransparency = 1, AnchorPoint = Vector2.new(0.5, 0.5), Position = UDim2.fromScale(0.5, 0.5),
 			Size = UDim2.fromOffset(17, 17), Image = ic, Parent = b,
@@ -2091,6 +2352,17 @@ function Lumen:SetDockVisible(v)
 	self.ShowDock = v
 	if Dock then Dock.Visible = v end
 	SyncOption("Lumen_Dock", v)
+end
+
+-- show / hide a single dock button by its name (tooltip text)
+function Lumen:SetDockButtonVisible(name, v)
+	for _, e in ipairs(DockButtons) do
+		if e.Name == name then e.Button.Visible = v end
+	end
+end
+
+function Lumen:GetDockButtons()
+	return DockButtons
 end
 
 ------------------------------------------------------------------------------
@@ -2310,32 +2582,23 @@ function Lumen:_PaletteKey(kc)
 	return true
 end
 
--- `which` lists the built-in dock buttons to create (default: all of them)
+-- `which` lists the built-in dock buttons to show (default: menu, hotkeys, palette = the reference dock).
+-- "watermark" and "snow" are always created but stay hidden unless listed (or switched on in the config tab).
 function Lumen:_InitDock(W, which)
 	if self._dockInit then return end
 	self._dockInit = true
 	local want = {}
-	for _, k in ipairs(which or { "menu", "hotkeys", "watermark", "snow", "palette" }) do want[k] = true end
-	if want.menu then
-		self:AddDockButton({ Icon = "window", Tooltip = "Toggle menu", Order = 1,
-			Callback = function() W:Toggle() end, Active = function() return W.Visible end })
-	end
-	if want.hotkeys then
-		self:AddDockButton({ Icon = "keyboard", Tooltip = "Hotkey list", Order = 30,
-			Callback = function() Lumen:SetHotkeysVisible(not Lumen.ShowHotkeys) end, Active = function() return Lumen.ShowHotkeys end })
-	end
-	if want.watermark then
-		self:AddDockButton({ Icon = "list", Tooltip = "Watermark", Order = 32,
-			Callback = function() Lumen:SetWatermarkVisible(not Lumen.ShowWatermark) end, Active = function() return Lumen.ShowWatermark end })
-	end
-	if want.snow then
-		self:AddDockButton({ Icon = "snow", Tooltip = "Snow", Order = 34,
-			Callback = function() Lumen:SetSnow(not Snow.Enabled) end, Active = function() return Snow.Enabled end })
-	end
-	if want.palette then
-		self:AddDockButton({ Icon = "command", Tooltip = "Command palette (Ctrl+K)", Order = 40,
-			Callback = function() Lumen:TogglePalette() end, Active = function() return Palette.Open end })
-	end
+	for _, k in ipairs(which or { "menu", "hotkeys", "palette" }) do want[k] = true end
+	self:AddDockButton({ Icon = "window", Tooltip = "Toggle menu", Order = 1, Visible = want.menu ~= nil,
+		Callback = function() W:Toggle() end, Active = function() return W.Visible end })
+	self:AddDockButton({ Icon = "keyboard", Tooltip = "Hotkey list", Order = 30, Visible = want.hotkeys ~= nil,
+		Callback = function() Lumen:SetHotkeysVisible(not Lumen.ShowHotkeys) end, Active = function() return Lumen.ShowHotkeys end })
+	self:AddDockButton({ Icon = "list", Tooltip = "Watermark", Order = 32, Visible = want.watermark ~= nil,
+		Callback = function() Lumen:SetWatermarkVisible(not Lumen.ShowWatermark) end, Active = function() return Lumen.ShowWatermark end })
+	self:AddDockButton({ Icon = "snow", Tooltip = "Snow", Order = 34, Visible = want.snow ~= nil,
+		Callback = function() Lumen:SetSnow(not Snow.Enabled) end, Active = function() return Snow.Enabled end })
+	self:AddDockButton({ Icon = "command", Tooltip = "Command palette (Ctrl+K)", Order = 40, Visible = want.palette ~= nil,
+		Callback = function() Lumen:TogglePalette() end, Active = function() return Palette.Open end })
 end
 
 ------------------------------------------------------------------------------
@@ -2409,6 +2672,7 @@ function Lumen:CreateWindow(o)
 	}, { Corner(10) })
 	New("Frame", { Size = UDim2.new(1, 0, 0, 14), Parent = footerBar, Theme = { BackgroundColor3 = "Group" } })
 	New("Frame", { Size = UDim2.new(1, 0, 0, 1), Parent = footerBar, Theme = { BackgroundColor3 = "GroupBorder" } })
+	MakeDraggable(footerBar, main)
 	local footer = New("TextLabel", {
 		Size = UDim2.fromScale(1, 1), Text = o.Footer or "", TextSize = 12, Font = Enum.Font.GothamMedium,
 		TextColor3 = self.Theme.TextMuted, Parent = footerBar,
@@ -2560,7 +2824,10 @@ function Lumen:CreateWindow(o)
 				local titleRow = New("Frame", {
 					BackgroundTransparency = 1, Size = UDim2.new(1, 0, 0, 20), LayoutOrder = 0, Parent = frame,
 				}, { Pad(6, 0, 0, 0), List(8, Enum.FillDirection.Horizontal, Enum.HorizontalAlignment.Left, Enum.VerticalAlignment.Center) })
-				if icon then Icon(icon, titleRow, 15, "Label").LayoutOrder = 1 end
+				if icon then
+					local ic = (icon == "command" and PixelIcon("group_command", titleRow, "Label")) or Icon(icon, titleRow, 15, "Label")
+					ic.LayoutOrder = 1
+				end
 				New("TextLabel", {
 					Text = title, AutomaticSize = Enum.AutomaticSize.X, Size = UDim2.fromOffset(0, 20), LayoutOrder = 2, Parent = titleRow,
 				})
@@ -2714,7 +2981,7 @@ function Lumen:CreateWindow(o)
 	end
 
 	-- Ready-made settings tab: everything adjustable from the UI (menu, effects, layout, theme, configs)
-	function W:AddConfigTab(name)
+	function W:AddConfigTab(name, copts)
 		local tab = self:AddTab(name or "Config")
 		tab.Fill = false
 
@@ -2743,7 +3010,9 @@ function Lumen:CreateWindow(o)
 		menu:AddInput({ Text = "Screen watermark", Placeholder = "text tiled over the screen (empty = off)",
 			Callback = function(v) Lumen:SetScreenWatermark(v) end })
 		menu:AddDivider()
-		menu:AddButton({ Text = "Unload", DoubleClick = true, Callback = function() Lumen:Unload() end })
+		menu:AddButton({ Text = "Unload",
+			Confirm = { Title = "Unload Lumen?", Text = "This removes the whole interface until you run the script again.", Type = "Danger", Confirm = "Unload" },
+			Callback = function() Lumen:Unload() end })
 
 		local fx = tab:AddGroup("Effects", "Left")
 		fx:AddToggle({ Text = "Snow", Default = Snow.Enabled, Flag = "Lumen_Snow",
@@ -2763,18 +3032,22 @@ function Lumen:CreateWindow(o)
 		local function RefreshLayout()
 			for _, op in ipairs(layoutOpts) do op:Destroy() end
 			layoutOpts = {}
+			local function Add(text, default, cb)
+				table.insert(layoutOpts, layout:AddToggle({ Text = text, Default = default, Callback = cb }))
+			end
 			for _, t in ipairs(W.Tabs) do
 				if t ~= tab then
-					table.insert(layoutOpts, layout:AddToggle({
-						Text = "Tab: " .. t.Name, Default = not t.Hidden, Callback = function(v) t:SetVisible(v) end,
-					}))
+					Add("Tab: " .. t.Name, not t.Hidden, function(v) t:SetVisible(v) end)
 					for _, sec in ipairs(t.Sections) do
-						table.insert(layoutOpts, layout:AddToggle({
-							Text = "   " .. t.Name .. " / " .. sec.Get(), Default = sec.IsVisible(),
-							Callback = function(v) sec.Set(v) end,
-						}))
+						Add("   " .. t.Name .. " / " .. sec.Get(), sec.IsVisible(), function(v) sec.Set(v) end)
 					end
 				end
+			end
+			for _, pnl in ipairs(Lumen._Panels) do
+				Add("Panel: " .. pnl.Name, pnl.Frame.Visible, function(v) pnl:SetVisible(v) end)
+			end
+			for _, e in ipairs(Lumen:GetDockButtons()) do
+				Add("Dock: " .. e.Name, e.Button.Visible, function(v) e.Button.Visible = v end)
 			end
 		end
 		tab.OnSelect = RefreshLayout
@@ -2807,6 +3080,28 @@ function Lumen:CreateWindow(o)
 		th:AddButton({ Text = "Reset theme", Callback = function()
 			Lumen:ApplyPreset("Lavender")
 			SyncPickers()
+		end })
+
+		local tests = tab:AddGroup("Tests", "Right")
+		tests:AddButton({ Text = "Success", Callback = function()
+			Lumen:Notify({ Title = "Success", Content = "Everything worked as expected.", Type = "Success" })
+		end }):AddSubButton({ Text = "Failure", Callback = function()
+			Lumen:Notify({ Title = "Failure", Content = "Something went wrong. Try again.", Type = "Danger" })
+		end })
+		tests:AddButton({ Text = "Warning", Callback = function()
+			Lumen:Notify({ Title = "Warning", Content = "This setting may cause issues.", Type = "Warning" })
+		end }):AddSubButton({ Text = "Info", Callback = function()
+			Lumen:Notify({ Title = "Info", Content = "Press Ctrl+K to search every option.", Type = "Info" })
+		end })
+		tests:AddButton({ Text = "Test confirmation", Callback = function()
+			Lumen:Confirm({
+				Title = "Run the confirmation test?", Type = "Warning", Confirm = "Confirm", Hold = 1,
+				Text = "This is how confirmations look. Hold the button for a second to confirm, or press Esc to cancel.",
+				Callback = function(ok)
+					Lumen:Notify({ Title = ok and "Confirmed" or "Cancelled", Content = ok and "You held it. Nicely done." or "Nothing happened.",
+						Type = ok and "Success" or "Info" })
+				end,
+			})
 		end })
 
 		local cfg = tab:AddGroup("Configs", "Right")
@@ -2848,6 +3143,10 @@ function Lumen:CreateWindow(o)
 		end })
 		if not CanFile() then
 			cfg:AddLabel("Your executor has no file functions, so configs cannot be saved.", { Dim = true })
+		end
+		if copts and copts.Credits then
+			local cr = tab:AddGroup("Credits", "Right")
+			cr:AddCredits(copts.Credits)
 		end
 		return tab
 	end
@@ -2901,10 +3200,6 @@ Connect(UIS.InputBegan, function(input, gp)
 		return
 	end
 
-	-- click-away for popups
-	if OpenPopup and IsPress(input) then
-		if not MouseInside(OpenPopup.Frame) and not MouseInside(OpenPopup.Trigger) then ClosePopup() end
-	end
 
 	-- command palette: Escape / arrows while open, Ctrl+K to toggle
 	if Lumen:_PaletteKey(input.KeyCode) then return end

@@ -3,14 +3,14 @@ local Lumen = loadstring(game:HttpGet("https://raw.githubusercontent.com/Irakli1
 local Window = Lumen:CreateWindow({
 	Title = "Lumen Interface Suite",
 	Tag = "Pro",                         -- green pill
-	Version = "v2.2.0",                  -- red pill
+	Version = "v2.3.0",                  -- red pill
 	Subtitle = "Example Game",
 	Footer = "discord.gg/yourserver",
 	WatermarkTitle = "Lumen V2",
 	MenuKey = Enum.KeyCode.RightShift,
 	Snow = { Count = 70, Speed = 1 },    -- falling snow (true for defaults)
 	Backdrop = { Dim = 0.5, Blur = 8 },  -- dimmed + blurred world behind the UI
-	-- Dock = {"menu", "hotkeys", "watermark", "snow", "palette"},  -- pick which built-in dock buttons to create
+	-- Dock = {"menu", "hotkeys", "palette", "watermark", "snow"},  -- which built-in dock buttons to show (default: menu, hotkeys, palette)
 	-- Fill = false,                                                 -- content-sized boxes instead of equal-height columns
 })
 
@@ -53,8 +53,32 @@ Right:AddLabel("I'm a basic label")
 Right:AddSlider({ Text = "Cool Slider", Min = 0, Max = 8000, Default = 8000, Suffix = " km/100", Increment = 10, Flag = "Speed" })
 Right:AddLabel("Labels wrap automatically when the text is longer than the column, so you never have to worry about overflow at all.")
 Right:AddInput({ Text = "Cool Input", Placeholder = "Dynamic Input (textbox)", Flag = "Input", Callback = function(v) print("Input:", v) end })
+Right:AddInput({ Text = "Dynamic Input", Placeholder = "Type here, it grows as you type (Enter to submit)", Dynamic = true, Flag = "DynInput",
+	Callback = function(v) print("Dynamic:", v) end })
 Right:AddViewport({ Height = 150 })                  -- default: a gray block
 Right:AddButton({ Text = "Button" }):AddSubButton({ Text = "Sub-button", Callback = function() Lumen:Notify("Sub-button pressed") end })
+
+-- notification + confirmation tests
+local Tests = Main:AddGroup({ Title = "Tests", Icon = "command", Side = "Right" })
+Tests:AddButton({ Text = "Success", Callback = function()
+	Lumen:Notify({ Title = "Success", Content = "Settings applied.", Type = "Success" })
+end }):AddSubButton({ Text = "Failure", Callback = function()
+	Lumen:Notify({ Title = "Failure", Content = "Could not apply settings.", Type = "Danger" })
+end })
+Tests:AddButton({ Text = "Warning", Callback = function()
+	Lumen:Notify({ Title = "Warning", Content = "This may be unstable.", Type = "Warning" })
+end }):AddSubButton({ Text = "Info", Callback = function()
+	Lumen:Notify({ Title = "Info", Content = "Press Ctrl+K to search everything.", Type = "Info" })
+end })
+-- a button that asks first: hold-to-confirm dialog in the theme's style
+Tests:AddButton({
+	Text = "Reset Everything",
+	Confirm = { Title = "Reset everything?", Text = "All toggles and sliders go back to their defaults. This can't be undone.",
+		Type = "Danger", Confirm = "Reset", Hold = 1 },
+	Callback = function() Lumen:Notify({ Title = "Reset", Content = "Everything was reset.", Type = "Success" }) end,
+})
+Tests:AddButton({ Text = "Quick confirm", Confirm = { Title = "Apply changes?", Text = "Click Confirm or press Enter.", Type = "Info" },
+	Callback = function() Lumen:Notify({ Content = "Applied." }) end })
 
 local RightBox = Main:AddTabbox("Right")
 local Delta = RightBox:AddTab("Delta")
@@ -68,6 +92,17 @@ Window:AddTab("World")
 Window:AddTab("Character")
 Window:AddTab("Exploits")
 Window:AddTab("Webhook")
+-- credits inside a tab
+local About = Window:AddTab("About")
+About:AddGroup("Credits", "Left"):AddCredits({
+	{ Name = "@developer", Role = "Owner/Developer", RoleColor = Color3.fromRGB(80, 159, 119), Description = "Founder and developer." },
+	{ Name = "@tester", Role = "Owner/Tester", RoleColor = Color3.fromRGB(168, 128, 82), Description = "Co-founder." },
+})
+About:AddGroup("Contributors", "Right"):AddCredits({
+	{ Name = "@helper", Role = "Contributor » Bug fixing", RoleColor = Color3.fromRGB(159, 88, 88), Description = "Lorem ipsum dolor sit amet." },
+	{ Name = "@designer", Role = "Contributor » Lorem ipsum", RoleColor = Color3.fromRGB(80, 158, 237), Description = "Lorem ipsum dolor sit amet." },
+})
+
 Window:AddConfigTab("Config")   -- menu, effects, tab/section toggles, theme editor, configs: all adjustable in the UI
 
 ------------------------------------------------------------ Floating panels
@@ -103,15 +138,16 @@ Lumen:CreateCredits({
 	Height = 420,
 	Dock = { Icon = "user", Tooltip = "Credits", Order = 50 },
 	Entries = {
-		{ Name = "@developer", Role = "Owner/Developer", RoleColor = Color3.fromRGB(88, 163, 125), Description = "Founder and developer." },
-		{ Name = "@tester", Role = "Owner/Tester", RoleColor = Color3.fromRGB(161, 123, 79), Description = "Co-founder." },
+		{ Name = "@developer", Role = "Owner/Developer", RoleColor = Color3.fromRGB(80, 159, 119), Description = "Founder and developer." },
+		{ Name = "@tester", Role = "Owner/Tester", RoleColor = Color3.fromRGB(168, 128, 82), Description = "Co-founder." },
 		{ Name = "@helper", Role = "Contributor » Bug fixing", RoleColor = Color3.fromRGB(159, 88, 88), Description = "Lorem ipsum dolor sit amet." },
-		{ Name = "@designer", Role = "Contributor » Lorem ipsum", RoleColor = Color3.fromRGB(100, 150, 220), Description = "Lorem ipsum dolor sit amet." },
+		{ Name = "@designer", Role = "Contributor » Lorem ipsum", RoleColor = Color3.fromRGB(80, 158, 237), Description = "Lorem ipsum dolor sit amet." },
 	},
 })
 
 -- your own dock button (icons: window, keyboard, command, scan, bell, user, gear, snow, list, discord, or an rbxassetid)
-Lumen:AddDockButton({ Icon = "gear", Tooltip = "Say hi", Order = 60, Callback = function() Lumen:Notify("Hello!") end })
+-- Lumen:AddDockButton({ Icon = "gear", Tooltip = "Say hi", Order = 60, Callback = function() Lumen:Notify("Hello!") end })
+-- (left commented out so the dock matches the reference exactly: menu, preview, hotkeys, palette, credits)
 
 Lumen:Notify("test notif")
 Lumen:Notify("test notif")
