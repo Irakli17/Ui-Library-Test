@@ -1,4 +1,4 @@
-# Lumen v2.3.0 - API Reference
+# Lumen v0.0.1-stable - API Reference
 
 ```lua
 local Lumen = loadstring(game:HttpGet("https://raw.githubusercontent.com/Irakli17/Ui-Library-Test/main/Lumen.lua"))()
@@ -18,7 +18,7 @@ local Window = Lumen:CreateWindow({
   WatermarkTitle = "My Hub V1", Id = "MainWindow",
   Size = Vector2.new(560, 752), MenuKey = Enum.KeyCode.RightShift,
   Watermark = true, Hotkeys = true, Dock = true, Fill = true,
-  Snow = {Count = 70, Speed = 1},        -- or true / omit
+  Snow = {Count = 70, Speed = 1, Kind = "Theme"},   -- particles; or true / omit
   Backdrop = {Dim = 0.5, Blur = 8},      -- or false to disable
   Icon = "rbxassetid://123",             -- watermark logo (optional)
   ScreenWatermark = "my text",           -- faint text tiled over the screen (optional)
@@ -97,7 +97,9 @@ Every element takes an options table. `Flag` stores the value in `Lumen.Flags[fl
 `AddDivider()`. `AddImage({Image, Height, ScaleType})`.
 
 ### AddViewport
-`AddViewport({Height, Object, Character, Rotate, Color})`. A 3D preview. No options shows a gray block, `Character = true` shows a clone of your avatar, `Object` takes a Model or BasePart. **Drag with the mouse to orbit in any direction; when you let go it eases back to its default tilt and keeps auto-rotating.** The mouse wheel zooms. `Rotate = false` turns auto-rotation off (dragging still works). `:SetObject(inst)` swaps the model.
+`AddViewport({Height, Object, Character, Rotate, Color, ESP})`. A 3D preview. No options shows a gray block, `Character = true` shows a clone of your avatar, `Object` takes a Model or BasePart. **Drag with the mouse to orbit in any direction; when you let go it eases back to its default tilt and keeps auto-rotating.** The mouse wheel zooms. `Rotate = false` turns auto-rotation off (dragging still works). `:SetObject(inst)` swaps the model.
+
+**ESP preview.** `ESP = {Box = "Full" | "Corner", Name = true | "text", Health = 0-1, Distance = true, DistanceText, Color}` draws an ESP overlay that tracks the model's real on-screen bounds as it rotates: a box (full outline or corner brackets), the name above, a health bar on the left (green to red) and distance below. Update it live with `viewport:SetESP({Health = 0.3, Name = "Enemy", DistanceText = "42m"})`.
 
 ### AddImageGrid
 `AddImageGrid({Items = {{Image, Name}}, Columns = 4, CellHeight = 64, Flag, Callback(item, index)})`. Click to select (accent outline). `:Set(i)`, `:SetItems(list)`.
@@ -132,14 +134,14 @@ p:SetVisible(false); p:Toggle(); p:Destroy()
 
 ## Dock
 
-The icon bar at the top centre. The `window`, `scan`, `keyboard`, `command` and `user` icons are traced pixel-for-pixel from the reference, so a default setup (menu, a preview panel, hotkeys, palette, a credits panel) looks exactly like it. Built-in buttons: menu, hotkey list and command palette are shown by default; watermark and snow buttons also exist but start hidden. Choose which built-ins are shown with `Dock = {"menu", "hotkeys", "palette", "watermark", "snow"}` in `CreateWindow`, or `Dock = false` for none. Every dock button can also be switched on or off from the config tab's Layout group, or with `Lumen:SetDockButtonVisible(name, bool)` (name = its tooltip). Active buttons are highlighted. It stays visible when the window is hidden, so it doubles as the mobile toggle. Drag it to move it.
+The icon bar at the top centre. The `window`, `scan`, `keyboard`, `command` and `user` icons are traced pixel-for-pixel from the reference, so a default setup (menu, a preview panel, hotkeys, palette, a credits panel) looks exactly like it. Built-in buttons: menu, hotkey list and command palette are shown by default; a particles button also exists but starts hidden (there is no watermark button; the watermark is toggled in the config tab). Choose which built-ins are shown with `Dock = {"menu", "hotkeys", "palette", "particles"}` in `CreateWindow`, or `Dock = false` for none. Every dock button can also be switched on or off from the config tab's Layout group, or with `Lumen:SetDockButtonVisible(name, bool)` (name = its tooltip). Active buttons are highlighted. It stays visible when the window is hidden, so it doubles as the mobile toggle. Drag it to move it.
 
 ```lua
 Lumen:AddDockButton({Icon = "gear", Tooltip = "Settings", Order = 50, Callback = function() end, Active = function() return true end})
 Lumen:SetDockVisible(false)
 ```
 
-`Order` sorts the buttons (menu = 1, panel buttons default 20, hotkeys = 30, watermark = 32, snow = 34, palette = 40, custom default 50).
+`Order` sorts the buttons (menu = 1, panel buttons default 20, hotkeys = 30, particles = 34, palette = 40, custom default 50).
 
 ## Confirmation dialog
 
@@ -161,51 +163,89 @@ Press **Ctrl+K** or click the dock command button. Search every named option, se
 
 ## HUD
 
-The watermark and hotkey list can be dragged anywhere.
+The watermark, hotkey list and dock can be dragged anywhere.
+
+**Return to place.** After you drag the dock or the hotkey list, it glides back to where it was (a smooth 0.75s ease, never a jump) 5 seconds after you let go. Grabbing it again before then cancels the return. Everything is adjustable in the config tab's **HUD Positions** group, or from code:
+
+```lua
+Lumen.SnapBack = {Enabled = true, Delay = 5, Dock = true, Hotkeys = true, Watermark = false}
+Lumen:ResetHudPositions()   -- glide everything home now
+Lumen:SetHudHome()          -- make the current spots the new home
+```
 
 `Lumen:SetWatermarkVisible(bool)`, `SetWatermark("custom text")`, `SetWatermarkTitle(text)`, `SetIcon(assetId | nil)`, `SetHotkeysVisible(bool)`, `SetScreenWatermark(text | nil)`.
 
 ## Notifications
 
 ```lua
-Lumen:Notify({Title = "Hi", Content = "Hello", Type = "Success", Duration = 4})
-Lumen:Notify("Quick message")
+Lumen:Notify("test notif")                                                   -- compact, reference style
+Lumen:Notify({Title = "Saved", Content = "Settings applied.", Type = "Success"})  -- green
+Lumen:Notify({Title = "Careful", Content = "May be unstable.", Type = "Warning"}) -- yellow
+Lumen:Notify({Title = "Failed", Content = "Server unreachable.", Type = "Error"})  -- red
+Lumen:Notify({Title = "Tip", Content = "Ctrl+K searches.", Type = "Info"})          -- blue
+
+local n = Lumen:Notify({Title = "Loading", Content = "Fetching...", Type = "Loading"})   -- spinner, waits
+n:Update({Title = "Done", Content = "Loaded.", Type = "Success"})                         -- morphs in place
+n:Dismiss()
 ```
 
-Types: default (the reference bell icon), `Success` (check), `Danger` (cross), `Warning`, `Info`. Typed notifications get a coloured title and a countdown bar. Options: `Title`, `Content`, `Type`, `Duration`, `Progress` (force the bar on or off). Disable all with `Lumen.ShowNotifications = false`.
+Nothing is static: cards slide in from the right with a slight overshoot, a light sweep passes over them, the icon pops in, the accent bar on the left breathes (harder for warnings and errors), errors give a short shake, and the countdown bar drains. The stack reflows smoothly when one leaves. **Hover pauses** the countdown, **click dismisses**. At most six are shown at once.
 
-## Snow and backdrop
+Types: `Success`, `Warning` (alias `Caution`), `Error` (alias `Danger`), `Info`, `Loading`. Colours come from the theme keys `Success`, `Caution`, `Error`, `Info` and `Accent`. Options: `Title`, `Content`, `Type`, `Duration`, `Progress` (force the countdown bar on or off). Disable all with `Lumen.ShowNotifications = false`.
+
+## Particles and backdrop
 
 ```lua
-Lumen:SetSnow(true, {Count = 100, Speed = 1.5})
+Lumen:SetSnow(true, {Count = 100, Speed = 1.5, Kind = "Theme"})
+Lumen:SetParticles("Petals")     -- Theme, Snow, Bubbles, Petals, Embers, Fireflies, Stars, Glyphs
 Lumen:SetSnowOptions({Count = 50})
 Lumen:SetBackdrop({Dim = 0.5, Blur = 12})
 ```
 
-Drawn behind the UI and only while a window is open.
+`Theme` (the default) uses whatever the active theme ships with. Drawn behind the UI and only while a window is open.
 
 ## Themes, fonts and scale
 
+Every preset changes the **shape and feel**, not just the colours:
+
+| Preset | Corners | Glow | Font | Surface | Particles |
+|---|---|---|---|---|---|
+| Lavender | reference | reference | Inter | flat, as in the reference | Snow |
+| Ocean | rounder (1.35x) | stronger | Inter | deep-water glow from below, cyan-to-blue light along the top edge | Bubbles rising |
+| Rose | very round (1.75x) | strongest | Inter | pink haze from above, pink-to-peach top light | Petals spinning down |
+| Emerald | slightly rounder | strong | Inter | aurora band across the top | Fireflies drifting and pulsing |
+| Sunset | reference | strong | Inter | warm glow from below, orange-to-magenta top light | Embers rising and flickering |
+| Mono | sharp (0.25x) | none | Mono | scanlines | Glyph rain |
+
+Switching presets blends the whole palette over `Lumen.ThemeTransition` seconds (0.3 by default, adjustable as **Theme fade** in the config tab) instead of snapping.
+
 ```lua
-Lumen:SetTheme({Accent = Color3.fromRGB(255, 90, 120)})
-Lumen:ApplyPreset("Ocean")     -- Lavender, Ocean, Rose, Emerald, Sunset, Mono
+Lumen:ApplyPreset("Rose")
+Lumen:SetTheme({Accent = Color3.fromRGB(255, 90, 120)})             -- colours only (instant)
+Lumen:SetTheme({Accent = Color3.fromRGB(255, 90, 120)}, 0.4)        -- colours, blended
+Lumen:SetStyle({Radius = 1.4, Glow = 1.3, Font = "Inter", Particles = "Fireflies",
+  ParticleColor = Color3.fromRGB(180, 255, 150), Tint = Color3.fromRGB(60, 200, 150), TintPlace = "Aurora",
+  TintAmount = 0.2, TopLine = {Color3.fromRGB(90, 230, 160), Color3.fromRGB(60, 190, 220)}, Scanlines = false})
 Lumen:SetScale(1.15)           -- windows, panels and popups (0.6 - 1.6)
-Lumen:SetFont("Inter")         -- or "Gotham"
+Lumen:SetFont("Inter")         -- "Inter", "Gotham" or "Mono"
 ```
 
-Theme keys: `Background, Group, GroupBorder, Control, ControlHover, Border, Outline, Text, Label, TextDim, TextMuted, Chip, ChipText, Accent, AccentText, AccentBorder, Toggle, TabActive, Success, Warning, Danger, Info`. Everything updates live. Setting `Accent` or `Background` also derives `AccentText`, `AccentBorder`, `Toggle` and `TabActive` unless you pass them. The default theme was sampled from the reference screenshots.
+Add your own preset by putting a table in `Lumen.Presets` with colour keys plus a `Style` table; it shows up in the config dropdown.
 
-**Fonts.** Inter is downloaded once from GitHub into your `Lumen/fonts` folder (needs `writefile` and `getcustomasset`). Until it is ready, or if your executor can't do it, Gotham is used.
+Theme keys: `Background, Group, GroupBorder, Control, ControlHover, Border, Outline, Text, Label, TextDim, TextMuted, Chip, ChipText, Accent, AccentText, AccentBorder, Toggle, TabActive, Success, Warning, Danger, Info, Caution, Error`. Setting `Accent` or `Background` also derives `AccentText`, `AccentBorder`, `Toggle` and `TabActive` unless you pass them. The default theme was sampled from the reference screenshots.
+
+**Fonts.** Inter is downloaded once from GitHub into your `Lumen/fonts` folder (needs `writefile` and `getcustomasset`). Until it is ready, or if your executor can't do it, Gotham is used. Mono uses Roblox's RobotoMono. Applying a preset switches to its font; you can still pick another in the config tab.
 
 ## Config tab
 
 `Window:AddConfigTab()` builds a settings tab where everything is adjustable:
 
 - **Menu**: menu key, dock, watermark, hotkey list, notifications, UI scale, font, screen watermark, unload
-- **Effects**: snow on/amount/speed, backdrop dim and blur
+- **Effects**: particles on/off, particle style, amount, speed, backdrop dim and blur
+- **HUD Positions**: return-to-place on/off, delay, which pieces (dock, hotkey list, watermark), Return now, Set as home
 - **Layout**: a toggle for every tab, section, floating panel and dock button
-- **Theme**: preset dropdown and a colour picker for each theme colour, reset button
-- **Tests**: Success, Failure, Warning and Info notifications, and a hold-to-confirm dialog
+- **Theme**: preset dropdown with a one-line description of each look, theme fade time, a colour picker for each theme colour, reset button
+- **Tests**: Success, Warning, Error and Info notifications, a Loading -> Done notification, a plain one, and a hold-to-confirm dialog
 - **Configs**: save, load, delete, autoload
 - **Credits** (optional): `Window:AddConfigTab("Config", {Credits = {...entries}})`
 
@@ -220,7 +260,7 @@ Lumen:DeleteConfig("legit"); Lumen:SetAutoload("legit")
 Lumen:LoadAutoload()            -- call once, after building your UI
 ```
 
-Only elements with a `Flag` are saved.
+Only elements with a `Flag` are saved. The theme preset is saved too and is applied before your custom colours when a config loads.
 
 ## Misc
 
@@ -228,11 +268,11 @@ Only elements with a `Flag` are saved.
 
 ## Changelog
 
-**v2.3.0**
-- Dropdowns, colour pickers and tooltips no longer close or misfire on clicks; this was why the Font dropdown and the Rose / Sunset presets could not be picked on some executors (the pointer was offset by the top-bar inset). Popups now close with a full-screen click catcher, and sliders / pickers calibrate the pointer on press.
-- Dock and notification icons traced pixel-for-pixel from the reference; default dock now shows the reference's buttons
-- Hotkey panel sized to its longest entry (no more endless stretch to the right)
-- Confirmation dialog (`Lumen:Confirm`, `Button.Confirm`), Tests group in the config tab
-- Dynamic input, credits inside groups (`AddCredits`)
-- Success / failure / warning / info notifications with their own icons
-- Window draggable from the footer; panels and dock buttons toggleable from the Layout group
+**v0.0.1-stable** - first stable release
+- Themes change shape, glow, font, surface and particles, not just colour; switching blends smoothly
+- Seven particle styles (snow, bubbles, petals, embers, fireflies, stars, glyph rain), selectable or theme-driven
+- Dock and hotkey list glide back to their spot after dragging (configurable delay and targets)
+- Animated notifications: success / warning / error / info / loading, morphing handles, hover-to-pause, click-to-dismiss
+- ESP preview overlay on viewports (box, name, health, distance)
+- Watermark button removed from the dock
+- Everything from the earlier development builds: pixel-traced dock icons, command palette, confirmation dialogs, dynamic input, credits, layout toggles, config system

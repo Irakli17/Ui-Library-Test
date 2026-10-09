@@ -3,14 +3,14 @@ local Lumen = loadstring(game:HttpGet("https://raw.githubusercontent.com/Irakli1
 local Window = Lumen:CreateWindow({
 	Title = "Lumen Interface Suite",
 	Tag = "Pro",                         -- green pill
-	Version = "v2.3.0",                  -- red pill
+	Version = "v0.0.1",                  -- red pill
 	Subtitle = "Example Game",
 	Footer = "discord.gg/yourserver",
 	WatermarkTitle = "Lumen V2",
 	MenuKey = Enum.KeyCode.RightShift,
-	Snow = { Count = 70, Speed = 1 },    -- falling snow (true for defaults)
+	Snow = { Count = 70, Speed = 1 },    -- particles: follow the theme (snow, bubbles, petals, embers, fireflies, glyphs)
 	Backdrop = { Dim = 0.5, Blur = 8 },  -- dimmed + blurred world behind the UI
-	-- Dock = {"menu", "hotkeys", "palette", "watermark", "snow"},  -- which built-in dock buttons to show (default: menu, hotkeys, palette)
+	-- Dock = {"menu", "hotkeys", "palette", "particles"},  -- which built-in dock buttons to show (default: menu, hotkeys, palette)
 	-- Fill = false,                                                 -- content-sized boxes instead of equal-height columns
 })
 
@@ -60,15 +60,24 @@ Right:AddButton({ Text = "Button" }):AddSubButton({ Text = "Sub-button", Callbac
 
 -- notification + confirmation tests
 local Tests = Main:AddGroup({ Title = "Tests", Icon = "command", Side = "Right" })
+-- green success, yellow warning, red error, blue info; hover pauses them, click dismisses
 Tests:AddButton({ Text = "Success", Callback = function()
-	Lumen:Notify({ Title = "Success", Content = "Settings applied.", Type = "Success" })
-end }):AddSubButton({ Text = "Failure", Callback = function()
-	Lumen:Notify({ Title = "Failure", Content = "Could not apply settings.", Type = "Danger" })
+	Lumen:Notify({ Title = "Success", Content = "Settings applied and saved.", Type = "Success" })
+end }):AddSubButton({ Text = "Warning", Callback = function()
+	Lumen:Notify({ Title = "Warning", Content = "This feature can be unstable in some games.", Type = "Warning" })
 end })
-Tests:AddButton({ Text = "Warning", Callback = function()
-	Lumen:Notify({ Title = "Warning", Content = "This may be unstable.", Type = "Warning" })
+Tests:AddButton({ Text = "Error", Callback = function()
+	Lumen:Notify({ Title = "Error", Content = "Couldn't reach the server. Try again in a moment.", Type = "Error" })
 end }):AddSubButton({ Text = "Info", Callback = function()
 	Lumen:Notify({ Title = "Info", Content = "Press Ctrl+K to search everything.", Type = "Info" })
+end })
+-- a loading notification that morphs into a result
+Tests:AddButton({ Text = "Loading -> Done", Callback = function()
+	local n = Lumen:Notify({ Title = "Injecting", Content = "Preparing features...", Type = "Loading" })
+	task.delay(2, function() n:Update({ Title = "Ready", Content = "Everything loaded.", Type = "Success" }) end)
+end }):AddSubButton({ Text = "Loading -> Fail", Callback = function()
+	local n = Lumen:Notify({ Title = "Checking key", Content = "Talking to the key server...", Type = "Loading" })
+	task.delay(2, function() n:Update({ Title = "Key invalid", Content = "That key has expired.", Type = "Error" }) end)
 end })
 -- a button that asks first: hold-to-confirm dialog in the theme's style
 Tests:AddButton({
@@ -115,10 +124,13 @@ skins:AddImageGrid({ Items = items, Columns = 4, CellHeight = 82, Callback = fun
 
 -- 3D preview. Drag to orbit in any direction, wheel to zoom. Gets its own dock button (scan icon).
 local preview = Lumen:CreatePanel({
-	Title = "Preview", Width = 250, Position = UDim2.new(1, -790, 0.5, -90),
+	Title = "ESP Preview", Width = 250, Position = UDim2.new(1, -790, 0.5, -90),
 	Dock = { Icon = "scan", Tooltip = "Preview", Order = 20 },
 })
-preview:AddViewport({ Height = 320, Character = true, Color = Color3.fromRGB(58, 58, 62) })
+-- ESP overlay tracks the model as it turns: box ("Full" or "Corner"), name, health bar, distance
+local esp = preview:AddViewport({ Height = 320, Character = true, Color = Color3.fromRGB(58, 58, 62),
+	ESP = { Box = "Full", Name = true, Health = 0.85, Distance = true } })
+-- esp:SetESP({ Health = 0.3, Name = "Enemy", DistanceText = "42m" })  -- update it live from your own code
 
 Lumen:CreateKeySystem({
 	Title = "Key System",
@@ -151,4 +163,7 @@ Lumen:CreateCredits({
 
 Lumen:Notify("test notif")
 Lumen:Notify("test notif")
+Lumen:Notify({ Title = "Loaded", Content = "Lumen " .. Lumen.Version .. " is ready. RightShift hides the menu.", Type = "Success" })
+
+-- themes change more than colour: try Lumen:ApplyPreset("Rose"), "Ocean", "Emerald", "Sunset" or "Mono"
 Lumen:LoadAutoload()

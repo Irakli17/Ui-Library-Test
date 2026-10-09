@@ -1,7 +1,7 @@
 --!nocheck
 --!nolint
 --[[
-	Lumen UI Library  v2.3.0
+	Lumen UI Library  v0.0.1-stable
 	Single file, no dependencies, loadstring-ready.
 
 	local Lumen = loadstring(game:HttpGet("https://raw.githubusercontent.com/Irakli17/Ui-Library-Test/main/Lumen.lua"))()
@@ -27,7 +27,7 @@ local Stats = Service("Stats")
 local Lighting = Service("Lighting")
 
 local Lumen = {
-	Version = "v2.3.0",
+	Version = "v0.0.1-stable",
 	Flags = {},
 	Options = {},
 	Windows = {},
@@ -38,7 +38,13 @@ local Lumen = {
 	ShowNotifications = true,
 	ShowDock = true,
 	Scale = 1,
-	FontName = "Gotham",
+	FontName = "Inter",
+	ThemeTransition = 0.3,          -- seconds colours blend when the theme changes (0 = instant)
+	Preset = "Lavender",
+	-- the non-colour half of a theme: shape, glow, font, particles, surface tint
+	Style = { Radius = 1, Glow = 1, Font = "Inter", Particles = "Snow", ParticleColor = Color3.new(1, 1, 1) },
+	-- dragged HUD pieces glide back home after a delay
+	SnapBack = { Enabled = true, Delay = 5, Dock = true, Hotkeys = true, Watermark = false },
 	-- colours sampled from the reference UI
 	Theme = {
 		Background = Color3.fromRGB(14, 13, 17),
@@ -63,14 +69,22 @@ local Lumen = {
 		Warning = Color3.fromRGB(168, 128, 82),
 		Danger = Color3.fromRGB(159, 88, 88),
 		Info = Color3.fromRGB(80, 158, 237),
+		Caution = Color3.fromRGB(212, 178, 92),
+		Error = Color3.fromRGB(209, 98, 104),
 	},
 	Presets = {
-		Lavender = { Accent = Color3.fromRGB(159, 150, 193), Background = Color3.fromRGB(14, 13, 17), Group = Color3.fromRGB(17, 16, 21), GroupBorder = Color3.fromRGB(25, 24, 30), Control = Color3.fromRGB(24, 23, 28), ControlHover = Color3.fromRGB(34, 33, 39), Border = Color3.fromRGB(48, 47, 58), Outline = Color3.fromRGB(38, 36, 45), Text = Color3.fromRGB(210, 209, 220), Label = Color3.fromRGB(187, 186, 195), TextDim = Color3.fromRGB(134, 133, 141), TextMuted = Color3.fromRGB(108, 107, 114) },
-		Ocean = { Accent = Color3.fromRGB(110, 165, 225), Background = Color3.fromRGB(10, 14, 20), Group = Color3.fromRGB(14, 19, 27), GroupBorder = Color3.fromRGB(22, 30, 41), Control = Color3.fromRGB(20, 27, 38), ControlHover = Color3.fromRGB(29, 39, 54), Border = Color3.fromRGB(40, 54, 72), Outline = Color3.fromRGB(33, 45, 61), Text = Color3.fromRGB(210, 218, 230), Label = Color3.fromRGB(180, 190, 204), TextDim = Color3.fromRGB(122, 138, 158), TextMuted = Color3.fromRGB(96, 110, 128) },
-		Rose = { Accent = Color3.fromRGB(205, 120, 150), Background = Color3.fromRGB(17, 12, 15), Group = Color3.fromRGB(22, 16, 20), GroupBorder = Color3.fromRGB(33, 24, 29), Control = Color3.fromRGB(31, 23, 28), ControlHover = Color3.fromRGB(43, 32, 39), Border = Color3.fromRGB(62, 46, 54), Outline = Color3.fromRGB(50, 37, 44), Text = Color3.fromRGB(228, 214, 220), Label = Color3.fromRGB(200, 184, 191), TextDim = Color3.fromRGB(150, 130, 140), TextMuted = Color3.fromRGB(118, 100, 109) },
-		Emerald = { Accent = Color3.fromRGB(100, 190, 145), Background = Color3.fromRGB(10, 15, 13), Group = Color3.fromRGB(14, 20, 18), GroupBorder = Color3.fromRGB(22, 31, 28), Control = Color3.fromRGB(20, 28, 25), ControlHover = Color3.fromRGB(29, 40, 36), Border = Color3.fromRGB(42, 58, 52), Outline = Color3.fromRGB(34, 47, 42), Text = Color3.fromRGB(212, 226, 219), Label = Color3.fromRGB(184, 198, 191), TextDim = Color3.fromRGB(124, 144, 133), TextMuted = Color3.fromRGB(98, 114, 106) },
-		Sunset = { Accent = Color3.fromRGB(215, 150, 90), Background = Color3.fromRGB(17, 13, 11), Group = Color3.fromRGB(23, 18, 15), GroupBorder = Color3.fromRGB(34, 27, 22), Control = Color3.fromRGB(32, 26, 21), ControlHover = Color3.fromRGB(44, 36, 30), Border = Color3.fromRGB(64, 52, 43), Outline = Color3.fromRGB(51, 41, 34), Text = Color3.fromRGB(230, 220, 210), Label = Color3.fromRGB(202, 191, 180), TextDim = Color3.fromRGB(152, 138, 124), TextMuted = Color3.fromRGB(120, 108, 96) },
-		Mono = { Accent = Color3.fromRGB(190, 190, 196), Background = Color3.fromRGB(12, 12, 12), Group = Color3.fromRGB(17, 17, 17), GroupBorder = Color3.fromRGB(26, 26, 26), Control = Color3.fromRGB(25, 25, 25), ControlHover = Color3.fromRGB(36, 36, 36), Border = Color3.fromRGB(52, 52, 52), Outline = Color3.fromRGB(41, 41, 41), Text = Color3.fromRGB(222, 222, 222), Label = Color3.fromRGB(194, 194, 194), TextDim = Color3.fromRGB(136, 136, 136), TextMuted = Color3.fromRGB(106, 106, 106) },
+		Lavender = { Accent = Color3.fromRGB(159, 150, 193), Background = Color3.fromRGB(14, 13, 17), Group = Color3.fromRGB(17, 16, 21), GroupBorder = Color3.fromRGB(25, 24, 30), Control = Color3.fromRGB(24, 23, 28), ControlHover = Color3.fromRGB(34, 33, 39), Border = Color3.fromRGB(48, 47, 58), Outline = Color3.fromRGB(38, 36, 45), Text = Color3.fromRGB(210, 209, 220), Label = Color3.fromRGB(187, 186, 195), TextDim = Color3.fromRGB(134, 133, 141), TextMuted = Color3.fromRGB(108, 107, 114),
+			Style = { Radius = 1, Glow = 1, Font = "Inter", Particles = "Snow", ParticleColor = Color3.new(1, 1, 1) } },
+		Ocean = { Accent = Color3.fromRGB(110, 165, 225), Background = Color3.fromRGB(10, 14, 20), Group = Color3.fromRGB(14, 19, 27), GroupBorder = Color3.fromRGB(22, 30, 41), Control = Color3.fromRGB(20, 27, 38), ControlHover = Color3.fromRGB(29, 39, 54), Border = Color3.fromRGB(40, 54, 72), Outline = Color3.fromRGB(33, 45, 61), Text = Color3.fromRGB(210, 218, 230), Label = Color3.fromRGB(180, 190, 204), TextDim = Color3.fromRGB(122, 138, 158), TextMuted = Color3.fromRGB(96, 110, 128),
+			Style = { Radius = 1.35, Glow = 1.35, Font = "Inter", Particles = "Bubbles", ParticleColor = Color3.fromRGB(140, 205, 255), Tint = Color3.fromRGB(40, 120, 200), TintPlace = "Bottom", TintAmount = 0.2, TopLine = { Color3.fromRGB(90, 210, 255), Color3.fromRGB(80, 110, 245) } } },
+		Rose = { Accent = Color3.fromRGB(205, 120, 150), Background = Color3.fromRGB(17, 12, 15), Group = Color3.fromRGB(22, 16, 20), GroupBorder = Color3.fromRGB(33, 24, 29), Control = Color3.fromRGB(31, 23, 28), ControlHover = Color3.fromRGB(43, 32, 39), Border = Color3.fromRGB(62, 46, 54), Outline = Color3.fromRGB(50, 37, 44), Text = Color3.fromRGB(228, 214, 220), Label = Color3.fromRGB(200, 184, 191), TextDim = Color3.fromRGB(150, 130, 140), TextMuted = Color3.fromRGB(118, 100, 109),
+			Style = { Radius = 1.75, Glow = 1.6, Font = "Inter", Particles = "Petals", ParticleColor = Color3.fromRGB(242, 150, 186), Tint = Color3.fromRGB(215, 95, 150), TintPlace = "Top", TintAmount = 0.16, TopLine = { Color3.fromRGB(245, 140, 185), Color3.fromRGB(255, 190, 150) } } },
+		Emerald = { Accent = Color3.fromRGB(100, 190, 145), Background = Color3.fromRGB(10, 15, 13), Group = Color3.fromRGB(14, 20, 18), GroupBorder = Color3.fromRGB(22, 31, 28), Control = Color3.fromRGB(20, 28, 25), ControlHover = Color3.fromRGB(29, 40, 36), Border = Color3.fromRGB(42, 58, 52), Outline = Color3.fromRGB(34, 47, 42), Text = Color3.fromRGB(212, 226, 219), Label = Color3.fromRGB(184, 198, 191), TextDim = Color3.fromRGB(124, 144, 133), TextMuted = Color3.fromRGB(98, 114, 106),
+			Style = { Radius = 1.1, Glow = 1.45, Font = "Inter", Particles = "Fireflies", ParticleColor = Color3.fromRGB(180, 255, 150), Tint = Color3.fromRGB(50, 210, 150), TintPlace = "Aurora", TintAmount = 0.2, TopLine = { Color3.fromRGB(90, 230, 160), Color3.fromRGB(60, 190, 220) } } },
+		Sunset = { Accent = Color3.fromRGB(215, 150, 90), Background = Color3.fromRGB(17, 13, 11), Group = Color3.fromRGB(23, 18, 15), GroupBorder = Color3.fromRGB(34, 27, 22), Control = Color3.fromRGB(32, 26, 21), ControlHover = Color3.fromRGB(44, 36, 30), Border = Color3.fromRGB(64, 52, 43), Outline = Color3.fromRGB(51, 41, 34), Text = Color3.fromRGB(230, 220, 210), Label = Color3.fromRGB(202, 191, 180), TextDim = Color3.fromRGB(152, 138, 124), TextMuted = Color3.fromRGB(120, 108, 96),
+			Style = { Radius = 1, Glow = 1.3, Font = "Inter", Particles = "Embers", ParticleColor = Color3.fromRGB(255, 150, 70), Tint = Color3.fromRGB(235, 110, 60), TintPlace = "Bottom", TintAmount = 0.2, TopLine = { Color3.fromRGB(255, 160, 80), Color3.fromRGB(230, 80, 140) } } },
+		Mono = { Accent = Color3.fromRGB(190, 190, 196), Background = Color3.fromRGB(12, 12, 12), Group = Color3.fromRGB(17, 17, 17), GroupBorder = Color3.fromRGB(26, 26, 26), Control = Color3.fromRGB(25, 25, 25), ControlHover = Color3.fromRGB(36, 36, 36), Border = Color3.fromRGB(52, 52, 52), Outline = Color3.fromRGB(41, 41, 41), Text = Color3.fromRGB(222, 222, 222), Label = Color3.fromRGB(194, 194, 194), TextDim = Color3.fromRGB(136, 136, 136), TextMuted = Color3.fromRGB(106, 106, 106),
+			Style = { Radius = 0.25, Glow = 0, Font = "Mono", Particles = "Glyphs", ParticleColor = Color3.fromRGB(205, 205, 205), Scanlines = true } },
 	},
 }
 env.LumenUI = Lumen
@@ -96,6 +110,10 @@ local EnumToWeight = {}
 for w, e in pairs(GothamByWeight) do EnumToWeight[e] = w end
 
 local function ApplyFont(obj, weight)
+	if Lumen.FontName == "Mono" then
+		obj.Font = Enum.Font.RobotoMono
+		return
+	end
 	local asset = Lumen._fontAsset
 	if asset then
 		local ok = pcall(function() obj.FontFace = Font.new(asset, WeightEnum[weight]) end)
@@ -197,14 +215,20 @@ local function New(class, props, children)
 		end
 		local w = EnumToWeight[obj.Font] or "SemiBold"
 		table.insert(FontObjs, { obj, w })
-		if Lumen._fontAsset then ApplyFont(obj, w) end
+		if Lumen._fontAsset or Lumen.FontName == "Mono" then ApplyFont(obj, w) end
 	end
 	for _, c in ipairs(children or {}) do c.Parent = obj end
 	if parent then obj.Parent = parent end
 	return obj
 end
 
-local function Corner(r) return New("UICorner", { CornerRadius = UDim.new(0, r or 4) }) end
+local function Corner(r)
+	r = r or 4
+	local c = New("UICorner", { CornerRadius = UDim.new(0, math.floor(r * Lumen.Style.Radius + 0.5)) })
+	c:SetAttribute("R", r)
+	return c
+end
+local function CornerFixed(r) return New("UICorner", { CornerRadius = UDim.new(0, r or 4) }) end
 
 local function UpdateGradient(g)
 	local T = Lumen.Theme
@@ -246,8 +270,10 @@ end
 -- soft glow from four concentric rings (no image assets). `color` is a theme key or a Color3.
 -- Measured from the reference: ring alphas 19% / 15% / 10% / 6%.
 local GLOW_ALPHA = { 0.19, 0.15, 0.10, 0.06 }
-local function Glow(host, color, radius)
+local Glows = {}
+local function Glow(host, color, radius, fixed)
 	local G = { rings = {}, mult = 1 }
+	table.insert(Glows, G)
 	for i = 1, #GLOW_ALPHA do
 		local props = { Thickness = 1, Transparency = 1 - GLOW_ALPHA[i], ApplyStrokeMode = Enum.ApplyStrokeMode.Border }
 		if type(color) == "string" then props.Theme = { Color = color } else props.Color = color end
@@ -255,18 +281,97 @@ local function Glow(host, color, radius)
 		New("Frame", {
 			AnchorPoint = Vector2.new(0.5, 0.5), Position = UDim2.fromScale(0.5, 0.5), Size = UDim2.new(1, i * 2, 1, i * 2),
 			BackgroundTransparency = 1, Parent = host,
-		}, { Corner((radius or 5) + i), st })
+		}, { (fixed and CornerFixed or Corner)((radius or 5) + i), st })
 		G.rings[i] = st
 	end
 	function G:Set(mult)
 		self.mult = mult
-		for i, st in ipairs(self.rings) do st.Transparency = 1 - GLOW_ALPHA[i] * mult end
+		local k = Lumen.Style.Glow or 1
+		for i, st in ipairs(self.rings) do st.Transparency = 1 - math.min(1, GLOW_ALPHA[i] * mult * k) end
 	end
+	G:Set(1)
 	function G:SetColor(c)
 		for _, st in ipairs(self.rings) do st.Color = c end
 	end
 	return G
 end
+
+-- Surfaces: windows, panels and the dock take the theme's tint gradient, top light and scanlines.
+local Surfaces = {}
+local function StyleSurface(e)
+	if not e.Frame.Parent then return end
+	local st, T = Lumen.Style, Lumen.Theme
+	local base = T.Background
+	local tint = st.Tint
+	local amt = (st.TintAmount or 0.15) * (e.Kind == "Window" and 1 or 0.75)
+	local seq
+	if tint then
+		local tc = base:Lerp(tint, amt)
+		local place = st.TintPlace or "Top"
+		if place == "Bottom" then
+			seq = ColorSequence.new({ ColorSequenceKeypoint.new(0, base), ColorSequenceKeypoint.new(0.5, base), ColorSequenceKeypoint.new(1, tc) })
+		elseif place == "Aurora" then
+			seq = ColorSequence.new({ ColorSequenceKeypoint.new(0, base:Lerp(tint, amt * 0.5)), ColorSequenceKeypoint.new(0.1, tc),
+				ColorSequenceKeypoint.new(0.32, base), ColorSequenceKeypoint.new(1, base) })
+		else
+			seq = ColorSequence.new({ ColorSequenceKeypoint.new(0, tc), ColorSequenceKeypoint.new(0.45, base), ColorSequenceKeypoint.new(1, base) })
+		end
+	else
+		seq = ColorSequence.new(base)
+	end
+	e.Frame.BackgroundColor3 = Color3.new(1, 1, 1)
+	e.Gradient.Color = seq
+	if e.Line then
+		local tl = st.TopLine
+		e.Line.Visible = tl ~= nil
+		e.Leak.Visible = tl ~= nil
+		if tl then
+			local cs = ColorSequence.new(tl[1], tl[2] or tl[1])
+			e.LineGrad.Color = cs
+			e.LeakGrad.Color = cs
+		end
+	end
+	if e.Kind == "Window" then
+		if st.Scanlines and not e.Scan then
+			e.Scan = New("Frame", {
+				BackgroundTransparency = 1, Size = UDim2.fromScale(1, 1), ClipsDescendants = true, ZIndex = 0, Parent = e.Frame,
+			})
+			for y = 0, 900, 3 do
+				New("Frame", {
+					Position = UDim2.fromOffset(0, y), Size = UDim2.new(1, 0, 0, 1), BackgroundColor3 = Color3.new(1, 1, 1),
+					BackgroundTransparency = 0.972, ZIndex = 0, Parent = e.Scan,
+				})
+			end
+		end
+		if e.Scan then e.Scan.Visible = st.Scanlines == true end
+	end
+end
+
+local function RegisterSurface(frame, kind)
+	local e = { Frame = frame, Kind = kind, Gradient = New("UIGradient", { Rotation = 90, Parent = frame }) }
+	if kind == "Window" then
+		e.LineGrad = New("UIGradient", { Transparency = NumberSequence.new({
+			NumberSequenceKeypoint.new(0, 1), NumberSequenceKeypoint.new(0.5, 0), NumberSequenceKeypoint.new(1, 1) }) })
+		e.Line = New("Frame", {
+			AnchorPoint = Vector2.new(0.5, 0), Position = UDim2.new(0.5, 0, 0, 0), Size = UDim2.new(0.72, 0, 0, 1),
+			BackgroundColor3 = Color3.new(1, 1, 1), Visible = false, ZIndex = 6, Parent = frame,
+		}, { e.LineGrad })
+		e.LeakGrad = New("UIGradient", { Rotation = 90, Transparency = NumberSequence.new({
+			NumberSequenceKeypoint.new(0, 0.86), NumberSequenceKeypoint.new(1, 1) }) })
+		e.Leak = New("Frame", {
+			AnchorPoint = Vector2.new(0.5, 0), Position = UDim2.new(0.5, 0, 0, 1), Size = UDim2.new(0.6, 0, 0, 22),
+			BackgroundColor3 = Color3.new(1, 1, 1), Visible = false, ZIndex = 0, Parent = frame,
+		}, { e.LeakGrad })
+	end
+	table.insert(Surfaces, e)
+	StyleSurface(e)
+	return e
+end
+table.insert(Refreshers, function()
+	for i = #Surfaces, 1, -1 do
+		if Surfaces[i].Frame.Parent then StyleSurface(Surfaces[i]) else table.remove(Surfaces, i) end
+	end
+end)
 
 local Scales = {}
 local function RegisterScale(parent)
@@ -325,7 +430,7 @@ local function Icon(kind, parent, size, colorKey)
 		local b = New("Frame", {
 			Position = UDim2.fromOffset(x * s, y * s), Size = UDim2.fromOffset(w * s, h * s), Parent = f,
 			Theme = { BackgroundColor3 = key or colorKey },
-		}, { Corner((r or 1) * s) })
+		}, { CornerFixed((r or 1) * s) })
 		if key then b:SetAttribute("Fixed", true) end
 		return b
 	end
@@ -333,7 +438,7 @@ local function Icon(kind, parent, size, colorKey)
 		return New("Frame", {
 			Position = UDim2.fromOffset(x * s, y * s), Size = UDim2.fromOffset(w * s, h * s),
 			BackgroundTransparency = 1, Parent = f,
-		}, { Corner((r or 3) * s), New("UIStroke", { Thickness = th or 1.4, Theme = { Color = colorKey } }) })
+		}, { CornerFixed((r or 3) * s), New("UIStroke", { Thickness = th or 1.4, Theme = { Color = colorKey } }) })
 	end
 	if kind == "window" then
 		Ring(1, 2, 14, 12, 3, 1.5)
@@ -456,11 +561,18 @@ local function Dragger(frame, cb)
 	end)
 end
 
-local function MakeDraggable(handle, target, onStart)
+local SnapHomes = {}
+-- snapKey (optional): "Dock" / "Hotkeys" / "Watermark". When Lumen.SnapBack allows it, the target glides
+-- back to where it started a few seconds after you let go. Grabbing it again cancels the return.
+local function MakeDraggable(handle, target, onStart, snapKey)
 	local dragging, startMouse, startPos = false, nil, nil
+	local token, homeTween = 0, nil
 	Connect(handle.InputBegan, function(i)
 		if IsPress(i) then
 			dragging = true
+			token = token + 1
+			if homeTween then homeTween:Cancel() homeTween = nil end
+			if snapKey and not SnapHomes[target] then SnapHomes[target] = target.Position end
 			startMouse = UIS:GetMouseLocation()
 			startPos = target.Position
 			if onStart then onStart() end
@@ -473,8 +585,38 @@ local function MakeDraggable(handle, target, onStart)
 		end
 	end)
 	Connect(UIS.InputEnded, function(i)
-		if IsPress(i) then dragging = false end
+		if IsPress(i) and dragging then
+			dragging = false
+			local sb = Lumen.SnapBack
+			if snapKey and sb.Enabled and sb[snapKey] then
+				token = token + 1
+				local mine = token
+				task.delay(sb.Delay, function()
+					if mine ~= token or dragging or Lumen.Unloaded then return end
+					local home = SnapHomes[target]
+					if not home or target.Position == home then return end
+					homeTween = TweenService:Create(target, TweenInfo.new(0.75, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), { Position = home })
+					homeTween:Play()
+				end)
+			end
+		end
 	end)
+end
+
+-- glide every snap-enabled HUD piece home now
+function Lumen:ResetHudPositions()
+	for target, home in pairs(SnapHomes) do
+		if target.Parent then
+			TweenService:Create(target, TweenInfo.new(0.75, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), { Position = home }):Play()
+		end
+	end
+end
+
+-- make the current spots the new home positions
+function Lumen:SetHudHome()
+	for target in pairs(SnapHomes) do
+		if target.Parent then SnapHomes[target] = target.Position end
+	end
 end
 
 local ShortKeys = {
@@ -498,23 +640,17 @@ end
 
 function Lumen:ApplyPreset(name)
 	local p = self.Presets[name]
-	if p then self:SetTheme(p) end
+	if not p then return end
+	self.Preset = name
+	local colors = {}
+	for k, v in pairs(p) do if k ~= "Style" then colors[k] = v end end
+	self:SetTheme(colors, self.ThemeTransition)
+	self:SetStyle(p.Style or {})
 end
 
-function Lumen:SetTheme(t)
-	local T = self.Theme
-	for k, v in pairs(t) do T[k] = v end
-	if t.Accent or t.Background then
-		if not t.AccentText then T.AccentText = T.Accent:Lerp(Color3.new(1, 1, 1), 0.02) end
-		if not t.AccentBorder then T.AccentBorder = T.Accent:Lerp(T.Background, 0.36) end
-		if not t.Toggle then T.Toggle = T.Accent:Lerp(T.Background, 0.64) end
-		if not t.TabActive then T.TabActive = T.Accent:Lerp(T.Background, 0.79) end
-	end
-	if (t.Control or t.Background) and not t.Chip then T.Chip = T.Control:Lerp(T.Background, 0.08) end
-	if (t.TextDim or t.Label) and not t.ChipText then T.ChipText = T.TextDim:Lerp(T.Label, 0.4) end
-	if t.Control and not t.ControlHover then
-		T.ControlHover = t.Control:Lerp(Color3.new(1, 1, 1), 0.07)
-	end
+local ThemeToken = 0
+local function ApplyThemeNow()
+	local T = Lumen.Theme
 	for i = #Themed, 1, -1 do
 		local e = Themed[i]
 		if e[1].Parent == nil then
@@ -525,6 +661,51 @@ function Lumen:SetTheme(t)
 	end
 	for _, g in ipairs(Gradients) do UpdateGradient(g) end
 	for _, fn in ipairs(Refreshers) do pcall(fn) end
+end
+
+-- t: theme keys to change. fade (seconds, optional): blend from the current palette instead of snapping.
+function Lumen:SetTheme(t, fade)
+	local T = self.Theme
+	local N = {}
+	for k, v in pairs(self._themeTarget or T) do N[k] = v end
+	for k, v in pairs(t) do N[k] = v end
+	if t.Accent or t.Background then
+		if not t.AccentText then N.AccentText = N.Accent:Lerp(Color3.new(1, 1, 1), 0.02) end
+		if not t.AccentBorder then N.AccentBorder = N.Accent:Lerp(N.Background, 0.36) end
+		if not t.Toggle then N.Toggle = N.Accent:Lerp(N.Background, 0.64) end
+		if not t.TabActive then N.TabActive = N.Accent:Lerp(N.Background, 0.79) end
+	end
+	if (t.Control or t.Background) and not t.Chip then N.Chip = N.Control:Lerp(N.Background, 0.08) end
+	if (t.TextDim or t.Label) and not t.ChipText then N.ChipText = N.TextDim:Lerp(N.Label, 0.4) end
+	if t.Control and not t.ControlHover then N.ControlHover = t.Control:Lerp(Color3.new(1, 1, 1), 0.07) end
+
+	ThemeToken = ThemeToken + 1
+	local mine = ThemeToken
+	fade = fade or 0
+	if fade <= 0 or #Themed > 9000 then
+		self._themeTarget = nil
+		for k, v in pairs(N) do T[k] = v end
+		ApplyThemeNow()
+		return
+	end
+	self._themeTarget = N
+	local before = {}
+	for k, v in pairs(T) do before[k] = v end
+	task.spawn(function()
+		local steps = math.max(2, math.floor(fade * 30))
+		for i = 1, steps do
+			if mine ~= ThemeToken or Lumen.Unloaded then return end
+			local a = i / steps
+			a = 1 - (1 - a) * (1 - a)
+			for k, v in pairs(N) do
+				local b = before[k]
+				if i < steps and typeof(v) == "Color3" and typeof(b) == "Color3" then T[k] = b:Lerp(v, a) else T[k] = v end
+			end
+			ApplyThemeNow()
+			if i < steps then task.wait(fade / steps) end
+		end
+		if mine == ThemeToken then Lumen._themeTarget = nil end
+	end)
 end
 
 ------------------------------------------------------------------------------
@@ -681,63 +862,211 @@ end
 
 local NotifHolder = New("Frame", {
 	BackgroundTransparency = 1, AnchorPoint = Vector2.new(1, 0), Position = UDim2.new(1, -12, 0, 12),
-	Size = UDim2.fromOffset(280, 0), AutomaticSize = Enum.AutomaticSize.Y, ZIndex = 100, Parent = Gui,
-}, { List(6, Enum.FillDirection.Vertical, Enum.HorizontalAlignment.Right) })
+	Size = UDim2.fromOffset(290, 0), AutomaticSize = Enum.AutomaticSize.Y, ZIndex = 100, Parent = Gui,
+}, { List(0, Enum.FillDirection.Vertical, Enum.HorizontalAlignment.Right) })
 
--- o: string, or {Title, Content, Type = Success/Warning/Danger/Info, Duration, Progress}
+local NOTIFY_KINDS = {
+	Success = { Key = "Success", Icon = "check" },
+	Warning = { Key = "Caution", Icon = "warn" },
+	Caution = { Key = "Caution", Icon = "warn" },
+	Danger = { Key = "Error", Icon = "cross" },
+	Error = { Key = "Error", Icon = "cross" },
+	Info = { Key = "Info", Icon = "info" },
+	Loading = { Key = "Accent", Icon = "spinner" },
+}
+local NotifyCount = 0
+local LiveNotifs = {}
+
+local function Spinner(parent, color)
+	local f = New("Frame", { BackgroundTransparency = 1, Size = UDim2.fromOffset(14, 14), Parent = parent }, {
+		CornerFixed(7),
+		New("UIStroke", { Thickness = 2, Color = color }, {
+			New("UIGradient", { Transparency = NumberSequence.new({
+				NumberSequenceKeypoint.new(0, 0), NumberSequenceKeypoint.new(0.5, 0.15), NumberSequenceKeypoint.new(0.52, 1), NumberSequenceKeypoint.new(1, 1) }) }),
+		}),
+	})
+	return f
+end
+
+-- o: string, or {Title, Content, Type = "Success" | "Warning" | "Error" | "Info" | "Loading", Duration, Progress}
+-- Returns a handle: handle:Update({...}) morphs it in place (e.g. Loading -> Success), handle:Dismiss() closes it.
+-- Hovering pauses the countdown, clicking dismisses.
 function Lumen:Notify(o, duration)
 	if type(o) == "string" then o = { Content = o, Duration = duration } end
-	if not self.ShowNotifications then return end
-	local key = o.Type
-	if not key or not self.Theme[key] then key = "Label" end
-	local symbol = ({ Success = "check", Danger = "cross", Warning = "warn", Info = "info" })[o.Type or ""]
-	local dur = o.Duration or 4
+	local H = { Closed = false }
+	function H:Update() end
+	function H:Dismiss() end
+	if not self.ShowNotifications then return H end
+
+	NotifyCount = NotifyCount + 1
+	local holder = New("Frame", {
+		BackgroundTransparency = 1, Size = UDim2.fromOffset(290, 0), LayoutOrder = NotifyCount, Parent = NotifHolder,
+	})
 	local card = New("CanvasGroup", {
-		Size = UDim2.fromOffset(280, 0), AutomaticSize = Enum.AutomaticSize.Y, GroupTransparency = 1,
-		Parent = NotifHolder, Theme = { BackgroundColor3 = "Background" },
-	}, { Corner(8), Stroke("Outline"), List(0) })
+		Size = UDim2.fromOffset(280, 34), Position = UDim2.fromOffset(310, 0), GroupTransparency = 1, AnchorPoint = Vector2.new(0, 0),
+		Parent = holder, Theme = { BackgroundColor3 = "Background" },
+	}, { Corner(8) })
+	New("UIStroke", { Thickness = 1, ApplyStrokeMode = Enum.ApplyStrokeMode.Border, Theme = { Color = "Outline" }, Parent = card })
 	local body = New("Frame", {
-		BackgroundTransparency = 1, Size = UDim2.new(1, 0, 0, 0), AutomaticSize = Enum.AutomaticSize.Y,
-		LayoutOrder = 1, Parent = card,
-	}, { Pad(12, 8, 12, 8), New("UISizeConstraint", { MinSize = Vector2.new(0, 32) }),
+		BackgroundTransparency = 1, Size = UDim2.new(1, 0, 0, 0), AutomaticSize = Enum.AutomaticSize.Y, ZIndex = 2, Parent = card,
+	}, { Pad(12, 9, 12, 9), New("UISizeConstraint", { MinSize = Vector2.new(0, 34) }),
 		List(10, Enum.FillDirection.Horizontal, Enum.HorizontalAlignment.Left, Enum.VerticalAlignment.Center) })
-	local iconHolder = New("Frame", { BackgroundTransparency = 1, Size = UDim2.fromOffset(16, 16), LayoutOrder = 1, Parent = body })
-	if symbol then
-		Icon(symbol, iconHolder, 16, key)
-	else
-		local bell = PixelIcon("bell", iconHolder, key)
-		bell.Position = UDim2.fromOffset(1, 0)
+	local bar = New("Frame", { Size = UDim2.new(0, 3, 1, 0), BackgroundColor3 = Color3.new(1, 1, 1), Visible = false, ZIndex = 3, Parent = card })
+	local barGrad = New("UIGradient", { Rotation = 90, Transparency = NumberSequence.new({
+		NumberSequenceKeypoint.new(0, 0.6), NumberSequenceKeypoint.new(0.5, 0), NumberSequenceKeypoint.new(1, 0.6) }), Parent = bar })
+	local wash = New("Frame", { Size = UDim2.fromScale(1, 1), BackgroundColor3 = Color3.new(1, 1, 1), BackgroundTransparency = 1, ZIndex = 1, Parent = card })
+	local washGrad = New("UIGradient", { Transparency = NumberSequence.new({
+		NumberSequenceKeypoint.new(0, 0.86), NumberSequenceKeypoint.new(0.45, 1), NumberSequenceKeypoint.new(1, 1) }), Parent = wash })
+	local shine = New("Frame", {
+		Size = UDim2.new(0.45, 0, 1, 0), Position = UDim2.new(-0.6, 0, 0, 0), BackgroundColor3 = Color3.new(1, 1, 1), ZIndex = 4, Parent = card,
+	}, { New("UIGradient", { Rotation = 18, Transparency = NumberSequence.new({
+		NumberSequenceKeypoint.new(0, 1), NumberSequenceKeypoint.new(0.5, 0.9), NumberSequenceKeypoint.new(1, 1) }) }) })
+	local track = New("Frame", {
+		AnchorPoint = Vector2.new(0, 1), Position = UDim2.new(0, 0, 1, 0), Size = UDim2.new(1, 0, 0, 2), Visible = false, ZIndex = 3,
+		Parent = card, Theme = { BackgroundColor3 = "Outline" },
+	})
+	local fill = New("Frame", { Size = UDim2.fromScale(1, 1), BackgroundColor3 = Color3.new(1, 1, 1), ZIndex = 3, Parent = track })
+
+	local kind, color, dur, remaining, hovered, shakeT = nil, nil, 4, 4, false, 0
+	local iconScale, spin
+	local conn
+
+	local function Fit()
+		local h = math.max(34, body.AbsoluteSize.Y)
+		card.Size = UDim2.fromOffset(280, h)
+		if not H.Closed then Tween(holder, 0.25, { Size = UDim2.fromOffset(290, h + 6) }) end
 	end
-	local text = New("Frame", {
-		BackgroundTransparency = 1, Size = UDim2.new(1, -28, 0, 0), AutomaticSize = Enum.AutomaticSize.Y,
-		LayoutOrder = 2, Parent = body,
-	}, { List(1) })
-	if o.Title then
-		New("TextLabel", {
-			Size = UDim2.new(1, 0, 0, 16), Text = o.Title, TextColor3 = symbol and self.Theme[key] or self.Theme.Text,
-			TextXAlignment = Enum.TextXAlignment.Left, LayoutOrder = 1, Parent = text,
-		})
+	Connect(body:GetPropertyChangedSignal("AbsoluteSize"), Fit)
+
+	local function Build(opts)
+		for _, c in ipairs(body:GetChildren()) do
+			if c:IsA("GuiObject") then c:Destroy() end
+		end
+		spin = nil
+		kind = NOTIFY_KINDS[opts.Type or ""]
+		color = kind and Lumen.Theme[kind.Key] or Lumen.Theme.Label
+		-- icon: tinted badge for typed notifications, the reference bell for plain ones
+		local iconHolder = New("Frame", { BackgroundTransparency = 1, Size = UDim2.fromOffset(kind and 24 or 16, kind and 24 or 16), LayoutOrder = 1, Parent = body })
+		iconScale = New("UIScale", { Scale = 1, Parent = iconHolder })
+		if kind then
+			local badge = New("Frame", {
+				Size = UDim2.fromScale(1, 1), BackgroundColor3 = color:Lerp(Lumen.Theme.Background, 0.8), Parent = iconHolder,
+			}, { CornerFixed(12), New("UIStroke", { Color = color:Lerp(Lumen.Theme.Background, 0.45), Thickness = 1 }) })
+			if kind.Icon == "spinner" then
+				spin = Spinner(badge, color)
+				spin.AnchorPoint = Vector2.new(0.5, 0.5)
+				spin.Position = UDim2.fromScale(0.5, 0.5)
+			else
+				local ic = Icon(kind.Icon, badge, 14, kind.Key)
+				ic.AnchorPoint = Vector2.new(0.5, 0.5)
+				ic.Position = UDim2.fromScale(0.5, 0.5)
+			end
+		else
+			local bell = PixelIcon("bell", iconHolder, "Label")
+			bell.Position = UDim2.fromOffset(1, 0)
+		end
+		local text = New("Frame", {
+			BackgroundTransparency = 1, Size = UDim2.new(1, -(kind and 34 or 26), 0, 0), AutomaticSize = Enum.AutomaticSize.Y,
+			LayoutOrder = 2, Parent = body,
+		}, { List(2) })
+		if opts.Title then
+			New("TextLabel", {
+				Size = UDim2.new(1, 0, 0, 16), Text = opts.Title, TextColor3 = kind and color or Lumen.Theme.Text,
+				TextXAlignment = Enum.TextXAlignment.Left, LayoutOrder = 1, Parent = text,
+			})
+		end
+		if opts.Content then
+			New("TextLabel", {
+				Size = UDim2.new(1, 0, 0, 0), AutomaticSize = Enum.AutomaticSize.Y, Text = opts.Content, TextWrapped = true,
+				TextXAlignment = Enum.TextXAlignment.Left, LayoutOrder = 2, TextSize = opts.Title and 11 or 12,
+				Font = opts.Title and Enum.Font.GothamMedium or Enum.Font.GothamSemibold,
+				TextColor3 = opts.Title and Lumen.Theme.TextDim or Lumen.Theme.Label, Parent = text,
+			})
+		end
+		-- accent bar, colour wash and countdown only for typed notifications
+		bar.Visible = kind ~= nil
+		bar.BackgroundColor3 = color
+		wash.BackgroundTransparency = kind and 0 or 1
+		wash.BackgroundColor3 = color
+		local loading = kind and kind.Icon == "spinner"
+		dur = opts.Duration or (loading and math.huge or (kind and 4.5 or 4))
+		remaining = dur
+		track.Visible = (opts.Progress ~= false) and (kind ~= nil or opts.Progress == true) and not loading
+		fill.BackgroundColor3 = color
+		fill.Size = UDim2.fromScale(1, 1)
+		-- entrance flourishes
+		iconScale.Scale = 0.35
+		Tween(iconScale, 0.5, { Scale = 1 })
+		pcall(function()
+			TweenService:Create(iconScale, TweenInfo.new(0.5, Enum.EasingStyle.Back, Enum.EasingDirection.Out), { Scale = 1 }):Play()
+		end)
+		shine.Position = UDim2.new(-0.6, 0, 0, 0)
+		TweenService:Create(shine, TweenInfo.new(0.9, Enum.EasingStyle.Sine, Enum.EasingDirection.Out), { Position = UDim2.new(1.2, 0, 0, 0) }):Play()
+		if kind and kind.Key == "Error" then shakeT = 0.45 end
+		Fit()
 	end
-	if o.Content then
-		New("TextLabel", {
-			Size = UDim2.new(1, 0, 0, 0), AutomaticSize = Enum.AutomaticSize.Y, Text = o.Content, TextWrapped = true,
-			TextXAlignment = Enum.TextXAlignment.Left, LayoutOrder = 2, TextSize = o.Title and 11 or 12,
-			TextColor3 = o.Title and self.Theme.TextDim or self.Theme.Label, Parent = text,
-		})
+
+	local function Close()
+		if H.Closed then return end
+		H.Closed = true
+		if conn then conn:Disconnect() end
+		for i, n in ipairs(LiveNotifs) do if n == H then table.remove(LiveNotifs, i) break end end
+		TweenService:Create(card, TweenInfo.new(0.28, Enum.EasingStyle.Quad, Enum.EasingDirection.In), { Position = UDim2.fromOffset(310, 0), GroupTransparency = 1 }):Play()
+		task.delay(0.22, function()
+			if holder.Parent then Tween(holder, 0.22, { Size = UDim2.fromOffset(290, 0) }) end
+		end)
+		task.delay(0.5, function() holder:Destroy() end)
 	end
-	if o.Progress or (o.Progress == nil and symbol) then
-		local track = New("Frame", {
-			Size = UDim2.new(1, 0, 0, 2), LayoutOrder = 2, Parent = card, Theme = { BackgroundColor3 = "Outline" },
-		})
-		local fill = New("Frame", { Size = UDim2.fromScale(1, 1), BackgroundColor3 = self.Theme[key], Parent = track })
-		Tween(fill, dur, { Size = UDim2.new(0, 0, 1, 0) })
+
+	function H:Update(o2)
+		if self.Closed then return end
+		for k, v in pairs(o2 or {}) do o[k] = v end
+		if o2 and o2.Type == nil then o.Type = nil end
+		Build(o)
 	end
-	Tween(card, 0.2, { GroupTransparency = 0 })
-	task.delay(dur, function()
-		if card.Parent then
-			Tween(card, 0.25, { GroupTransparency = 1 }).Completed:Connect(function() card:Destroy() end)
+	function H:Dismiss() Close() end
+
+	Connect(card.MouseEnter, function()
+		hovered = true
+		Tween(card, 0.15, { Position = UDim2.fromOffset(-4, 0) })
+	end)
+	Connect(card.MouseLeave, function()
+		hovered = false
+		if not H.Closed then Tween(card, 0.15, { Position = UDim2.fromOffset(0, 0) }) end
+	end)
+	Connect(card.InputBegan, function(i) if IsPress(i) then Close() end end)
+
+	conn = RunService.RenderStepped:Connect(function(dt)
+		if H.Closed then return end
+		local t = os.clock()
+		if spin then spin.Rotation = (spin.Rotation + dt * 360) % 360 end
+		if kind then
+			-- the accent bar breathes; warnings and errors breathe harder
+			local k = (kind.Key == "Caution" or kind.Key == "Error") and 0.35 or 0.18
+			bar.BackgroundTransparency = k * (0.5 + 0.5 * math.sin(t * 4))
+		end
+		if shakeT > 0 then
+			shakeT = math.max(0, shakeT - dt)
+			card.Position = UDim2.fromOffset(math.sin(shakeT * 70) * 7 * (shakeT / 0.45), 0)
+		end
+		if not hovered and remaining ~= math.huge then
+			remaining = remaining - dt
+			fill.Size = UDim2.fromScale(math.clamp(remaining / dur, 0, 1), 1)
+			if remaining <= 0 then Close() end
 		end
 	end)
+	table.insert(Connections, conn)
+
+	Build(o)
+	-- slide in from the right with a little overshoot
+	card.Position = UDim2.fromOffset(310, 0)
+	card.GroupTransparency = 1
+	TweenService:Create(card, TweenInfo.new(0.5, Enum.EasingStyle.Back, Enum.EasingDirection.Out), { Position = UDim2.fromOffset(0, 0) }):Play()
+	Tween(card, 0.3, { GroupTransparency = 0 })
+
+	table.insert(LiveNotifs, H)
+	if #LiveNotifs > 6 then LiveNotifs[1]:Dismiss() end
+	return H
 end
 
 local Fps, WatermarkOverride, WatermarkTitle = 60, nil, nil
@@ -746,10 +1075,11 @@ local Watermark = New("Frame", {
 	ZIndex = 5, Parent = Gui, Theme = { BackgroundColor3 = "Background" },
 }, { Corner(9), Stroke(nil, true), Pad(11, 0, 14, 0),
 	List(9, Enum.FillDirection.Horizontal, Enum.HorizontalAlignment.Left, Enum.VerticalAlignment.Center) })
-MakeDraggable(Watermark, Watermark)
+MakeDraggable(Watermark, Watermark, nil, "Watermark")
+SnapHomes[Watermark] = Watermark.Position
 local WatermarkLogo = New("Frame", { BackgroundTransparency = 1, Size = UDim2.fromOffset(18, 18), LayoutOrder = 1, Parent = Watermark }, {
-	New("Frame", { Size = UDim2.fromScale(1, 1), BackgroundTransparency = 1 }, { Corner(9), New("UIStroke", { Thickness = 2, Theme = { Color = "AccentBorder" } }) }),
-	New("Frame", { AnchorPoint = Vector2.new(0.5, 0.5), Position = UDim2.fromScale(0.5, 0.5), Size = UDim2.fromOffset(6, 6), Theme = { BackgroundColor3 = "AccentText" } }, { Corner(3) }),
+	New("Frame", { Size = UDim2.fromScale(1, 1), BackgroundTransparency = 1 }, { CornerFixed(9), New("UIStroke", { Thickness = 2, Theme = { Color = "AccentBorder" } }) }),
+	New("Frame", { AnchorPoint = Vector2.new(0.5, 0.5), Position = UDim2.fromScale(0.5, 0.5), Size = UDim2.fromOffset(6, 6), Theme = { BackgroundColor3 = "AccentText" } }, { CornerFixed(3) }),
 })
 local WatermarkImage = New("ImageLabel", {
 	BackgroundTransparency = 1, Size = UDim2.fromOffset(18, 18), LayoutOrder = 1, Visible = false, Parent = Watermark,
@@ -763,7 +1093,8 @@ local HotkeyFrame = New("Frame", {
 	Position = UDim2.fromOffset(12, 56), Size = UDim2.fromOffset(170, 0), AutomaticSize = Enum.AutomaticSize.Y,
 	Visible = false, ZIndex = 5, Parent = Gui, Theme = { BackgroundColor3 = "Background" },
 }, { Corner(9), Stroke(nil, true), Pad(14, 10, 16, 12), List(8) })
-MakeDraggable(HotkeyFrame, HotkeyFrame)
+MakeDraggable(HotkeyFrame, HotkeyFrame, nil, "Hotkeys")
+SnapHomes[HotkeyFrame] = HotkeyFrame.Position
 local HotkeyTitle = New("Frame", {
 	BackgroundTransparency = 1, Size = UDim2.fromOffset(0, 18), AutomaticSize = Enum.AutomaticSize.X,
 	LayoutOrder = 0, Parent = HotkeyFrame,
@@ -1085,7 +1416,7 @@ function OptBase:AddTooltip(text)
 	local chip = New("TextButton", {
 		Size = UDim2.fromOffset(20, 20), BackgroundTransparency = 1, Text = "?", TextSize = 11,
 		TextColor3 = T.Accent:Lerp(T.Background, 0.5), Parent = self._addons, LayoutOrder = 100,
-	}, { Corner(10), Stroke("Outline") })
+	}, { CornerFixed(10), Stroke("Outline") })
 	AttachTooltip(chip, text)
 	return self
 end
@@ -1233,8 +1564,8 @@ function Elements:AddSlider(o)
 	local knob = New("Frame", {
 		Size = UDim2.fromOffset(8, 8), AnchorPoint = Vector2.new(0.5, 0.5), Position = UDim2.new(1, 0, 0.5, 0),
 		BackgroundColor3 = Color3.new(1, 1, 1), ZIndex = 3, Parent = fill,
-	}, { Corner(4) })
-	Glow(knob, Color3.new(1, 1, 1), 4):Set(0.2)
+	}, { CornerFixed(4) })
+	Glow(knob, Color3.new(1, 1, 1), 4, true):Set(0.2)
 	local hit = New("TextButton", { Position = UDim2.fromOffset(0, 14), Size = UDim2.new(1, 0, 0, 18), Parent = row })
 
 	local function Render()
@@ -1562,12 +1893,102 @@ function Elements:AddViewport(o)
 	local model, center, dist = nil, Vector3.new(0, 0, 0), 8
 	local yaw, pitch, zoom = 0.6, 0.12, 1
 	local dragging, lastMouse = false, nil
+	local bbCF, bbSize
+
+	-- ESP overlay: a box (corner brackets or full), name, health bar and distance that track the model as it turns
+	local esp
+	if o.ESP then
+		local E = type(o.ESP) == "table" and o.ESP or {}
+		local col = E.Color or Color3.new(1, 1, 1)
+		esp = { E = E }
+		esp.Root = New("Frame", { BackgroundTransparency = 1, Size = UDim2.fromScale(1, 1), ZIndex = 3, Parent = row })
+		esp.Box = New("Frame", { BackgroundTransparency = 1, ZIndex = 3, Parent = esp.Root })
+		if (E.Box or "Full") == "Full" then
+			New("UIStroke", { Color = col, Thickness = 1, Parent = esp.Box })
+			New("Frame", { BackgroundTransparency = 1, Size = UDim2.new(1, 2, 1, 2), Position = UDim2.fromOffset(-1, -1), ZIndex = 3, Parent = esp.Box },
+				{ New("UIStroke", { Color = Color3.new(0, 0, 0), Transparency = 0.55, Thickness = 1 }) })
+		else
+			esp.Corners = {}
+			for i = 1, 8 do
+				esp.Corners[i] = New("Frame", { BackgroundColor3 = col, ZIndex = 4, Parent = esp.Box },
+					{ New("UIStroke", { Color = Color3.new(0, 0, 0), Transparency = 0.6, Thickness = 1 }) })
+			end
+		end
+		if E.Name then
+			local name = E.Name == true and (Players.LocalPlayer and (Players.LocalPlayer.DisplayName or Players.LocalPlayer.Name) or "Player") or tostring(E.Name)
+			esp.Name = New("TextLabel", {
+				Text = name, AnchorPoint = Vector2.new(0.5, 1), Size = UDim2.fromOffset(160, 14), TextSize = 11, TextColor3 = col,
+				TextStrokeTransparency = 0.6, ZIndex = 4, Parent = esp.Root,
+			})
+		end
+		if E.Health then
+			esp.HealthBack = New("Frame", { BackgroundColor3 = Color3.new(0, 0, 0), BackgroundTransparency = 0.35, ZIndex = 4, Parent = esp.Root })
+			esp.HealthFill = New("Frame", { AnchorPoint = Vector2.new(0, 1), Position = UDim2.fromScale(0, 1), ZIndex = 5, Parent = esp.HealthBack })
+		end
+		if E.Distance then
+			esp.Dist = New("TextLabel", {
+				AnchorPoint = Vector2.new(0.5, 0), Size = UDim2.fromOffset(120, 14), TextSize = 10, TextColor3 = col, Font = Enum.Font.GothamMedium,
+				TextStrokeTransparency = 0.6, ZIndex = 4, Parent = esp.Root,
+			})
+		end
+	end
+
+	local function UpdateESP()
+		if not esp or not bbCF then return end
+		local sz = row.AbsoluteSize / Lumen.Scale
+		if sz.X < 2 or sz.Y < 2 then return end
+		local tanf = math.tan(math.rad(cam.FieldOfView / 2))
+		local aspect = sz.X / sz.Y
+		local minX, minY, maxX, maxY = math.huge, math.huge, -math.huge, -math.huge
+		local hx, hy, hz = bbSize.X / 2, bbSize.Y / 2, bbSize.Z / 2
+		for _, c in ipairs({ { 1, 1, 1 }, { 1, 1, -1 }, { 1, -1, 1 }, { 1, -1, -1 }, { -1, 1, 1 }, { -1, 1, -1 }, { -1, -1, 1 }, { -1, -1, -1 } }) do
+			local p = bbCF * Vector3.new(c[1] * hx, c[2] * hy, c[3] * hz)
+			local lp = cam.CFrame:PointToObjectSpace(p)
+			if lp.Z < -0.05 then
+				local x = (lp.X / (-lp.Z * tanf * aspect) + 1) / 2 * sz.X
+				local y = (1 - lp.Y / (-lp.Z * tanf)) / 2 * sz.Y
+				minX, minY = math.min(minX, x), math.min(minY, y)
+				maxX, maxY = math.max(maxX, x), math.max(maxY, y)
+			end
+		end
+		if minX == math.huge then esp.Root.Visible = false return end
+		esp.Root.Visible = true
+		minX, minY = math.floor(math.max(minX, 4)), math.floor(math.max(minY, 16))
+		maxX, maxY = math.floor(math.min(maxX, sz.X - 4)), math.floor(math.min(maxY, sz.Y - 16))
+		local w, h = math.max(maxX - minX, 4), math.max(maxY - minY, 4)
+		esp.Box.Position = UDim2.fromOffset(minX, minY)
+		esp.Box.Size = UDim2.fromOffset(w, h)
+		if esp.Corners then
+			local lw, lh = math.floor(w * 0.25), math.floor(h * 0.2)
+			local spec = {
+				{ 0, 0, lw, 1 }, { 0, 0, 1, lh }, { w - lw, 0, lw, 1 }, { w - 1, 0, 1, lh },
+				{ 0, h - 1, lw, 1 }, { 0, h - lh, 1, lh }, { w - lw, h - 1, lw, 1 }, { w - 1, h - lh, 1, lh },
+			}
+			for i, c in ipairs(spec) do
+				esp.Corners[i].Position = UDim2.fromOffset(c[1], c[2])
+				esp.Corners[i].Size = UDim2.fromOffset(c[3], c[4])
+			end
+		end
+		if esp.Name then esp.Name.Position = UDim2.fromOffset(minX + w / 2, minY - 3) end
+		if esp.HealthBack then
+			local hp = math.clamp(tonumber(esp.E.Health) or 1, 0, 1)
+			esp.HealthBack.Position = UDim2.fromOffset(minX - 6, minY)
+			esp.HealthBack.Size = UDim2.fromOffset(3, h)
+			esp.HealthFill.Size = UDim2.new(1, 0, hp, 0)
+			esp.HealthFill.BackgroundColor3 = Color3.fromRGB(220, 80, 80):Lerp(Color3.fromRGB(90, 220, 120), hp)
+		end
+		if esp.Dist then
+			esp.Dist.Position = UDim2.fromOffset(minX + w / 2, maxY + 3)
+			esp.Dist.Text = esp.E.DistanceText or (math.floor(dist * zoom + 0.5) .. " studs")
+		end
+	end
 
 	local function Place()
 		if not model then return end
 		local d = dist * zoom
 		local cp = math.cos(pitch)
 		cam.CFrame = CFrame.lookAt(center + Vector3.new(math.sin(yaw) * cp * d, math.sin(pitch) * d, math.cos(yaw) * cp * d), center)
+		UpdateESP()
 	end
 	local function Prepare(obj)
 		if model then model:Destroy() model = nil end
@@ -1586,6 +2007,7 @@ function Elements:AddViewport(o)
 		model = obj
 		local cf, sz
 		if obj:IsA("Model") then cf, sz = obj:GetBoundingBox() else cf, sz = obj.CFrame, obj.Size end
+		bbCF, bbSize = cf, sz
 		center = cf.Position
 		dist = math.max(sz.X, sz.Y, sz.Z) * 0.5 / math.tan(math.rad(cam.FieldOfView / 2)) * 1.25 + sz.Z * 0.5
 		Place()
@@ -1598,12 +2020,14 @@ function Elements:AddViewport(o)
 	end
 	Prepare(o.Object or (o.Character and CharacterClone()) or nil)
 
-	Connect(vf.InputBegan, function(i)
+	local function BeginDrag(i)
 		if IsPress(i) then
 			dragging = true
 			lastMouse = UIS:GetMouseLocation()
 		end
-	end)
+	end
+	Connect(vf.InputBegan, BeginDrag)
+	if esp then Connect(esp.Root.InputBegan, BeginDrag) end
 	Connect(UIS.InputChanged, function(i)
 		if dragging and (i.UserInputType == Enum.UserInputType.MouseMovement or i.UserInputType == Enum.UserInputType.Touch) then
 			local m = UIS:GetMouseLocation()
@@ -1631,6 +2055,13 @@ function Elements:AddViewport(o)
 	end)
 
 	function V:SetObject(obj) Prepare(obj) end
+	-- live-update the ESP preview: V:SetESP({Health = 0.4, Name = "Enemy", DistanceText = "42m"})
+	function V:SetESP(t)
+		if not esp then return end
+		for k, v in pairs(t or {}) do esp.E[k] = v end
+		if esp.Name and t and t.Name then esp.Name.Text = tostring(t.Name) end
+		UpdateESP()
+	end
 	V.Viewport = vf
 	return V
 end
@@ -1779,6 +2210,7 @@ function Lumen:CreatePanel(o)
 	}, { List(6) })
 	P._container, P.Frame = content, frame
 	RegisterScale(frame)
+	RegisterSurface(frame, "Panel")
 
 	local function Front()
 		ZCounter = ZCounter + 1
@@ -1863,11 +2295,12 @@ end
 --    Hold (seconds the confirm button must be held, 0 = plain click), Callback(accepted), OnConfirm, OnCancel
 function Lumen:Confirm(o)
 	o = o or {}
-	local key = o.Type or "Warning"
-	if not self.Theme[key] then key = "Warning" end
+	local kind = NOTIFY_KINDS[o.Type or "Warning"] or NOTIFY_KINDS.Warning
+	if kind.Icon == "spinner" then kind = NOTIFY_KINDS.Info end
+	local key = kind.Key
 	local T = self.Theme
 	local color = T[key]
-	local symbol = ({ Success = "check", Danger = "cross", Warning = "warn", Info = "info" })[key] or "warn"
+	local symbol = kind.Icon
 	local hold = o.Hold or 0
 	local done = false
 	local keyConn
@@ -1893,8 +2326,8 @@ function Lumen:Confirm(o)
 		{ List(14, Enum.FillDirection.Horizontal, Enum.HorizontalAlignment.Left, Enum.VerticalAlignment.Top) })
 	local badge = New("Frame", {
 		Size = UDim2.fromOffset(44, 44), BackgroundColor3 = color:Lerp(T.Background, 0.78), LayoutOrder = 1, Parent = top,
-	}, { Corner(22), New("UIStroke", { Color = color:Lerp(T.Background, 0.45), Thickness = 1 }) })
-	Glow(badge, color, 22)
+	}, { CornerFixed(22), New("UIStroke", { Color = color:Lerp(T.Background, 0.45), Thickness = 1 }) })
+	Glow(badge, color, 22, true)
 	local badgeIcon = Icon(symbol, badge, 22, key)
 	badgeIcon.AnchorPoint = Vector2.new(0.5, 0.5)
 	badgeIcon.Position = UDim2.fromScale(0.5, 0.5)
@@ -2077,6 +2510,15 @@ function Lumen:_Serialize()
 end
 
 function Lumen:_Apply(data)
+	if data.Lumen_Preset and self.Options.Lumen_Preset then
+		local fade = self.ThemeTransition
+		self.ThemeTransition = 0
+		pcall(function() self.Options.Lumen_Preset:Set(data.Lumen_Preset.v) end)
+		self.ThemeTransition = fade
+		local rest = {}
+		for k, v in pairs(data) do if k ~= "Lumen_Preset" then rest[k] = v end end
+		data = rest
+	end
 	for flag, d in pairs(data) do
 		local o = self.Options[flag]
 		if o and o.Type == d.t then
@@ -2155,7 +2597,14 @@ end
 -- Backdrop (dim + blur + snow). Shown only while a window is open.
 ------------------------------------------------------------------------------
 
-local Snow = { Enabled = false, Count = 70, Speed = 1, Flakes = {}, Time = 0 }
+local Snow = { Enabled = false, Count = 70, Speed = 1, Kind = "Theme", Flakes = {}, Time = 0, Built = nil }
+Lumen.ParticleKinds = { "Theme", "Snow", "Bubbles", "Petals", "Embers", "Fireflies", "Stars", "Glyphs" }
+local KIND_COLORS = {
+	Snow = Color3.new(1, 1, 1), Bubbles = Color3.fromRGB(140, 205, 255), Petals = Color3.fromRGB(242, 150, 186),
+	Embers = Color3.fromRGB(255, 150, 70), Fireflies = Color3.fromRGB(180, 255, 150), Stars = Color3.new(1, 1, 1),
+	Glyphs = Color3.fromRGB(205, 205, 205),
+}
+local GLYPH_CHARS = { "0", "1", "0", "1", "A", "F", "7", "3", "#", "*" }
 local Backdrop = { Dim = 0.35, Blur = 0 }
 local BlurEffect
 
@@ -2190,42 +2639,105 @@ function Lumen:_UpdateSnow()
 	self:_UpdateDock()
 end
 
+local function CurrentKind()
+	if Snow.Kind == "Theme" then return Lumen.Style.Particles or "Snow" end
+	return Snow.Kind
+end
+
 local function BuildFlakes()
 	for _, f in ipairs(Snow.Flakes) do f.Frame:Destroy() end
 	Snow.Flakes = {}
+	Snow.Built = nil
 	if not Snow.Enabled then return end
+	local kind = CurrentKind()
+	if not KIND_COLORS[kind] then kind = "Snow" end
+	Snow.Built = kind
+	local color = (Snow.Kind == "Theme" and Lumen.Style.ParticleColor) or KIND_COLORS[kind]
 	for i = 1, Snow.Count do
-		local size = math.random(4, 13)
-		local frame = New("Frame", {
-			Size = UDim2.fromOffset(size, size), BackgroundColor3 = Color3.new(1, 1, 1),
-			BackgroundTransparency = 0.3 + math.random() * 0.5, Parent = BackdropFrame,
-		}, { Corner(size) })
-		table.insert(Snow.Flakes, {
-			Frame = frame, X = math.random(), Y = math.random(), Speed = 0.03 + (size / 13) * 0.07,
-			Sway = 0.4 + math.random() * 0.8, Phase = math.random() * 6.28,
-		})
+		local f = { X = math.random(), Y = math.random(), Phase = math.random() * 6.28, Sway = 0.4 + math.random() * 0.8 }
+		if kind == "Snow" then
+			local size = math.random(4, 13)
+			f.Speed = 0.03 + (size / 13) * 0.07
+			f.Frame = New("Frame", { Size = UDim2.fromOffset(size, size), BackgroundColor3 = color,
+				BackgroundTransparency = 0.3 + math.random() * 0.5, Parent = BackdropFrame }, { CornerFixed(size) })
+		elseif kind == "Bubbles" then
+			local size = math.random(6, 20)
+			f.Speed = 0.025 + (size / 20) * 0.05
+			f.Frame = New("Frame", { Size = UDim2.fromOffset(size, size), BackgroundColor3 = color, BackgroundTransparency = 0.92, Parent = BackdropFrame },
+				{ CornerFixed(size), New("UIStroke", { Color = color, Thickness = 1.2, Transparency = 0.35 + math.random() * 0.4 }),
+				  New("Frame", { Size = UDim2.fromOffset(math.max(2, size / 4), math.max(2, size / 4)), Position = UDim2.fromScale(0.22, 0.2),
+					BackgroundColor3 = Color3.new(1, 1, 1), BackgroundTransparency = 0.45 }, { CornerFixed(size) }) })
+		elseif kind == "Petals" then
+			local size = math.random(6, 12)
+			f.Speed = 0.025 + math.random() * 0.03
+			f.Spin = (math.random() - 0.5) * 160
+			f.Rot = math.random() * 360
+			f.Frame = New("Frame", { Size = UDim2.fromOffset(math.floor(size * 1.5), size), BackgroundColor3 = color:Lerp(Color3.new(1, 1, 1), math.random() * 0.3),
+				BackgroundTransparency = 0.15 + math.random() * 0.4, Parent = BackdropFrame }, { CornerFixed(size) })
+		elseif kind == "Embers" then
+			local size = math.random(2, 5)
+			f.Speed = 0.05 + math.random() * 0.07
+			f.Frame = New("Frame", { Size = UDim2.fromOffset(size, size), BackgroundColor3 = color:Lerp(Color3.fromRGB(255, 230, 150), math.random() * 0.5),
+				BackgroundTransparency = 0.2, Parent = BackdropFrame }, { CornerFixed(1) })
+		elseif kind == "Fireflies" then
+			local size = math.random(3, 6)
+			f.Pulse = 1.2 + math.random() * 2
+			f.Frame = New("Frame", { Size = UDim2.fromOffset(size, size), BackgroundColor3 = color, BackgroundTransparency = 0.2, Parent = BackdropFrame },
+				{ CornerFixed(size), New("Frame", { AnchorPoint = Vector2.new(0.5, 0.5), Position = UDim2.fromScale(0.5, 0.5),
+					Size = UDim2.fromOffset(size * 4, size * 4), BackgroundColor3 = color, BackgroundTransparency = 0.88 }, { CornerFixed(size * 2) }) })
+		elseif kind == "Stars" then
+			local size = math.random(1, 3)
+			f.Pulse = 0.6 + math.random() * 2.2
+			f.Frame = New("Frame", { Size = UDim2.fromOffset(size, size), BackgroundColor3 = color, BackgroundTransparency = 0.3,
+				Position = UDim2.fromScale(f.X, f.Y), Parent = BackdropFrame }, { CornerFixed(size) })
+		elseif kind == "Glyphs" then
+			f.Speed = 0.06 + math.random() * 0.1
+			-- plain Instance.new so the global font switch never touches these
+			local t = Instance.new("TextLabel")
+			t.BackgroundTransparency = 1
+			t.Size = UDim2.fromOffset(14, 16)
+			t.Font = Enum.Font.RobotoMono
+			t.TextSize = math.random(10, 16)
+			t.TextColor3 = color
+			t.TextTransparency = 0.3 + math.random() * 0.55
+			t.Text = GLYPH_CHARS[math.random(#GLYPH_CHARS)]
+			t.Parent = BackdropFrame
+			f.Frame = t
+		end
+		table.insert(Snow.Flakes, f)
 	end
 end
 
--- opts (all optional): Count, Speed, Dim
+function Lumen:_RefreshParticles()
+	if Snow.Enabled then BuildFlakes() end
+end
+
+-- opts (all optional): Count, Speed, Dim, Kind
 function Lumen:SetSnow(enabled, opts)
 	if opts then
 		if opts.Count then Snow.Count = math.floor(opts.Count) end
 		if opts.Speed then Snow.Speed = opts.Speed end
 		if opts.Dim then Backdrop.Dim = opts.Dim end
+		if opts.Kind then Snow.Kind = opts.Kind end
 	end
 	Snow.Enabled = enabled and true or false
 	BuildFlakes()
 	SyncOption("Lumen_Snow", Snow.Enabled)
 	self:_UpdateSnow()
 end
+Lumen.SetParticlesEnabled = Lumen.SetSnow
 
 function Lumen:SetSnowOptions(opts)
-	if opts.Count then
-		Snow.Count = math.floor(opts.Count)
-		if Snow.Enabled then BuildFlakes() end
-	end
+	if opts.Kind then Snow.Kind = opts.Kind end
+	if opts.Count then Snow.Count = math.floor(opts.Count) end
 	if opts.Speed then Snow.Speed = opts.Speed end
+	if (opts.Kind or opts.Count) and Snow.Enabled then BuildFlakes() end
+end
+
+-- "Theme" follows the active theme; or "Snow", "Bubbles", "Petals", "Embers", "Fireflies", "Stars", "Glyphs"
+function Lumen:SetParticles(kind)
+	self:SetSnowOptions({ Kind = kind })
+	SyncOption("Lumen_Particles", kind)
 end
 
 -- opts: Dim (0-1 darkness of the backdrop), Blur (0-40 world blur)
@@ -2238,15 +2750,65 @@ end
 Connect(RunService.RenderStepped, function(dt)
 	if not BackdropFrame.Visible or #Snow.Flakes == 0 then return end
 	Snow.Time = Snow.Time + dt
+	local t, sp, kind = Snow.Time, Snow.Speed, Snow.Built
 	for _, f in ipairs(Snow.Flakes) do
-		f.Y = f.Y + f.Speed * Snow.Speed * dt
-		if f.Y > 1.03 then
-			f.Y = -0.03
-			f.X = math.random()
+		if kind == "Snow" then
+			f.Y = f.Y + f.Speed * sp * dt
+			if f.Y > 1.03 then f.Y = -0.03 f.X = math.random() end
+			f.Frame.Position = UDim2.fromScale(f.X + math.sin(t * f.Sway + f.Phase) * 0.008, f.Y)
+		elseif kind == "Bubbles" then
+			f.Y = f.Y - f.Speed * sp * dt
+			if f.Y < -0.04 then f.Y = 1.04 f.X = math.random() end
+			f.Frame.Position = UDim2.fromScale(f.X + math.sin(t * f.Sway * 1.6 + f.Phase) * 0.012, f.Y)
+		elseif kind == "Petals" then
+			f.Y = f.Y + f.Speed * sp * dt
+			f.Rot = f.Rot + f.Spin * sp * dt
+			if f.Y > 1.05 then f.Y = -0.05 f.X = math.random() end
+			f.Frame.Position = UDim2.fromScale(f.X + math.sin(t * f.Sway + f.Phase) * 0.035, f.Y)
+			f.Frame.Rotation = f.Rot
+		elseif kind == "Embers" then
+			f.Y = f.Y - f.Speed * sp * dt
+			if f.Y < -0.03 then f.Y = 1.03 f.X = math.random() end
+			f.Frame.Position = UDim2.fromScale(f.X + math.sin(t * f.Sway * 2 + f.Phase) * 0.018, f.Y)
+			f.Frame.BackgroundTransparency = math.clamp(0.1 + (1 - f.Y) * 0.75 + 0.15 * math.sin(t * 13 + f.Phase), 0, 1)
+		elseif kind == "Fireflies" then
+			f.X = (f.X + math.sin(t * f.Sway * 0.7 + f.Phase) * 0.018 * sp * dt) % 1
+			f.Y = (f.Y + math.cos(t * f.Sway * 0.5 + f.Phase * 2) * 0.014 * sp * dt) % 1
+			f.Frame.Position = UDim2.fromScale(f.X, f.Y)
+			f.Frame.BackgroundTransparency = 0.15 + 0.75 * (0.5 + 0.5 * math.sin(t * f.Pulse + f.Phase))
+		elseif kind == "Stars" then
+			f.Frame.BackgroundTransparency = 0.15 + 0.75 * (0.5 + 0.5 * math.sin(t * f.Pulse * sp + f.Phase))
+		elseif kind == "Glyphs" then
+			f.Y = f.Y + f.Speed * sp * dt
+			if f.Y > 1.03 then f.Y = -0.03 f.X = math.random() end
+			if math.random() < dt * 1.5 then f.Frame.Text = GLYPH_CHARS[math.random(#GLYPH_CHARS)] end
+			f.Frame.Position = UDim2.fromScale(f.X, f.Y)
 		end
-		f.Frame.Position = UDim2.fromScale(f.X + math.sin(Snow.Time * f.Sway + f.Phase) * 0.008, f.Y)
 	end
 end)
+
+-- The non-colour half of a theme. Keys (all optional):
+--   Radius (corner scale), Glow (glow strength, 0 = off), Font ("Inter" | "Gotham" | "Mono"),
+--   Particles + ParticleColor, Tint + TintPlace ("Top" | "Bottom" | "Aurora") + TintAmount,
+--   TopLine = {Color3, Color3} (light along the window's top edge), Scanlines (bool)
+function Lumen:SetStyle(st)
+	local new = { Radius = 1, Glow = 1, Particles = "Snow", ParticleColor = Color3.new(1, 1, 1) }
+	for k, v in pairs(st or {}) do new[k] = v end
+	self.Style = new
+	for _, d in ipairs(Gui:GetDescendants()) do
+		if d:IsA("UICorner") then
+			local r = d:GetAttribute("R")
+			if r then d.CornerRadius = UDim.new(0, math.floor(r * new.Radius + 0.5)) end
+		end
+	end
+	for i = #Glows, 1, -1 do
+		local g = Glows[i]
+		if g.rings[1] and g.rings[1].Parent and g.rings[1].Parent.Parent then g:Set(g.mult) else table.remove(Glows, i) end
+	end
+	if new.Font then self:SetFont(new.Font) end
+	for _, e in ipairs(Surfaces) do StyleSurface(e) end
+	self:_RefreshParticles()
+end
 
 -- faint diagonal text tiled over the whole screen (anti-leak watermark). Pass nil to remove.
 local ScreenWM
@@ -2282,7 +2844,9 @@ local function EnsureDock()
 		Theme = { BackgroundColor3 = "Background" },
 	}, { Corner(11), Stroke(nil, true), Pad(7, 7, 7, 7),
 		List(6, Enum.FillDirection.Horizontal, Enum.HorizontalAlignment.Left, Enum.VerticalAlignment.Center) })
-	MakeDraggable(Dock, Dock)
+	RegisterSurface(Dock, "Dock")
+	MakeDraggable(Dock, Dock, nil, "Dock")
+	SnapHomes[Dock] = Dock.Position
 	return Dock
 end
 
@@ -2583,19 +3147,18 @@ function Lumen:_PaletteKey(kc)
 end
 
 -- `which` lists the built-in dock buttons to show (default: menu, hotkeys, palette = the reference dock).
--- "watermark" and "snow" are always created but stay hidden unless listed (or switched on in the config tab).
+-- A "particles" button also exists but stays hidden unless listed (or switched on in the config tab's Layout group).
 function Lumen:_InitDock(W, which)
 	if self._dockInit then return end
 	self._dockInit = true
 	local want = {}
 	for _, k in ipairs(which or { "menu", "hotkeys", "palette" }) do want[k] = true end
+	if want.snow then want.particles = true end
 	self:AddDockButton({ Icon = "window", Tooltip = "Toggle menu", Order = 1, Visible = want.menu ~= nil,
 		Callback = function() W:Toggle() end, Active = function() return W.Visible end })
 	self:AddDockButton({ Icon = "keyboard", Tooltip = "Hotkey list", Order = 30, Visible = want.hotkeys ~= nil,
 		Callback = function() Lumen:SetHotkeysVisible(not Lumen.ShowHotkeys) end, Active = function() return Lumen.ShowHotkeys end })
-	self:AddDockButton({ Icon = "list", Tooltip = "Watermark", Order = 32, Visible = want.watermark ~= nil,
-		Callback = function() Lumen:SetWatermarkVisible(not Lumen.ShowWatermark) end, Active = function() return Lumen.ShowWatermark end })
-	self:AddDockButton({ Icon = "snow", Tooltip = "Snow", Order = 34, Visible = want.snow ~= nil,
+	self:AddDockButton({ Icon = "snow", Tooltip = "Particles", Order = 34, Visible = want.particles ~= nil,
 		Callback = function() Lumen:SetSnow(not Snow.Enabled) end, Active = function() return Snow.Enabled end })
 	self:AddDockButton({ Icon = "command", Tooltip = "Command palette (Ctrl+K)", Order = 40, Visible = want.palette ~= nil,
 		Callback = function() Lumen:TogglePalette() end, Active = function() return Palette.Open end })
@@ -2629,6 +3192,7 @@ function Lumen:CreateWindow(o)
 		Parent = Gui, Theme = { BackgroundColor3 = "Background" },
 	}, { Corner(10), Stroke(nil, true) })
 	RegisterScale(main)
+	RegisterSurface(main, "Window")
 	W.Frame = main
 
 	local header = New("Frame", { BackgroundTransparency = 1, Size = UDim2.new(1, 0, 0, 50), Parent = main })
@@ -3000,7 +3564,7 @@ function Lumen:CreateWindow(o)
 			Callback = function(v) Lumen.ShowNotifications = v end })
 		menu:AddSlider({ Text = "UI scale", Min = 0.7, Max = 1.4, Default = Lumen.Scale, Increment = 0.05, Suffix = "x",
 			Flag = "Lumen_Scale", Callback = function(v) Lumen:SetScale(v) end })
-		Lumen._fontDropdown = menu:AddDropdown({ Text = "Font", Values = { "Inter", "Gotham" }, Default = Lumen.FontName,
+		Lumen._fontDropdown = menu:AddDropdown({ Text = "Font", Values = { "Inter", "Gotham", "Mono" }, Default = Lumen.FontName,
 			Callback = function(v)
 				if v == "Inter" and not Lumen._interAsset then
 					Lumen:Notify({ Title = "Font", Content = "Inter needs file support in your executor. Using Gotham.", Type = "Warning" })
@@ -3015,16 +3579,34 @@ function Lumen:CreateWindow(o)
 			Callback = function() Lumen:Unload() end })
 
 		local fx = tab:AddGroup("Effects", "Left")
-		fx:AddToggle({ Text = "Snow", Default = Snow.Enabled, Flag = "Lumen_Snow",
+		fx:AddToggle({ Text = "Particles", Default = Snow.Enabled, Flag = "Lumen_Snow",
 			Callback = function(v) Lumen:SetSnow(v) end })
-		fx:AddSlider({ Text = "Snow amount", Min = 10, Max = 200, Default = Snow.Count, Flag = "Lumen_SnowCount",
+		fx:AddDropdown({ Text = "Particle style", Values = Lumen.ParticleKinds, Default = Snow.Kind, Flag = "Lumen_Particles",
+			Callback = function(v) if v then Lumen:SetSnowOptions({ Kind = v }) end end })
+		fx:AddSlider({ Text = "Amount", Min = 10, Max = 200, Default = Snow.Count, Flag = "Lumen_SnowCount",
 			Callback = function(v) Lumen:SetSnowOptions({ Count = v }) end })
-		fx:AddSlider({ Text = "Snow speed", Min = 0.2, Max = 3, Default = Snow.Speed, Increment = 0.1, Suffix = "x",
+		fx:AddSlider({ Text = "Speed", Min = 0.2, Max = 3, Default = Snow.Speed, Increment = 0.1, Suffix = "x",
 			Flag = "Lumen_SnowSpeed", Callback = function(v) Lumen:SetSnowOptions({ Speed = v }) end })
 		fx:AddSlider({ Text = "Backdrop dim", Min = 0, Max = 90, Default = math.floor(Backdrop.Dim * 100), Suffix = "%",
 			Flag = "Lumen_Dim", Callback = function(v) Lumen:SetBackdrop({ Dim = v / 100 }) end })
 		fx:AddSlider({ Text = "Backdrop blur", Min = 0, Max = 40, Default = Backdrop.Blur,
 			Flag = "Lumen_Blur", Callback = function(v) Lumen:SetBackdrop({ Blur = v }) end })
+
+		-- HUD pieces glide back to their spot after you drag them
+		local hud = tab:AddGroup("HUD Positions", "Left")
+		local sb = Lumen.SnapBack
+		hud:AddToggle({ Text = "Return to place after dragging", Default = sb.Enabled, Flag = "Lumen_Snap",
+			Callback = function(v) sb.Enabled = v end })
+		hud:AddSlider({ Text = "Return after", Min = 1, Max = 30, Default = sb.Delay, Suffix = "s", Flag = "Lumen_SnapDelay",
+			Callback = function(v) sb.Delay = v end })
+		hud:AddToggle({ Text = "Dock", Default = sb.Dock, Flag = "Lumen_SnapDock", Callback = function(v) sb.Dock = v end })
+		hud:AddToggle({ Text = "Hotkey list", Default = sb.Hotkeys, Flag = "Lumen_SnapHotkeys", Callback = function(v) sb.Hotkeys = v end })
+		hud:AddToggle({ Text = "Watermark", Default = sb.Watermark, Flag = "Lumen_SnapWatermark", Callback = function(v) sb.Watermark = v end })
+		hud:AddButton({ Text = "Return now", Callback = function() Lumen:ResetHudPositions() end })
+			:AddSubButton({ Text = "Set as home", Callback = function()
+				Lumen:SetHudHome()
+				Lumen:Notify({ Title = "HUD", Content = "Current positions saved as home.", Type = "Success" })
+			end })
 
 		-- turn tabs and sections on or off (rebuilt every time this tab is opened)
 		local layout = tab:AddGroup("Layout", "Left")
@@ -3061,13 +3643,26 @@ function Lumen:CreateWindow(o)
 		local names = {}
 		for n in pairs(Lumen.Presets) do table.insert(names, n) end
 		table.sort(names)
-		th:AddDropdown({ Text = "Preset", Values = names, Default = "Lavender",
+		local DESCRIPTIONS = {
+			Lavender = "The reference look: soft lilac, snow.",
+			Ocean = "Rounder, deep-water glow, rising bubbles.",
+			Rose = "Extra round and glowy, drifting petals.",
+			Emerald = "Aurora band up top, fireflies.",
+			Sunset = "Warm glow from below, rising embers.",
+			Mono = "Sharp corners, no glow, monospace, scanlines, glyph rain.",
+		}
+		local desc
+		th:AddDropdown({ Text = "Preset", Values = names, Default = Lumen.Preset, Flag = "Lumen_Preset",
 			Callback = function(v)
 				if v then
 					Lumen:ApplyPreset(v)
 					SyncPickers()
+					if desc then desc:SetText(DESCRIPTIONS[v] or "") end
 				end
 			end })
+		desc = th:AddLabel(DESCRIPTIONS[Lumen.Preset] or "", { Dim = true })
+		th:AddSlider({ Text = "Theme fade", Min = 0, Max = 1, Default = Lumen.ThemeTransition, Increment = 0.05, Suffix = "s",
+			Flag = "Lumen_ThemeFade", Callback = function(v) Lumen.ThemeTransition = v end })
 		for _, entry in ipairs({ { "Accent", "Accent" }, { "Background", "Window" }, { "Group", "Panels" },
 			{ "Control", "Controls" }, { "Outline", "Outlines" }, { "Border", "Borders" },
 			{ "Text", "Text" }, { "Label", "Labels" }, { "TextDim", "Dim text" } }) do
@@ -3084,15 +3679,19 @@ function Lumen:CreateWindow(o)
 
 		local tests = tab:AddGroup("Tests", "Right")
 		tests:AddButton({ Text = "Success", Callback = function()
-			Lumen:Notify({ Title = "Success", Content = "Everything worked as expected.", Type = "Success" })
-		end }):AddSubButton({ Text = "Failure", Callback = function()
-			Lumen:Notify({ Title = "Failure", Content = "Something went wrong. Try again.", Type = "Danger" })
+			Lumen:Notify({ Title = "Success", Content = "Settings applied and saved.", Type = "Success" })
+		end }):AddSubButton({ Text = "Warning", Callback = function()
+			Lumen:Notify({ Title = "Warning", Content = "This feature can be unstable in some games.", Type = "Warning" })
 		end })
-		tests:AddButton({ Text = "Warning", Callback = function()
-			Lumen:Notify({ Title = "Warning", Content = "This setting may cause issues.", Type = "Warning" })
+		tests:AddButton({ Text = "Error", Callback = function()
+			Lumen:Notify({ Title = "Error", Content = "Couldn't reach the server. Try again in a moment.", Type = "Error" })
 		end }):AddSubButton({ Text = "Info", Callback = function()
 			Lumen:Notify({ Title = "Info", Content = "Press Ctrl+K to search every option.", Type = "Info" })
 		end })
+		tests:AddButton({ Text = "Loading -> Done", Callback = function()
+			local n = Lumen:Notify({ Title = "Loading", Content = "Fetching your config...", Type = "Loading" })
+			task.delay(2, function() n:Update({ Title = "Done", Content = "Config loaded.", Type = "Success" }) end)
+		end }):AddSubButton({ Text = "Plain", Callback = function() Lumen:Notify("test notif") end })
 		tests:AddButton({ Text = "Test confirmation", Callback = function()
 			Lumen:Confirm({
 				Title = "Run the confirmation test?", Type = "Warning", Confirm = "Confirm", Hold = 1,
@@ -3159,7 +3758,7 @@ function Lumen:CreateWindow(o)
 		local mb = New("TextButton", {
 			Size = UDim2.fromOffset(44, 44), Position = UDim2.new(0, 14, 0.5, -22), Text = "UI",
 			BackgroundTransparency = 0, ZIndex = 20, Parent = Gui, Theme = { BackgroundColor3 = "Group" },
-		}, { Corner(22), Stroke("Border") })
+		}, { CornerFixed(22), Stroke("Border") })
 		Connect(mb.MouseButton1Click, function() W:Toggle() end)
 	end
 
@@ -3252,7 +3851,7 @@ end
 -- Inter font: downloaded once into the Lumen folder (needs writefile + getcustomasset), otherwise Gotham stays.
 if not env.LumenNoInter then
 	task.spawn(function()
-		if Lumen:_LoadInter() and not Lumen.Unloaded then Lumen:SetFont("Inter") end
+		if Lumen:_LoadInter() and not Lumen.Unloaded and Lumen.FontName == "Inter" then Lumen:SetFont("Inter") end
 	end)
 end
 
