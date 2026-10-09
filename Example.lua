@@ -7,8 +7,8 @@
 local Lumen = loadstring(game:HttpGet("https://raw.githubusercontent.com/Irakli17/Ui-Library-Test/main/Lumen.lua"))({
 	Id = "LumenExample",
 	Folder = "LumenExample",
-	-- Theme = "Cosmos",          -- start in any theme: Lavender (default), Ocean, Rose, Emerald, Sunset, Mono, Synthwave, Frost, Royal,
-	--                               Candy, Arcade, Cosmos, Storm, Blueprint, Noir, Prism, Hazard, Glass, Haunted, Parchment
+	-- Theme = "Cosmos",          -- start in any theme: Lavender (default), Ocean, Rose, Emerald, Sunset, Mono, Frost, Royal,
+	--                               Candy, Arcade, Cosmos, Storm, Blueprint, Prism, Hazard, Glass, Criminality, MLG
 	-- AssetBase = "https://your.host/icons/",   -- optional: where the high-res icon PNGs live (defaults to this repo)
 })
 
@@ -21,7 +21,7 @@ local LocalPlayer = Players.LocalPlayer
 local Window = Lumen:CreateWindow({
 	Title = "Lumen Interface Suite",
 	Tag = "Pro",                         -- green pill
-	Version = "v0.0.3",                  -- red pill
+	Version = "v0.0.4",                  -- red pill
 	Subtitle = "Example Game",
 	Footer = "discord.gg/yourserver",
 	WatermarkTitle = "Lumen V2",
@@ -118,7 +118,7 @@ Tests:AddButton({ Text = "Loading -> Done", Callback = function()
 	local n = Lumen:Notify({ Title = "Injecting", Content = "Preparing features...", Type = "Loading" })
 	task.delay(2, function() n:Update({ Title = "Ready", Content = "Everything loaded.", Type = "Success" }) end)
 end }):AddSubButton({ Text = "With buttons", Callback = function()
-	Lumen:Notify({ Title = "Update available", Content = "Version 0.0.3 is out.", Type = "Info", Duration = 8,
+	Lumen:Notify({ Title = "Update available", Content = "Version 0.0.5 is out.", Type = "Info", Duration = 8,
 		Actions = { { Text = "Changelog", Callback = function() Lumen:Notify("Opening changelog...") end }, { Text = "Later" } } })
 end })
 Tests:AddButton({

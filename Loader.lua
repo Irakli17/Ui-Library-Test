@@ -3,7 +3,7 @@
 
 	local Lumen = loadstring(game:HttpGet("https://raw.githubusercontent.com/Irakli17/Ui-Library-Test/main/Loader.lua"))()({
 		Id = "MyHub",          -- any Lumen load option (Id, Theme, Folder, Font, ...)
-		Version = "main",      -- branch or tag to load, e.g. "v0.0.3-stable" to pin a release
+		Version = "main",      -- branch or tag to load, e.g. "v0.0.4-stable" to pin a release
 	})
 
 	What it does:

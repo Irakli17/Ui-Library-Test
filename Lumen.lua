@@ -1,7 +1,7 @@
 --!nocheck
 --!nolint
 --[[
-	Lumen UI Library  v0.0.3-stable
+	Lumen UI Library  v0.0.4-stable
 	Single file, no dependencies, loadstring-ready. Also works as a ModuleScript (require) in Studio.
 
 	local Lumen = loadstring(game:HttpGet("https://raw.githubusercontent.com/Irakli17/Ui-Library-Test/main/Lumen.lua"))()
@@ -50,7 +50,7 @@ local Lighting = Service("Lighting")
 local TextService = Service("TextService")
 
 local Lumen = {
-	Version = "v0.0.3-stable",
+	Version = "v0.0.4-stable",
 	Id = InstanceId,
 	LoadOptions = LoadOptions,
 	NotifyErrors = LoadOptions.NotifyErrors ~= false,   -- a crashing callback shows a red notification
@@ -114,9 +114,6 @@ local Lumen = {
 			Style = { Radius = 1, Glow = 1.3, Font = "Inter", Particles = "Embers", ParticleColor = Color3.fromRGB(255, 150, 70), Tint = Color3.fromRGB(235, 110, 60), TintPlace = "Bottom", TintAmount = 0.2, TopLine = { Color3.fromRGB(255, 160, 80), Color3.fromRGB(230, 80, 140) } } },
 		Mono = { Accent = Color3.fromRGB(190, 190, 196), Background = Color3.fromRGB(12, 12, 12), Group = Color3.fromRGB(17, 17, 17), GroupBorder = Color3.fromRGB(26, 26, 26), Control = Color3.fromRGB(25, 25, 25), ControlHover = Color3.fromRGB(36, 36, 36), Border = Color3.fromRGB(52, 52, 52), Outline = Color3.fromRGB(41, 41, 41), Text = Color3.fromRGB(222, 222, 222), Label = Color3.fromRGB(194, 194, 194), TextDim = Color3.fromRGB(136, 136, 136), TextMuted = Color3.fromRGB(106, 106, 106),
 			Style = { Radius = 0.25, Glow = 0, Font = "Mono", Particles = "Glyphs", ParticleColor = Color3.fromRGB(205, 205, 205), Scanlines = true } },
-		-- neon pink and cyan, wide futuristic type, an animated rainbow border and rising light streaks
-		Synthwave = { Accent = Color3.fromRGB(255, 92, 205), Background = Color3.fromRGB(16, 10, 26), Group = Color3.fromRGB(22, 14, 36), GroupBorder = Color3.fromRGB(38, 24, 58), Control = Color3.fromRGB(30, 19, 46), ControlHover = Color3.fromRGB(44, 28, 66), Border = Color3.fromRGB(86, 52, 120), Outline = Color3.fromRGB(58, 36, 84), Text = Color3.fromRGB(245, 232, 255), Label = Color3.fromRGB(225, 205, 245), TextDim = Color3.fromRGB(170, 140, 200), TextMuted = Color3.fromRGB(130, 104, 160),
-			Style = { Radius = 0.8, Glow = 1.8, Font = "Michroma", TextScale = 0.86, Particles = "Neon", ParticleColor = Color3.fromRGB(0, 229, 255), Tint = Color3.fromRGB(255, 60, 190), TintPlace = "Bottom", TintAmount = 0.22, TopLine = { Color3.fromRGB(0, 229, 255), Color3.fromRGB(255, 92, 205) }, Aura = { Color3.fromRGB(255, 92, 205), Color3.fromRGB(0, 229, 255), Color3.fromRGB(140, 90, 255), Color3.fromRGB(255, 92, 205) }, AuraSpeed = 0.5, AccentGradient = { Color3.fromRGB(255, 92, 205), Color3.fromRGB(0, 229, 255) } } },
 		-- pale ice, thin rounded type, a frosted inner border and slowly spinning crystals
 		Frost = { Accent = Color3.fromRGB(150, 215, 255), Background = Color3.fromRGB(12, 18, 26), Group = Color3.fromRGB(16, 24, 34), GroupBorder = Color3.fromRGB(26, 38, 52), Control = Color3.fromRGB(22, 32, 44), ControlHover = Color3.fromRGB(32, 46, 62), Border = Color3.fromRGB(60, 86, 112), Outline = Color3.fromRGB(42, 60, 80), Text = Color3.fromRGB(232, 244, 255), Label = Color3.fromRGB(205, 224, 240), TextDim = Color3.fromRGB(140, 166, 190), TextMuted = Color3.fromRGB(105, 128, 150),
 			Style = { Radius = 1.25, Glow = 1.2, Font = "Jura", TextScale = 1.08, Particles = "Crystals", ParticleColor = Color3.fromRGB(215, 240, 255), Tint = Color3.fromRGB(120, 190, 255), TintPlace = "Top", TintAmount = 0.14, TopLine = { Color3.fromRGB(230, 248, 255), Color3.fromRGB(120, 190, 255) }, InnerLine = Color3.fromRGB(170, 215, 255), AccentGradient = { Color3.fromRGB(235, 248, 255), Color3.fromRGB(120, 190, 255) } } },
@@ -129,18 +126,21 @@ local Lumen = {
 		-- 8-bit: pixel font, square corners, a thick yellow border, CRT scanlines and stepping pixels
 		Arcade = { Accent = Color3.fromRGB(255, 214, 0), Background = Color3.fromRGB(8, 8, 14), Group = Color3.fromRGB(12, 12, 22), GroupBorder = Color3.fromRGB(30, 30, 58), Control = Color3.fromRGB(18, 18, 32), ControlHover = Color3.fromRGB(28, 28, 50), Border = Color3.fromRGB(70, 70, 140), Outline = Color3.fromRGB(44, 44, 90), Text = Color3.fromRGB(240, 240, 255), Label = Color3.fromRGB(210, 210, 240), TextDim = Color3.fromRGB(140, 140, 190), TextMuted = Color3.fromRGB(100, 100, 150),
 			Style = { Radius = 0, Glow = 0.6, Font = "Arcade", TextScale = 0.72, Particles = "Pixels", ParticleColor = Color3.fromRGB(90, 255, 170), Scanlines = true, Aura = { Color3.fromRGB(255, 214, 0), Color3.fromRGB(255, 214, 0) }, AuraSpeed = 0, AuraThickness = 2 } },
-		-- deep space: violet nebula band, a slowly turning aurora border, stars and shooting stars
-		Cosmos = { Accent = Color3.fromRGB(150, 120, 255), Background = Color3.fromRGB(8, 8, 18), Group = Color3.fromRGB(12, 12, 26), GroupBorder = Color3.fromRGB(24, 22, 46), Control = Color3.fromRGB(18, 17, 36), ControlHover = Color3.fromRGB(28, 26, 54), Border = Color3.fromRGB(64, 56, 120), Outline = Color3.fromRGB(40, 36, 78), Text = Color3.fromRGB(236, 234, 255), Label = Color3.fromRGB(210, 206, 245), TextDim = Color3.fromRGB(150, 144, 200), TextMuted = Color3.fromRGB(110, 104, 160),
-			Style = { Radius = 1.15, Glow = 1.5, Font = "TitilliumWeb", TextScale = 1.05, Particles = "Starfield", ParticleColor = Color3.fromRGB(230, 230, 255), Tint = Color3.fromRGB(110, 70, 255), TintPlace = "Aurora", TintAmount = 0.18, TopLine = { Color3.fromRGB(150, 120, 255), Color3.fromRGB(80, 200, 255) }, Aura = { Color3.fromRGB(150, 120, 255), Color3.fromRGB(80, 200, 255), Color3.fromRGB(255, 120, 220), Color3.fromRGB(150, 120, 255) }, AuraSpeed = 0.15, AccentGradient = { Color3.fromRGB(170, 130, 255), Color3.fromRGB(80, 200, 255) } } },
+		-- deep space: drifting violet and blue nebula clouds over a parallax star layer inside the window, the same nebula
+		-- faintly across the whole screen, a slowly turning aurora border, twinkling stars, shooting stars and comets
+		Cosmos = { Accent = Color3.fromRGB(160, 130, 255), Background = Color3.fromRGB(7, 7, 17), Group = Color3.fromRGB(11, 11, 25), GroupBorder = Color3.fromRGB(26, 24, 52), Control = Color3.fromRGB(18, 17, 38), ControlHover = Color3.fromRGB(28, 26, 56), Border = Color3.fromRGB(70, 60, 130), Outline = Color3.fromRGB(42, 38, 82), Text = Color3.fromRGB(238, 236, 255), Label = Color3.fromRGB(214, 210, 248), TextDim = Color3.fromRGB(156, 150, 206), TextMuted = Color3.fromRGB(114, 108, 166),
+			Style = { Radius = 1.2, Glow = 1.6, Font = "TitilliumWeb", TextScale = 1.05, Particles = "Galaxy", ParticleColor = Color3.fromRGB(225, 228, 255), Tint = Color3.fromRGB(110, 70, 255), TintPlace = "Aurora", TintAmount = 0.14,
+				TopLine = { Color3.fromRGB(170, 140, 255), Color3.fromRGB(90, 210, 255) },
+				Aura = { Color3.fromRGB(160, 130, 255), Color3.fromRGB(90, 210, 255), Color3.fromRGB(255, 120, 220), Color3.fromRGB(120, 90, 255), Color3.fromRGB(160, 130, 255) }, AuraSpeed = 0.1, AuraThickness = 1.4,
+				AccentGradient = { Color3.fromRGB(180, 140, 255), Color3.fromRGB(90, 210, 255) },
+				Texture = { { Image = "nebula", Transparency = 0.5, Drift = 0.03, Zoom = 0.9 }, { Image = "stars", Transparency = 0.15, Drift = 0.055, Zoom = 1.15, Pulse = 0.25 } },
+				BackdropTexture = { Image = "nebula", Transparency = 0.84, Drift = 0.012, Zoom = 0.6 } } },
 		-- slate and steel, condensed type, slanted rain and distant lightning
 		Storm = { Accent = Color3.fromRGB(120, 180, 255), Background = Color3.fromRGB(13, 15, 19), Group = Color3.fromRGB(18, 21, 26), GroupBorder = Color3.fromRGB(28, 32, 40), Control = Color3.fromRGB(24, 28, 35), ControlHover = Color3.fromRGB(34, 39, 48), Border = Color3.fromRGB(62, 72, 88), Outline = Color3.fromRGB(42, 48, 60), Text = Color3.fromRGB(226, 232, 242), Label = Color3.fromRGB(200, 208, 222), TextDim = Color3.fromRGB(140, 150, 168), TextMuted = Color3.fromRGB(104, 112, 128),
 			Style = { Radius = 0.9, Glow = 1.25, Font = "Oswald", TextScale = 1.05, Particles = "Rain", ParticleColor = Color3.fromRGB(170, 200, 240), Tint = Color3.fromRGB(90, 120, 170), TintPlace = "Top", TintAmount = 0.16, TopLine = { Color3.fromRGB(200, 225, 255), Color3.fromRGB(120, 180, 255) }, Lightning = true } },
 		-- drafting paper: navy blue, a white grid, a ruled double border, handwritten labels and drafting marks
 		Blueprint = { Accent = Color3.fromRGB(225, 238, 255), Background = Color3.fromRGB(18, 48, 92), Group = Color3.fromRGB(22, 56, 104), GroupBorder = Color3.fromRGB(52, 90, 140), Control = Color3.fromRGB(28, 64, 116), ControlHover = Color3.fromRGB(40, 80, 136), Border = Color3.fromRGB(120, 160, 210), Outline = Color3.fromRGB(70, 110, 165), Text = Color3.fromRGB(240, 246, 255), Label = Color3.fromRGB(214, 228, 248), TextDim = Color3.fromRGB(150, 180, 220), TextMuted = Color3.fromRGB(115, 145, 190),
 			Style = { Radius = 0.3, Glow = 0.35, Font = "PatrickHand", TextScale = 1.15, Particles = "Drafting", ParticleColor = Color3.fromRGB(210, 230, 255), Grid = true, GridColor = Color3.fromRGB(220, 235, 255), InnerLine = Color3.fromRGB(200, 225, 255) } },
-		-- film noir: black, white and one red, typewriter type, a dark vignette and flickering film grain
-		Noir = { Accent = Color3.fromRGB(214, 40, 52), Background = Color3.fromRGB(11, 11, 11), Group = Color3.fromRGB(17, 17, 17), GroupBorder = Color3.fromRGB(30, 30, 30), Control = Color3.fromRGB(24, 24, 24), ControlHover = Color3.fromRGB(36, 36, 36), Border = Color3.fromRGB(70, 70, 70), Outline = Color3.fromRGB(44, 44, 44), Text = Color3.fromRGB(236, 236, 236), Label = Color3.fromRGB(205, 205, 205), TextDim = Color3.fromRGB(140, 140, 140), TextMuted = Color3.fromRGB(105, 105, 105),
-			Style = { Radius = 0.3, Glow = 0.9, Font = "SpecialElite", TextScale = 1.02, Particles = "FilmGrain", ParticleColor = Color3.fromRGB(230, 230, 230), Vignette = true, TopLine = { Color3.fromRGB(214, 40, 52), Color3.fromRGB(120, 20, 28) } } },
 		-- prism: a rainbow border that turns, accents that cycle through the spectrum, rising glass shards
 		Prism = { Accent = Color3.fromRGB(180, 160, 255), Background = Color3.fromRGB(12, 12, 18), Group = Color3.fromRGB(17, 17, 26), GroupBorder = Color3.fromRGB(30, 30, 44), Control = Color3.fromRGB(24, 24, 36), ControlHover = Color3.fromRGB(34, 34, 50), Border = Color3.fromRGB(70, 70, 100), Outline = Color3.fromRGB(44, 44, 64), Text = Color3.fromRGB(240, 240, 255), Label = Color3.fromRGB(215, 215, 235), TextDim = Color3.fromRGB(150, 150, 180), TextMuted = Color3.fromRGB(110, 110, 140),
 			Style = { Radius = 1.25, Glow = 1.6, Font = "Ubuntu", TextScale = 1, Particles = "Prisms", AccentCycle = true, Tint = Color3.fromRGB(120, 80, 255), TintPlace = "Aurora", TintAmount = 0.12,
@@ -155,14 +155,20 @@ local Lumen = {
 		Glass = { Accent = Color3.fromRGB(170, 215, 255), Background = Color3.fromRGB(22, 26, 36), Group = Color3.fromRGB(30, 36, 50), GroupBorder = Color3.fromRGB(60, 70, 92), Control = Color3.fromRGB(38, 45, 62), ControlHover = Color3.fromRGB(52, 60, 80), Border = Color3.fromRGB(110, 125, 155), Outline = Color3.fromRGB(70, 82, 108), Text = Color3.fromRGB(245, 248, 255), Label = Color3.fromRGB(220, 228, 242), TextDim = Color3.fromRGB(160, 172, 195), TextMuted = Color3.fromRGB(122, 134, 158),
 			Style = { Radius = 1.6, Glow = 1, Font = "Nunito", TextScale = 1.04, Particles = "Bokeh", ParticleColor = Color3.fromRGB(180, 210, 255), SurfaceTransparency = 0.35, Blur = 18, InnerLine = Color3.fromRGB(255, 255, 255),
 				TopLine = { Color3.fromRGB(255, 255, 255), Color3.fromRGB(170, 215, 255) }, AccentGradient = { Color3.fromRGB(220, 240, 255), Color3.fromRGB(140, 190, 255) } } },
-		-- haunted: pumpkin orange on midnight purple, dripping type, ghostly green fog below, bats overhead
-		Haunted = { Accent = Color3.fromRGB(255, 140, 40), Background = Color3.fromRGB(14, 10, 20), Group = Color3.fromRGB(20, 14, 28), GroupBorder = Color3.fromRGB(36, 26, 48), Control = Color3.fromRGB(28, 20, 38), ControlHover = Color3.fromRGB(40, 30, 54), Border = Color3.fromRGB(86, 60, 110), Outline = Color3.fromRGB(54, 38, 70), Text = Color3.fromRGB(245, 236, 225), Label = Color3.fromRGB(225, 212, 200), TextDim = Color3.fromRGB(165, 145, 150), TextMuted = Color3.fromRGB(125, 105, 120),
-			Style = { Radius = 1.1, Glow = 1.5, Font = "Creepster", TextScale = 1.05, Particles = "Bats", ParticleColor = Color3.fromRGB(130, 90, 170), Tint = Color3.fromRGB(110, 220, 140), TintPlace = "Bottom", TintAmount = 0.13, Vignette = true,
-				TopLine = { Color3.fromRGB(255, 140, 40), Color3.fromRGB(150, 70, 220) }, AccentGradient = { Color3.fromRGB(255, 170, 60), Color3.fromRGB(170, 90, 255) } } },
-		-- parchment (a light theme): aged paper, ink-brown text, a wax-seal red accent, a calligraphic hand and falling leaves
-		Parchment = { Accent = Color3.fromRGB(156, 52, 40), Background = Color3.fromRGB(236, 224, 198), Group = Color3.fromRGB(243, 234, 212), GroupBorder = Color3.fromRGB(214, 196, 160), Control = Color3.fromRGB(229, 215, 186), ControlHover = Color3.fromRGB(221, 205, 172), Border = Color3.fromRGB(168, 140, 100), Outline = Color3.fromRGB(200, 178, 140), Text = Color3.fromRGB(52, 36, 24), Label = Color3.fromRGB(70, 50, 34), TextDim = Color3.fromRGB(120, 96, 72), TextMuted = Color3.fromRGB(148, 124, 98),
-			Style = { Radius = 0.55, Glow = 0.25, Font = "Fondamento", TextScale = 1.06, Particles = "Leaves", ParticleColor = Color3.fromRGB(200, 110, 50), InnerLine = Color3.fromRGB(120, 84, 54), Vignette = true,
-				Tint = Color3.fromRGB(150, 100, 50), TintPlace = "Top", TintAmount = 0.06 } },
+		-- criminality: a grimy brick alley at night under a failing sodium street lamp, blood-red accents, condensed type,
+		-- the title and screen glitching for a moment now and then, dust hanging in the lamp light, a glint along a blade
+		Criminality = { Accent = Color3.fromRGB(216, 50, 60), Background = Color3.fromRGB(12, 12, 13), Group = Color3.fromRGB(17, 17, 18), GroupBorder = Color3.fromRGB(32, 30, 31), Control = Color3.fromRGB(24, 23, 24), ControlHover = Color3.fromRGB(36, 34, 35), Border = Color3.fromRGB(70, 62, 62), Outline = Color3.fromRGB(44, 41, 42), Text = Color3.fromRGB(240, 236, 230), Label = Color3.fromRGB(214, 208, 202), TextDim = Color3.fromRGB(152, 146, 142), TextMuted = Color3.fromRGB(114, 108, 106),
+			Style = { Radius = 0.45, Glow = 1.2, Font = "RobotoCondensed", TextScale = 1.08, Particles = "Grit", ParticleColor = Color3.fromRGB(255, 196, 120), Tint = Color3.fromRGB(255, 160, 70), TintPlace = "Top", TintAmount = 0.07,
+				TopLine = { Color3.fromRGB(255, 240, 225), Color3.fromRGB(216, 50, 60) }, Vignette = true, Glitch = true,
+				AccentGradient = { Color3.fromRGB(240, 70, 80), Color3.fromRGB(150, 24, 34) },
+				Texture = { { Image = "brick", Transparency = 0.62, Drift = 0.006, Zoom = 1 }, { Image = "lamp", Mode = "Lamp", Color = Color3.fromRGB(255, 184, 105), Transparency = 0.55, Flicker = true } } } },
+		-- MLG: Mountain Dew green on black, a comic font, a fast spinning rainbow border, rainbow accents, spinning doritos,
+		-- hitmarkers popping everywhere and rainbow words slamming in
+		MLG = { Accent = Color3.fromRGB(140, 232, 20), Background = Color3.fromRGB(8, 8, 8), Group = Color3.fromRGB(14, 14, 14), GroupBorder = Color3.fromRGB(34, 34, 34), Control = Color3.fromRGB(22, 22, 22), ControlHover = Color3.fromRGB(34, 34, 34), Border = Color3.fromRGB(80, 80, 80), Outline = Color3.fromRGB(46, 46, 46), Text = Color3.fromRGB(255, 255, 255), Label = Color3.fromRGB(232, 232, 232), TextDim = Color3.fromRGB(168, 168, 168), TextMuted = Color3.fromRGB(124, 124, 124),
+			Style = { Radius = 1, Glow = 1.9, Font = "Cartoon", TextScale = 1.04, Particles = "MLG", ParticleColor = Color3.fromRGB(255, 140, 0), AccentCycle = true, CycleSpeed = 0.3,
+				Tint = Color3.fromRGB(140, 232, 20), TintPlace = "Bottom", TintAmount = 0.12, TopLine = { Color3.fromRGB(140, 232, 20), Color3.fromRGB(255, 140, 0) },
+				Aura = { Color3.fromRGB(255, 60, 60), Color3.fromRGB(255, 170, 0), Color3.fromRGB(240, 255, 60), Color3.fromRGB(60, 255, 120), Color3.fromRGB(60, 200, 255), Color3.fromRGB(150, 90, 255), Color3.fromRGB(255, 70, 220), Color3.fromRGB(255, 60, 60) },
+				AuraSpeed = 0.9, AuraThickness = 2 } },
 	},
 }
 env.LumenInstances[InstanceId] = Lumen
@@ -302,12 +308,14 @@ function Lumen:SetFont(name, fade)
 	local half = fade / 2
 	local dip = TweenInfo.new(half, Enum.EasingStyle.Sine, Enum.EasingDirection.In)
 	local rise = TweenInfo.new(half, Enum.EasingStyle.Sine, Enum.EasingDirection.Out)
+	-- Text rises back to its *resting* transparency (0, or the TTRest attribute), never to whatever value it had
+	-- mid-animation: reading the live value here is what used to leave dropdown values and tab names blank after
+	-- a theme switch (they were caught halfway through their own fade-in and restored to invisible).
 	local items = {}
 	for _, e in ipairs(FontObjs) do
 		local o = e[1]
-		if o.Parent and o:IsDescendantOf(Gui) then
-			local t0 = o:GetAttribute("TT0")
-			if t0 == nil then t0 = o.TextTransparency o:SetAttribute("TT0", t0) end
+		if o.Parent and o:IsDescendantOf(Gui) and not o:GetAttribute("NoDip") then
+			local t0 = o:GetAttribute("TTRest") or 0
 			table.insert(items, { o, t0 })
 			TweenService:Create(o, dip, { TextTransparency = math.min(1, t0 + 0.9) }):Play()
 		end
@@ -502,7 +510,7 @@ local function AccentEnds()
 	local a = StyleBlend and StyleBlend.A or 1
 	local function ends(st)
 		if st.AccentCycle then
-			local h = (os.clock() * 0.07) % 1
+			local h = (os.clock() * (st.CycleSpeed or 0.07)) % 1
 			return Color3.fromHSV(h, 0.5, 1), Color3.fromHSV((h + 0.3) % 1, 0.5, 1)
 		end
 		local g = st.AccentGradient
@@ -532,6 +540,22 @@ table.insert(Refreshers, function()
 		if AccentFills[i].Frame.Parent then PaintAccent(AccentFills[i]) else table.remove(AccentFills, i) end
 	end
 end)
+
+-- Theme textures (nebula, stars, brick, lamp light, ...): high-res PNGs downloaded on first use, cached on disk.
+-- Style.Texture = { {Image = "nebula", Transparency = 0.55, Drift = 0.03, Zoom = 1, Pulse = 0.1, Color = Color3}, ... }
+-- Image may be a built-in name (assets/textures/<name>.png) or any rbxassetid:// / rbxasset:// / getcustomasset id.
+local TextureImages = {}
+Lumen.TextureAssets = TextureImages
+if type(LoadOptions.Textures) == "table" then for k, v in pairs(LoadOptions.Textures) do TextureImages[k] = v end end
+local RequestTexture = function() end -- replaced by the loader at the end of the file
+local function TextureImage(name)
+	if type(name) ~= "string" then return "" end
+	if name:find("^rbx") or name:find("^http") then return name end
+	if TextureImages[name] then return TextureImages[name] end
+	RequestTexture(name)
+	-- a cached file can load straight away
+	return TextureImages[name] or ""
+end
 
 -- Surfaces: windows, panels and the dock take the theme's tint gradient, top light, scanlines, aura border and inner line.
 local Surfaces = {}
@@ -715,6 +739,145 @@ local function StyleSurface(e)
 			end
 		end
 	end
+
+	-- texture layers: each image fades by how much of it the old and new theme use, so themes crossfade their art
+	local want = {}
+	for _, pair in ipairs({ { from, 1 - a }, { to, a } }) do
+		for _, L in ipairs(pair[1].Texture or {}) do
+			local key = tostring(L.Image) .. ":" .. tostring(L.Mode or "Fill")
+			local w = want[key] or { P = 0 }
+			w.P = w.P + pair[2]
+			if pair[2] > 0 or not w.Cfg then w.Cfg = L end
+			want[key] = w
+		end
+	end
+	e.Tex = e.Tex or {}
+	for key, w in pairs(want) do
+		local layer = e.Tex[key]
+		if not layer and w.P > 0.01 then
+			local lamp = w.Cfg.Mode == "Lamp"
+			layer = { Key = key, Phase = math.random() * 6.28, NextFlicker = 0, OffUntil = 0 }
+			layer.Label = New("ImageLabel", {
+				Name = "LumenTexture", BackgroundTransparency = 1, ImageTransparency = 1, ZIndex = 0, ScaleType = Enum.ScaleType.Stretch,
+				AnchorPoint = lamp and Vector2.new(0.5, 0) or Vector2.new(0, 0),
+				Position = lamp and UDim2.new(0.5, 0, 0, 0) or UDim2.new(0, 0, 0, 0),
+				Size = lamp and UDim2.fromScale(0.95, 0.9) or UDim2.fromScale(1, 1), Parent = e.Frame,
+			}, (not lamp) and { Corner(e.Radius) } or nil)
+			e.Tex[key] = layer
+		end
+		if layer then
+			layer.Cfg, layer.P = w.Cfg, math.clamp(w.P, 0, 1)
+			local img = TextureImage(w.Cfg.Image)
+			if layer.Label.Image ~= img then layer.Label.Image = img end
+			layer.Label.ImageColor3 = w.Cfg.Color or Color3.new(1, 1, 1)
+			layer.Label.Visible = layer.P > 0.01 and img ~= ""
+		end
+	end
+	for key, layer in pairs(e.Tex) do
+		if not want[key] then layer.P = 0 layer.Label.Visible = false end
+	end
+
+	-- glitch: chromatic copies of the title, made once, shown only during a glitch burst
+	if (to.Glitch or from.Glitch) and not e.Glitch then
+		e.Glitch = { Bars = {}, Next = os.clock() + 1.5, Until = 0, Step = 0 }
+		for i = 1, 4 do
+			e.Glitch.Bars[i] = New("Frame", { BorderSizePixel = 0, BackgroundTransparency = 1, Visible = false, ZIndex = 40, Parent = e.Frame })
+		end
+	end
+end
+
+-- per-frame motion for texture layers: slow drift (a smooth back-and-forth pan over the image, so it never jumps),
+-- gentle breathing, and the faulty street-lamp flicker
+local TexFX = {}
+function TexFX.Drift(label, cfg, t, phase)
+	local abs = label.AbsoluteSize
+	if not abs or abs.X < 2 or abs.Y < 2 then return end
+	local ts = cfg.Size or 1024
+	local zoom = cfg.Zoom or 1
+	local rw, rh = abs.X * zoom, abs.Y * zoom
+	local k = math.min(1, ts / rw, ts / rh)
+	rw, rh = rw * k, rh * k
+	local sp = cfg.Drift or 0.02
+	local ax, ay = (ts - rw) / 2, (ts - rh) / 2
+	label.ImageRectSize = Vector2.new(math.floor(rw), math.floor(rh))
+	label.ImageRectOffset = Vector2.new(math.floor(ax + ax * math.sin(t * sp + phase)), math.floor(ay + ay * math.sin(t * sp * 0.77 + phase * 1.3)))
+end
+function TexFX.Flicker(layer, t)
+	-- mostly steady with a slow hum; every few seconds it stutters off and back on like a dying sodium lamp
+	if t >= layer.NextFlicker then
+		layer.NextFlicker = t + 2.5 + math.random() * 5
+		layer.OffUntil = t + 0.05 + math.random() * 0.14
+		layer.Second = math.random() < 0.45 and (layer.OffUntil + 0.07 + math.random() * 0.08) or nil
+	end
+	if t < layer.OffUntil then return 0.18 + math.random() * 0.2 end
+	if layer.Second and t >= layer.Second then
+		if t < layer.Second + 0.06 then return 0.3 end
+		layer.Second = nil
+	end
+	return 0.9 + 0.1 * math.sin(t * 9 + layer.Phase) * math.sin(t * 2.3)
+end
+TexFX.GlitchColors = { Color3.new(1, 1, 1), Color3.fromRGB(255, 40, 70), Color3.fromRGB(40, 220, 255), Color3.fromRGB(230, 230, 230) }
+function TexFX.Glitch(e, t)
+	local G = e.Glitch
+	local on = Lumen.Style.Glitch and e.Frame.Visible
+	local active = on and t < G.Until
+	if on and not active and t >= G.Next then
+		G.Until = t + 0.16 + math.random() * 0.22
+		G.Next = G.Until + 2.5 + math.random() * 5.5
+		G.Step = 0
+		active = true
+	end
+	if not active then
+		if G.Shown then
+			G.Shown = false
+			for _, b in ipairs(G.Bars) do b.Visible = false end
+			for _, g in ipairs(G.Ghosts or {}) do g.Visible = false end
+		end
+		return
+	end
+	if t < G.Step then return end
+	G.Step = t + 0.045
+	G.Shown = true
+	if e.Title and not G.Ghosts then
+		-- red and cyan copies of the title that split away from it for a moment (chromatic aberration)
+		G.Ghosts = {}
+		for i, c in ipairs({ Color3.fromRGB(255, 40, 70), Color3.fromRGB(40, 220, 255) }) do
+			local g = Instance.new("TextLabel")
+			g.BackgroundTransparency = 1
+			g.Size = UDim2.fromScale(1, 1)
+			g.TextColor3 = c
+			g.TextTransparency = 1
+			g.Visible = false
+			g.Name = "LumenGlitch" .. i
+			g.Parent = e.Title
+			G.Ghosts[i] = g
+		end
+	end
+	local abs = e.Frame.AbsoluteSize
+	local h = (abs and abs.Y > 0) and abs.Y / ((Lumen.Scale > 0) and Lumen.Scale or 1) or 400
+	for _, b in ipairs(G.Bars) do
+		if math.random() < 0.7 then
+			b.Visible = true
+			b.BackgroundColor3 = TexFX.GlitchColors[math.random(#TexFX.GlitchColors)]
+			b.BackgroundTransparency = 0.72 + math.random() * 0.2
+			local w = 0.25 + math.random() * 0.75
+			b.Size = UDim2.new(w, 0, 0, math.random(1, 7))
+			b.Position = UDim2.new(math.random() * (1 - w), 0, 0, math.random(0, math.max(0, math.floor(h) - 7)))
+		else
+			b.Visible = false
+		end
+	end
+	if e.Title and G.Ghosts then
+		for i, g in ipairs(G.Ghosts) do
+			g.Text = e.Title.Text
+			g.TextSize = e.Title.TextSize
+			pcall(function() g.FontFace = e.Title.FontFace end)
+			g.TextXAlignment = e.Title.TextXAlignment
+			g.Position = UDim2.fromOffset((i == 1 and -1 or 1) * math.random(1, 3), math.random(-1, 1))
+			g.TextTransparency = 0.35 + math.random() * 0.3
+			g.Visible = true
+		end
+	end
 end
 
 local function RegisterSurface(frame, kind, radius)
@@ -751,6 +914,19 @@ Connect(RunService.RenderStepped, function()
 		if e.AuraOn and (e.AuraSpeed or 0) > 0 and e.Frame.Visible then
 			e.StrokeGrad.Rotation = (t * e.AuraSpeed * 360) % 360
 		end
+		if e.Tex and e.Frame.Visible then
+			for _, layer in pairs(e.Tex) do
+				if layer.P > 0.01 and layer.Label.Visible then
+					local cfg = layer.Cfg
+					if cfg.Mode ~= "Lamp" then TexFX.Drift(layer.Label, cfg, t, layer.Phase) end
+					local f = 1
+					if cfg.Flicker then f = TexFX.Flicker(layer, t) end
+					if cfg.Pulse then f = f * (1 - cfg.Pulse * (0.5 + 0.5 * math.sin(t * 0.9 + layer.Phase))) end
+					layer.Label.ImageTransparency = 1 - (1 - (cfg.Transparency or 0.5)) * layer.P * f
+				end
+			end
+		end
+		if e.Glitch then TexFX.Glitch(e, t) end
 	end
 	-- prism themes: the accent gradient slowly cycles through the spectrum
 	if Lumen.Style.AccentCycle and t - (Lumen._cycleT or 0) > 0.05 then
@@ -1122,10 +1298,18 @@ function Lumen:SetTheme(t, fade)
 	local mine = ThemeToken
 	fade = fade or 0
 	self.Events.ThemeChanged:Fire(N)
+	-- settle pass: hover / press tweens that were started mid-blend aim at in-between colours and can finish after
+	-- the blend does. Once everything has come to rest, every bound colour is written once more from the final theme.
+	local function Settle(after)
+		task.delay(after, function()
+			if mine == ThemeToken and not Lumen.Unloaded and not Lumen._themeTarget then ApplyThemeNow() end
+		end)
+	end
 	if fade <= 0 or #Themed > 9000 then
 		self._themeTarget = nil
 		for k, v in pairs(N) do T[k] = v end
 		ApplyThemeNow()
+		Settle(0.35)
 		return
 	end
 	self._themeTarget = N
@@ -1144,7 +1328,10 @@ function Lumen:SetTheme(t, fade)
 			ApplyThemeNow()
 			if i < steps then task.wait(fade / steps) end
 		end
-		if mine == ThemeToken then Lumen._themeTarget = nil end
+		if mine == ThemeToken then
+			Lumen._themeTarget = nil
+			Settle(0.35)
+		end
 	end)
 end
 
@@ -1204,8 +1391,10 @@ Connect(PopupCatcher.MouseButton1Down, function() ClosePopup() end)
 Connect(PopupCatcher.MouseButton2Down, function() ClosePopup() end)
 
 -- popups unfold downward from their trigger (and fold back up when closed) instead of popping in
+local HideHintNow -- set once the hint card exists
 local function ShowPopup(frame, trigger, onClose)
 	ClosePopup()
+	if HideHintNow then HideHintNow() end
 	local sc = frame:FindFirstChildOfClass("UIScale")
 	if not sc then sc = New("UIScale", { Parent = frame }) end
 	sc.Scale = Lumen.Scale
@@ -1228,11 +1417,70 @@ local function ShowPopup(frame, trigger, onClose)
 	OpenPopup = { Frame = frame, Trigger = trigger, OnClose = onClose, Full = full }
 end
 
+-- Fader: fades a whole Frame tree like a CanvasGroup would, but leaves text rendered natively.
+-- CanvasGroups rasterise their contents to a texture, which makes text soft (worse with UI scale or half-pixel
+-- positions), so hints, notifications and dialogs use this instead. At rest (Alpha = 0) it lets go of the tree
+-- completely, so elements can change their own transparency freely. Mark an object with the attribute NoFade
+-- when it animates its own transparency.
+local Fader
+do
+local FADE_PROPS = {
+	TextLabel = { "BackgroundTransparency", "TextTransparency" }, TextButton = { "BackgroundTransparency", "TextTransparency" },
+	TextBox = { "BackgroundTransparency", "TextTransparency" }, ImageLabel = { "BackgroundTransparency", "ImageTransparency" },
+	ImageButton = { "BackgroundTransparency", "ImageTransparency" }, Frame = { "BackgroundTransparency" },
+	ScrollingFrame = { "BackgroundTransparency" }, UIStroke = { "Transparency" },
+}
+function Fader(root)
+	local F = { Alpha = 0, Root = root }
+	local bases
+	local value = Instance.new("NumberValue")
+	local function Capture()
+		bases = {}
+		local function add(o)
+			local props = FADE_PROPS[o.ClassName]
+			if props and not o:GetAttribute("NoFade") then
+				for _, prop in ipairs(props) do table.insert(bases, { o, prop, o[prop] }) end
+			end
+		end
+		add(root)
+		for _, d in ipairs(root:GetDescendants()) do add(d) end
+	end
+	function F:Set(a)
+		a = math.clamp(a, 0, 1)
+		F.Alpha = a
+		if a > 0.001 and not bases then Capture() end
+		if not bases then return end
+		for _, b in ipairs(bases) do
+			if b[1].Parent then b[1][b[2]] = 1 - (1 - b[3]) * (1 - a) end
+		end
+		if a <= 0.001 then bases = nil end
+	end
+	-- re-read resting values (call after rebuilding content while hidden)
+	function F:Recapture()
+		if bases then
+			local a = F.Alpha
+			F:Set(0)
+			F:Set(a)
+		end
+	end
+	Connect(value:GetPropertyChangedSignal("Value"), function() F:Set(value.Value) end)
+	function F:Tween(time, goal, style, dir)
+		value.Value = F.Alpha
+		local tw = TweenService:Create(value, TweenInfo.new(time, style or Enum.EasingStyle.Quad, dir or Enum.EasingDirection.Out), { Value = goal })
+		tw:Play()
+		return tw
+	end
+	function F:Hide() F:Set(1) value.Value = 1 end
+	return F
+end
+end
+Lumen.Fader = Fader
+
 -- Hover explanations: a card that fades and lifts in after a short rest, glides between elements,
 -- and fades out when the mouse leaves. Used by Description = "..." on any element, tooltips, dock buttons and chips.
 local Hint = { Token = 0 }
-local HintCard = New("CanvasGroup", {
-	Visible = false, Size = UDim2.fromOffset(240, 0), AutomaticSize = Enum.AutomaticSize.Y, GroupTransparency = 1,
+local HintCard = New("Frame", {
+	Name = "LumenHint", Visible = false, Size = UDim2.fromOffset(240, 0), AutomaticSize = Enum.AutomaticSize.Y,
 	BackgroundTransparency = 1, ZIndex = 300, Parent = Gui,
 })
 local HintScale = New("UIScale", { Scale = 1, Parent = HintCard })
@@ -1247,27 +1495,30 @@ local HintBody = New("Frame", {
 	BackgroundTransparency = 1, Size = UDim2.new(1, 0, 0, 0), AutomaticSize = Enum.AutomaticSize.Y, ZIndex = 302, Parent = HintCard,
 }, { Pad(13, 9, 12, 10), List(3) })
 local HintTitle = New("TextLabel", {
-	Size = UDim2.new(1, 0, 0, 0), AutomaticSize = Enum.AutomaticSize.Y, TextWrapped = true, TextSize = 12, Font = Enum.Font.GothamBold,
+	Size = UDim2.new(1, 0, 0, 0), AutomaticSize = Enum.AutomaticSize.Y, TextWrapped = true, TextSize = 13, Font = Enum.Font.GothamBold,
 	TextXAlignment = Enum.TextXAlignment.Left, ZIndex = 303, LayoutOrder = 1, TextColor3 = Lumen.Theme.Text, Parent = HintBody,
 })
+-- body text uses the brighter Label colour at 12px so it reads cleanly on every theme
 local HintText = New("TextLabel", {
-	Size = UDim2.new(1, 0, 0, 0), AutomaticSize = Enum.AutomaticSize.Y, TextWrapped = true, TextSize = 11, Font = Enum.Font.GothamMedium,
-	TextXAlignment = Enum.TextXAlignment.Left, ZIndex = 303, LayoutOrder = 2, TextColor3 = Lumen.Theme.TextDim, Parent = HintBody,
+	Size = UDim2.new(1, 0, 0, 0), AutomaticSize = Enum.AutomaticSize.Y, TextWrapped = true, TextSize = 12, Font = Enum.Font.GothamMedium,
+	TextXAlignment = Enum.TextXAlignment.Left, ZIndex = 303, LayoutOrder = 2, TextColor3 = Lumen.Theme.Label, LineHeight = 1.08, Parent = HintBody,
 })
+local HintFade = Fader(HintCard)
+HintFade:Hide()
 
 local function HintMeasure(title, body)
 	local w, h = 0, 0
 	pcall(function()
-		local b = TextService:GetTextSize(body, 11, Enum.Font.GothamMedium, Vector2.new(214, 10000))
-		w, h = b.X, b.Y
+		local b = TextService:GetTextSize(body, 12, Enum.Font.GothamMedium, Vector2.new(224, 10000))
+		w, h = b.X, b.Y * 1.08
 		if title and title ~= "" then
-			local t = TextService:GetTextSize(title, 12, Enum.Font.GothamBold, Vector2.new(214, 10000))
+			local t = TextService:GetTextSize(title, 13, Enum.Font.GothamBold, Vector2.new(224, 10000))
 			w = math.max(w, t.X)
 			h = h + t.Y + 3
 		end
 	end)
-	if not w or w <= 0 then w, h = 214, 40 end
-	w = math.clamp(math.ceil(w) + 30, 110, 246)
+	if not w or w <= 0 then w, h = 224, 40 end
+	w = math.clamp(math.ceil(w) + 30, 110, 256)
 	return w, math.ceil(h) + 21
 end
 
@@ -1298,26 +1549,34 @@ local function HintSpot(anchor, w, h)
 	return math.clamp(ap.X, 8, math.max(8, vp.X - w - 8)), by, "below", cy
 end
 
+-- true while a dropdown / picker popup is open and the anchor isn't inside it: hints wait until it closes
+local function PopupBlocks(anchor)
+	return OpenPopup ~= nil and OpenPopup.Frame ~= nil and not anchor:IsDescendantOf(OpenPopup.Frame)
+end
 local function ShowHint(anchor, title, body)
 	if not Lumen.Hints or type(body) ~= "string" or body == "" then return end
+	if PopupBlocks(anchor) then return end
 	Hint.Token = Hint.Token + 1
 	local mine = Hint.Token
-	local gliding = HintCard.Visible and HintCard.GroupTransparency < 0.6
+	local gliding = HintCard.Visible and HintFade.Alpha < 0.6
 	task.delay(gliding and 0.04 or Lumen.HintDelay, function()
 		if mine ~= Hint.Token or Lumen.Unloaded or not anchor.Parent then return end
+		if PopupBlocks(anchor) then return end
 		HintTitle.Text = title or ""
 		HintTitle.Visible = title ~= nil and title ~= ""
 		HintText.Text = body
 		local w, h = HintMeasure(title, body)
 		HintCard.Size = UDim2.fromOffset(w, 0)
 		local x, y, side, cy = HintSpot(anchor, w, h)
+		x, y = math.floor(x + 0.5), math.floor(y + 0.5)
 		-- the accent strip sits on the side facing the element, level with it, like a pointer
 		local stripY = math.clamp(cy - y - 9, 6, math.max(6, h - 24))
 		local stripGoal = { Position = side == "left" and UDim2.new(1, -2, 0, stripY) or UDim2.fromOffset(0, stripY) }
 		HintStrip.Size = UDim2.fromOffset(2, 18)
 		if gliding then
 			TweenService:Create(HintCard, TweenInfo.new(0.22, Enum.EasingStyle.Quint, Enum.EasingDirection.Out),
-				{ Position = UDim2.fromOffset(x, y), GroupTransparency = 0 }):Play()
+				{ Position = UDim2.fromOffset(x, y) }):Play()
+			HintFade:Tween(0.22, 0, Enum.EasingStyle.Quint)
 			TweenService:Create(HintStrip, TweenInfo.new(0.22, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), stripGoal):Play()
 			TweenService:Create(HintScale, TweenInfo.new(0.2, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), { Scale = 1 }):Play()
 		else
@@ -1325,25 +1584,27 @@ local function ShowHint(anchor, title, body)
 			local dx = side == "left" and 8 or (side == "right" and -8 or 0)
 			HintCard.Position = UDim2.fromOffset(x + dx, side == "below" and y + 7 or y)
 			HintScale.Scale = 0.95
-			HintCard.GroupTransparency = 1
+			HintFade:Hide()
 			HintCard.Visible = true
 			TweenService:Create(HintCard, TweenInfo.new(0.24, Enum.EasingStyle.Quint, Enum.EasingDirection.Out),
-				{ Position = UDim2.fromOffset(x, y), GroupTransparency = 0 }):Play()
+				{ Position = UDim2.fromOffset(x, y) }):Play()
+			HintFade:Tween(0.24, 0, Enum.EasingStyle.Quint)
 			TweenService:Create(HintScale, TweenInfo.new(0.28, Enum.EasingStyle.Back, Enum.EasingDirection.Out), { Scale = 1 }):Play()
 		end
 	end)
 end
 
-local function HideHint()
+local function HideHint(now)
 	Hint.Token = Hint.Token + 1
 	local mine = Hint.Token
-	task.delay(0.07, function()
+	task.delay(now == true and 0 or 0.07, function()
 		if mine ~= Hint.Token then return end
-		TweenService:Create(HintCard, TweenInfo.new(0.15, Enum.EasingStyle.Quad, Enum.EasingDirection.In), { GroupTransparency = 1 }):Play()
+		HintFade:Tween(0.15, 1, Enum.EasingStyle.Quad, Enum.EasingDirection.In)
 		TweenService:Create(HintScale, TweenInfo.new(0.15, Enum.EasingStyle.Quad, Enum.EasingDirection.In), { Scale = 0.97 }):Play()
 		task.delay(0.16, function() if mine == Hint.Token then HintCard.Visible = false end end)
 	end)
 end
+HideHintNow = function() HideHint(true) end
 Lumen.ShowHint, Lumen.HideHint = function(_, anchor, title, body) ShowHint(anchor, title, body) end, function() HideHint() end
 
 -- title / body may be strings or functions (read each time the hint opens)
@@ -1353,7 +1614,7 @@ local function AttachHint(inst, title, body)
 		local b = type(body) == "function" and body() or body
 		ShowHint(inst, t, b)
 	end)
-	Connect(inst.MouseLeave, HideHint)
+	Connect(inst.MouseLeave, function() HideHint() end)
 	Connect(inst.InputBegan, function(i)
 		if i.UserInputType == Enum.UserInputType.MouseButton1 or i.UserInputType == Enum.UserInputType.Touch then HideHint() end
 	end)
@@ -1551,8 +1812,8 @@ function Lumen:Notify(o, duration)
 	local holder = New("Frame", {
 		BackgroundTransparency = 1, Size = UDim2.fromOffset(290, 0), LayoutOrder = NotifyCount, Parent = NotifHolder,
 	})
-	local card = New("CanvasGroup", {
-		Size = UDim2.fromOffset(280, 34), Position = UDim2.fromOffset(offX, 0), GroupTransparency = 1,
+	local card = New("Frame", {
+		Size = UDim2.fromOffset(280, 34), Position = UDim2.fromOffset(offX, 0), ClipsDescendants = true,
 		Parent = holder, Theme = { BackgroundColor3 = "Background" },
 	}, { Corner(9) })
 	if side[1] == 1 then card.Position = UDim2.fromOffset(offX, 0) end
@@ -1566,18 +1827,21 @@ function Lumen:Notify(o, duration)
 		List(11, Enum.FillDirection.Horizontal, Enum.HorizontalAlignment.Left, Enum.VerticalAlignment.Center) })
 	local bar = New("Frame", { Size = UDim2.new(0, 3, 1, -12), Position = UDim2.fromOffset(0, 6), BackgroundColor3 = Color3.new(1, 1, 1),
 		Visible = false, ZIndex = 4, Parent = card }, { CornerFixed(2) })
-	local wash = New("Frame", { Size = UDim2.fromScale(1, 1), BackgroundColor3 = Color3.new(1, 1, 1), BackgroundTransparency = 1, ZIndex = 2, Parent = card })
+	local wash = New("Frame", { Size = UDim2.fromScale(1, 1), BackgroundColor3 = Color3.new(1, 1, 1), BackgroundTransparency = 1, ZIndex = 2, Parent = card }, { Corner(9) })
 	New("UIGradient", { Transparency = NumberSequence.new({
 		NumberSequenceKeypoint.new(0, 0.84), NumberSequenceKeypoint.new(0.5, 1), NumberSequenceKeypoint.new(1, 1) }), Parent = wash })
+	-- the sheen stays clear of the rounded corners (a plain Frame clips square)
 	local shine = New("Frame", {
-		Size = UDim2.new(0.45, 0, 1, 0), Position = UDim2.new(-0.6, 0, 0, 0), BackgroundColor3 = Color3.new(1, 1, 1), ZIndex = 6, Parent = card,
+		Size = UDim2.new(0.45, 0, 1, -18), Position = UDim2.new(-0.6, 0, 0, 9), BackgroundColor3 = Color3.new(1, 1, 1), ZIndex = 6, Parent = card,
 	}, { New("UIGradient", { Rotation = 18, Transparency = NumberSequence.new({
 		NumberSequenceKeypoint.new(0, 1), NumberSequenceKeypoint.new(0.5, 0.88), NumberSequenceKeypoint.new(1, 1) }) }) })
 	local track = New("Frame", {
-		AnchorPoint = Vector2.new(0, 1), Position = UDim2.new(0, 0, 1, 0), Size = UDim2.new(1, 0, 0, 2), Visible = false, ZIndex = 5,
+		AnchorPoint = Vector2.new(0, 1), Position = UDim2.new(0, 9, 1, -1), Size = UDim2.new(1, -18, 0, 2), Visible = false, ZIndex = 5,
 		Parent = card, Theme = { BackgroundColor3 = "Outline" },
-	})
-	local fill = New("Frame", { Size = UDim2.fromScale(1, 1), BackgroundColor3 = Color3.new(1, 1, 1), ZIndex = 5, Parent = track })
+	}, { CornerFixed(1) })
+	local fill = New("Frame", { Size = UDim2.fromScale(1, 1), BackgroundColor3 = Color3.new(1, 1, 1), ZIndex = 5, Parent = track }, { CornerFixed(1) })
+	local fade = Fader(card)
+	bar:SetAttribute("NoFade", true)
 	-- bright head on the countdown bar
 	local head = New("Frame", { AnchorPoint = Vector2.new(0.5, 0.5), Position = UDim2.new(1, 0, 0.5, 0), Size = UDim2.fromOffset(10, 2),
 		BackgroundColor3 = Color3.new(1, 1, 1), BackgroundTransparency = 0.2, ZIndex = 6, Parent = fill }, { CornerFixed(1) })
@@ -1600,7 +1864,8 @@ function Lumen:Notify(o, duration)
 		if conn then conn:Disconnect() end
 		for i, n in ipairs(LiveNotifs) do if n == H then table.remove(LiveNotifs, i) break end end
 		TweenService:Create(card, TweenInfo.new(0.3, Enum.EasingStyle.Quint, Enum.EasingDirection.In),
-			{ Position = UDim2.fromOffset(offX, 0), GroupTransparency = 1 }):Play()
+			{ Position = UDim2.fromOffset(offX, 0) }):Play()
+		fade:Tween(0.3, 1, Enum.EasingStyle.Quint, Enum.EasingDirection.In)
 		task.delay(0.24, function()
 			if holder.Parent then Tween(holder, 0.24, { Size = UDim2.fromOffset(290, 0) }) end
 		end)
@@ -1628,6 +1893,8 @@ function Lumen:Notify(o, duration)
 				AnchorPoint = Vector2.new(0.5, 0.5), Position = UDim2.fromScale(0.5, 0.5), Size = UDim2.fromOffset(26, 26),
 				BackgroundTransparency = 1, ZIndex = 1, Parent = holderB,
 			}, { CornerFixed(999), New("UIStroke", { Color = color, Thickness = 1.5, Transparency = 0.25 }) })
+			ring:SetAttribute("NoFade", true)
+			ring:FindFirstChildOfClass("UIStroke"):SetAttribute("NoFade", true)
 			TweenService:Create(ring, TweenInfo.new(0.75, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), { Size = UDim2.fromOffset(52, 52) }):Play()
 			TweenService:Create(ring:FindFirstChildOfClass("UIStroke"), TweenInfo.new(0.75, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), { Transparency = 1 }):Play()
 		else
@@ -1649,9 +1916,9 @@ function Lumen:Notify(o, duration)
 		if opts.Content then
 			New("TextLabel", {
 				Size = UDim2.new(1, 0, 0, 0), AutomaticSize = Enum.AutomaticSize.Y, Text = opts.Content, TextWrapped = true, RichText = true,
-				TextXAlignment = Enum.TextXAlignment.Left, LayoutOrder = 2, TextSize = opts.Title and 11 or 12,
+				TextXAlignment = Enum.TextXAlignment.Left, LayoutOrder = 2, TextSize = 12,
 				Font = opts.Title and Enum.Font.GothamMedium or Enum.Font.GothamSemibold,
-				TextColor3 = opts.Title and T.TextDim or T.Label, Parent = text,
+				TextColor3 = T.Label, Parent = text,
 			})
 		end
 		if type(opts.Actions) == "table" and #opts.Actions > 0 then
@@ -1710,6 +1977,7 @@ function Lumen:Notify(o, duration)
 		for k, v in pairs(o2 or {}) do o[k] = v end
 		if o2 and o2.Type == nil then o.Type = nil end
 		Build(o)
+		fade:Recapture()
 	end
 	function H:Dismiss() Close() end
 
@@ -1731,7 +1999,7 @@ function Lumen:Notify(o, duration)
 		if kind then
 			-- the accent bar breathes; warnings and errors breathe harder
 			local k = (kind.Key == "Caution" or kind.Key == "Error") and 0.4 or 0.2
-			bar.BackgroundTransparency = k * (0.5 + 0.5 * math.sin(t * 4.5))
+			bar.BackgroundTransparency = 1 - (1 - k * (0.5 + 0.5 * math.sin(t * 4.5))) * (1 - fade.Alpha)
 		end
 		if anim.kind == "warn" and glyph and at < 1.1 then
 			-- the exclamation mark wobbles, settling over a second
@@ -1754,9 +2022,9 @@ function Lumen:Notify(o, duration)
 	Build(o)
 	-- slide in from the screen edge with a little overshoot
 	card.Position = UDim2.fromOffset(offX, 0)
-	card.GroupTransparency = 1
+	fade:Hide()
 	TweenService:Create(card, TweenInfo.new(0.55, Enum.EasingStyle.Back, Enum.EasingDirection.Out), { Position = UDim2.fromOffset(0, 0) }):Play()
-	Tween(card, 0.3, { GroupTransparency = 0 })
+	fade:Tween(0.3, 0)
 
 	table.insert(LiveNotifs, H)
 	if #LiveNotifs > 6 then LiveNotifs[1]:Dismiss() end
@@ -2326,6 +2594,16 @@ function Elements:AddSlider(o)
 	return S
 end
 
+-- WCAG contrast ratio between two colours (1 = identical, 21 = black on white)
+local function Contrast(a, b)
+	local function ch(v) return v <= 0.03928 and v / 12.92 or ((v + 0.055) / 1.055) ^ 2.4 end
+	local function Luma(c) return 0.2126 * ch(c.R) + 0.7152 * ch(c.G) + 0.0722 * ch(c.B) end
+	local la, lb = Luma(a), Luma(b)
+	if la < lb then la, lb = lb, la end
+	return (la + 0.05) / (lb + 0.05)
+end
+Lumen.Contrast = Contrast
+
 local function Chevron(parent)
 	local f = New("Frame", {
 		BackgroundTransparency = 1, AnchorPoint = Vector2.new(0.5, 0.5), Position = UDim2.new(1, -14, 0.5, 0),
@@ -2385,7 +2663,7 @@ function Elements:AddDropdown(o)
 	local function WantsSearch() return o.Search == true or (o.Search ~= false and #D.Values > 8) end
 	search = New("TextBox", {
 		Position = UDim2.fromOffset(4, 4), Size = UDim2.new(1, -8, 0, 26), BackgroundTransparency = 1, Text = "",
-		PlaceholderText = "Search...", PlaceholderColor3 = Lumen.Theme.TextMuted, ClearTextOnFocus = false, Visible = false,
+		PlaceholderText = "Search...", PlaceholderColor3 = Lumen.Theme.TextMuted, Theme = { PlaceholderColor3 = "TextMuted" }, ClearTextOnFocus = false, Visible = false,
 		TextXAlignment = Enum.TextXAlignment.Left, Font = Enum.Font.GothamMedium, Parent = pop,
 	}, { Corner(5), Stroke("Outline"), Pad(8, 0, 8, 0) })
 
@@ -2400,12 +2678,15 @@ function Elements:AddDropdown(o)
 	local function PaintItem(it, instant)
 		local T = Lumen.Theme
 		local on = IsSelected(it.Value)
+		-- picked rows: whichever of the accent text or plain text reads better on the selected fill
+		local onText = Contrast(T.AccentText, T.TabActive) >= 4.5 and T.AccentText
+			or (Contrast(T.Text, T.TabActive) >= Contrast(T.AccentText, T.TabActive) and T.Text or T.AccentText)
 		local goals = {
 			{ it.Sel, { BackgroundTransparency = on and 0 or 1 } },
 			{ it.Hover, { BackgroundTransparency = (it.Hovered and not on) and 0 or 1 } },
 			{ it.Bar, { Size = UDim2.fromOffset(2, on and 14 or (it.Hovered and 7 or 0)), BackgroundTransparency = on and 0 or (it.Hovered and 0.35 or 1) } },
 			{ it.Label, { Position = UDim2.fromOffset(it.Hovered and 15 or 11, 0),
-				TextColor3 = on and T.AccentText or (it.Hovered and T.Text or T.Label) } },
+				TextColor3 = on and onText or (it.Hovered and T.Text or T.Label) } },
 			{ it.CheckScale, { Scale = on and 1 or 0 } },
 		}
 		for _, g in ipairs(goals) do
@@ -2583,7 +2864,7 @@ function Elements:AddInput(o)
 	local stroke = Stroke("Outline")
 	local box = New("TextBox", {
 		Position = UDim2.fromOffset(0, h - 28), Size = UDim2.new(1, 0, 0, 28), Text = I.Value, BackgroundTransparency = 1,
-		PlaceholderText = o.Placeholder or "", PlaceholderColor3 = Lumen.Theme.TextDim, ClearTextOnFocus = false,
+		PlaceholderText = o.Placeholder or "", PlaceholderColor3 = Lumen.Theme.TextDim, Theme = { PlaceholderColor3 = "TextDim" }, ClearTextOnFocus = false,
 		TextXAlignment = Enum.TextXAlignment.Left, ClipsDescendants = true, Font = Enum.Font.GothamMedium, Parent = row,
 	}, { Corner(6), stroke, Pad(11, 0, 11, 0) })
 
@@ -3411,9 +3692,9 @@ function Lumen:Confirm(o)
 		Size = UDim2.fromScale(1, 1), BackgroundColor3 = Color3.new(0, 0, 0), BackgroundTransparency = 1,
 		Active = true, ZIndex = 70, Parent = Gui,
 	})
-	local card = New("CanvasGroup", {
+	local card = New("Frame", {
 		AnchorPoint = Vector2.new(0.5, 0.5), Position = UDim2.new(0.5, 0, 0.5, 14), Size = UDim2.fromOffset(410, 0),
-		AutomaticSize = Enum.AutomaticSize.Y, GroupTransparency = 1, ZIndex = 71, Parent = Gui,
+		AutomaticSize = Enum.AutomaticSize.Y, ZIndex = 71, Parent = Gui,
 		Theme = { BackgroundColor3 = "Background" },
 	}, { Corner(12), Stroke(nil, true), List(0) })
 	-- soft coloured light along the top edge
@@ -3441,7 +3722,7 @@ function Lumen:Confirm(o)
 	if o.Text then
 		New("TextLabel", {
 			Text = o.Text, Size = UDim2.new(1, 0, 0, 0), AutomaticSize = Enum.AutomaticSize.Y, TextWrapped = true, TextSize = 12,
-			TextColor3 = T.TextDim, Font = Enum.Font.GothamMedium, TextXAlignment = Enum.TextXAlignment.Left,
+			TextColor3 = T.Label, Font = Enum.Font.GothamMedium, TextXAlignment = Enum.TextXAlignment.Left,
 			TextYAlignment = Enum.TextYAlignment.Top, LayoutOrder = 2, Parent = texts,
 		})
 	end
@@ -3468,8 +3749,11 @@ function Lumen:Confirm(o)
 	})
 
 	local scale = New("UIScale", { Scale = 0.94, Parent = card })
+	local fade = Fader(card)
+	fade:Hide()
 	Tween(dim, 0.18, { BackgroundTransparency = 0.45 })
-	Tween(card, 0.2, { GroupTransparency = 0, Position = UDim2.new(0.5, 0, 0.5, 0) })
+	Tween(card, 0.2, { Position = UDim2.new(0.5, 0, 0.5, 0) })
+	fade:Tween(0.2, 0)
 	Tween(scale, 0.2, { Scale = 1 })
 
 	local function Close(accepted)
@@ -3477,7 +3761,7 @@ function Lumen:Confirm(o)
 		done = true
 		if keyConn then keyConn:Disconnect() end
 		Tween(dim, 0.15, { BackgroundTransparency = 1 })
-		Tween(card, 0.15, { GroupTransparency = 1 })
+		fade:Tween(0.15, 1)
 		Tween(scale, 0.15, { Scale = 0.96 })
 		task.delay(0.2, function()
 			dim:Destroy()
@@ -3708,6 +3992,12 @@ local BackdropFrame = New("Frame", {
 local DimFrame = New("Frame", {
 	Size = UDim2.fromScale(1, 1), BackgroundColor3 = Color3.new(0, 0, 0), BackgroundTransparency = 1, Parent = BackdropFrame,
 })
+-- Style.BackdropTexture = {Image, Transparency, Drift, Zoom}: art across the whole screen behind the windows
+local BackdropArt = New("ImageLabel", {
+	Name = "BackdropArt", Size = UDim2.fromScale(1, 1), BackgroundTransparency = 1, ImageTransparency = 1, Visible = false,
+	ScaleType = Enum.ScaleType.Stretch, ZIndex = 0, Parent = BackdropFrame,
+})
+local ArtState = { P = 0, Cfg = nil }
 local FlashFrame = New("Frame", {
 	Size = UDim2.fromScale(1, 1), BackgroundColor3 = Color3.fromRGB(215, 228, 255), BackgroundTransparency = 1, ZIndex = 3, Parent = BackdropFrame,
 })
@@ -3728,6 +4018,17 @@ local function StyleVignette()
 	local a = StyleBlend and StyleBlend.A or 1
 	local p = (from.Vignette and 1 or 0) * (1 - a) + (to.Vignette and 1 or 0) * a
 	for _, fr in ipairs(Vignette) do fr.BackgroundTransparency = 1 - p end
+	-- backdrop art: fades in/out with the theme (a different image swaps at the midpoint of the blend)
+	local ft, tt = from.BackdropTexture, to.BackdropTexture
+	if ft and tt and ft.Image ~= tt.Image then
+		ArtState.Cfg, ArtState.P = (a < 0.5) and ft or tt, math.abs(a * 2 - 1)
+	else
+		ArtState.Cfg = tt or ft
+		ArtState.P = (ft and 1 or 0) * (1 - a) + (tt and 1 or 0) * a
+	end
+	local img = ArtState.Cfg and TextureImage(ArtState.Cfg.Image) or ""
+	if BackdropArt.Image ~= img then BackdropArt.Image = img end
+	BackdropArt.Visible = ArtState.P > 0.01 and img ~= ""
 end
 
 local function AnyWindowVisible()
@@ -3741,7 +4042,7 @@ end
 function Lumen:_UpdateSnow()
 	local any = AnyWindowVisible()
 	Snow.ShowTarget = any and 1 or 0
-	if any and (Snow.Enabled or Backdrop.Dim > 0) then BackdropFrame.Visible = true end
+	if any and (Snow.Enabled or Backdrop.Dim > 0 or Lumen.Style.BackdropTexture) then BackdropFrame.Visible = true end
 	TweenService:Create(DimFrame, TweenInfo.new(0.35, Enum.EasingStyle.Sine, Enum.EasingDirection.Out),
 		{ BackgroundTransparency = any and (1 - math.clamp(Backdrop.Dim, 0, 1)) or 1 }):Play()
 	local target = any and math.max(Backdrop.Blur, Lumen.Style.Blur or 0) or 0
@@ -3761,6 +4062,8 @@ end
 -- and Update(f, dt, t, speed) (move it; may return a transparency). Register your own with Lumen:RegisterParticles.
 ------------------------------------------------------------------------------
 
+local KINDS = {}
+do -- particle kinds (helpers stay local to this block)
 local GLYPH_CHARS = { "0", "1", "0", "1", "A", "F", "7", "3", "#", "*" }
 local CONFETTI = { Color3.fromRGB(255, 128, 190), Color3.fromRGB(130, 255, 210), Color3.fromRGB(255, 220, 120), Color3.fromRGB(150, 170, 255), Color3.fromRGB(255, 160, 110) }
 local function Dot(parent, size, color, tr)
@@ -3771,7 +4074,6 @@ local function Fall(f, dt, sp, dir)
 	if f.Y > 1.05 then f.Y = -0.05 f.X = math.random() elseif f.Y < -0.05 then f.Y = 1.05 f.X = math.random() end
 end
 
-local KINDS = {}
 KINDS.Snow = {
 	Build = function(f, c, p)
 		local size = math.random(4, 13)
@@ -4235,8 +4537,234 @@ KINDS.Leaves = {
 	end,
 }
 
+-- cosmos: a deep star field in parallax (near stars drift faster), colour temperatures from blue-white to amber,
+-- bright stars with diffraction spikes, shooting stars with glowing heads and the occasional slow comet
+do
+local STAR_TEMPS = { Color3.fromRGB(170, 195, 255), Color3.fromRGB(215, 225, 255), Color3.new(1, 1, 1), Color3.fromRGB(255, 240, 210), Color3.fromRGB(255, 214, 170) }
+local function Fade(inst, time, props, style, dir)
+	local tw = TweenService:Create(inst, TweenInfo.new(time, style or Enum.EasingStyle.Quad, dir or Enum.EasingDirection.Out), props)
+	tw:Play()
+	return tw
+end
+local function Streak(layer, color, o)
+	-- a glowing head with a tapered tail, flying along `ang` degrees
+	local vis = layer.Alpha * Snow.Show
+	local holder = New("Frame", { AnchorPoint = Vector2.new(1, 0.5), BackgroundTransparency = 1, Size = UDim2.fromOffset(o.Len, o.Width + 4),
+		Rotation = o.Ang, Position = UDim2.fromScale(o.X, o.Y), Parent = layer.Folder })
+	local tail = New("Frame", { AnchorPoint = Vector2.new(0, 0.5), Position = UDim2.fromScale(0, 0.5), Size = UDim2.new(1, 0, 0, o.Width),
+		BackgroundColor3 = Color3.new(1, 1, 1), BackgroundTransparency = 1 - vis, Parent = holder }, {
+		CornerFixed(o.Width), New("UIGradient", { Color = ColorSequence.new(o.TailColor or color, Color3.new(1, 1, 1)),
+			Transparency = NumberSequence.new({ NumberSequenceKeypoint.new(0, 1), NumberSequenceKeypoint.new(0.7, 0.55), NumberSequenceKeypoint.new(1, 0) }) }) })
+	local head = New("Frame", { AnchorPoint = Vector2.new(0.5, 0.5), Position = UDim2.fromScale(1, 0.5), Size = UDim2.fromOffset(o.Head, o.Head),
+		BackgroundColor3 = Color3.new(1, 1, 1), BackgroundTransparency = 1 - vis, Parent = holder }, { CornerFixed(o.Head) })
+	local glow = New("Frame", { AnchorPoint = Vector2.new(0.5, 0.5), Position = UDim2.fromScale(1, 0.5), Size = UDim2.fromOffset(o.Head * 3, o.Head * 3),
+		BackgroundColor3 = o.TailColor or color, BackgroundTransparency = 1 - vis * 0.25, Parent = holder }, { CornerFixed(o.Head * 3) })
+	local r = math.rad(o.Ang)
+	Fade(holder, o.Time, { Position = UDim2.fromScale(o.X + math.cos(r) * o.Dist * 0.56, o.Y + math.sin(r) * o.Dist) }, Enum.EasingStyle.Sine, Enum.EasingDirection.Out)
+	for _, part in ipairs({ tail, head, glow }) do Fade(part, o.Time, { BackgroundTransparency = 1 }, Enum.EasingStyle.Quad, Enum.EasingDirection.In) end
+	task.delay(o.Time + 0.05, function() holder:Destroy() end)
+end
+KINDS.Galaxy = {
+	Build = function(f, c, p)
+		f.Depth = math.random() ^ 2
+		f.Pulse = 0.5 + math.random() * 2.2
+		f.VX = -(0.002 + f.Depth * 0.011)
+		local col = STAR_TEMPS[math.random(#STAR_TEMPS)]:Lerp(c, 0.2)
+		if math.random() < 0.09 then
+			local len = math.random(9, 17)
+			f.Bright = true
+			f.NoSelf = true
+			f.Base = 0.1
+			f.Frame = New("Frame", { AnchorPoint = Vector2.new(0.5, 0.5), BackgroundTransparency = 1, Size = UDim2.fromOffset(len, len), Parent = p })
+			local core = New("Frame", { AnchorPoint = Vector2.new(0.5, 0.5), Position = UDim2.fromScale(0.5, 0.5), Size = UDim2.fromOffset(3, 3),
+				BackgroundColor3 = Color3.new(1, 1, 1), Parent = f.Frame }, { CornerFixed(2) })
+			local spikes = {}
+			for i, rot in ipairs({ 0, 90 }) do
+				spikes[i] = New("Frame", { AnchorPoint = Vector2.new(0.5, 0.5), Position = UDim2.fromScale(0.5, 0.5), Size = UDim2.new(1, 0, 0, 1),
+					Rotation = rot, BackgroundColor3 = col, Parent = f.Frame }, { New("UIGradient", { Transparency = NumberSequence.new({
+					NumberSequenceKeypoint.new(0, 1), NumberSequenceKeypoint.new(0.5, 0), NumberSequenceKeypoint.new(1, 1) }) }) })
+			end
+			local halo = New("Frame", { AnchorPoint = Vector2.new(0.5, 0.5), Position = UDim2.fromScale(0.5, 0.5), Size = UDim2.fromOffset(7, 7),
+				BackgroundColor3 = col, Parent = f.Frame }, { CornerFixed(4) })
+			f.Extra = { { core, "BackgroundTransparency" }, { spikes[1], "BackgroundTransparency" }, { spikes[2], "BackgroundTransparency" }, { halo, "BackgroundTransparency", 0.7 } }
+		else
+			local size = 1 + math.floor(f.Depth * 2.2 + math.random() * 0.7)
+			f.Base = 0.3
+			f.Frame = Dot(p, size, col, 0.3)
+		end
+		f.Frame.Position = UDim2.fromScale(f.X, f.Y)
+	end,
+	Update = function(f, dt, t, sp)
+		f.X = f.X + f.VX * sp * dt
+		if f.X < -0.02 then f.X, f.Y = 1.02, math.random() end
+		f.Frame.Position = UDim2.fromScale(f.X, f.Y)
+		local tw = 0.5 + 0.5 * math.sin(t * f.Pulse * sp + f.Phase)
+		if f.Bright then
+			f.Frame.Rotation = math.sin(t * 0.35 + f.Phase) * 8
+			return 0.05 + 0.45 * tw
+		end
+		return 0.12 + (0.75 - f.Depth * 0.35) * tw
+	end,
+	Layer = function(layer, dt, t, sp, color)
+		layer.NextShot = layer.NextShot or (t + 1.2)
+		layer.NextComet = layer.NextComet or (t + 7 + math.random() * 6)
+		if t >= layer.NextShot then
+			layer.NextShot = t + 1.8 + math.random() * 4.2
+			Streak(layer, color, { X = math.random() * 0.75, Y = math.random() * 0.45, Ang = 18 + math.random() * 30, Len = math.random(110, 190),
+				Width = 2, Head = 3, Dist = 0.32 + math.random() * 0.15, Time = 0.75 + math.random() * 0.35, TailColor = Color3.fromRGB(150, 180, 255) })
+		end
+		if t >= layer.NextComet then
+			layer.NextComet = t + 16 + math.random() * 12
+			Streak(layer, color, { X = math.random() * 0.3, Y = 0.1 + math.random() * 0.3, Ang = 6 + math.random() * 12, Len = math.random(220, 320),
+				Width = 4, Head = 5, Dist = 0.8, Time = 4.5 + math.random() * 1.5, TailColor = Color3.fromRGB(120, 230, 255) })
+		end
+	end,
+}
+
+-- criminality: dust motes hanging in street-lamp light, catching it now and then; the screen glitches for a moment,
+-- and a glint runs down an unseen blade
+local GRIT_GLITCH = { Color3.new(1, 1, 1), Color3.fromRGB(255, 40, 70), Color3.fromRGB(40, 220, 255) }
+KINDS.Grit = {
+	Build = function(f, c, p)
+		local size = math.random(1, 3)
+		f.Base = 0.45 + math.random() * 0.4
+		f.Pulse = 0.3 + math.random() * 0.9
+		f.VX, f.VY = (math.random() - 0.5) * 0.006, (math.random() - 0.35) * 0.008
+		f.Frame = Dot(p, size, c:Lerp(Color3.fromRGB(200, 200, 200), math.random() * 0.5), f.Base)
+	end,
+	Update = function(f, dt, t, sp)
+		f.X = (f.X + (f.VX + math.sin(t * 0.3 + f.Phase) * 0.004) * sp * dt) % 1
+		f.Y = f.Y + f.VY * sp * dt
+		if f.Y > 1.02 then f.Y = -0.02 elseif f.Y < -0.02 then f.Y = 1.02 end
+		f.Frame.Position = UDim2.fromScale(f.X, f.Y)
+		-- a mote drifting through the light flares briefly
+		local glint = math.max(0, math.sin(t * f.Pulse + f.Phase)) ^ 6
+		return f.Base - (f.Base - 0.05) * glint
+	end,
+	Layer = function(layer, dt, t, sp, color)
+		local vis = layer.Alpha * Snow.Show
+		layer.NextGlitch = layer.NextGlitch or (t + 2)
+		layer.NextGlint = layer.NextGlint or (t + 4)
+		if t >= layer.NextGlitch then
+			layer.NextGlitch = t + 3 + math.random() * 5
+			for _ = 1, math.random(2, 4) do
+				local y, h = math.random(), math.random(2, 14)
+				local bar = New("Frame", { Position = UDim2.new(0, 0, y, 0), Size = UDim2.new(1, 0, 0, h), BackgroundColor3 = GRIT_GLITCH[math.random(#GRIT_GLITCH)],
+					BackgroundTransparency = 1 - vis * (0.08 + math.random() * 0.1), Parent = layer.Folder })
+				local life = 0.1 + math.random() * 0.18
+				task.delay(life * 0.5, function() if bar.Parent then bar.Position = UDim2.new(0, math.random(-30, 30), y + (math.random() - 0.5) * 0.02, 0) end end)
+				task.delay(life, function() bar:Destroy() end)
+			end
+		end
+		if t >= layer.NextGlint then
+			layer.NextGlint = t + 6 + math.random() * 7
+			local len = math.random(180, 300)
+			local blade = New("Frame", { AnchorPoint = Vector2.new(0.5, 0.5), Position = UDim2.fromScale(0.15 + math.random() * 0.7, 0.15 + math.random() * 0.7),
+				Size = UDim2.fromOffset(len, 2), Rotation = -20 - math.random() * 25, BackgroundColor3 = Color3.new(1, 1, 1),
+				BackgroundTransparency = 1 - vis * 0.85, Parent = layer.Folder }, { CornerFixed(1) })
+			local g = New("UIGradient", { Color = ColorSequence.new(Color3.fromRGB(255, 214, 150), Color3.new(1, 1, 1)), Offset = Vector2.new(-1, 0),
+				Transparency = NumberSequence.new({ NumberSequenceKeypoint.new(0, 1), NumberSequenceKeypoint.new(0.42, 1), NumberSequenceKeypoint.new(0.5, 0),
+				NumberSequenceKeypoint.new(0.58, 1), NumberSequenceKeypoint.new(1, 1) }), Parent = blade })
+			Fade(g, 0.55, { Offset = Vector2.new(1, 0) }, Enum.EasingStyle.Quad, Enum.EasingDirection.InOut)
+			task.delay(0.6, function() blade:Destroy() end)
+		end
+	end,
+}
+
+-- MLG: spinning doritos rain down, hitmarkers pop all over, and rainbow words slam in
+local MLG_WORDS = { "WOW", "360", "NO SCOPE", "MLG", "REKT", "GG", "EZ", "HEADSHOT", "!!", "OH BABY", "1v1 ME" }
+local function ComicFont(weight)
+	local f
+	pcall(function() f = Font.new(Font.fromEnum(Enum.Font.Cartoon).Family, weight or Enum.FontWeight.Bold) end)
+	return f
+end
+KINDS.MLG = {
+	Build = function(f, c, p)
+		local sz = math.random(14, 30)
+		f.Speed = 0.05 + math.random() * 0.08
+		f.Spin, f.Rot = (math.random() - 0.5) * 420, math.random() * 360
+		f.Base = 0.05 + math.random() * 0.15
+		local img = TextureImage("dorito")
+		if img ~= "" then
+			f.Frame = New("ImageLabel", { AnchorPoint = Vector2.new(0.5, 0.5), Size = UDim2.fromOffset(sz, sz), BackgroundTransparency = 1, Image = img, Parent = p })
+			f.NoSelf = true
+			f.Extra = { { f.Frame, "ImageTransparency" } }
+		else
+			-- until the chip image arrives: an orange diamond
+			f.Frame = New("Frame", { AnchorPoint = Vector2.new(0.5, 0.5), Size = UDim2.fromOffset(sz * 0.6, sz * 0.6), BackgroundColor3 = c, Parent = p }, { CornerFixed(2) })
+		end
+	end,
+	Update = function(f, dt, t, sp)
+		Fall(f, dt, sp)
+		f.Rot = f.Rot + f.Spin * sp * dt
+		f.Frame.Rotation = f.Rot
+		f.Frame.Position = UDim2.fromScale(f.X + math.sin(t * f.Sway * 1.4 + f.Phase) * 0.012, f.Y)
+	end,
+	Layer = function(layer, dt, t, sp, color)
+		local vis = layer.Alpha * Snow.Show
+		layer.NextHit = layer.NextHit or (t + 0.6)
+		layer.NextWord = layer.NextWord or (t + 1.4)
+		if t >= layer.NextHit then
+			layer.NextHit = t + 0.35 + math.random() * 1.1
+			local hx, hy = 0.05 + math.random() * 0.9, 0.05 + math.random() * 0.9
+			for n = 0, (math.random() < 0.35 and 1 or 0) do
+				task.delay(n * 0.09, function()
+					if not layer.Folder.Parent then return end
+					local hit = New("Frame", { AnchorPoint = Vector2.new(0.5, 0.5), Position = UDim2.fromScale(hx, hy), Size = UDim2.fromOffset(26, 26),
+						BackgroundTransparency = 1, Rotation = 45, Parent = layer.Folder })
+					local sc = New("UIScale", { Scale = 1.6, Parent = hit })
+					-- four short arms with a gap in the middle: the classic hitmarker
+					local arms = {}
+					for i, spec in ipairs({ { 0, 0.5, 9, 2 }, { 1, 0.5, 9, 2 }, { 0.5, 0, 2, 9 }, { 0.5, 1, 2, 9 } }) do
+						arms[i] = New("Frame", { AnchorPoint = Vector2.new(spec[1], spec[2]), Position = UDim2.fromScale(spec[1], spec[2]),
+							Size = UDim2.fromOffset(spec[3], spec[4]), BackgroundColor3 = Color3.new(1, 1, 1), BackgroundTransparency = 1 - vis, Parent = hit })
+					end
+					Fade(sc, 0.09, { Scale = 1 }, Enum.EasingStyle.Back, Enum.EasingDirection.Out)
+					task.delay(0.22, function()
+						for _, a in ipairs(arms) do Fade(a, 0.3, { BackgroundTransparency = 1 }) end
+					end)
+					task.delay(0.6, function() hit:Destroy() end)
+				end)
+			end
+		end
+		if t >= layer.NextWord then
+			layer.NextWord = t + 1.4 + math.random() * 2.2
+			local word = Instance.new("TextLabel")
+			word.BackgroundTransparency = 1
+			word.AnchorPoint = Vector2.new(0.5, 0.5)
+			word.Position = UDim2.fromScale(0.1 + math.random() * 0.8, 0.12 + math.random() * 0.76)
+			word.Size = UDim2.fromOffset(260, 60)
+			word.Text = MLG_WORDS[math.random(#MLG_WORDS)]
+			word.TextSize = math.random(24, 40)
+			word.Font = Enum.Font.GothamBlack
+			local cf = ComicFont(Enum.FontWeight.Bold)
+			if cf then pcall(function() word.FontFace = cf end) end
+			local hue = math.random()
+			word.TextColor3 = Color3.fromHSV(hue, 0.85, 1)
+			word.TextStrokeColor3 = Color3.new(0, 0, 0)
+			word.TextStrokeTransparency = 1 - vis
+			word.TextTransparency = 1 - vis
+			word.Rotation = (math.random() - 0.5) * 36
+			word.Parent = layer.Folder
+			local sc = Instance.new("UIScale")
+			sc.Scale = 0.2
+			sc.Parent = word
+			Fade(sc, 0.32, { Scale = 1 }, Enum.EasingStyle.Back, Enum.EasingDirection.Out)
+			Fade(word, 1.6, { TextColor3 = Color3.fromHSV((hue + 0.5) % 1, 0.85, 1), Rotation = word.Rotation + (math.random() - 0.5) * 30,
+				Position = word.Position + UDim2.fromScale(0, -0.05) }, Enum.EasingStyle.Sine, Enum.EasingDirection.Out)
+			task.delay(1.1, function()
+				if word.Parent then Fade(word, 0.45, { TextTransparency = 1, TextStrokeTransparency = 1 }, Enum.EasingStyle.Quad, Enum.EasingDirection.In) end
+			end)
+			task.delay(1.65, function() word:Destroy() end)
+		end
+	end,
+}
+end
+
+end
+
 local BUILTIN_KINDS = { "Snow", "Bubbles", "Petals", "Embers", "Fireflies", "Stars", "Glyphs", "Rain", "Confetti", "Sparkles", "Pixels", "Starfield", "Crystals", "Neon",
-	"Drafting", "FilmGrain", "Prisms", "Sparks", "Bokeh", "Bats", "Leaves" }
+	"Drafting", "FilmGrain", "Prisms", "Sparks", "Bokeh", "Bats", "Leaves", "Galaxy", "Grit", "MLG" }
 Lumen.ParticleKinds = { "Theme" }
 for _, k in ipairs(BUILTIN_KINDS) do table.insert(Lumen.ParticleKinds, k) end
 Lumen._particleDropdowns = {}
@@ -4272,7 +4800,8 @@ local function BuildFlakes()
 			Sparkles = Color3.fromRGB(255, 214, 120), Pixels = Color3.fromRGB(90, 255, 170), Crystals = Color3.fromRGB(215, 240, 255),
 			Neon = Color3.fromRGB(0, 229, 255), Drafting = Color3.fromRGB(210, 230, 255), FilmGrain = Color3.fromRGB(230, 230, 230),
 			Sparks = Color3.fromRGB(255, 210, 90), Bokeh = Color3.fromRGB(180, 210, 255), Bats = Color3.fromRGB(130, 90, 170),
-			Leaves = Color3.fromRGB(200, 110, 50) })[kind] or color
+			Leaves = Color3.fromRGB(200, 110, 50), Galaxy = Color3.fromRGB(225, 228, 255), Grit = Color3.fromRGB(255, 196, 120),
+			MLG = Color3.fromRGB(255, 140, 0) })[kind] or color
 	end
 	local L = { Kind = kind, Def = def, Color = color, Flakes = {}, Alpha = 0, Target = 1,
 		Folder = New("Frame", { BackgroundTransparency = 1, Size = UDim2.fromScale(1, 1), ZIndex = 1, Parent = BackdropFrame }) }
@@ -4370,6 +4899,10 @@ Connect(RunService.RenderStepped, function(dt)
 		BackdropFrame.Visible = false
 		return
 	end
+	if BackdropArt.Visible and ArtState.Cfg then
+		TexFX.Drift(BackdropArt, ArtState.Cfg, t, 0.7)
+		BackdropArt.ImageTransparency = 1 - (1 - (ArtState.Cfg.Transparency or 0.85)) * ArtState.P * Snow.Show
+	end
 	for li = #Snow.Layers, 1, -1 do
 		local L = Snow.Layers[li]
 		local lr = dt / 0.7
@@ -4398,7 +4931,10 @@ end)
 --   Particles + ParticleColor, Tint + TintPlace ("Top" | "Bottom" | "Aurora") + TintAmount,
 --   TopLine = {c1, c2} (light along the window's top edge), Scanlines (bool),
 --   Aura = {c1, c2, ...} + AuraSpeed + AuraThickness (animated gradient border),
---   InnerLine = Color3 (thin second border), AccentGradient = {c1, c2} (toggles, sliders, progress bars), Lightning (bool)
+--   InnerLine = Color3 (thin second border), AccentGradient = {c1, c2} (toggles, sliders, progress bars), Lightning (bool),
+--   Grid + GridColor, Vignette, SurfaceTransparency, Blur, AccentCycle + CycleSpeed, AuraHard, AuraRotation,
+--   Texture = { {Image, Transparency, Drift, Zoom, Pulse, Color, Mode = "Fill" | "Lamp", Flicker}, ... } (art inside windows),
+--   BackdropTexture = {Image, Transparency, Drift, Zoom} (art across the screen), Glitch (bool: title + screen glitches)
 -- fade (seconds): corners, glow, fonts, surfaces and particles all blend instead of switching.
 ------------------------------------------------------------------------------
 
@@ -4450,6 +4986,7 @@ function Lumen:SetStyle(st, fade)
 				Paint()
 				if i < steps then task.wait(fade / steps) end
 			end
+			task.delay(0.35, function() if mine == StyleToken and not Lumen.Unloaded then Paint() end end)
 		end)
 	else
 		StyleBlend = nil
@@ -4475,6 +5012,7 @@ function Lumen:SetScreenWatermark(text)
 				Rotation = -28, TextSize = 20, TextColor3 = Color3.new(1, 1, 1), TextTransparency = 0.94,
 				Font = Enum.Font.GothamBold, Parent = ScreenWM,
 			})
+			ScreenWM:GetChildren()[#ScreenWM:GetChildren()]:SetAttribute("TTRest", 0.94)
 		end
 	end
 end
@@ -4752,7 +5290,7 @@ local function BuildPalette()
 	})
 	PaletteInput = New("TextBox", {
 		Position = UDim2.fromOffset(32, 0), Size = UDim2.new(1, -46, 1, 0), BackgroundTransparency = 1, Text = "",
-		PlaceholderText = "Search options...", PlaceholderColor3 = Lumen.Theme.TextMuted, ClearTextOnFocus = false,
+		PlaceholderText = "Search options...", PlaceholderColor3 = Lumen.Theme.TextMuted, Theme = { PlaceholderColor3 = "TextMuted" }, ClearTextOnFocus = false,
 		TextSize = 13, TextColor3 = Lumen.Theme.Text, TextXAlignment = Enum.TextXAlignment.Left, Parent = head,
 	})
 	New("Frame", {
@@ -4869,7 +5407,7 @@ function Lumen:CreateWindow(o)
 		Parent = Gui, Theme = { BackgroundColor3 = "Background" },
 	}, { Corner(10), Stroke(nil, true) })
 	W._scale = RegisterScale(main)
-	RegisterSurface(main, "Window", 10)
+	local surface = RegisterSurface(main, "Window", 10)
 	W.Frame = main
 
 	local header = New("Frame", { BackgroundTransparency = 1, Size = UDim2.new(1, 0, 0, 50), Parent = main })
@@ -4880,6 +5418,7 @@ function Lumen:CreateWindow(o)
 		Text = W.Title, AutomaticSize = Enum.AutomaticSize.X, Size = UDim2.fromOffset(0, 22), TextSize = 13,
 		TextColor3 = self.Theme.Text, LayoutOrder = 1, Parent = titleRow,
 	})
+	surface.Title = titleLabel
 	local pills = New("Frame", {
 		BackgroundTransparency = 1, Size = UDim2.fromOffset(0, 21), AutomaticSize = Enum.AutomaticSize.X, LayoutOrder = 2,
 		Parent = titleRow,
@@ -4967,8 +5506,8 @@ function Lumen:CreateWindow(o)
 		AnchorPoint = Vector2.new(1, 1), Position = UDim2.new(1, -4, 1, -4), Size = UDim2.fromOffset(14, 14),
 		Text = "", ZIndex = 5, Parent = main,
 	}, {
-		New("Frame", { Size = UDim2.fromOffset(8, 1), Position = UDim2.new(1, -9, 1, -3), BackgroundColor3 = self.Theme.TextMuted, Rotation = -45, BackgroundTransparency = 0.3 }),
-		New("Frame", { Size = UDim2.fromOffset(4, 1), Position = UDim2.new(1, -6, 1, -3), BackgroundColor3 = self.Theme.TextMuted, Rotation = -45, BackgroundTransparency = 0.3 }),
+		New("Frame", { Size = UDim2.fromOffset(8, 1), Position = UDim2.new(1, -9, 1, -3), Rotation = -45, BackgroundTransparency = 0.3, Theme = { BackgroundColor3 = "TextMuted" } }),
+		New("Frame", { Size = UDim2.fromOffset(4, 1), Position = UDim2.new(1, -6, 1, -3), Rotation = -45, BackgroundTransparency = 0.3, Theme = { BackgroundColor3 = "TextMuted" } }),
 	})
 	do
 		local resizing, startMouse, startSize = false, nil, nil
@@ -5027,41 +5566,78 @@ function Lumen:CreateWindow(o)
 	function W:SetSubtitle(t) subtitle.Text = t end
 	function W:SetFooter(t) footer.Text = t end
 
-	local function MoveIndicator(instant)
+	-- The pill always heads for wherever the active tab is *right now*. Tab widths change when a theme swaps the
+	-- font, so a glide aimed at the old spot is re-aimed instead of finishing in the wrong place, and a watchdog
+	-- below catches anything else (window scaling, tabs shown/hidden mid-glide) so it can never stay stuck.
+	local indGoal = nil
+	local function IndicatorGoal()
 		local t = W.Active
-		if not t or t.Hidden or not t.Button.Parent then
+		if not t or t.Hidden or not t.Button.Parent then return nil end
+		local sc = (W._scale and W._scale.Scale) or Lumen.Scale
+		if sc <= 0 then return nil end
+		local b = t.Button
+		local x = math.floor((b.AbsolutePosition.X - indHolder.AbsolutePosition.X) / sc + 0.5)
+		local w = math.floor(b.AbsoluteSize.X / sc + 0.5)
+		if w <= 0 then return nil end
+		return x, w
+	end
+	local function Glide(x, w, time)
+		if indTween then indTween:Cancel() end
+		indGoal = { x, w }
+		indTween = TweenService:Create(ind, TweenInfo.new(time, Enum.EasingStyle.Quint, Enum.EasingDirection.Out),
+			{ Position = UDim2.fromOffset(x, 0), Size = UDim2.fromOffset(w, 28), BackgroundTransparency = 0 })
+		local mine = indTween
+		indTween.Completed:Connect(function() if indTween == mine then indTween = nil end end)
+		indTween:Play()
+		task.delay(time + 0.05, function() if indTween == mine then indTween = nil end end)
+	end
+	local function MoveIndicator(instant)
+		local x, w = IndicatorGoal()
+		if not x then
+			if indTween then indTween:Cancel() indTween = nil end
+			indGoal = nil
 			Tween(ind, 0.15, { BackgroundTransparency = 1 })
 			return
 		end
-		local sc = (W._scale and W._scale.Scale) or Lumen.Scale
-		if sc <= 0 then return end
-		local b = t.Button
-		local x = (b.AbsolutePosition.X - indHolder.AbsolutePosition.X) / sc
-		local w = b.AbsoluteSize.X / sc
-		local goal = { Position = UDim2.fromOffset(x, 0), Size = UDim2.fromOffset(w, 28), BackgroundTransparency = 0 }
 		if instant then
-			if indTween then return end
-			ind.Position, ind.Size, ind.BackgroundTransparency = goal.Position, goal.Size, 0
-		else
-			if indTween then indTween:Cancel() end
-			indTween = TweenService:Create(ind, TweenInfo.new(0.34, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), goal)
-			local mine = indTween
-			indTween.Completed:Connect(function() if indTween == mine then indTween = nil end end)
-			indTween:Play()
-			task.delay(0.4, function() if indTween == mine then indTween = nil end end)
+			if indTween then
+				-- mid-glide: re-aim at the new spot instead of ignoring the change
+				if not indGoal or math.abs(indGoal[1] - x) > 0.5 or math.abs(indGoal[2] - w) > 0.5 then Glide(x, w, 0.22) end
+				return
+			end
+			indGoal = { x, w }
+			ind.Position, ind.Size, ind.BackgroundTransparency = UDim2.fromOffset(x, 0), UDim2.fromOffset(w, 28), 0
+		elseif not (indTween and indGoal and indGoal[1] == x and indGoal[2] == w) then
+			Glide(x, w, 0.34)
 		end
 	end
 	W._MoveIndicator = MoveIndicator
+	W._Indicator = ind
+	-- watchdog: a few times a second, make sure the resting pill sits exactly on the active tab
+	do
+		local acc = 0
+		Connect(RunService.Heartbeat, function(dt)
+			acc = acc + dt
+			if acc < 0.15 then return end
+			acc = 0
+			if indTween or not main.Visible or Lumen.Unloaded then return end
+			local x, w = IndicatorGoal()
+			if not x then return end
+			local p, z = ind.Position.X.Offset, ind.Size.X.Offset
+			if math.abs(p - x) > 0.5 or math.abs(z - w) > 0.5 or ind.BackgroundTransparency > 0.01 then Glide(x, w, 0.25) end
+		end)
+	end
 	Connect(tabbar:GetPropertyChangedSignal("CanvasPosition"), function() MoveIndicator(true) end)
 
-	function W:_StyleTabs(skipPages)
+	function W:_StyleTabs(skipPages, instant)
 		for _, t in ipairs(self.Tabs) do
 			local on = (t == self.Active) and not t.Hidden
 			if not skipPages then t.Page.Visible = on end
 			t.Button.BackgroundTransparency = 1
-			Tween(t.Button, 0.18, { TextColor3 = on and Lumen.Theme.AccentText or Lumen.Theme.TextDim })
+			local c = on and Lumen.Theme.AccentText or Lumen.Theme.TextDim
+			if instant then t.Button.TextColor3 = c else Tween(t.Button, 0.18, { TextColor3 = c }) end
 		end
-		MoveIndicator(false)
+		MoveIndicator(instant == true)
 	end
 
 	local TabToken = 0
@@ -5112,7 +5688,7 @@ function Lumen:CreateWindow(o)
 		local cur = table.find(list, self.Active) or 1
 		self:SelectTab(list[((cur - 1 + step) % #list) + 1])
 	end
-	table.insert(Refreshers, function() W:_StyleTabs() end)
+	table.insert(Refreshers, function() W:_StyleTabs(true, true) end)
 
 	function W:SetTabVisible(name, v)
 		for _, t in ipairs(self.Tabs) do
@@ -5412,8 +5988,8 @@ function Lumen:CreateWindow(o)
 				TextXAlignment = Enum.TextXAlignment.Left, LayoutOrder = 1, Parent = f,
 			})
 			local bl = New("TextLabel", {
-				Text = wo.Text or "", Size = UDim2.new(1, 0, 0, 0), AutomaticSize = Enum.AutomaticSize.Y, TextSize = 11,
-				TextColor3 = Lumen.Theme.Label:Lerp(Lumen.Theme.Background, 0.12), TextWrapped = true, TextXAlignment = Enum.TextXAlignment.Left,
+				Text = wo.Text or "", Size = UDim2.new(1, 0, 0, 0), AutomaticSize = Enum.AutomaticSize.Y, TextSize = 12,
+				Theme = { TextColor3 = "Label" }, TextWrapped = true, TextXAlignment = Enum.TextXAlignment.Left,
 				Font = Enum.Font.GothamMedium, LayoutOrder = 2, Parent = f,
 			})
 			Relayout()
@@ -5502,7 +6078,7 @@ function Lumen:CreateWindow(o)
 			Flag = "Lumen_Scale", Callback = function(v) Lumen:SetScale(v) end })
 		Lumen._fontDropdown = menu:AddDropdown({ Text = "Font",
 			Values = { "Inter", "Gotham", "Mono", "Michroma", "Jura", "Merriweather", "FredokaOne", "Arcade", "TitilliumWeb", "Oswald", "Ubuntu", "Nunito", "SourceSans",
-				"PatrickHand", "SpecialElite", "Sarpanch", "Creepster", "Fondamento" },
+				"PatrickHand", "SpecialElite", "Sarpanch", "Creepster", "Fondamento", "RobotoCondensed", "Cartoon" },
 			Default = Lumen.FontName,
 			Description = "The typeface used everywhere. Themes pick one automatically; choose here to override it.",
 			Callback = function(v)
@@ -5627,20 +6203,18 @@ function Lumen:CreateWindow(o)
 			Emerald = "Aurora band up top, fireflies.",
 			Sunset = "Warm glow from below, rising embers.",
 			Mono = "Sharp corners, no glow, monospace, scanlines, glyph rain.",
-			Synthwave = "Neon pink and cyan, wide futuristic type, a spinning neon border, rising light streaks.",
 			Frost = "Pale ice, thin rounded type, a frosted double border, spinning ice crystals.",
 			Royal = "Midnight navy and gold, serif type, a gilded double border, glinting sparkles.",
 			Candy = "Bubblegum pastels, a soft rounded font, extra-round shapes, tumbling confetti.",
 			Arcade = "8-bit pixel font, square corners, a thick yellow border, CRT scanlines, stepping pixels.",
-			Cosmos = "Deep space, a violet nebula band, a slowly turning aurora border, stars and shooting stars.",
+			Cosmos = "Deep space: drifting nebula clouds over a parallax star layer, a turning aurora border, twinkling stars, shooting stars and comets.",
 			Storm = "Slate and steel, condensed type, slanted rain and distant lightning.",
 			Blueprint = "Drafting paper: navy blue, a white grid, a ruled double border, handwritten labels, drafting marks.",
-			Noir = "Film noir: black, white and one red, typewriter type, a dark vignette and flickering film grain.",
 			Prism = "A turning rainbow border, accents that cycle through the spectrum, rising glass shards.",
 			Hazard = "Industrial yellow and black, a striped warning-tape border, square corners, welding sparks.",
 			Glass = "See-through frosted surfaces over a blurred world, soft rounded type, drifting bokeh lights.",
-			Haunted = "Pumpkin orange on midnight purple, dripping type, ghostly green fog, bats overhead.",
-			Parchment = "A light theme: aged paper, ink-brown text, a wax-seal red accent, calligraphy, falling leaves.",
+			Criminality = "A grimy brick alley under a flickering street lamp, blood-red accents, glitching title, dust in the light, a glint along a blade.",
+			MLG = "Comic font, a fast rainbow border, rainbow accents, spinning doritos, hitmarkers and rainbow words. WOW.",
 		}
 		local desc
 		local presetDrop = th:AddDropdown({ Text = "Preset", Values = names, Default = PresetLabel(Lumen.Preset), Flag = "Lumen_Preset",
@@ -5953,6 +6527,7 @@ do
 	if LoadOptions.NotifyPosition then pcall(function() Lumen:SetNotifyPosition(LoadOptions.NotifyPosition) end) end
 end
 
+do -- image loading (icons + theme textures)
 -- High-res icons: fetched once (GitHub, then the jsDelivr mirror), cached on disk, then swapped in with a fade
 local ICON_BASES = {
 	"https://raw.githubusercontent.com/Irakli17/Ui-Library-Test/main/assets/icons/",
@@ -6013,6 +6588,52 @@ end
 
 if not LoadOptions.NoImages then
 	task.spawn(function() Lumen:_LoadIcons() end)
+end
+
+-- Theme textures load on demand (only when a theme that uses them is shown), from assets/textures/ next to the icons.
+do
+local TEXTURE_VERSION = "v1"
+local TEXTURE_BASES = {}
+for _, b in ipairs(ICON_BASES) do
+	local tb = b:gsub("icons/?$", "textures/")
+	if tb ~= b then table.insert(TEXTURE_BASES, tb) end
+end
+if type(LoadOptions.TextureBase) == "string" then table.insert(TEXTURE_BASES, 1, LoadOptions.TextureBase) end
+local TextureState = {}
+RequestTexture = function(name)
+	if TextureState[name] or LoadOptions.NoImages or Lumen.Unloaded then return end
+	if not (writefile and readfile and isfile and isfolder and makefolder and getcustomasset) then TextureState[name] = "off" return end
+	TextureState[name] = "loading"
+	-- deferred so the caller finishes first (a cached file loads without yielding)
+	task.defer(function()
+		local ok = pcall(function()
+			local dir = Lumen.Folder .. "/textures"
+			if not isfolder(Lumen.Folder) then makefolder(Lumen.Folder) end
+			if not isfolder(dir) then makefolder(dir) end
+			dir = dir .. "/" .. TEXTURE_VERSION
+			if not isfolder(dir) then makefolder(dir) end
+			local path = dir .. "/" .. name .. ".png"
+			if not isfile(path) then
+				for _, base in ipairs(TEXTURE_BASES) do
+					local okGet, data = pcall(function() return game:HttpGet(base .. name .. ".png") end)
+					if okGet and type(data) == "string" and data:sub(1, 4) == "\137PNG" then
+						writefile(path, data)
+						break
+					end
+				end
+			end
+			if isfile(path) then TextureImages[name] = getcustomasset(path) end
+		end)
+		TextureState[name] = (ok and TextureImages[name]) and "done" or "failed"
+		if TextureImages[name] and not Lumen.Unloaded then
+			for _, fn in ipairs(Refreshers) do pcall(fn) end
+			pcall(StyleVignette)
+			-- sprite-based particles pick up their image with a crossfade
+			if name == "dorito" and CurrentKind() == "MLG" then pcall(function() Lumen:_RefreshParticles() end) end
+		end
+	end)
+end
+end
 end
 
 -- Inter font: downloaded once into the Lumen folder (needs writefile + getcustomasset), otherwise Gotham stays.
