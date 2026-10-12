@@ -51,6 +51,8 @@ local TextService = Service("TextService")
 
 local Lumen = {
 	Version = "v0.0.4-stable",
+	ConfirmsConfigDelete = true,                        -- the config tab asks before it deletes a config
+	ConfigProgressNotices = true,                       -- saving, loading and autoloading show Loading -> result
 	Id = InstanceId,
 	LoadOptions = LoadOptions,
 	NotifyErrors = LoadOptions.NotifyErrors ~= false,   -- a crashing callback shows a red notification
@@ -3972,8 +3974,11 @@ end
 function Lumen:LoadAutoload()
 	local n = self:GetAutoload()
 	if n then
-		local ok = self:LoadConfig(n)
-		if ok then self:Notify({ Title = "Config", Content = "Autoloaded '" .. n .. "'.", Type = "Success" }) end
+		local card = self:Notify({ Title = "Config", Content = "Autoloading '" .. n .. "'...", Type = "Loading" })
+		local ok, err = self:LoadConfig(n)
+		task.delay(0.35, function()
+			card:Update({ Title = "Config", Content = ok and ("Autoloaded '" .. n .. "'.") or tostring(err or "Could not read config"), Type = ok and "Success" or "Danger", Duration = 4 })
+		end)
 	end
 end
 
@@ -6296,29 +6301,45 @@ function Lumen:CreateWindow(o)
 			Lumen:Notify({ Title = "Config", Content = ok and good or tostring(err), Type = ok and "Success" or "Danger" })
 		end
 
+		-- one card per action: it spins while the file is written or read, then turns into the result
+		local function Progress(busy, ok, err, good)
+			local card = Lumen:Notify({ Title = "Config", Content = busy, Type = "Loading" })
+			task.delay(0.35, function()
+				card:Update({ Title = "Config", Content = ok and good or tostring(err), Type = ok and "Success" or "Danger", Duration = 4 })
+			end)
+		end
+
 		cfg:AddButton({ Text = "Create / Save", Callback = function()
 			local n = nameInput.Value
 			if n == "" then n = list.Value or "" end
 			local ok, err = Lumen:SaveConfig(n)
-			Result(ok, err, "Saved '" .. n .. "'.")
+			if n:gsub("%s", "") == "" then Result(ok, err) else Progress("Saving '" .. n .. "'...", ok, err, "Saved '" .. n .. "'.") end
 			Refresh()
 		end }):AddSubButton({ Text = "Load", Callback = function()
 			if not list.Value then return Result(false, "Select a config first") end
-			local ok, err = Lumen:LoadConfig(list.Value)
-			Result(ok, err, "Loaded '" .. list.Value .. "'.")
+			local n = list.Value
+			local ok, err = Lumen:LoadConfig(n)
+			Progress("Loading '" .. n .. "'...", ok, err, "Loaded '" .. n .. "'.")
 			SyncPickers()
 		end })
 		cfg:AddButton({ Text = "Set autoload", Callback = function()
 			if not list.Value then return Result(false, "Select a config first") end
-			Lumen:SetAutoload(list.Value)
-			Result(true, nil, "'" .. list.Value .. "' will load automatically.")
+			local n = list.Value
+			local ok = Lumen:SetAutoload(n) ~= false
+			Progress("Setting '" .. n .. "' as autoload...", ok, "Your executor cannot write files, autoload was not set.", "'" .. n .. "' will load automatically.")
 			Refresh()
-		end }):AddSubButton({ Text = "Delete", DoubleClick = true, Callback = function()
+		end }):AddSubButton({ Text = "Delete", Callback = function()
 			if not list.Value then return Result(false, "Select a config first") end
 			local n = list.Value
-			local ok, err = Lumen:DeleteConfig(n)
-			Result(ok, err, "Deleted '" .. n .. "'.")
-			Refresh()
+			Lumen:Confirm({
+				Title = "Delete '" .. n .. "'?", Type = "Danger", Confirm = "Delete",
+				Text = "The saved config is removed from disk. This cannot be undone.",
+				OnConfirm = function()
+					local ok, err = Lumen:DeleteConfig(n)
+					Result(ok, err, "Deleted '" .. n .. "'.")
+					Refresh()
+				end,
+			})
 		end })
 		if not CanFile() then
 			cfg:AddLabel("Your executor has no file functions, so configs cannot be saved.", { Dim = true })
