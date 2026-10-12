@@ -1,7 +1,7 @@
-"""Lumen icon set: white vector icons on a 24x24 grid, rendered to high-res PNGs (tinted in-game via ImageColor3).
+"""TingUI icon set: white vector icons on a 24x24 grid, rendered to high-res PNGs (tinted in-game via ImageColor3).
 
 Rebuild assets/icons:  pip install cairosvg pillow   then   python tools/build_icons.py
-Add an icon: add an SVG body to ICONS (and its name to ICON_NAMES in Lumen.lua), rebuild, push.
+Add an icon: add an SVG body to ICONS (and its name to ICON_NAMES in TingUI.lua), rebuild, push.
 """
 import math, os, sys, io
 import cairosvg

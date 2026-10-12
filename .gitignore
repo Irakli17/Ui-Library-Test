@@ -1,0 +1,5 @@
+tests/.sources.lua
+Packages/
+*.rbxl
+*.rbxlx
+tools/.cache/

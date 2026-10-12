@@ -1,15 +1,16 @@
 --[[
-	Lumen example: every element, the reference layout, and real Roblox features wired to the controls.
+	TingUI example: every element, the reference layout, and real Roblox features wired to the controls.
 	Everything here runs client-side and is restored when the UI is unloaded.
 ]]
 
--- Options can be passed straight into the loadstring call. Id keeps this script's UI separate from other scripts using Lumen.
-local Lumen = loadstring(game:HttpGet("https://raw.githubusercontent.com/Irakli17/Ui-Library-Test/main/Lumen.lua"))({
-	Id = "LumenExample",
-	Folder = "LumenExample",
-	-- Theme = "Cosmos",          -- start in any theme: Lavender (default), Ocean, Rose, Emerald, Sunset, Mono, Frost, Royal,
-	--                               Candy, Arcade, Cosmos, Storm, Blueprint, Prism, Hazard, Glass, Criminality, MLG
+-- Options can be passed straight into the loadstring call. Id keeps this script's UI separate from other scripts using TingUI.
+local TingUI = loadstring(game:HttpGet("https://raw.githubusercontent.com/Irakli17/Ui-Library-Test/main/TingUI.lua"))({
+	Id = "TingUIExample",
+	Folder = "TingUIExample",
+	-- Theme = "Hologram",        -- start in any theme: Lavender (default), Ocean, Rose, Sunset, Mono, Frost, Royal, Candy,
+	--                               Cosmos, Storm, Blueprint, Hazard, Glass, Hologram, Circuit, Abyss, Criminality, MLG
 	-- AssetBase = "https://your.host/icons/",   -- optional: where the high-res icon PNGs live (defaults to this repo)
+	-- Shell = { Name = "Example Hub" },          -- how this script shows up when other TingUI scripts share the screen
 })
 
 local Players = game:GetService("Players")
@@ -18,13 +19,13 @@ local TeleportService = game:GetService("TeleportService")
 local HttpService = game:GetService("HttpService")
 local LocalPlayer = Players.LocalPlayer
 
-local Window = Lumen:CreateWindow({
-	Title = "Lumen Interface Suite",
+local Window = TingUI:CreateWindow({
+	Title = "TingUI Interface Suite",
 	Tag = "Pro",                         -- green pill
-	Version = "v0.0.4",                  -- red pill
+	Version = "v0.0.7",                  -- red pill
 	Subtitle = "Example Game",
 	Footer = "discord.gg/yourserver",
-	WatermarkTitle = "Lumen V2",
+	WatermarkTitle = "TingUI V2",
 	MenuKey = Enum.KeyCode.RightShift,
 	Snow = { Count = 70, Speed = 1 },    -- particles follow the theme
 	Backdrop = { Dim = 0.5, Blur = 8 },  -- dimmed + blurred world behind the UI
@@ -32,13 +33,13 @@ local Window = Lumen:CreateWindow({
 
 -- Anything the script changes in the game is put back when the UI unloads.
 local Restore = {}
-Lumen.Events.Unloading:Connect(function()
+TingUI.Events.Unloading:Connect(function()
 	for _, fn in ipairs(Restore) do pcall(fn) end
 end)
 
 -- The ESP Preview panel is created up front so controls in any tab can drive it.
 -- Visible = false: only the main window shows on first run. Open it from the dock (scan icon) or the Visuals tab.
-local espPanel = Lumen:CreatePanel({
+local espPanel = TingUI:CreatePanel({
 	Title = "ESP Preview", Width = 250, Position = UDim2.new(1, -790, 0.5, -90), Visible = false,
 	Dock = { Icon = "scan", Tooltip = "ESP Preview", Order = 20 },
 })
@@ -64,15 +65,15 @@ Aimbot:AddToggle({ Text = "Cool Toggle With a Tooltip", Tooltip = "Hover the ? c
 -- switches on the character highlight in the ESP Preview; swatch 1 is the fill, swatch 2 the outline.
 local colors = Aimbot:AddToggle({ Text = "Cool Toggle With Colors", Flag = "CoolColors",
 	Description = "A toggle with colour swatches attached. Click a swatch to pick a colour. Here it turns on the character highlight in the ESP Preview: the first swatch is the fill, the second the outline.",
-	Callback = function(v) Lumen:SetFlag("EspHighlight", v) end })
+	Callback = function(v) TingUI:SetFlag("EspHighlight", v) end })
 colors:AddColorPicker({ Default = Color3.fromRGB(158, 224, 151), Flag = "ColorA", Callback = function(c) esp:SetHighlight({ Fill = c }) end })
 colors:AddColorPicker({ Default = Color3.fromRGB(120, 230, 170), Flag = "ColorB", Callback = function(c) esp:SetHighlight({ Outline = c }) end })
 Aimbot:AddToggle({ Text = "Risky Toggle", Risky = true, Description = "Risky = true tints the label red, for features users should think twice about." })
 Aimbot:AddSlider({ Text = "Cool Slider", Min = 0, Max = 300, Default = 300, Flag = "CoolSlider", Description = "Drag it, or click the number to type an exact value." })
 Aimbot:AddDropdown({ Text = "Cool Dropdown", Values = { "One", "Two", "Three" }, Flag = "CoolDrop" })
 Aimbot:AddViewport({ Height = 150, Character = true })   -- your avatar; drag to orbit, auto-rotates when released
-Aimbot:AddButton({ Text = "Button", Callback = function() Lumen:Notify("test notif") end })
-	:AddSubButton({ Text = "Sub-button", Callback = function() Lumen:Notify("Sub-button pressed") end })
+Aimbot:AddButton({ Text = "Button", Callback = function() TingUI:Notify("test notif") end })
+	:AddSubButton({ Text = "Sub-button", Callback = function() TingUI:Notify("Sub-button pressed") end })
 
 FOV:AddDropdown({ Text = "Multi Dropdown", Values = { "Red", "Green", "Blue", "Yellow" }, Multi = true, Default = { "Red" }, Flag = "MultiDrop" })
 FOV:AddDropdown({ Text = "Searchable Dropdown", Flag = "Weapon", Description = "Lists longer than 8 entries get a search box automatically.",
@@ -90,43 +91,43 @@ Silent:AddToggle({ Text = "Silent Aim", Flag = "Silent", Disabled = true })
 Silent:AddToggle({ Text = "Cool Toggle With Colors", Flag = "EspTint",
 	Description = "Same idea: a toggle with a colour swatch. Turn it on to colour the ESP box, name and distance in the ESP Preview with the swatch colour.",
 	Callback = function(v)
-		esp:SetESP({ Color = v and (Lumen.Flags.EspTintColor or Color3.fromRGB(255, 170, 255)) or Color3.new(1, 1, 1) })
+		esp:SetESP({ Color = v and (TingUI.Flags.EspTintColor or Color3.fromRGB(255, 170, 255)) or Color3.new(1, 1, 1) })
 		if v then espPanel:SetVisible(true) end
 	end }):AddColorPicker({ Default = Color3.fromRGB(255, 170, 255), Flag = "EspTintColor",
-	Callback = function(c) if Lumen.Flags.EspTint then esp:SetESP({ Color = c }) end end })
+	Callback = function(c) if TingUI.Flags.EspTint then esp:SetESP({ Color = c }) end end })
 Silent:AddLabel("I'm a basic label")
 Silent:AddSlider({ Text = "Cool Slider", Min = 0, Max = 8000, Default = 8000, Suffix = " km/100", Increment = 10, Flag = "Speed" })
 Silent:AddLabel("Label with text in it so coolLabel with text in it so coolLabel with text in it so coolLabel with text in it so cool")
 Silent:AddInput({ Text = "Cool Input", Placeholder = "Dynamic Input (textbox)", Flag = "Input", Callback = function(v) print("Input:", v) end })
 Silent:AddInput({ Text = "Dynamic Input", Placeholder = "Type here, it grows as you type (Enter to submit)", Dynamic = true, Flag = "DynInput" })
 Silent:AddViewport({ Height = 150 })                  -- default: a gray block
-Silent:AddButton({ Text = "Button" }):AddSubButton({ Text = "Sub-button", Callback = function() Lumen:Notify("Sub-button pressed") end })
+Silent:AddButton({ Text = "Button" }):AddSubButton({ Text = "Sub-button", Callback = function() TingUI:Notify("Sub-button pressed") end })
 Range:AddLabel("Empty sub-tabs simply show nothing.", { Dim = true })
 
 local Tests = Combat:AddGroup({ Title = "Notifications", Icon = "command", Side = "Right" })
 Tests:AddButton({ Text = "Success", Callback = function()
-	Lumen:Notify({ Title = "Success", Content = "Settings applied and saved.", Type = "Success" })
+	TingUI:Notify({ Title = "Success", Content = "Settings applied and saved.", Type = "Success" })
 end }):AddSubButton({ Text = "Warning", Callback = function()
-	Lumen:Notify({ Title = "Warning", Content = "This feature can be unstable in some games.", Type = "Warning" })
+	TingUI:Notify({ Title = "Warning", Content = "This feature can be unstable in some games.", Type = "Warning" })
 end })
 Tests:AddButton({ Text = "Error", Callback = function()
-	Lumen:Notify({ Title = "Error", Content = "Couldn't reach the server. Try again in a moment.", Type = "Error" })
+	TingUI:Notify({ Title = "Error", Content = "Couldn't reach the server. Try again in a moment.", Type = "Error" })
 end }):AddSubButton({ Text = "Info", Callback = function()
-	Lumen:Notify({ Title = "Info", Content = "Press Ctrl+K to search everything, Ctrl+Tab to switch tabs.", Type = "Info" })
+	TingUI:Notify({ Title = "Info", Content = "Press Ctrl+K to search everything, Ctrl+Tab to switch tabs.", Type = "Info" })
 end })
 Tests:AddButton({ Text = "Loading -> Done", Callback = function()
-	local n = Lumen:Notify({ Title = "Injecting", Content = "Preparing features...", Type = "Loading" })
+	local n = TingUI:Notify({ Title = "Injecting", Content = "Preparing features...", Type = "Loading" })
 	task.delay(2, function() n:Update({ Title = "Ready", Content = "Everything loaded.", Type = "Success" }) end)
 end }):AddSubButton({ Text = "With buttons", Callback = function()
-	Lumen:Notify({ Title = "Update available", Content = "Version 0.0.5 is out.", Type = "Info", Duration = 8,
-		Actions = { { Text = "Changelog", Callback = function() Lumen:Notify("Opening changelog...") end }, { Text = "Later" } } })
+	TingUI:Notify({ Title = "Update available", Content = "Version 0.0.8 is out.", Type = "Info", Duration = 8,
+		Actions = { { Text = "Changelog", Callback = function() TingUI:Notify("Opening changelog...") end }, { Text = "Later" } } })
 end })
 Tests:AddButton({
 	Text = "Reset Everything",
 	Description = "A button that asks first: hold the confirm button for a second.",
 	Confirm = { Title = "Reset everything?", Text = "All toggles and sliders go back to their defaults. This can't be undone.",
 		Type = "Danger", Confirm = "Reset", Hold = 1 },
-	Callback = function() Lumen:Notify({ Title = "Reset", Content = "Everything was reset.", Type = "Success" }) end,
+	Callback = function() TingUI:Notify({ Title = "Reset", Content = "Everything was reset.", Type = "Success" }) end,
 })
 
 ------------------------------------------------------------------ Visuals: ESP preview, highlight, panels, camera
@@ -175,7 +176,7 @@ CameraGroup:AddSlider({ Text = "Field of view", Min = 40, Max = 120, Default = b
 	Callback = function(v) if camera then camera.FieldOfView = v end end })
 CameraGroup:AddButton({ Text = "Reset field of view", Callback = function()
 	if camera then camera.FieldOfView = baseFov end
-	Lumen:SetFlag("Fov", baseFov)
+	TingUI:SetFlag("Fov", baseFov)
 end })
 
 ------------------------------------------------------------------ World: lighting, time of day, fog
@@ -208,8 +209,8 @@ TimeGroup:AddSlider({ Text = "Time of day", Min = 0, Max = 24, Increment = 0.25,
 TimeGroup:AddToggle({ Text = "Lock time", Description = "Keeps the time where you set it, even if the game tries to change it.",
 	Callback = function(v) lockTime = v end })
 task.spawn(function()
-	while not Lumen.Unloaded do
-		if lockTime and Lumen.Flags.ClockTime then Lighting.ClockTime = Lumen.Flags.ClockTime end
+	while not TingUI.Unloaded do
+		if lockTime and TingUI.Flags.ClockTime then Lighting.ClockTime = TingUI.Flags.ClockTime end
 		task.wait(0.5)
 	end
 end)
@@ -220,7 +221,7 @@ FogGroup:AddSlider({ Text = "Brightness", Min = 0, Max = 5, Increment = 0.1, Def
 	Callback = function(v) Lighting.Brightness = v end })
 FogGroup:AddButton({ Text = "Restore game lighting", Callback = function()
 	RestoreLighting()
-	Lumen:Notify({ Title = "Lighting", Content = "Restored the game's original lighting.", Type = "Success" })
+	TingUI:Notify({ Title = "Lighting", Content = "Restored the game's original lighting.", Type = "Success" })
 end })
 
 ------------------------------------------------------------------ Character
@@ -239,8 +240,8 @@ InfoGroup:AddParagraph({ Title = LocalPlayer and LocalPlayer.DisplayName or "Pla
 	Content = string.format("@%s\nUser ID: %s\nAccount age: %s days", tostring(LocalPlayer and LocalPlayer.Name),
 		tostring(LocalPlayer and LocalPlayer.UserId), tostring(LocalPlayer and LocalPlayer.AccountAge)) })
 InfoGroup:AddButton({ Text = "Copy username", Callback = function()
-	if Lumen:Clipboard(LocalPlayer.Name) then Lumen:Notify({ Content = "Username copied.", Type = "Success" })
-	else Lumen:Notify({ Content = "Your executor can't copy to the clipboard.", Type = "Warning" }) end
+	if TingUI:Clipboard(LocalPlayer.Name) then TingUI:Notify({ Content = "Username copied.", Type = "Success" })
+	else TingUI:Notify({ Content = "Your executor can't copy to the clipboard.", Type = "Warning" }) end
 end })
 InfoGroup:AddButton({ Text = "Reset character", Description = "Respawns your character, like the reset button in the Roblox menu.",
 	Confirm = { Title = "Reset character?", Text = "Your character will respawn.", Type = "Warning", Confirm = "Reset" },
@@ -271,7 +272,7 @@ PlayersGroup:AddToggle({ Text = "Spectate", Flag = "Spectate", Description = "Po
 target:OnChanged(function() if spectating then Spectate(target:GetPlayer()) end end)
 PlayersGroup:AddButton({ Text = "Copy their username", Callback = function()
 	local p = target:GetPlayer()
-	if p and Lumen:Clipboard(p.Name) then Lumen:Notify({ Content = "Copied @" .. p.Name, Type = "Success" }) end
+	if p and TingUI:Clipboard(p.Name) then TingUI:Notify({ Content = "Copied @" .. p.Name, Type = "Success" }) end
 end })
 
 local ServerGroup = Exploits:AddGroup({ Title = "Server", Side = "Right" })
@@ -286,15 +287,15 @@ UpdateServer()
 Players.PlayerAdded:Connect(UpdateServer)
 Players.PlayerRemoving:Connect(function() task.defer(UpdateServer) end)
 ServerGroup:AddButton({ Text = "Copy Job ID", Callback = function()
-	if Lumen:Clipboard(game.JobId) then Lumen:Notify({ Content = "Job ID copied.", Type = "Success" }) end
+	if TingUI:Clipboard(game.JobId) then TingUI:Notify({ Content = "Job ID copied.", Type = "Success" }) end
 end }):AddSubButton({ Text = "Copy join script", Description = "A one-line script that joins this exact server.", Callback = function()
 	local line = string.format('game:GetService("TeleportService"):TeleportToPlaceInstance(%s, "%s")', tostring(game.PlaceId), tostring(game.JobId))
-	if Lumen:Clipboard(line) then Lumen:Notify({ Content = "Join script copied.", Type = "Success" }) end
+	if TingUI:Clipboard(line) then TingUI:Notify({ Content = "Join script copied.", Type = "Success" }) end
 end })
 ServerGroup:AddButton({ Text = "Rejoin", Description = "Leaves and rejoins this same server.",
 	Confirm = { Title = "Rejoin this server?", Text = "You'll be teleported back into the same server.", Type = "Info", Confirm = "Rejoin" },
 	Callback = function()
-		local n = Lumen:Notify({ Title = "Rejoining", Content = "Teleporting...", Type = "Loading" })
+		local n = TingUI:Notify({ Title = "Rejoining", Content = "Teleporting...", Type = "Loading" })
 		local ok, err = pcall(function() TeleportService:TeleportToPlaceInstance(game.PlaceId, game.JobId, LocalPlayer) end)
 		if not ok then n:Update({ Title = "Rejoin failed", Content = tostring(err), Type = "Error" }) end
 	end })
@@ -304,28 +305,28 @@ local Webhook = Window:AddTab("Webhook")
 local HookGroup = Webhook:AddGroup({ Title = "Discord webhook", Side = "Left" })
 HookGroup:AddParagraph({ Content = "Paste a webhook URL from Discord (Server Settings > Integrations > Webhooks). Needs an executor with an HTTP request function." })
 local url = HookGroup:AddInput({ Text = "Webhook URL", Placeholder = "https://discord.com/api/webhooks/...", Flag = "WebhookUrl" })
-local message = HookGroup:AddInput({ Text = "Message", Placeholder = "Hello from Lumen!", Dynamic = true, Flag = "WebhookMessage" })
+local message = HookGroup:AddInput({ Text = "Message", Placeholder = "Hello from TingUI!", Dynamic = true, Flag = "WebhookMessage" })
 local embedColor
 HookGroup:AddLabel("Embed colour"):AddColorPicker({ Default = Color3.fromRGB(159, 150, 193), Flag = "WebhookColor",
 	Callback = function(c) embedColor = c end })
 HookGroup:AddButton({ Text = "Send test message", Callback = function()
 	local u = url.Value
 	if not (u:match("^https://discord%.com/api/webhooks/") or u:match("^https://discordapp%.com/api/webhooks/")) then
-		Lumen:Notify({ Title = "Webhook", Content = "That doesn't look like a Discord webhook URL.", Type = "Warning" })
+		TingUI:Notify({ Title = "Webhook", Content = "That doesn't look like a Discord webhook URL.", Type = "Warning" })
 		return
 	end
 	local c = embedColor or Color3.fromRGB(159, 150, 193)
 	local body = HttpService:JSONEncode({
-		username = "Lumen",
+		username = "TingUI",
 		embeds = { {
 			title = "Test from " .. tostring(LocalPlayer.Name),
-			description = message.Value ~= "" and message.Value or "Hello from Lumen!",
+			description = message.Value ~= "" and message.Value or "Hello from TingUI!",
 			color = math.floor(c.R * 255) * 65536 + math.floor(c.G * 255) * 256 + math.floor(c.B * 255),
 		} },
 	})
-	local n = Lumen:Notify({ Title = "Webhook", Content = "Sending...", Type = "Loading" })
+	local n = TingUI:Notify({ Title = "Webhook", Content = "Sending...", Type = "Loading" })
 	task.spawn(function()
-		local res, err = Lumen:Request({ Url = u, Method = "POST", Headers = { ["Content-Type"] = "application/json" }, Body = body })
+		local res, err = TingUI:Request({ Url = u, Method = "POST", Headers = { ["Content-Type"] = "application/json" }, Body = body })
 		local code = res and (res.StatusCode or res.status_code)
 		if code and code >= 200 and code < 300 then
 			n:Update({ Title = "Webhook", Content = "Message delivered.", Type = "Success" })
@@ -350,15 +351,15 @@ Window:AddConfigTab("Config")   -- menu, effects, layout toggles, theme editor, 
 
 ------------------------------------------------------------ Floating panels from the reference
 -- Every extra window starts hidden (Visible = false) so first run shows only the main UI.
-skins = Lumen:CreatePanel({ Title = "Skin Changer", Width = 440, Position = UDim2.new(1, -490, 0, 96), Visible = false,
+skins = TingUI:CreatePanel({ Title = "Skin Changer", Width = 440, Position = UDim2.new(1, -490, 0, 96), Visible = false,
 	Dock = { Icon = "palette", Tooltip = "Skin Changer", Order = 30 } })
 local items = {}
 for i = 1, 12 do
 	items[i] = { Image = "rbxthumb://type=AvatarHeadShot&id=" .. i .. "&w=420&h=420" }
 end
-skins:AddImageGrid({ Items = items, Columns = 4, CellHeight = 82, Callback = function() Lumen:Notify("Skin selected") end })
+skins:AddImageGrid({ Items = items, Columns = 4, CellHeight = 82, Callback = function() TingUI:Notify("Skin selected") end })
 
-local keySystem = Lumen:CreateKeySystem({
+local keySystem = TingUI:CreateKeySystem({
 	Visible = false,
 	Title = "Key System",
 	Note = "Get your key from our Discord",
@@ -366,11 +367,11 @@ local keySystem = Lumen:CreateKeySystem({
 	DiscordLink = "https://discord.gg/yourserver",   -- adds the Discord icon in the header
 	GetKeyLink = "https://example.com/getkey",
 	Validate = function(k) return k == "my-secret-key", "That key is not valid" end,
-	OnSuccess = function() Lumen:Notify("Unlocked!") end,
+	OnSuccess = function() TingUI:Notify("Unlocked!") end,
 	Position = UDim2.new(1, -900, 1, -230),
 })
 
-Lumen:CreateCredits({
+TingUI:CreateCredits({
 	Title = "CREDITS",
 	Subtitle = "Cool people behind *your* script",
 	Position = UDim2.new(1, -400, 0.5, -10),
@@ -388,6 +389,6 @@ Lumen:CreateCredits({
 -- About tab: open the demo windows
 About:AddGroup("Demos", "Left"):AddButton({ Text = "Key System demo", Description = "Opens the example key prompt. The valid key is my-secret-key.",
 	Callback = function() keySystem:Toggle() end })
-Lumen:Notify({ Title = "Loaded", Content = "Lumen " .. Lumen.Version .. " is ready. RightShift hides the menu, Ctrl+K searches.", Type = "Success" })
+TingUI:Notify({ Title = "Loaded", Content = "TingUI " .. TingUI.Version .. " is ready. RightShift hides the menu, Ctrl+K searches.", Type = "Success" })
 
-Lumen:LoadAutoload()
+TingUI:LoadAutoload()

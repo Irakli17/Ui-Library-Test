@@ -1,9 +1,9 @@
-"""Lumen theme textures, generated procedurally (nothing copied from anywhere).
+"""TingUI theme textures, generated procedurally (nothing copied from anywhere).
 
     python tools/build_textures.py [output folder]     (default: ../assets/textures next to this script)
 
 Needs numpy and Pillow. Every texture is deterministic (fixed seeds), so rebuilding gives the same files.
-Lumen loads them from <repo>/assets/textures/<name>.png, caches them on disk and draws them on windows
+TingUI loads them from <repo>/assets/textures/<name>.png, caches them on disk and draws them on windows
 with the Style.Texture / Style.Lamp theme keys.
 
   nebula.png  1024 x 1024  violet / magenta / blue gas clouds with dark dust lanes (alpha = cloud density)

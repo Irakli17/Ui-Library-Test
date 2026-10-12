@@ -1,0 +1,18 @@
+{
+	"name": "TingUI Dev Place",
+	"tree": {
+		"$className": "DataModel",
+		"ReplicatedStorage": {
+			"TingUI": { "$path": "TingUI.lua" },
+			"TingUIDataStoreStorage": { "$path": "extras/DataStoreStorage.lua" }
+		},
+		"ServerScriptService": {
+			"TingUIConfigServer": { "$path": "extras/ConfigServer.server.lua" }
+		},
+		"StarterPlayer": {
+			"StarterPlayerScripts": {
+				"TingUIDemo": { "$path": "extras/StudioDemo.client.lua" }
+			}
+		}
+	}
+}
