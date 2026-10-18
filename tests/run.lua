@@ -167,7 +167,7 @@ Test("Configure changes theme, parent and shortcuts after loading", function()
 	local holder = M.NewInstance("Folder", { Name = "Holder" })
 	holder.Parent = M.PlayerGui
 	TingUI:Configure({ Theme = "Abyss", Parent = holder, Shortcuts = false, DisplayOrder = 5 })
-	assert(TingUI.Preset == "Abyss", "theme not applied")
+	assert(TingUI.Preset == "Ocean", "retired theme name (Abyss) should map to Ocean, got " .. tostring(TingUI.Preset))
 	assert(TingUI.Gui.Parent == holder, "parent not applied")
 	assert(TingUI.Shortcuts == false and TingUI.Gui.DisplayOrder == 5, "Shortcuts / DisplayOrder not applied")
 	BuildUI(TingUI, M)
@@ -271,7 +271,7 @@ Test("theme scenes build, animate, answer clicks, tabs and opening, hold still u
 		for _, c in ipairs(frame:GetChildren()) do if c.Name == "TingUIScene" or c.Name == "TingUISceneTop" then n = n + 1 end end
 		return n
 	end
-	for _, name in ipairs({ "Hologram", "Circuit", "Abyss" }) do
+	for _, name in ipairs({ "Hologram", "Circuit", "Ocean" }) do
 		TingUI:ApplyPreset(name)
 		M.Step(1 / 60, 90)
 		assert(SceneFrames() == 2, name .. ": expected one scene (2 layers), found " .. SceneFrames())
@@ -894,6 +894,169 @@ Test("the layouts in docs/layouts.md mount as written", function()
 	assert(Sources.LayoutsDoc:find("Tabs[1] 'Main' > Groups[1] 'Movement' > Elements[2] " .. phrase, 1, true), "the docs show a different error")
 	M.Step(1 / 60, 30)
 	M.Warnings = {}
+	NoErrors(M)
+end)
+
+local function Find(root, pred)
+	for _, d in ipairs(root:GetDescendants()) do if pred(d) then return d end end
+end
+local function Count(root, pred)
+	local n = 0
+	for _, d in ipairs(root:GetDescendants()) do if pred(d) then n = n + 1 end end
+	return n
+end
+
+Test("notifications: merge, progress, undo / commit, reply, details, copy, history, center, clear all, swipe", function()
+	local M, env = Fresh(true)
+	local TingUI = Load(M, env, Sources.TingUI, "TingUI", nil, { Id = "N" })
+	local W = TingUI:CreateWindow({ Title = "N", Dock = { "menu", "notifications" } })
+	W:AddTab("Main")
+	local Enum, V2 = M.globals.Enum, M.globals.Vector2
+	-- the same card twice merges into one with a counter
+	local a = TingUI:Notify({ Title = "Joined", Content = "x", Type = "Friend" })
+	local b = TingUI:Notify({ Title = "Joined", Content = "x", Type = "Friend" })
+	assert(a == b and a.Count == 2, "identical notifications should merge")
+	assert(Find(a.Frame, function(d) return d.ClassName == "TextLabel" and d.Text == "x2" end), "merge counter not shown")
+	-- determinate progress
+	local p = TingUI:Notify({ Title = "Downloading", Content = "0 / 10", Type = "Download", Value = 0 })
+	p:SetProgress(0.5, "5 / 10")
+	assert(Find(p.Frame, function(d) return d.ClassName == "TextLabel" and d.Text == "50%" end), "progress percentage not shown")
+	assert(Find(p.Frame, function(d) return d.ClassName == "TextLabel" and d.Text == "5 / 10" end), "SetProgress text not applied")
+	-- undo: OnCommit runs only when the card goes away without Undo
+	local committed, undone = 0, 0
+	TingUI:Notify({ Title = "Deleted", Type = "Warning", Undo = function() undone = undone + 1 end, OnCommit = function() committed = committed + 1 end, Duration = 1 })
+	M.Step(1 / 30, 60)
+	assert(committed == 1 and undone == 0, "timing out should commit")
+	local u = TingUI:Notify({ Title = "Deleted 2", Type = "Warning", Undo = function() undone = undone + 1 end, OnCommit = function() committed = committed + 1 end })
+	local ub = Find(u.Frame, function(d) return d.ClassName == "TextButton" and tostring(d.Text):find("^Undo") end)
+	assert(ub, "no Undo button")
+	ub.MouseButton1Click:Fire()
+	M.Step(1 / 30, 10)
+	assert(undone == 1 and committed == 1 and u.Closed, "Undo should undo, close and skip OnCommit")
+	-- reply from the card
+	local got
+	local r = TingUI:Notify({ Title = "builderman", Content = "gg", Type = "Message", Input = { Callback = function(t) got = t end } })
+	local box = Find(r.Frame, function(d) return d.ClassName == "TextBox" end)
+	assert(box, "no reply box")
+	box.Text = "rematch?"
+	box.FocusLost:Fire(true)
+	M.Step(1 / 30, 5)
+	assert(got == "rematch?" and r.Closed, "reply not sent")
+	-- details unfold, copy copies
+	local e = TingUI:Notify({ Title = "Failed", Content = "503", Type = "Error", Details = "trace line 1\ntrace line 2", Copy = "id-42" })
+	local det = Find(e.Frame, function(d) return d.ClassName == "TextButton" and d.Text == "Details" end)
+	local box2 = Find(e.Frame, function(d) return d.ClassName == "ScrollingFrame" end)
+	assert(det and box2 and not box2.Visible, "details should start folded")
+	det.MouseButton1Click:Fire()
+	assert(box2.Visible, "details didn't unfold")
+	local cp = Find(e.Frame, function(d) return d.ClassName == "TextButton" and d.Text == "Copy" end)
+	cp.MouseButton1Click:Fire()
+	assert(M.Clipboard == "id-42", "Copy didn't copy: " .. tostring(M.Clipboard))
+	-- a crashing callback's card carries the full error
+	TingUI.SafeCall("test", function() error("kaboom") end)
+	M.Step(1 / 30, 3)
+	local found
+	for _, h in ipairs(TingUI:GetNotifications()) do if h.Options.Title == "Script error" then found = h end end
+	assert(found and tostring(found.Options.Details):find("kaboom"), "script error should carry Details")
+	M.Errors = {}
+	M.Warnings = {}
+	-- persistent cards stay, everything else times out; history keeps them all
+	local keep = TingUI:Notify({ Title = "Stays", Persistent = true })
+	M.Step(1 / 30, 400)
+	assert(not keep.Closed, "Persistent card timed out")
+	assert(#TingUI.NotificationHistory >= 8, "history too short: " .. #TingUI.NotificationHistory)
+	local center = TingUI:OpenNotificationCenter()
+	M.Step(1 / 30, 3)
+	assert(center.Frame.Visible, "center didn't open")
+	assert(Count(center.Frame, function(d) return d.ClassName == "TextLabel" and d.Text == "Stays" end) >= 1, "center doesn't list the history")
+	-- several cards show a Clear all pill, and it clears them
+	for i = 1, 4 do TingUI:Notify({ Title = "n" .. i, Persistent = true }) end
+	M.Step(1 / 30, 3)
+	assert(Find(TingUI.Gui, function(d) return d.ClassName == "TextButton" and tostring(d.Text):find("^Clear all") and d.Visible end), "no Clear all pill")
+	TingUI:ClearNotifications()
+	M.Step(1 / 30, 30)
+	assert(#TingUI:GetNotifications() == 0, "ClearNotifications left cards")
+	-- swipe a card away
+	local mouse = V2.new(400, 300)
+	M.Services.UserInputService.GetMouseLocation = function() return mouse end
+	local s = TingUI:Notify({ Title = "Swipe me", Persistent = true })
+	local hit = s.Frame:FindFirstChild("Hit")
+	hit.InputBegan:Fire({ UserInputType = Enum.UserInputType.MouseButton1, Position = M.globals.Vector3.new(400, 300, 0) })
+	mouse = V2.new(520, 300)
+	M.Services.UserInputService.InputChanged:Fire({ UserInputType = Enum.UserInputType.MouseMovement, Position = M.globals.Vector3.new(520, 300, 0) }, false)
+	M.Services.UserInputService.InputEnded:Fire({ UserInputType = Enum.UserInputType.MouseButton1, Position = M.globals.Vector3.new(520, 300, 0) }, false)
+	M.Step(1 / 30, 5)
+	assert(s.Closed, "swiping didn't dismiss")
+	-- every type builds and animates
+	for _, k in ipairs(TingUI.NotifyTypes) do TingUI:Notify({ Title = k, Content = k, Type = k, Value = (k == "Upload" and 0.3 or nil) }) end
+	M.Step(1 / 30, 90)
+	TingUI:Unload()
+	NoErrors(M)
+end)
+
+Test("the tab bar always fits: padding, gap and labels tighten, then it scrolls the active tab into view", function()
+	local M, env = Fresh(false)
+	local TingUI = Load(M, env, Sources.TingUI, "TingUI", ModuleScript(M))
+	local W = TingUI:CreateWindow({ Title = "Tabs" })
+	local tabs = {}
+	for i, n in ipairs({ "Combat", "Visuals", "World", "Character", "Exploits", "Webhook", "About", "Config" }) do tabs[i] = W:AddTab(n) end
+	local bar
+	for _, c in ipairs(W.Frame:GetChildren()) do if c.ClassName == "ScrollingFrame" and c.Size.Y.Offset == 28 then bar = c end end
+	assert(bar, "tab bar not found")
+	local V2 = M.globals.Vector2
+	-- roomy: full padding
+	bar._props.AbsoluteSize = V2.new(900, 28)
+	W:_FitTabs()
+	local pad = tabs[1].Button:FindFirstChildOfClass("UIPadding")
+	assert(pad.PaddingLeft.Offset == 11, "roomy bar should keep full padding, got " .. pad.PaddingLeft.Offset)
+	-- a wide theme font in a 520px window: padding tightens and labels shrink, nothing scrolls off
+	bar._props.AbsoluteSize = V2.new(420, 28)
+	W:_FitTabs()
+	assert(pad.PaddingLeft.Offset < 11, "padding didn't tighten")
+	assert((tabs[1].Button:GetAttribute("TSK") or 1) < 1, "labels didn't shrink when padding wasn't enough")
+	-- hopeless: it scrolls, and selecting the last tab doesn't error
+	bar._props.AbsoluteSize = V2.new(150, 28)
+	W:_FitTabs()
+	W:SelectTab(tabs[8])
+	M.Step(1 / 60, 30)
+	-- every theme keeps the bar consistent
+	for name in pairs(TingUI.Presets) do TingUI:ApplyPreset(name) M.Step(1 / 60, 2) end
+	NoErrors(M)
+end)
+
+Test("themes: Ocean and Serotonin, Hazard without particles, retired names, pointer calibration", function()
+	local M, env = Fresh(false)
+	local TingUI = Load(M, env, Sources.TingUI, "TingUI", ModuleScript(M, { Theme = "Candy" }))
+	assert(TingUI.Preset == "Rose", "a retired theme asked for at load should map to its replacement, got " .. tostring(TingUI.Preset))
+	for _, gone in ipairs({ "Candy", "Abyss", "Criminality", "MLG" }) do assert(TingUI.Presets[gone] == nil, gone .. " should be removed") end
+	assert(TingUI.Presets.Serotonin and TingUI.Presets.Serotonin.Style.Particles == "None", "Serotonin should exist with no particles")
+	assert(TingUI.Presets.Hazard.Style.Particles == "None", "Hazard should have no particles")
+	assert(TingUI.Presets.Ocean.Style.Scene == "Ocean", "Ocean should have its scene")
+	local W = BuildUI(TingUI, M)
+	W.Frame._props.AbsolutePosition = M.globals.Vector2.new(100, 50)
+	W.Frame._props.AbsoluteSize = M.globals.Vector2.new(560, 752)
+	-- configs naming a retired theme keep the current one (unchanged behaviour)
+	TingUI:ApplyPreset("Serotonin")
+	TingUI:ApplyPreset("MLG")
+	assert(TingUI.Preset == "Serotonin", "ApplyPreset of a retired name changed the theme")
+	M.Step(1 / 60, 30)
+	TingUI:ApplyPreset("Ocean")
+	TingUI:SetSnow(true)
+	M.Step(1 / 60, 240)
+	TingUI:SetParticles("Bokeh")
+	M.Step(1 / 60, 240)
+	TingUI:SetParticles("Theme")
+	-- pointer: with the inset honoured it's corrected, and a press on a small control re-learns it
+	local V2 = M.globals.Vector2
+	assert(TingUI:GetPointer() == V2.new(400, 300), "pointer should match the mouse when the inset is ignored")
+	TingUI.Gui.IgnoreGuiInset = false
+	assert(TingUI:GetPointer() == V2.new(400, 264), "pointer should drop the 36px inset, got " .. tostring(TingUI:GetPointer()))
+	local tb = W.Tabs[1].Button
+	tb._props.AbsolutePosition = V2.new(380, 290)
+	tb._props.AbsoluteSize = V2.new(60, 24)
+	tb.InputBegan:Fire({ UserInputType = M.globals.Enum.UserInputType.MouseButton1, Position = M.globals.Vector3.new(400, 264, 0) })
+	assert(TingUI:GetPointer() == V2.new(400, 300), "a press on a control should re-learn the offset")
+	TingUI.Gui.IgnoreGuiInset = true
 	NoErrors(M)
 end)
 

@@ -2,6 +2,39 @@
 
 <sub>[Docs](README.md) › Changelog</sub>
 
+## v0.0.8-stable
+
+> [!NOTE]
+> Nothing in your script has to change. Every existing link (`TingUI.lua`, the old `Lumen.lua`), option, config and notification call works as before, and the UI keeps exactly the size you set. A script that asks for a retired theme at load gets its closest replacement instead of a warning.
+
+**Notifications** ([docs](elements.md#notifications))
+- New options: `Value` (a progress bar with a percentage), `Undo` + `OnCommit` (a counting-down Undo button), `Copy` (a Copy button that flips to Copied), `Details` (a folded monospace box), `Input` (reply from the card), `Image` (a picture instead of the badge), `Callback` (click the card), `Persistent`, `Group` and `Sound`. `Actions` take `Style = "Primary" | "Danger"` and `Close = false`, and their callbacks receive the handle.
+- Repeats merge: the same notification again bumps one card's x2, x3 counter and resets its timer instead of stacking copies.
+- Hover shows **pin** and **close** buttons. Drag a card sideways to fling it away. A **Clear all** pill appears under three or more cards.
+- Eight new types, each with its own animated icon: `Download` and `Upload` (the arrow keeps dropping into a tray until done), `Message` (typing dots), `Friend`, `Achievement` (a gold star spins in, sparks and a double shine), `Security`, `Update` (the gear spins up and coasts) and `Heart` (two heartbeats). Success now throws out sparks.
+- Handles gain `:SetProgress(v, text)`, `:SetTitle`, `:SetContent`, `:Pin`, `.Count`, `.Frame` and `.Options`.
+- `TingUI.NotificationHistory`, `GetNotifications`, `ClearNotifications`, and a **notification center** panel (`OpenNotificationCenter`, or the new bell dock button: `Dock = {..., "notifications"}`).
+- "Script error" cards carry the full traceback under **Details**, with a Copy button for bug reports.
+- When the stack is full, the oldest card that isn't loading or waiting for a reply leaves first.
+- The config tab's Tests group and Example.lua demo every new kind and interaction.
+
+**Themes** ([docs](themes.md))
+- **Ocean** rebuilt with a living scene. Waves roll along the window's bottom and swell toward the cursor, caustic light plays over the header, a tide washes over the window on switching, a swell rolls through on tab changes, and clicks drop ripples and bubbles. New style keys: `WaterColor`, `FoamColor`.
+- **Bubbles** particles: fizz strings, glassy bubbles with highlights that squash as they rise, big wobbly ones and clusters. They pop at depth, at the surface or when the cursor touches them, with a ring and droplets.
+- **Serotonin**: a new theme in the classic cheat-menu style. Square corners, a hairline teal outline in a dark teal frame, teal light from the top, flat slate panels, Arial, no particles.
+- **Glass** particles are now real lens bokeh: crisp far discs with a colour fringe, soft near ones, aperture hexagons, slow focus breathing and the odd glint.
+- **Hazard** keeps its look, without particles.
+- Removed **Candy**, **Abyss**, **Criminality** and **MLG**, with the Abyss scene and the MarineSnow, Grit and MLG particles. `TingUI.PresetAliases` maps retired names to their replacements when a script asks for one at load. Saved configs naming one keep the current theme, as before.
+- `Particles = "None"` (or `false`) for themes without particles; the Theme Studio offers it too.
+
+**Fixes**
+- The tab bar never cuts tabs off. Spacing tightens, then labels shrink slightly (never below 84%), and only then does the bar scroll the active tab into view, with edge fades. Nothing changes when tabs already fit.
+- Click effects (scene ripples, bursts) land exactly on the cursor. TingUI now converts the pointer into its own GUI space and re-learns the top-bar offset from presses on its controls, so effects no longer appear a bar's height above or below when the inset handling differs. `TingUI:GetPointer()` exposes it.
+
+**Tests and docs**
+- Three new headless tests: every notification feature, tab fitting, and the theme changes with pointer calibration (25 tests in all).
+- `tools/build_previews.py` draws the Ocean scene, the new bubbles and bokeh, Serotonin, and a new `docs/images/notifications.png`.
+
 ## v0.0.7-stable
 
 > [!NOTE]

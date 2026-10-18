@@ -82,7 +82,7 @@ Each script keeps its own theme, but you can hand one look to all of them:
 
 ```lua
 TingUI.Shell:ApplyThemeToAll()           -- this script's current look, in every other script; returns how many took it
-TingUI.Shell:ApplyThemeToAll("Abyss")    -- switch this script to Abyss, then every other script too
+TingUI.Shell:ApplyThemeToAll("Ocean")    -- switch this script to Ocean, then every other script too
 ```
 
 A built-in theme travels by name. A custom or edited theme travels as a [share code](theme-studio.md#share-codes), so the other script gets exactly the same colours and style even if it has never seen that theme. The other script uses the look for the session without saving it.

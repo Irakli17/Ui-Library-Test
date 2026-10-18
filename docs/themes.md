@@ -20,7 +20,7 @@ A TingUI theme changes the **shape and feel** of every element, not just its col
 ## Switching themes
 
 ```lua
-TingUI:ApplyPreset("Abyss")
+TingUI:ApplyPreset("Ocean")
 TingUI:SetTheme({ Accent = Color3.fromRGB(255, 90, 120) })             -- colours only (instant)
 TingUI:SetTheme({ Accent = Color3.fromRGB(255, 90, 120) }, 0.4)        -- colours, blended
 TingUI:SetStyle({ Radius = 1.4, Glow = 1.3, Font = "Nunito" }, 0.4)    -- shape and feel, blended
@@ -36,28 +36,37 @@ TingUI:SetStyle(style, 0.4)
 
 Lavender is the default, and the config tab lists it as **"Lavender (Default)"**. `TingUI:ApplyPreset("Lavender (Default)")` also works.
 
+### Retired themes
+
+Candy, Abyss, Criminality and MLG were removed in v0.0.8 (along with Synthwave, Noir, Haunted, Parchment, Emerald and Prism before them). Nothing breaks if a script still names one:
+
+| Where the old name appears | What happens |
+|---|---|
+| `Theme = "Candy"` at load, or `Configure({ Theme = ... })` | The closest theme still shipped is used instead (`TingUI.PresetAliases`: Candy → Rose, Abyss → Ocean, Criminality → Storm, MLG → Lavender) |
+| A saved config, or `ApplyPreset("Candy")` | The current theme stays, exactly as before |
+| `RegisterTheme("Candy", ...)` | Your theme wins; aliases only apply to names that don't exist |
+
+Add your own mapping with `TingUI.PresetAliases.OldName = "NewName"`.
+
 ## The presets
 
 | Preset | Shape | Font | Surface and border | Accent | Particles | Scene |
 |---|---|---|---|---|---|---|
 | [Lavender](#lavender) | reference | Inter | flat, as in the reference | solid | Snow | |
-| [Ocean](#ocean) | rounder | Inter | deep-water glow from below, cyan-blue top light | solid | Bubbles rising | |
+| [Ocean](#ocean) | round, deep glow | Josefin Sans | waves along the bottom edge, caustic light, slow water-shimmer border | aqua-to-deep-blue gradient | Bubbles: fizz, glassy, big wobbly and clusters, all popping | **Ocean** |
 | [Rose](#rose) | very round, strong glow | Inter | pink haze from above, pink-peach top light | solid | Petals spinning down | |
 | [Sunset](#sunset) | reference | Inter | warm glow from below | solid | Embers rising | |
 | [Mono](#mono) | sharp, no glow | RobotoMono | scanlines | solid | Glyph rain | |
 | [Frost](#frost) | round | Jura | icy top light, frosted inner border | white-to-ice gradient | Spinning ice crystals | |
 | [Royal](#royal) | sharp-ish | Merriweather (serif) | gold top light, gilded double border | gold gradient | Glinting sparkles | |
-| [Candy](#candy) | extra round, big glow | Fredoka One | mint glow from below, slow pastel border | pink-to-peach gradient | Tumbling confetti | |
 | [Cosmos](#cosmos) | round | Titillium Web | drifting nebula and parallax stars in the window, nebula across the screen, turning aurora border | violet-to-cyan gradient | Galaxy: stars, shooting stars, comets | |
 | [Storm](#storm) | reference | Oswald (condensed) | steel top light | solid | Slanted rain and distant lightning | |
 | [Blueprint](#blueprint) | sharp | Patrick Hand | drafting grid, white inner line | solid | Pencil marks | |
-| [Hazard](#hazard) | square | Sarpanch | static yellow and black striped border at 45° | solid | Sparks arcing under gravity | |
-| [Glass](#glass) | very round | Nunito | translucent, blurred surfaces, white inner line | gradient | Soft bokeh | |
+| [Hazard](#hazard) | square | Sarpanch | static yellow and black striped border at 45° | solid | none | |
+| [Glass](#glass) | very round | Nunito | translucent, blurred surfaces, white inner line | gradient | Lens bokeh at different depths, glints | |
 | [Hologram](#hologram) | crisp | Michroma | cyan projection: scanlines, see-through surface, slow scanning aura | ice-to-cyan gradient | Holo: data motes | **Hologram** |
 | [Circuit](#circuit) | sharp | Ubuntu | graphite board, copper inner line, amber top light | amber gradient | Static: electric arcs | **Circuit** |
-| [Abyss](#abyss) | round, deep glow | Josefin Sans | dark water lit from below, vignette | pink-to-violet gradient | Marine snow | **Abyss** |
-| [Criminality](#criminality) | tight | Roboto Condensed | brick wall under a flickering street lamp, vignette, glitching title and screen | blood-red gradient | Grit: dust in the light, blade glints | |
-| [MLG](#mlg) | reference, big glow | Cartoon (comic) | fast rainbow border, green glow from below | rainbow, cycling | Doritos, hitmarkers, rainbow words | |
+| [Serotonin](#serotonin) | square | Arial | hairline teal outline in a dark teal frame, teal light from the top, flat slate panels | teal | none | |
 
 ## Scenes
 
@@ -87,19 +96,19 @@ They're also careful with performance and safety. A scene pauses while its windo
 | Open, Tab | A boot chase runs around every pin in turn. |
 | Click | A burst fires down the nearest traces, with a square solder flash where you clicked. |
 
-### Abyss scene
+### Ocean scene
 
-<img src="images/themes/abyss.gif" alt="Abyss scene, animated" width="720">
+<img src="images/themes/ocean.gif" alt="Ocean scene, animated" width="720">
 
 | When | What happens |
 |---|---|
-| Always | Light shafts fall from far above, and bioluminescent jellyfish pulse their way up around the window, trailing tentacles. |
-| Pointer | Plankton glow and drift aside as your cursor passes. |
-| Open | The light shafts flare and every jellyfish flashes. |
-| Tab | The light shafts flare. |
-| Click | Light blooms where you clicked, plankton scatter and nearby jellyfish flinch away. |
+| Always | Two layers of waves roll along the bottom edge of the window, the front one capped with shimmering foam. Caustic light plays across the header. |
+| Pointer | The water swells up toward your cursor when it comes near the bottom edge. |
+| Open, switching to Ocean | A tide washes up over the whole window (see-through, so the UI stays readable), holds for a beat and drains away, releasing a rush of bubbles. |
+| Tab | A swell rolls through the waves. |
+| Click | Flattened ripples spread out from where you clicked, and a few bubbles rise and pop. |
 
-Scenes take their colours from the theme, so they follow your accent. Circuit also reads `TraceColor` and `EnergyColor`, and Abyss reads `JellyColors`, `RayColor` and `PlanktonColor` (see [Style keys](#style-keys)). To write your own, see [Scenes in Extending](extending.md#scenes).
+Scenes take their colours from the theme, so they follow your accent. Circuit also reads `TraceColor` and `EnergyColor`, and Ocean reads `WaterColor` and `FoamColor` (see [Style keys](#style-keys)). To write your own, see [Scenes in Extending](extending.md#scenes).
 
 ## Gallery
 
@@ -118,7 +127,7 @@ The reference look: soft lilac and snow.
 ### Ocean
 <img src="images/themes/ocean.png" alt="Ocean">
 
-Rounder, with a deep-water glow and rising bubbles.
+The window floats in water: waves roll along its bottom and rise toward your cursor, caustic light shimmers over the header, and a tide washes over it when you switch to it. No two bubbles are alike, and they pop at depth, at the surface or when you touch them. It has a live [scene](#scenes).
 
 </td>
   </tr>
@@ -169,10 +178,10 @@ Midnight navy and gold, serif type, a gilded double border and glinting sparkles
 </td>
     <td valign="top">
 
-### Candy
-<img src="images/themes/candy.png" alt="Candy">
+### Serotonin
+<img src="images/themes/serotonin.png" alt="Serotonin">
 
-Bubblegum pastels, a soft rounded font, extra-round shapes and tumbling confetti.
+A crisp classic cheat-menu look: square corners, a hairline teal outline in a dark teal frame, teal light from the top edge, flat slate panels and plain type. No particles.
 
 </td>
   </tr>
@@ -208,7 +217,7 @@ Drafting paper: navy blue, a white grid, a ruled double border, handwritten labe
 ### Hazard
 <img src="images/themes/hazard.png" alt="Hazard">
 
-Industrial yellow and black, a striped warning-tape border, square corners and welding sparks.
+Industrial yellow and black, a striped warning-tape border and square corners. No particles, so nothing distracts from the tape.
 
 </td>
   </tr>
@@ -218,7 +227,7 @@ Industrial yellow and black, a striped warning-tape border, square corners and w
 ### Glass
 <img src="images/themes/glass.png" alt="Glass">
 
-See-through frosted surfaces over a blurred world, soft rounded type and drifting bokeh lights.
+See-through frosted surfaces over a blurred world and soft rounded type. Behind it, real lens bokeh: crisp far discs with a bright rim and a faint colour fringe, big soft near ones, a few aperture hexagons, all breathing in and out of focus, with a glint streaking across now and then.
 
 </td>
     <td valign="top">
@@ -240,29 +249,6 @@ The window is a chip on a circuit board, with current racing down its traces. It
 
 </td>
     <td valign="top">
-
-### Abyss
-<img src="images/themes/abyss.png" alt="Abyss">
-
-The deep sea: light shafts, pulsing jellyfish and glowing plankton. It has a live [scene](#scenes).
-
-</td>
-  </tr>
-  <tr>
-    <td valign="top">
-
-### Criminality
-<img src="images/themes/criminality.png" alt="Criminality">
-
-A grimy brick alley under a flickering street lamp, blood-red accents, a glitching title and dust in the light.
-
-</td>
-    <td valign="top">
-
-### MLG
-<img src="images/themes/mlg.png" alt="MLG">
-
-A comic font, a fast rainbow border, spinning doritos, hitmarkers and rainbow words. WOW.
 
 </td>
   </tr>
@@ -290,7 +276,7 @@ Every key is optional.
 | `Radius` | Corner scale. `1` is the reference. |
 | `Glow` | Glow strength. `0` turns it off. |
 | `Font`, `TextScale` | Font name and text size multiplier (see [Fonts](#fonts)). |
-| `Particles`, `ParticleColor` | The theme's particle style and colour. |
+| `Particles`, `ParticleColor` | The theme's particle style and colour. `"None"` (or `false`) means no particles. |
 | `Tint`, `TintPlace`, `TintAmount` | Window lighting: a colour, where it sits (`"Top"`, `"Bottom"` or `"Aurora"`) and how strong it is. |
 | `TopLine = {c1, c2}` | A light line along the top edge. |
 | `Scanlines` | CRT-style lines over the window. |
@@ -305,15 +291,15 @@ Every key is optional.
 | `SurfaceTransparency` | See-through surfaces (`0-1`). |
 | `Blur` | World blur behind the UI. |
 | `Texture`, `BackdropTexture`, `Glitch` | Painted art and glitches (see [Theme textures](#theme-textures)). |
-| `Scene` | A [scene](#scenes) name: `"Hologram"`, `"Circuit"`, `"Abyss"` or one you registered. |
+| `Scene` | A [scene](#scenes) name: `"Hologram"`, `"Circuit"`, `"Ocean"` or one you registered. |
 | `TraceColor`, `EnergyColor` | Circuit's copper traces and current. They default to `Border` and `Accent`. |
-| `JellyColors = {c1, c2, ...}`, `RayColor`, `PlanktonColor` | Abyss' jellyfish, light shafts and plankton. They default to `Accent`, `Text` and `Accent`. |
+| `WaterColor`, `FoamColor` | Ocean's waves and tide, and its foam, ripples and caustic light. They default to `Accent` and `Text`. |
 
 **Theme keys** (colours): `Background, Group, GroupBorder, Control, ControlHover, Border, Outline, Text, Label, TextDim, TextMuted, Chip, ChipText, Accent, AccentText, AccentBorder, Toggle, TabActive, Success, Warning, Danger, Info, Caution, Error`. Setting `Accent` or `Background` also derives `AccentText`, `AccentBorder`, `Toggle` and `TabActive` unless you pass them.
 
 ## Theme textures
 
-Some themes paint real art into the window. Cosmos has drifting nebula clouds over a parallax star layer, with the nebula faintly across the whole screen. Criminality has a grimy brick wall lit by a flickering street lamp. The images are high-resolution PNGs generated by `tools/build_textures.py` (procedural, nothing copied) and stored in `assets/textures/`. They're downloaded the first time a theme needs them and cached in `<CacheFolder>/textures/v1/`. Until they arrive, or without `writefile` and `getcustomasset`, the theme simply shows without its art.
+Some themes paint real art into the window. Cosmos has drifting nebula clouds over a parallax star layer, with the nebula faintly across the whole screen. The `brick` and `lamp` textures (a grimy wall and a flickering street lamp) are still built in for your own themes. The images are high-resolution PNGs generated by `tools/build_textures.py` (procedural, nothing copied) and stored in `assets/textures/`. They're downloaded the first time a theme needs them and cached in `<CacheFolder>/textures/v1/`. Until they arrive, or without `writefile` and `getcustomasset`, the theme simply shows without its art.
 
 ```lua
 TingUI:RegisterTheme("Deep Field", {
@@ -357,7 +343,9 @@ TingUI:SetBackdrop({ Dim = 0.5, Blur = 12 })
 | Kind | Looks like |
 |---|---|
 | `Theme` | Whatever the active theme ships with |
-| `Snow`, `Bubbles`, `Petals`, `Embers`, `Fireflies`, `Stars`, `Rain`, `Leaves` | What they say |
+| `None` | No particles (a theme can ship this too) |
+| `Snow`, `Petals`, `Embers`, `Fireflies`, `Stars`, `Rain`, `Leaves` | What they say |
+| `Bubbles` | No two alike: fizzing strings of beads, glassy bubbles with a highlight, big wobbly ones, little clusters. They pop at depth, at the surface or when your cursor touches them, with a ring and a spray of droplets |
 | `Glyphs` | Falling code characters |
 | `Confetti` | Tumbling paper |
 | `Sparkles`, `Crystals` | Glints and spinning ice |
@@ -366,20 +354,19 @@ TingUI:SetBackdrop({ Dim = 0.5, Blur = 12 })
 | `Drafting` | Pencil marks |
 | `FilmGrain` | Old film |
 | `Sparks` | Sparks arcing under gravity |
-| `Bokeh` | Soft out-of-focus lights |
+| `Bokeh` | Lens bokeh at different focus depths: crisp rims with a colour fringe, soft near discs, aperture hexagons, slow focus breathing and the odd glint |
 | `Bats` | Flapping bats |
 | `Galaxy` | Parallax stars, spiked bright stars, shooting stars and comets |
-| `Grit` | Dust in lamp light, screen glitches and a blade glint |
-| `MLG` | Spinning doritos, hitmarkers and rainbow words |
 | `Holo` | Data motes drifting up, flickering like a weak signal |
 | `Static` | Tiny electric arcs that crackle for an instant, then jump elsewhere |
-| `MarineSnow` | Flecks sinking slowly through dark water, a few glowing faintly |
 
 Switching kind, amount or theme **crossfades** the old particles out and the new ones in. The whole backdrop fades in when a window opens and out when the last one closes. Register your own with [`RegisterParticles`](extending.md#particles).
 
 ## Fonts
 
-Inter is downloaded once from GitHub into `<CacheFolder>/fonts`, which needs `writefile` and `getcustomasset`. Until it's ready, or if your executor can't do it, Gotham is used. `"Mono"` means RobotoMono. Any other name is looked up as a built-in Roblox font, for example `Michroma`, `Jura`, `Merriweather`, `FredokaOne`, `JosefinSans`, `TitilliumWeb`, `Oswald`, `Ubuntu`, `Nunito` or `SourceSans`. Unknown names fall back to Gotham.
+Inter is downloaded once from GitHub into `<CacheFolder>/fonts`, which needs `writefile` and `getcustomasset`. Until it's ready, or if your executor can't do it, Gotham is used. `"Mono"` means RobotoMono. Any other name is looked up as a built-in Roblox font, for example `Michroma`, `Jura`, `Merriweather`, `FredokaOne`, `JosefinSans`, `TitilliumWeb`, `Oswald`, `Ubuntu`, `Nunito`, `Arial` or `SourceSans`.
+
+The tab bar always fits, whatever the font. When a wide font (or a narrow window, or many tabs) would push tabs past the edge, the spacing tightens first, then the labels shrink slightly (never below 84%). Only if that still isn't enough does the bar scroll, sliding the active tab into view, with soft fades marking the hidden side. Unknown names fall back to Gotham.
 
 ```lua
 TingUI:SetFont("Michroma", 0.35)   -- optional fade in seconds
@@ -404,7 +391,7 @@ TingUI:RegisterTheme("Matcha", {
 }, "Soft greens and drifting leaves.")   -- shown in the config tab's Preset dropdown
 ```
 
-Add `Scene = "Abyss"` (or your own) to the style to give it a living backdrop.
+Add `Scene = "Ocean"` (or your own) to the style to give it a living backdrop.
 
 ## Theme Studio and share codes
 

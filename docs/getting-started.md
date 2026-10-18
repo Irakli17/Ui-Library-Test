@@ -28,7 +28,7 @@ The sturdiest way is `Loader.lua`. It tries GitHub, then the jsDelivr mirror, th
 ```lua
 local TingUI, err = loadstring(game:HttpGet("https://raw.githubusercontent.com/Irakli17/Ui-Library-Test/main/Loader.lua"))()({
 	Id = "MyHub",
-	Version = "main",   -- or a tag like "v0.0.7-stable" to pin a release
+	Version = "main",   -- or a tag like "v0.0.8-stable" to pin a release
 })
 if not TingUI then return warn(err) end
 ```
@@ -42,7 +42,7 @@ You can also set `getgenv().TingUIOptions = {...}` before loading. It's read onc
 
 `TingUI.lua` is also a plain **ModuleScript**. It needs nothing from your game's hierarchy and only runs on the client.
 
-1. Put `TingUI.lua` in **ReplicatedStorage** as a ModuleScript named `TingUI`. Alternatively, sync it with Rojo (`default.project.json` maps it) or install it with Wally (`TingUI = "irakli17/tingui@0.0.7"`).
+1. Put `TingUI.lua` in **ReplicatedStorage** as a ModuleScript named `TingUI`. Alternatively, sync it with Rojo (`default.project.json` maps it) or install it with Wally (`TingUI = "irakli17/tingui@0.0.8"`).
 2. Require it from a **LocalScript**. StarterPlayerScripts is a good home. Requiring it from a server Script errors with a clear message.
 
 ```lua
@@ -70,7 +70,7 @@ local Window = TingUI:CreateWindow({ Title = "My Game" })
 | Configs | Live in memory for the session, unless you give TingUI a storage adapter. `extras/DataStoreStorage.lua` saves them per player in a DataStore (see [Configs](configs.md#datastore-in-a-real-game)). |
 | Inter font | Stays Gotham, because downloading a font needs `writefile` and `getcustomasset`. |
 | Icons | The crisp vector versions are used, unless you pass `Icons = {gear = "rbxassetid://..."}`. |
-| Theme art | Cosmos' nebula and Criminality's brick wall need `Textures = {nebula = "rbxassetid://..."}`. Scenes need nothing and always work. |
+| Theme art | Cosmos' nebula and stars (and the brick and lamp textures for your own themes) need `Textures = {nebula = "rbxassetid://..."}`. Scenes need nothing and always work. |
 | `TingUI:Request` / `TingUI:Clipboard` | Return `nil` / `false`. |
 
 Everything else works the same.

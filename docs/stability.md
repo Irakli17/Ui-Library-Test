@@ -24,6 +24,8 @@ TingUI's size is `TingUI.Scale`, and only `TingUI:SetScale`, the config tab's **
 | Text widths changed in other languages | Roblox's auto-translation rewrote labels | `AutoLocalize` is off for the TingUI ScreenGui |
 | Windows ended up off-screen after resizing | The window kept its old position | Windows are nudged back into reach when the screen changes size, and their size never changes |
 | The UI vanished on respawn | ScreenGuis in PlayerGui reset when the character respawns | `ResetOnSpawn` is off |
+| The last tabs were cut off in some themes | A wide theme font made the tab labels longer than the bar | The bar tightens its spacing and, only if needed, shrinks just the tab labels (never below 84%) before it scrolls. Nothing else changes size |
+| Click effects appeared above or below the cursor | The pointer was read in screen space while the GUI used a different top-bar offset | The pointer is converted into TingUI's GUI space and re-calibrated from presses on its own controls (`TingUI:GetPointer()`) |
 
 > [!NOTE]
 > If your project relies on putting a `UIScale` inside TingUI on purpose, load with `ScaleGuard = false`, or set `TingUI.ScaleGuard = false` at any time. TingUI's own scaling objects carry the attribute `TingUI` and are always left alone.
@@ -51,7 +53,7 @@ From v0.0.6 on, an update shouldn't make you change your script:
 - **Defaults stay.** A new feature that would change how existing scripts look or behave starts switched off, or comes with an option to turn it off.
 - **Configs stay.** Configs saved by an older version keep loading. The rename from Lumen is the proof: `Lumen_` settings are read as `TingUI_` settings, and old configs are copied into each script's new folder.
 - **Links stay.** `Lumen.lua` and `Loader.lua` keep working at the same URLs.
-- **Removals are announced.** Anything that does go away is listed in the [changelog](changelog.md) first. A removed theme name, whether in a load option, `ApplyPreset` or an old config, leaves the current theme in place instead of erroring.
+- **Removals are announced.** Anything that does go away is listed in the [changelog](changelog.md) first. A removed theme name never errors: asked for at load (`Theme = "Candy"`, `Configure`) it becomes its closest replacement (`TingUI.PresetAliases`), and in `ApplyPreset` or an old config it leaves the current theme in place.
 
 ## Pinning a version
 

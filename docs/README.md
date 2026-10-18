@@ -4,7 +4,7 @@
 
 # TingUI documentation
 
-<sub>v0.0.7-stable · [Back to the project](../README.md)</sub>
+<sub>v0.0.8-stable · [Back to the project](../README.md)</sub>
 
 <table>
   <tr>
@@ -19,7 +19,7 @@
     <td width="50%" valign="top">
 
 ### Make it yours
-- [**Themes**](themes.md): the 18 presets, scenes, particles, textures, fonts, scale, your own theme
+- [**Themes**](themes.md): the 15 presets, scenes, particles, textures, fonts, scale, your own theme
 - [**Configs**](configs.md): the config tab, saving, storage adapters, DataStore, events, flags
 - [**Extending**](extending.md): your own elements, particles, icons and scenes
 

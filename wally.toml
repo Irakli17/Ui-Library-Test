@@ -1,7 +1,7 @@
 [package]
 name = "irakli17/tingui"
 description = "A dark, compact, themeable UI library in a single ModuleScript"
-version = "0.0.7"
+version = "0.0.8"
 registry = "https://github.com/UpliftGames/wally-index"
 realm = "shared"
 include = ["TingUI.lua", "default.project.json", "wally.toml", "README.md", "DOCS.md"]

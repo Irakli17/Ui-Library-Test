@@ -171,9 +171,11 @@ It dims the screen and shows a centred card with a glowing status badge: a circl
 
 ## Notifications
 
+<img src="images/notifications.png" alt="Notification cards: a download with a progress bar, a message with a reply box, a friend request with a picture, an error with its details unfolded and a Copied button, an Undo countdown, a gold achievement, a merged x3 card with its pin and close buttons, a security alert with a danger button, an upload, and the Clear all pill" width="900">
+
 ```lua
 TingUI:Notify("test notif")                                                         -- compact (the bell rings)
-TingUI:Notify({ Title = "Saved", Content = "Settings applied.", Type = "Success" })    -- green circle, the check spins in
+TingUI:Notify({ Title = "Saved", Content = "Settings applied.", Type = "Success" })    -- green circle, the check spins in, sparks fly
 TingUI:Notify({ Title = "Careful", Content = "May be unstable.", Type = "Warning" })   -- yellow diamond, the ! wobbles
 TingUI:Notify({ Title = "Failed", Content = "Server unreachable.", Type = "Error" })    -- red square, the card shakes
 TingUI:Notify({ Title = "Tip", Content = "Ctrl+K searches.", Type = "Info" })          -- blue circle, the i drops in
@@ -182,23 +184,92 @@ local n = TingUI:Notify({ Title = "Loading", Content = "Fetching...", Type = "Lo
 n:Update({ Title = "Done", Content = "Loaded.", Type = "Success" })                          -- morphs in place
 n:Dismiss()
 
-TingUI:Notify({ Title = "Update available", Content = "v0.0.8 is out.", Type = "Info", Duration = 8,
-	Actions = { { Text = "Changelog", Callback = function() end }, { Text = "Later" } } })   -- buttons inside the card
-
 TingUI:SetNotifyPosition("BottomRight")   -- TopRight, BottomRight, TopLeft, BottomLeft
 ```
 
-Each type has its own badge **shape** as well as colour, so it reads at a glance. Cards slide in from their screen edge with a slight overshoot, a pulse ring expands out of the badge, a light sweep passes over the card, the accent bar breathes (harder for warnings and errors) and the countdown bar drains with a bright head. The stack reflows smoothly when one leaves. **Hovering pauses** the countdown and **clicking dismisses**. At most six show at once.
+### Doing things from a card
 
-| Type | Aliases | Colour key |
-|---|---|---|
-| `Success` | | `Success` |
-| `Warning` | `Caution` | `Caution` |
-| `Error` | `Danger` | `Error` |
-| `Info` | | `Info` |
-| `Loading` | | `Accent` |
+```lua
+-- a live progress bar; the arrow keeps dropping into the tray until it's done
+local d = TingUI:Notify({ Title = "Downloading", Content = "0 / 24 MB", Type = "Download", Value = 0 })
+d:SetProgress(0.5, "12 / 24 MB")
+d:Update({ Title = "Downloaded", Type = "Success", Value = 1, Duration = 4 })
 
-Options: `Title`, `Content` (rich text), `Type`, `Duration`, `Progress`, `Actions` and `Source`. `Source` puts a small label above the title, naming where the card came from. When several scripts share the screen, every card goes into one stack and is labelled with its script automatically (see [The Shell](shell.md)). Turn all notifications off with `TingUI.ShowNotifications = false`.
+-- take it back: the Undo button counts down; OnCommit runs if the card goes away without Undo
+TingUI:Notify({ Title = "Waypoint removed", Type = "Warning", Undo = RestoreWaypoint, OnCommit = SaveWaypoints })
+
+-- reply right from the card (typing pauses its timer)
+TingUI:Notify({ Title = "builderman", Content = "gg?", Type = "Message",
+	Input = { Placeholder = "Reply...", Button = "Send", Callback = function(text) SendChat(text) end } })
+
+-- the technical part tucked away, plus a copy button
+TingUI:Notify({ Title = "Request failed", Content = "The server answered 503.", Type = "Error",
+	Details = longLogText, Copy = "request-id: 7f3c" })
+
+-- a picture instead of the badge, and buttons with a style
+TingUI:Notify({ Title = "Friend request", Type = "Friend", Image = "rbxthumb://type=AvatarHeadShot&id=1&w=150&h=150",
+	Actions = { { Text = "Accept", Style = "Primary", Callback = Accept }, { Text = "Ignore" } } })
+```
+
+| Option | What it does |
+|---|---|
+| `Title`, `Content` | The text. `Content` takes rich text. |
+| `Type` | See the table below. |
+| `Duration` | Seconds before it leaves. `math.huge` keeps it. |
+| `Progress` | `false` hides the countdown bar along the bottom. |
+| `Actions = {{Text, Callback, Style, Close}}` | Buttons in the card. `Style = "Primary"` fills it, `"Danger"` makes it red. A click closes the card unless `Close = false`. Callbacks receive the handle. |
+| `Value = 0-1` | A progress bar with a percentage. Move it with `handle:SetProgress(v, text)`. |
+| `Undo = fn`, `OnCommit = fn` | An Undo button that counts down. `OnCommit` runs if the card closes any other way. |
+| `Copy = "text"` or `true` | A Copy button (`true` copies the content). It flips to **Copied** and the card stays. |
+| `Details = "text"` | A **Details** toggle that unfolds a scrollable monospace box. Opening it pins the card. |
+| `Input = {Placeholder, Button, Callback(text), Close}` | A reply box. Enter or the button sends. The card stays until it's sent. |
+| `Image` | A picture instead of the badge, with a small type badge on its corner. |
+| `Callback = fn(handle)` | Runs when the card itself is clicked. |
+| `Persistent = true` | Never times out. It can still be closed, swiped away or cleared. |
+| `Group = "key"` or `false` | Cards with the same key merge into one card with a **x2, x3** counter, instead of stacking up copies. By default the key is the title, text, type and source, so a repeated notification merges on its own. `false` turns it off. |
+| `Sound = "rbxassetid://..."` | Plays once when it appears. |
+| `Source` | A small label above the title. In a [Shell](shell.md) every card is labelled with its script automatically. |
+
+The handle has `:Update(options)`, `:SetProgress(v, text)`, `:SetTitle(text)`, `:SetContent(text)`, `:Pin(bool)` and `:Dismiss()`, plus `.Closed`, `.Count` (how many times it merged), `.Frame` and `.Options`.
+
+### Types
+
+Each type has its own badge **shape**, colour and motion, so it reads at a glance.
+
+| Type | Aliases | Colour key | Motion |
+|---|---|---|---|
+| `Success` | | `Success` | The check spins in and sparks burst out |
+| `Warning` | `Caution` | `Caution` | The ! wobbles and settles |
+| `Error` | `Danger` | `Error` | The card shakes |
+| `Info` | | `Info` | The i drops in and bounces |
+| `Loading` | | `Accent` | A spinner, until you `:Update` it |
+| `Download`, `Upload` | | `Info` | The arrow keeps dropping into (or lifting out of) a tray until `Value` reaches 1 |
+| `Message` | | `Accent` | A chat bubble whose typing dots bounce |
+| `Friend` | | `Success` | The person rises in |
+| `Achievement` | | `Caution` | A gold star spins in, ten sparks burst out and the shine sweeps twice |
+| `Security` | | `Error` | The lock rattles |
+| `Update` | | `Accent` | The gear spins up and coasts to a stop |
+| `Heart` | | `Error` | Two heartbeats |
+
+`TingUI.NotifyTypes` lists them all.
+
+### Handling a stack
+
+- **Hover** pauses the countdown and shows **pin** (keep it open) and **close** buttons in the corner.
+- **Drag a card sideways** and let go past the line to fling it away. Short drags spring back.
+- **Click** a card to dismiss it, or to run its `Callback`.
+- With three or more cards, a **Clear all** pill appears under the stack.
+- At most six show at once. To make room, the oldest card that isn't loading or waiting for a reply leaves first.
+- A crashing callback's "Script error" card carries the full traceback under **Details**, and a **Copy** button for bug reports.
+
+```lua
+TingUI:GetNotifications()        -- the handles of every card still showing
+TingUI:ClearNotifications()      -- dismiss them all
+TingUI.NotificationHistory       -- the last 60, newest first: {Title, Content, Type, Source, Time}
+TingUI:OpenNotificationCenter()  -- a panel listing that history; also the bell in the dock
+```
+
+The **notification center** lists every notification this script showed, with its type, source and age, and a button to clear the history. Add the bell to the dock with `CreateWindow({ Dock = { "menu", "hotkeys", "notifications", "palette" } })`, or switch it on in the config tab's Layout group. Turn all notifications off with `TingUI.ShowNotifications = false`.
 
 ---
 

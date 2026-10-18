@@ -42,7 +42,7 @@ end)
 ```lua
 TingUI:RegisterTheme("Matcha", {
 	Accent = Color3.fromRGB(140, 200, 120), Background = Color3.fromRGB(14, 17, 13),
-	Style = { Radius = 1.3, Font = "Nunito", Particles = "Petals", Scene = "Abyss" },
+	Style = { Radius = 1.3, Font = "Nunito", Particles = "Petals", Scene = "Ocean" },
 }, "Soft greens and drifting leaves.")
 ```
 
@@ -71,7 +71,7 @@ The new kind shows up in the config tab's particle dropdown straight away. Under
 
 ## Scenes
 
-A scene is living artwork drawn in and around every window that uses it. Hologram, Circuit and Abyss are built this way. Register one, then name it in a theme's `Style.Scene`.
+A scene is living artwork drawn in and around every window that uses it. Hologram, Circuit and Ocean are built this way. Register one, then name it in a theme's `Style.Scene`.
 
 ```lua
 TingUI:RegisterScene("Fireflies", {

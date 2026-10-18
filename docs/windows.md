@@ -67,6 +67,8 @@ The window drags by its header or its footer strip and resizes from the bottom-r
 
 **Tab switching.** The highlight is one pill that slides to the clicked tab. The old page drifts out under a soft veil, and the new one slides in from the side you're moving towards. Sub-tabs inside tabboxes do the same.
 
+**Tabs always fit.** A theme with a wide font, a narrow window or a long list of tabs never pushes tabs past the edge. The spacing tightens first, then the labels shrink slightly (never below 84%). Only if that still isn't enough does the bar scroll, sliding the active tab into view, with soft fades marking the hidden side. Nothing changes when the tabs already fit.
+
 ## Menu key and shift lock
 
 Roblox binds **both** shift keys to shift lock. When a script uses RightShift or LeftShift as its menu key, pressing it to open the menu can also lock the camera. TingUI claims its menu keys through `ContextActionService` at a priority above Roblox's camera controls and sinks them, so the key toggles your menu and nothing else. It does this for every window's menu key and keeps it up to date when a key is rebound in the config tab or with `Window:SetMenuKey`. It releases the keys when the window is destroyed or TingUI unloads.
@@ -145,16 +147,16 @@ Inside any group, `group:AddCredits({ {Name, Role, RoleColor, Description}, ... 
 
 ## Dock
 
-The dock is the icon bar at the top centre. Its icons are high-resolution images, so a full setup stays crisp at any UI scale. The menu, hotkey list and command palette buttons show by default. A particles button also exists but starts hidden. The watermark is toggled in the config tab, not the dock.
+The dock is the icon bar at the top centre. Its icons are high-resolution images, so a full setup stays crisp at any UI scale. The menu, hotkey list and command palette buttons show by default. A particles button and a notifications button (the bell, which opens the [notification history](elements.md#handling-a-stack)) also exist but start hidden. The watermark is toggled in the config tab, not the dock.
 
-Pick which built-ins show with `Dock = {"menu", "hotkeys", "palette", "particles"}` in `CreateWindow`, or `Dock = false` for none. Every dock button can also be switched on or off in the config tab's Layout group, or with `TingUI:SetDockButtonVisible(name, bool)`, where `name` is its tooltip. Active buttons are highlighted. The dock stays visible when the window is hidden, so it doubles as the mobile toggle. Drag it to move it.
+Pick which built-ins show with `Dock = {"menu", "hotkeys", "notifications", "palette", "particles"}` in `CreateWindow`, or `Dock = false` for none. Every dock button can also be switched on or off in the config tab's Layout group, or with `TingUI:SetDockButtonVisible(name, bool)`, where `name` is its tooltip. Active buttons are highlighted. The dock stays visible when the window is hidden, so it doubles as the mobile toggle. Drag it to move it.
 
 ```lua
 TingUI:AddDockButton({ Icon = "gear", Tooltip = "Settings", Order = 50, Callback = function() end, Active = function() return true end })
 TingUI:SetDockVisible(false)
 ```
 
-`Order` sorts the buttons: menu is 1, panel buttons default to 20, hotkeys 30, particles 34, palette 40, and custom buttons default to 50.
+`Order` sorts the buttons: menu is 1, panel buttons default to 20, hotkeys 30, particles 34, notifications 36, palette 40, and custom buttons default to 50.
 
 ## HUD
 

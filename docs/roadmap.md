@@ -46,7 +46,7 @@ Configs keyed by the game, automatically. Autoload picks the profile saved for t
 
 ### 5. Notification centre and activity log
 
-A panel holding every notification from the session, plus script errors with their full tracebacks and a copy button. Error toasts would link straight to their entry. It turns "something went wrong" into a bug report the player can actually send.
+**Partly shipped in v0.0.8**: the notification center lists the session's notifications, and script-error cards carry their full traceback with a Copy button. Still to come: error toasts that link straight to their entry, and an activity log for events that never became a notification. Together they turn "something went wrong" into a bug report the player can actually send.
 
 ### 6. Data elements
 
@@ -89,7 +89,7 @@ Already built: an environment report (`TingUI.Environment`), a fallback for ever
 | 2 | Performance governor | Small | Protects every feature that comes after it |
 | 3 | Visual builder | Large | Layouts and live reload are in place, so it can be built on them now |
 | 4 | Per-game profiles | Small | A quick win for hubs |
-| 5 | Notification centre | Small | A quick win for support, and the Shell already gathers every script's notifications in one place |
+| 5 | Activity log (notification centre shipped in v0.0.8) | Small | Error toasts linking to their entry finish the support story |
 | 6 | Data elements | Medium | Whenever scripts ask for them |
 
 Design improvements and executor support can land alongside any of these, a few at a time.

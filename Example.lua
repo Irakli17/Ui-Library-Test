@@ -7,8 +7,8 @@
 local TingUI = loadstring(game:HttpGet("https://raw.githubusercontent.com/Irakli17/Ui-Library-Test/main/TingUI.lua"))({
 	Id = "TingUIExample",
 	Folder = "TingUIExample",
-	-- Theme = "Hologram",        -- start in any theme: Lavender (default), Ocean, Rose, Sunset, Mono, Frost, Royal, Candy,
-	--                               Cosmos, Storm, Blueprint, Hazard, Glass, Hologram, Circuit, Abyss, Criminality, MLG
+	-- Theme = "Hologram",        -- start in any theme: Lavender (default), Ocean, Rose, Sunset, Mono, Frost, Royal,
+	--                               Cosmos, Storm, Blueprint, Hazard, Glass, Hologram, Circuit, Serotonin
 	-- AssetBase = "https://your.host/icons/",   -- optional: where the high-res icon PNGs live (defaults to this repo)
 	-- Shell = { Name = "Example Hub" },          -- how this script shows up when other TingUI scripts share the screen
 })
@@ -22,17 +22,19 @@ local LocalPlayer = Players.LocalPlayer
 local Window = TingUI:CreateWindow({
 	Title = "TingUI Interface Suite",
 	Tag = "Pro",                         -- green pill
-	Version = "v0.0.7",                  -- red pill
+	Version = "v0.0.8",                  -- red pill
 	Subtitle = "Example Game",
 	Footer = "discord.gg/yourserver",
 	WatermarkTitle = "TingUI V2",
 	MenuKey = Enum.KeyCode.RightShift,
 	Snow = { Count = 70, Speed = 1 },    -- particles follow the theme
 	Backdrop = { Dim = 0.5, Blur = 8 },  -- dimmed + blurred world behind the UI
+	Dock = { "menu", "hotkeys", "notifications", "palette" },   -- the bell opens the notification history
 })
 
 -- Anything the script changes in the game is put back when the UI unloads.
 local Restore = {}
+local skins -- the Skin Changer panel, created at the bottom (declared here so buttons anywhere can open it)
 TingUI.Events.Unloading:Connect(function()
 	for _, fn in ipairs(Restore) do pcall(fn) end
 end)
@@ -119,8 +121,54 @@ Tests:AddButton({ Text = "Loading -> Done", Callback = function()
 	local n = TingUI:Notify({ Title = "Injecting", Content = "Preparing features...", Type = "Loading" })
 	task.delay(2, function() n:Update({ Title = "Ready", Content = "Everything loaded.", Type = "Success" }) end)
 end }):AddSubButton({ Text = "With buttons", Callback = function()
-	TingUI:Notify({ Title = "Update available", Content = "Version 0.0.8 is out.", Type = "Info", Duration = 8,
+	TingUI:Notify({ Title = "Update available", Content = "Version 0.0.9 is out.", Type = "Info", Duration = 8,
 		Actions = { { Text = "Changelog", Callback = function() TingUI:Notify("Opening changelog...") end }, { Text = "Later" } } })
+end })
+-- richer notifications: progress, replies, undo, details, merging, and a type for each kind of event
+Tests:AddButton({ Text = "Download", Description = "A live progress bar; the arrow keeps dropping into the tray until it's done, then it turns into a success.", Callback = function()
+	local n = TingUI:Notify({ Title = "Downloading", Content = "skins.pak  0 / 18 MB", Type = "Download", Value = 0 })
+	task.spawn(function()
+		for i = 1, 18 do
+			task.wait(0.15)
+			if n.Closed then return end
+			n:SetProgress(i / 18, string.format("skins.pak  %d / 18 MB", i))
+		end
+		n:Update({ Title = "Downloaded", Content = "18 new skins are ready.", Type = "Success", Value = 1, Duration = 4,
+			Actions = { { Text = "Open", Style = "Primary", Callback = function() if skins then skins:SetVisible(true) end end } } })
+	end)
+end }):AddSubButton({ Text = "Reply", Description = "Answer straight from the card. Typing pauses its timer.", Callback = function()
+	TingUI:Notify({ Title = "builderman", Content = "gg, want to run it back?", Type = "Message",
+		Input = { Placeholder = "Reply...", Button = "Send", Callback = function(text)
+			TingUI:Notify({ Title = "Sent", Content = text, Type = "Success" })
+		end } })
+end })
+Tests:AddButton({ Text = "Undo", Description = "An action you can take back while the Undo button counts down.", Callback = function()
+	TingUI:Notify({ Title = "Waypoint removed", Content = "\"Spawn\" was deleted.", Type = "Warning",
+		Undo = function() TingUI:Notify({ Content = "\"Spawn\" is back.", Type = "Success" }) end,
+		OnCommit = function() print("waypoint deleted for good") end })
+end }):AddSubButton({ Text = "Details", Description = "An error with the technical part tucked away, plus a copy button.", Callback = function()
+	TingUI:Notify({ Title = "Request failed", Content = "The server answered 503.", Type = "Error", Duration = 10,
+		Details = "POST /api/v1/sync\nstatus: 503 Service Unavailable\nretry-after: 30\nrequest-id: 7f3c-91aa-02de",
+		Copy = "request-id: 7f3c-91aa-02de" })
+end })
+Tests:AddButton({ Text = "Friend request", Description = "A picture instead of the badge, with Accept / Ignore.", Callback = function()
+	local id = LocalPlayer and LocalPlayer.UserId or 1
+	TingUI:Notify({ Title = "Friend request", Content = "Someone wants to be friends.", Type = "Friend", Duration = 10,
+		Image = "rbxthumb://type=AvatarHeadShot&id=" .. tostring(id) .. "&w=150&h=150",
+		Actions = { { Text = "Accept", Style = "Primary", Callback = function() TingUI:Notify({ Content = "Friends now.", Type = "Heart" }) end }, { Text = "Ignore" } } })
+end }):AddSubButton({ Text = "Achievement", Description = "Gold, a spin-in star, sparks and a double shine.", Callback = function()
+	TingUI:Notify({ Title = "Achievement unlocked", Content = "Tried every notification.", Type = "Achievement", Duration = 6 })
+end })
+Tests:AddButton({ Text = "Merge x3", Description = "The same notification three times becomes one card with a counter.", Callback = function()
+	for i = 1, 3 do task.delay((i - 1) * 0.4, function() TingUI:Notify({ Title = "Player joined", Content = "The server is filling up.", Type = "Friend" }) end) end
+end }):AddSubButton({ Text = "Security", Description = "Two choices, one of them marked as dangerous.", Callback = function()
+	TingUI:Notify({ Title = "New login", Content = "Your account was used on a new device.", Type = "Security", Duration = 10,
+		Actions = { { Text = "It was me", Style = "Primary" }, { Text = "Secure it", Style = "Danger", Callback = function() TingUI:Notify({ Content = "Signed out everywhere else.", Type = "Success" }) end } } })
+end })
+Tests:AddButton({ Text = "Pinned", Description = "Never times out. Hover any card for the pin and close buttons; drag one sideways to fling it away.", Callback = function()
+	TingUI:Notify({ Title = "Server restarting", Content = "In 5 minutes. This stays until you close it.", Type = "Update", Persistent = true })
+end }):AddSubButton({ Text = "History", Description = "Every notification so far, newest first (also the bell in the dock).", Callback = function()
+	TingUI:OpenNotificationCenter()
 end })
 Tests:AddButton({
 	Text = "Reset Everything",
@@ -161,7 +209,7 @@ HighlightGroup:AddSlider({ Text = "Fill opacity", Min = 0, Max = 100, Default = 
 HighlightGroup:AddSlider({ Text = "Outline thickness", Min = 1, Max = 4, Default = 2, Suffix = " px",
 	Callback = function(v) esp:SetHighlight({ Thickness = v }) end })
 
-local skins -- the Skin Changer panel, created at the bottom
+-- (skins, the Skin Changer panel, is declared at the top and created at the bottom)
 local PanelsGroup = Visuals:AddGroup({ Title = "Panels", Icon = "window", Side = "Right" })
 PanelsGroup:AddParagraph({ Content = "Extra floating windows stay hidden on first run. Open them here, from the dock, or from Config > Layout." })
 PanelsGroup:AddButton({ Text = "Skin Changer", Callback = function() if skins then skins:Toggle() end end })

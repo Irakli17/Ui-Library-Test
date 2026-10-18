@@ -1,7 +1,7 @@
 """TingUI theme previews for the docs, rendered from the themes themselves.
 
     python tools/build_previews.py            (writes docs/images/themes/*.png, scene GIFs, banner.png, anatomy.png,
-                                               shell.png and studio.png; name one of them, or a theme, to draw only that)
+                                               shell.png, studio.png and notifications.png; name one of them, or a theme, to draw only that)
 
 Needs numpy and Pillow. Every colour, corner radius, border, tint, texture, font and particle style is read from the
 Presets table in TingUI.lua, so a preview can't drift from the real theme: change a theme, run this again.
@@ -125,9 +125,9 @@ def full_theme(defaults, p):
     """The derived colours TingUI:SetTheme fills in."""
     T = dict(defaults)
     T.update({k: v for k, v in p.items() if k != 'Style'})
-    T['AccentBorder'] = lerp(T['Accent'], T['Background'], 0.36)
-    T['TabActive'] = lerp(T['Accent'], T['Background'], 0.79)
-    T['Toggle'] = lerp(T['Accent'], T['Background'], 0.64)
+    T['AccentBorder'] = p.get('AccentBorder', lerp(T['Accent'], T['Background'], 0.36))
+    T['TabActive'] = p.get('TabActive', lerp(T['Accent'], T['Background'], 0.79))
+    T['Toggle'] = p.get('Toggle', lerp(T['Accent'], T['Background'], 0.64))
     T['Chip'] = lerp(T['Control'], T['Background'], 0.08)
     if 'AccentText' not in p:
         T['AccentText'] = lerp(T['Accent'], (255, 255, 255), 0.02)
@@ -156,6 +156,7 @@ FONT_FILES = {
     'JosefinSans': ('ofl/josefinsans/JosefinSans%5Bwght%5D.ttf', 600),
     'Mono': ('ofl/robotomono/RobotoMono%5Bwght%5D.ttf', 550),
     'Cartoon': ('ofl/comicneue/ComicNeue-Bold.ttf', None),
+    'Arial': ('ofl/arimo/Arimo%5Bwght%5D.ttf', 400),
 }
 SYSTEM = ['/usr/share/fonts/opentype/inter/Inter-SemiBold.otf', '/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf']
 SYSTEM_BOLD = ['/usr/share/fonts/opentype/inter/InterDisplay-Bold.otf', '/usr/share/fonts/opentype/inter/Inter-Bold.otf',
@@ -337,21 +338,47 @@ def particles(img, size, kind, color, rng, count=70, t=0.0):
         count = 26
     for i in range(count):
         x, y = rng.random() * W, rng.random() * H
-        if kind in ('Snow', 'Grit', 'MarineSnow', 'Stars', 'Starfield', 'Galaxy'):
+        if kind in ('None',):
+            return
+        if kind in ('Snow', 'Stars', 'Starfield', 'Galaxy'):
             r = rng.choice([0.6, 0.8, 1, 1.2, 1.6, 2.2]) if kind != 'Snow' else rng.uniform(1, 3.2)
-            if kind == 'Grit':
-                r = rng.uniform(0.5, 1.4)
-            if kind == 'MarineSnow':
-                r = rng.uniform(0.5, 1.3)
             a = rng.uniform(0.25, 0.75)
             d.ellipse(box(x - r, y - r, x + r, y + r), fill=rgba(color, a))
             if kind in ('Galaxy', 'Starfield') and rng.random() < 0.08:
                 seg(d, (x - 6, y), (x + 6, y), color, 0.5)
                 seg(d, (x, y - 6), (x, y + 6), color, 0.5)
         elif kind == 'Bubbles':
-            r = rng.uniform(3, 10)
-            d.ellipse(box(x - r, y - r, x + r, y + r), outline=rgba(color, 0.5), width=S(1.1))
-            d.ellipse(box(x - r * 0.45, y - r * 0.55, x - r * 0.15, y - r * 0.25), fill=rgba((255, 255, 255), 0.5))
+            kindb = rng.choice(['Fizz', 'Fizz', 'Glass', 'Glass', 'Glass', 'Glass', 'Big', 'Cluster', 'Pop'])
+            white = (255, 255, 255)
+            def bubble(bx, by, r):
+                g = gradient((r * 2, r * 2), [(0, rgba(lerp(color, white, 0.55), 0.16)), (1, rgba(lerp(color, (0, 0, 0), 0.15), 0.12))], 90)
+                m = Image.new('L', g.size, 0)
+                ImageDraw.Draw(m).ellipse([0, 0, g.width - 1, g.height - 1], fill=255)
+                g.putalpha(ImageChops.multiply(g.getchannel('A'), m))
+                img.alpha_composite(g, (S(bx - r), S(by - r)))
+                d.ellipse(box(bx - r, by - r, bx + r, by + r), outline=rgba(lerp(color, white, 0.3), 0.62), width=S(1.5 if r >= 10 else 1))
+                hx, hy = bx - r * 0.36, by - r * 0.44
+                d.ellipse(box(hx - r * 0.22, hy - r * 0.12, hx + r * 0.22, hy + r * 0.12), fill=rgba(white, 0.75))
+                if r >= 5.5:
+                    d.ellipse(box(bx + r * 0.36, by + r * 0.42, bx + r * 0.5, by + r * 0.56), fill=rgba(white, 0.45))
+            if kindb == 'Fizz':
+                for k in range(3):
+                    r = max(0.6, 1.6 - k * 0.4)
+                    d.ellipse(box(x - r, y + k * 5 - r, x + r, y + k * 5 + r), fill=rgba(lerp(color, white, 0.5), 0.7 - k * 0.2))
+            elif kindb == 'Cluster':
+                for ox, oy, r in ((0, 0, 5), (8, -3, 3), (6, 7, 3.5)):
+                    bubble(x + ox, y + oy, r)
+            elif kindb == 'Pop':
+                r = rng.uniform(9, 15)
+                d.ellipse(box(x - r, y - r, x + r, y + r), outline=rgba(lerp(color, white, 0.45), 0.35), width=S(1.5))
+                for k in range(7):
+                    ang = k / 7 * 6.283 + 0.3
+                    dist = r * rng.uniform(1.1, 1.6)
+                    px, py = x + math.cos(ang) * dist, y + math.sin(ang) * dist
+                    d.ellipse(box(px - 1, py - 1, px + 1, py + 1), fill=rgba(lerp(color, white, 0.45), 0.6))
+            else:
+                r = rng.uniform(10, 17) if kindb == 'Big' else rng.uniform(4, 8.5)
+                bubble(x, y, r)
         elif kind in ('Petals', 'Leaves'):
             w, h = rng.uniform(6, 11), rng.uniform(4, 7)
             p = Image.new('RGBA', (S(w + 4), S(w + 4)), (0, 0, 0, 0))
@@ -393,19 +420,35 @@ def particles(img, size, kind, color, rng, count=70, t=0.0):
                 r = rng.uniform(6, 16)
                 d.arc(box(x - r, y - r, x + r, y + r), rng.uniform(0, 180), rng.uniform(200, 340), fill=rgba(color, 0.3), width=S(1))
         elif kind == 'Bokeh':
-            r = rng.uniform(8, 26)
-            glow(img, lambda g, x=x, y=y, r=r: g.ellipse(box(x - r, y - r, x + r, y + r), fill=rgba(color, rng.uniform(0.1, 0.25))), 3)
+            depth = rng.random()
+            r = 8 + depth ** 1.4 * 46
+            lights = [(255, 244, 228), (255, 210, 180), (180, 230, 255), (214, 196, 255), (190, 255, 226), (255, 226, 240)]
+            c = lerp(color, rng.choice(lights), 0.55)
+            soft = depth
+            pad = int(r * 1.5) + 4
+            disc = Image.new('RGBA', (S(pad * 2), S(pad * 2)), (0, 0, 0, 0))
+            dd = ImageDraw.Draw(disc)
+            cx = cy = pad
+            dd.ellipse(box(cx - r * 1.3, cy - r * 1.3, cx + r * 1.3, cy + r * 1.3), fill=rgba(c, 0.035))
+            if rng.random() < 0.22 and depth < 0.75:
+                pts = [(cx + math.cos(k * 1.0472 + 0.5236) * r, cy + math.sin(k * 1.0472 + 0.5236) * r) for k in range(6)]
+                dd.polygon([(S(px), S(py)) for px, py in pts], fill=rgba(c, 0.12))
+            else:
+                if depth < 0.6:
+                    fr = r + 1.8
+                    dd.ellipse(box(cx - fr, cy - fr, cx + fr, cy + fr), outline=rgba(lerp(c, (255, 120, 220), 0.5), 0.18), width=S(1))
+                dd.ellipse(box(cx - r, cy - r, cx + r, cy + r), fill=rgba(c, 0.09 + (1 - soft) * 0.04),
+                           outline=rgba(lerp(c, (255, 255, 255), 0.4), 0.5 - soft * 0.3), width=S(1.2))
+                dd.ellipse(box(cx - r * 0.55, cy - r * 0.55, cx + r * 0.55, cy + r * 0.55), fill=rgba(lerp(c, (255, 255, 255), 0.3), 0.06))
+            if soft > 0.35:
+                disc = disc.filter(ImageFilter.GaussianBlur(S(soft * 2.2)))
+            img.alpha_composite(disc, (S(x - pad), S(y - pad)))
         elif kind == 'FilmGrain':
             d.point((S(x), S(y)), fill=rgba(color, 0.3))
         elif kind == 'Bats':
             text(d, (x, y), 'v', font(None, 12, True), color, 0.5)
         elif kind == 'Neon':
             seg(d, (x, y), (x + rng.uniform(10, 30), y), color, 0.4, 1.5)
-        elif kind == 'MLG':
-            r = rng.uniform(7, 14)
-            ang = rng.uniform(0, 6.28)
-            pts = [(x + math.cos(ang + k * 2.094) * r, y + math.sin(ang + k * 2.094) * r) for k in range(3)]
-            d.polygon([(S(px), S(py)) for px, py in pts], fill=rgba((255, 140, 0), 0.9))
         elif kind == 'Holo':
             if rng.random() < 0.3:
                 seg(d, (x - 3, y), (x + 3, y), color, 0.6)
@@ -558,62 +601,49 @@ def scene_circuit(img, front, T, st, win, t):
     text(d, (x1 - 4, y1 + 18), 'TINGUI  LX-%d  REV 6' % int(x1 - x0), font('Code', 9), copper, 0.55, 'rm')
 
 
-def scene_abyss(img, front, T, st, win, t):
+def scene_ocean(img, front, T, st, win, t):
+    """Waves along the bottom (over the content), caustic light across the header (behind it)."""
     x0, y0, x1, y1 = win
     w, h = x1 - x0, y1 - y0
-    d = ImageDraw.Draw(img)
-    rng = random.Random(5)
-    ray_c = st.get('RayColor', T['Text'])
-    # light shafts
-    for i in range(5):
-        rw = rng.randint(30, 72)
-        cx = x0 + (0.1 + i * 0.2 + rng.random() * 0.06) * w
-        rot = 8 + rng.random() * 9 + math.sin(t * 0.22 + i) * 2.5
-        base = 0.05 + rng.random() * 0.04
-        L = h + 220
-        for k, mul in ((1, 1), (0.4, 1.3)):
-            g = gradient((rw * k, L), [(0, rgba(ray_c, 0)), (0.22, rgba(ray_c, 0.85 * base * mul)), (1, rgba(ray_c, 0))], 90)
-            g = g.rotate(-rot, resample=Image.BICUBIC, expand=True)
-            img.alpha_composite(g, (S(cx) - g.width // 2, S(y0 - 160 + L / 2) - g.height // 2))
-    # plankton
-    pc = st.get('PlanktonColor', T['Accent'])
-    for i in range(46):
-        px, py = x0 - 160 + rng.random() * (w + 320), y0 - 130 + rng.random() * (h + 260)
-        lit = rng.random() < 0.15
-        r = 2.2 if lit else 1
-        if lit:
-            glow(img, lambda g, px=px, py=py: g.ellipse(box(px - 4, py - 4, px + 4, py + 4), fill=rgba(pc, 0.7)), 3)
-        d.ellipse(box(px - r, py - r, px + r, py + r), fill=rgba(lerp(pc, (255, 255, 255), 0.5 if lit else 0), 0.9 if lit else 0.3))
-    # jellyfish
-    cols = st.get('JellyColors', [T['Accent']])
-    spots = [(x0 - 95, y0 + 0.28 * h, 30), (x1 + 85, y0 + 0.58 * h, 26), (x0 - 70, y0 + 0.9 * h, 22), (x1 + 110, y0 + 0.12 * h, 20)]
-    for i, (jx, jy, size) in enumerate(spots):
-        c = cols[i % len(cols)]
-        cyc = (t * (0.55 + i * 0.07) + i * 0.27) % 1
-        pulse = math.sin(cyc / 0.3 * math.pi) if cyc < 0.3 else 0
-        jy -= t * (14 + i * 3)
-        bw, bh = size * (1 - 0.16 * pulse), size * 0.7 * (1 + 0.12 * pulse)
-        glow(img, lambda g, jx=jx, jy=jy, size=size, c=c: g.ellipse(box(jx - size * 1.4, jy - bh * 0.4 - size * 1.4, jx + size * 1.4, jy - bh * 0.4 + size * 1.4), fill=rgba(c, 0.18 + 0.12 * pulse)), 10)
-        for k in range(5):
-            tx = jx + (k - 2) / 2 * size * 0.34 * (1 - 0.18 * pulse)
-            ty = jy
-            ln = size * (0.9 + ((k * 37 + i * 11) % 10) / 10 * 1.1) / 3
-            ang = 0
-            for s in range(3):
-                ang += math.sin(t * 2.2 + k + s * 0.9 + i) * 0.26
-                nx, ny = tx + math.sin(ang) * ln, ty + math.cos(ang) * ln * (1 + 0.25 * pulse)
-                seg(d, (tx, ty), (nx, ny), c, 0.6 - s * 0.16, 1)
-                tx, ty = nx, ny
-        bell = gradient((bw, bh), [(0, rgba(c, 0.9)), (0.7, rgba(c, 0.5)), (1, rgba(c, 0.08))], 90)
-        m = Image.new('L', bell.size, 0)
-        ImageDraw.Draw(m).ellipse([0, 0, bell.width - 1, bell.height * 2], fill=255)
-        bell.putalpha(ImageChops.multiply(bell.getchannel('A'), m))
-        img.alpha_composite(bell, (S(jx - bw / 2), S(jy - bh)))
-        d.rounded_rectangle(box(jx - bw * 0.45, jy - 1, jx + bw * 0.45, jy + 1), radius=S(1), fill=rgba(lerp(c, (255, 255, 255), 0.4), 0.7))
-        d.ellipse(box(jx - size * 0.15, jy - bh * 0.55, jx + size * 0.15, jy - bh * 0.35), fill=rgba(lerp(c, (255, 255, 255), 0.65), 0.6))
+    water = st.get('WaterColor', T['Accent'])
+    foam = st.get('FoamColor', T['Text'])
+    deep = lerp(water, T['Background'], 0.45)
+    rng = random.Random(9)
+    # caustics: soft light ovals drifting across the top of the window
+    for i in range(7):
+        cx = x0 + (rng.random() + math.sin(t * 0.25 + i) * 0.08) * w
+        cy = y0 + 10 + rng.random() * 70
+        cw = rng.uniform(60, 150)
+        c = lerp(foam, water, 0.4)
+        glow(img, lambda g, cx=cx, cy=cy, cw=cw, c=c: g.ellipse(box(cx - cw / 2, cy - cw * 0.16, cx + cw / 2, cy + cw * 0.16), fill=rgba(c, 0.12)), 8)
+    # waves over the content, clipped to the window
+    wv = layer(img.size)
+    wd = ImageDraw.Draw(wv)
+    for layer_i, (base, amp, col, alpha, ph) in enumerate(((15, 4.8, deep, 0.14, 1.3), (10, 4, water, 0.24, 0))):
+        pts = []
+        for k in range(0, int(w) + 9, 4):
+            xx = k
+            if layer_i == 0:
+                hh = base + amp * (math.sin(xx * 0.022 + t * 1.1 + ph) * 0.7 + math.sin(xx * 0.05 - t * 0.6) * 0.3)
+            else:
+                hh = base + amp * (math.sin(xx * 0.034 - t * 1.7) * 0.6 + math.sin(xx * 0.012 + t * 0.85) * 0.4)
+            pts.append((x0 + xx, y1 - hh))
+        poly = pts + [(x1 + 8, y1 + 2), (x0, y1 + 2)]
+        wd.polygon([(S(px), S(py)) for px, py in poly], fill=rgba(col, alpha))
+        if layer_i == 1:
+            for k in range(len(pts) - 1):
+                a = 0.45 + 0.3 * (0.5 + 0.5 * math.sin(pts[k][0] * 0.09 + t * 2.2))
+                wd.line([S(pts[k][0]), S(pts[k][1]), S(pts[k + 1][0]), S(pts[k + 1][1])], fill=rgba(foam, a), width=S(1.6))
+    m = rrect_mask(img.size, win, 10 * st['Radius'])
+    wv.putalpha(ImageChops.multiply(wv.getchannel('A'), m))
+    front.alpha_composite(wv)
+    # a click ripple, frozen mid-spread
+    rx, ry = x0 + w * 0.62, y0 + h * 0.58
+    for i, (rw, rh, a) in enumerate(((70, 36, 0.35), (48, 25, 0.5), (26, 13, 0.6))):
+        ImageDraw.Draw(front).ellipse(box(rx - rw / 2, ry - rh / 2, rx + rw / 2, ry + rh / 2), outline=rgba(foam, a * 0.6), width=S(1.3))
 
 
-SCENES = {'Hologram': scene_hologram, 'Circuit': scene_circuit, 'Abyss': scene_abyss}
+SCENES = {'Hologram': scene_hologram, 'Circuit': scene_circuit, 'Ocean': scene_ocean}
 
 
 # --------------------------------------------------------------------------------------------------------------
@@ -707,7 +737,7 @@ def window(T, st, size, win, t=0.0, title='TingUI', compact=False, tabs=None, su
     hy = y0 + 25
     text(d, (x0 + 18, hy), title, f_title, T['Text'])
     px = x0 + 18 + text_w(title, f_title) + 10
-    for label, c in (pills if pills is not None else (('Pro', T['Success']), ('v0.0.7', T['Danger']))):
+    for label, c in (pills if pills is not None else (('Pro', T['Success']), ('v0.0.8', T['Danger']))):
         pw = text_w(label, f_pill) + 14
         d.rounded_rectangle(box(px, hy - 9, px + pw, hy + 9), radius=S(5 * st['Radius']), fill=rgba(lerp(c, T['Background'], 0.78)), outline=rgba(lerp(c, T['Background'], 0.4)), width=S(1))
         text(d, (px + pw / 2, hy), label, f_pill, lerp(c, (255, 255, 255), 0.25), anchor='mm')
@@ -920,7 +950,7 @@ def banner(defaults, presets):
     for cx, cy, c, r in ((260, 120, (160, 130, 255), 260), (1300, 420, (90, 225, 255), 300), (900, 80, (255, 96, 196), 200)):
         glow(img, lambda g, cx=cx, cy=cy, c=c, r=r: g.ellipse(box(cx - r, cy - r, cx + r, cy + r), fill=rgba(c, 0.18)), 80)
     # three windows fanned out on the right
-    for i, (name, ox, oy, rot) in enumerate((('Circuit', 850, 70, 5), ('Hologram', 1380, 60, -5), ('Abyss', 1115, 165, 0))):
+    for i, (name, ox, oy, rot) in enumerate((('Circuit', 850, 70, 5), ('Hologram', 1380, 60, -5), ('Ocean', 1115, 165, 0))):
         T, st = full_theme(defaults, presets[name])
         size = (560, 420)
         win = (90, 60, 470, 360)
@@ -944,7 +974,7 @@ def banner(defaults, presets):
     px = 86
     chips = layer((W, H))
     cd = ImageDraw.Draw(chips)
-    for chip in ('18 themes', 'living scenes', 'live reload', 'Theme Studio'):
+    for chip in ('15 themes', 'living scenes', 'live reload', 'Theme Studio'):
         fc = font(None, 15)
         cw = text_w(chip, fc) + 26
         cd.rounded_rectangle(box(px, 410, px + cw, 442), radius=S(16), fill=(255, 255, 255, 16), outline=(255, 255, 255, 46), width=S(1))
@@ -1101,6 +1131,198 @@ def notify_card(img, T, st, x, y, w, kind, source, title, body, actions=()):
     return h
 
 
+NOTE_KINDS = {'Success': ('Success', 'circle'), 'Warning': ('Caution', 'diamond'), 'Error': ('Error', 'square'), 'Info': ('Info', 'circle'),
+              'Download': ('Info', 'circle'), 'Upload': ('Info', 'circle'), 'Message': ('Accent', 'square'), 'Friend': ('Success', 'circle'),
+              'Achievement': ('Caution', 'diamond'), 'Security': ('Error', 'square'), 'Update': ('Accent', 'circle'), 'Heart': ('Error', 'circle')}
+
+
+def note_glyph(d, kind, bx, by, col):
+    if kind in ('Success',):
+        seg(d, (bx - 4.5, by), (bx - 1.2, by + 3.5), col, 1, 1.8)
+        seg(d, (bx - 1.2, by + 3.5), (bx + 4.8, by - 3.5), col, 1, 1.8)
+    elif kind in ('Warning',):
+        seg(d, (bx, by - 5), (bx, by + 1.5), col, 1, 1.8)
+        d.ellipse(box(bx - 1.1, by + 3.6, bx + 1.1, by + 5.8), fill=rgba(col))
+    elif kind in ('Error',):
+        seg(d, (bx - 4, by - 4), (bx + 4, by + 4), col, 1, 1.8)
+        seg(d, (bx + 4, by - 4), (bx - 4, by + 4), col, 1, 1.8)
+    elif kind in ('Download', 'Upload'):
+        up = kind == 'Upload'
+        seg(d, (bx, by - 6 + (2 if up else 0)), (bx, by + 2 + (2 if up else 0)), col, 1, 1.8)
+        tip = by - 5 if up else by + 3
+        for s_ in (-1, 1):
+            seg(d, (bx, tip), (bx + s_ * 3.4, tip + (3.4 if up else -3.4)), col, 1, 1.8)
+        seg(d, (bx - 6, by + 6), (bx + 6, by + 6), col, 1, 1.8)
+    elif kind == 'Message':
+        d.rounded_rectangle(box(bx - 7, by - 6, bx + 7, by + 3), radius=S(3), fill=rgba(col))
+        d.polygon([(S(bx - 4), S(by + 2)), (S(bx - 1), S(by + 2)), (S(bx - 4), S(by + 6))], fill=rgba(col))
+        for k in range(3):
+            d.ellipse(box(bx - 4.2 + k * 3.6, by - 2.4 - (1 if k == 1 else 0), bx - 2.6 + k * 3.6, by - 0.8 - (1 if k == 1 else 0)), fill=(14, 14, 18, 255))
+    elif kind == 'Achievement':
+        pts = []
+        for k in range(8):
+            r = 7 if k % 2 == 0 else 2.4
+            a = k * math.pi / 4 - math.pi / 2
+            pts.append((S(bx + math.cos(a) * r), S(by + math.sin(a) * r)))
+        d.polygon(pts, fill=rgba(col))
+    elif kind == 'Friend':
+        d.ellipse(box(bx - 2.8, by - 6, bx + 2.8, by - 0.4), fill=rgba(col))
+        d.rounded_rectangle(box(bx - 5.5, by + 0.8, bx + 5.5, by + 6), radius=S(3), fill=rgba(col))
+    else:
+        d.ellipse(box(bx - 2, by - 2, bx + 2, by + 2), fill=rgba(col))
+
+
+def notify_card2(img, T, x, y, w, kind, title, body, source=None, actions=(), value=None, reply=None, details=None,
+                 count=None, tools=False, undo=None, progress=0.62, image=None):
+    """A v0.0.8 notification card with its extras. Returns its height."""
+    d = ImageDraw.Draw(img)
+    key, shape = NOTE_KINDS[kind]
+    col = T.get(key, T['Accent'])
+    fs, ft, fb, fa = font(None, 8.5, True), font(None, 12.5), font(None, 11.5), font(None, 10)
+    lines = body if isinstance(body, (list, tuple)) else [body]
+    h = 18 + (13 if source else 0) + 17 + 16 * len(lines)
+    if value is not None:
+        h += 16
+    if reply:
+        h += 30
+    if actions or undo:
+        h += 28
+    if details:
+        h += 16 * len(details) + 14
+    h += 8
+    glow(img, lambda g: g.rounded_rectangle(box(x, y + 6, x + w, y + h + 6), radius=S(9), fill=(0, 0, 0, 120)), 10)
+    d.rounded_rectangle(box(x, y, x + w, y + h), radius=S(9), fill=rgba(T['Background']), outline=rgba(lerp(col, T['Background'], 0.55)), width=S(1))
+    wash = gradient((w * 0.5, h - 2), [(0, rgba(col, 0.16)), (1, rgba(col, 0))], 0)
+    m = Image.new('L', wash.size, 0)
+    ImageDraw.Draw(m).rounded_rectangle([0, 0, wash.width + S(20), wash.height - 1], radius=S(8), fill=255)
+    wash.putalpha(ImageChops.multiply(wash.getchannel('A'), m))
+    img.alpha_composite(wash, (S(x + 1), S(y + 1)))
+    d.rounded_rectangle(box(x, y + 6, x + 3, y + h - 6), radius=S(2), fill=rgba(col))
+    bx, by = x + 25, y + 22 + (13 if source else 0)
+    glow(img, lambda g: g.ellipse(box(bx - 13, by - 13, bx + 13, by + 13), fill=rgba(col, 0.4)), 6)
+    plate = rgba(lerp(col, T['Background'], 0.78))
+    edge = rgba(lerp(col, T['Background'], 0.35))
+    if image:
+        d.rounded_rectangle(box(bx - 16, by - 16, bx + 16, by + 16), radius=S(9), fill=rgba(image), outline=rgba(col, 0.7), width=S(1))
+        d.ellipse(box(bx - 6, by - 11, bx + 6, by + 1), fill=rgba(lerp(image, (255, 255, 255), 0.5)))
+        d.rounded_rectangle(box(bx - 11, by + 3, bx + 11, by + 16), radius=S(6), fill=rgba(lerp(image, (255, 255, 255), 0.5)))
+        d.ellipse(box(bx + 8, by + 8, bx + 20, by + 20), fill=plate, outline=edge)
+        note_glyph(d, 'Success', bx + 14, by + 14, col)
+    elif shape == 'diamond':
+        d.polygon([(S(bx), S(by - 12)), (S(bx + 12), S(by)), (S(bx), S(by + 12)), (S(bx - 12), S(by))], fill=plate, outline=edge)
+    elif shape == 'square':
+        d.rounded_rectangle(box(bx - 12, by - 12, bx + 12, by + 12), radius=S(7), fill=plate, outline=edge, width=S(1))
+    else:
+        d.ellipse(box(bx - 12, by - 12, bx + 12, by + 12), fill=plate, outline=edge, width=S(1))
+    if not image:
+        note_glyph(d, kind, bx, by, col)
+    if kind == 'Achievement':
+        for k in range(10):
+            a = k / 10 * 6.283
+            seg(d, (bx + math.cos(a) * 17, by + math.sin(a) * 17), (bx + math.cos(a) * 21, by + math.sin(a) * 21), lerp(col, (255, 255, 255), 0.35), 0.6, 1.4)
+    tx = x + 49
+    ty = y + 13
+    tw = w - 49 - 14 - 34
+    if source:
+        text(d, (tx, ty + 2), source.upper(), fs, T['TextMuted'])
+        ty += 13
+    text(d, (tx, ty + 6), title, ft, col)
+    ty += 18
+    for ln in lines:
+        text(d, (tx, ty + 6), ln, fb, T['Label'])
+        ty += 16
+    if value is not None:
+        bw = w - 49 - 14 - 34 - 38 + 34
+        d.rounded_rectangle(box(tx, ty + 7, tx + bw, ty + 11), radius=S(2), fill=rgba(T['Outline']))
+        d.rounded_rectangle(box(tx, ty + 7, tx + bw * value, ty + 11), radius=S(2), fill=rgba(col))
+        sw = gradient((bw * value * 0.35, 4), [(0, rgba((255, 255, 255), 0)), (0.5, rgba((255, 255, 255), 0.5)), (1, rgba((255, 255, 255), 0))], 0)
+        img.alpha_composite(sw, (S(tx + bw * value * 0.5), S(ty + 7)))
+        text(d, (tx + bw + 34, ty + 9), '%d%%' % round(value * 100), font(None, 11, True), T['Label'], anchor='rm')
+        ty += 16
+    if reply:
+        rw = w - 49 - 14 - 58
+        d.rounded_rectangle(box(tx, ty + 6, tx + rw, ty + 30), radius=S(6), fill=rgba(T['Control']), outline=rgba(T['Outline']), width=S(1))
+        text(d, (tx + 9, ty + 18), reply, fb, T['TextMuted'])
+        sx = tx + rw + 6
+        d.rounded_rectangle(box(sx, ty + 8, sx + 46, ty + 28), radius=S(6), fill=rgba(col))
+        text(d, (sx + 23, ty + 18), 'Send', fa, T['Background'], anchor='mm')
+        ty += 30
+    if actions or undo:
+        ax = tx
+        allacts = ([('Undo  %d' % undo, 'Primary')] if undo else []) + list(actions)
+        for a in allacts:
+            label, style = a if isinstance(a, tuple) else (a, None)
+            aw = text_w(label, fa) + 18
+            if style == 'Primary':
+                d.rounded_rectangle(box(ax, ty + 6, ax + aw, ty + 26), radius=S(6), fill=rgba(col))
+                text(d, (ax + aw / 2, ty + 16), label, fa, T['Background'], anchor='mm')
+            else:
+                tone = T['Error'] if style == 'Danger' else col
+                d.rounded_rectangle(box(ax, ty + 6, ax + aw, ty + 26), radius=S(6), fill=rgba(lerp(tone, T['Background'], 0.82)), outline=rgba(lerp(tone, T['Background'], 0.5)), width=S(1))
+                text(d, (ax + aw / 2, ty + 16), label, fa, lerp(tone, (255, 255, 255), 0.25) if style != 'Copied' else T['Success'], anchor='mm')
+            ax += aw + 6
+        ty += 28
+    if details:
+        dh = 16 * len(details) + 10
+        d.rounded_rectangle(box(tx, ty + 4, x + w - 14, ty + 4 + dh), radius=S(6), fill=rgba(T['Group']), outline=rgba(T['Outline']), width=S(1))
+        for i, ln in enumerate(details):
+            text(d, (tx + 8, ty + 13 + i * 16), ln, font('Code', 10.5), T['TextDim'])
+        ty += dh + 4
+    if tools or count:
+        rx = x + w - 8
+        if tools:
+            d.rounded_rectangle(box(rx - 18, y + 6, rx, y + 24), radius=S(5), fill=rgba(T['ControlHover']))
+            seg(d, (rx - 13, y + 11), (rx - 5, y + 19), T['TextDim'], 1, 1.5)
+            seg(d, (rx - 5, y + 11), (rx - 13, y + 19), T['TextDim'], 1, 1.5)
+            rx -= 21
+            d.rounded_rectangle(box(rx - 18, y + 6, rx, y + 24), radius=S(5), fill=rgba(T['ControlHover']))
+            d.ellipse(box(rx - 11, y + 9, rx - 4, y + 16), fill=rgba(T['TextDim']))
+            seg(d, (rx - 9, y + 16), (rx - 11, y + 21), T['TextDim'], 1, 1.6)
+            rx -= 21
+        if count:
+            cw = text_w('x%d' % count, font(None, 10, True)) + 12
+            d.rounded_rectangle(box(rx - cw, y + 7, rx, y + 23), radius=S(8), fill=rgba(T['Control']))
+            text(d, (rx - cw / 2, y + 15), 'x%d' % count, font(None, 10, True), T['Text'], anchor='mm')
+    if progress is not None:
+        d.rounded_rectangle(box(x + 10, y + h - 4, x + 10 + (w - 20) * progress, y + h - 2.5), radius=S(1), fill=rgba(col, 0.9))
+    return h
+
+
+def notifications_image(defaults, presets):
+    W, H = 1180, 760
+    T, st = full_theme(defaults, presets['Lavender'])
+    img = backdrop(T, dict(st, Particles='Snow'), (W, H), 0.8, 4, motes=True)
+    cw = 300
+    cols = [40, 40 + cw + 40, 40 + (cw + 40) * 2]
+    ys = [40, 40, 40]
+
+    def put(ci, **kw):
+        h = notify_card2(img, T, cols[ci], ys[ci], cw, **kw)
+        ys[ci] += h + 14
+
+    put(0, kind='Download', title='Downloading', body='assets.pak  14 / 24 MB', value=0.58, progress=None)
+    put(0, kind='Message', title='builderman', body='gg, want to run it back?', reply='Reply...', progress=None)
+    put(0, kind='Friend', title='Friend request', body='Telamon wants to be friends.', image=(70, 120, 170),
+        actions=(('Accept', 'Primary'), 'Ignore'), progress=0.7)
+    put(1, kind='Error', title='Request failed', body='The server answered 503.', actions=('Hide details', ('Copied', 'Copied')),
+        details=['POST /api/v1/sync', 'status: 503 Service Unavailable', 'retry-after: 30', 'request-id: 7f3c-91aa-02de'], tools=True, progress=None)
+    put(1, kind='Warning', title='Config deleted', body='"pvp" was removed.', undo=4, progress=0.66)
+    put(2, kind='Achievement', title='Achievement unlocked', body='Opened every tab.', progress=0.8)
+    put(2, kind='Friend', title='Player joined', body='The server is filling up.', count=3, tools=True, progress=0.9)
+    put(2, kind='Security', title='New login', body='Your account was used on a new device.', actions=(('It was me', 'Primary'), ('Secure it', 'Danger')), progress=0.5)
+    put(2, kind='Upload', title='Uploading', body='Saving your config to the cloud...', value=0.4, progress=None)
+    # the Clear all pill under the stack
+    d = ImageDraw.Draw(img)
+    fc = font(None, 11)
+    label = 'Clear all (6)'
+    pw = text_w(label, fc) + 22
+    px, py = cols[2] + cw - pw, ys[2]
+    d.rounded_rectangle(box(px, py, px + pw, py + 22), radius=S(11), fill=rgba(T['Control']), outline=rgba(T['Outline']), width=S(1))
+    text(d, (px + pw / 2, py + 11), label, fc, T['TextDim'], anchor='mm')
+    out = img.resize((W, H), Image.LANCZOS)
+    save_png(out, os.path.join(OUT, 'notifications.png'))
+
+
 def shell_image(defaults, presets):
     W, H = 1280, 700
     T, st = full_theme(defaults, presets['Lavender'])
@@ -1239,7 +1461,7 @@ def studio_image(defaults, presets):
 def main():
     defaults, presets, order, descs = load_presets()
     only = sys.argv[1:]
-    extras = (['banner'], ['anatomy'], ['shell'], ['studio'])
+    extras = (['banner'], ['anatomy'], ['shell'], ['studio'], ['notifications'])
     for name in order:
         if only and name not in only and only not in extras:
             continue
@@ -1258,6 +1480,8 @@ def main():
         shell_image(defaults, presets)
     if not only or only == ['studio']:
         studio_image(defaults, presets)
+    if not only or only == ['notifications']:
+        notifications_image(defaults, presets)
 
 
 if __name__ == '__main__':

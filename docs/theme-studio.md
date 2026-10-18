@@ -35,7 +35,7 @@ Edits are applied a moment after you make them, so dragging a slider or a colour
 | **Colours** | **Surfaces**: window, panels, panel borders, controls, controls under the mouse, outlines, borders. **Status colours**: Success, Warning, Danger, Info, Caution, Error. **Text and accent**: the accent and the four text colours. **Readability**: the checks below. |
 | **Shape** | **Shape and type**: corner roundness, glow, text size, font, see-through surfaces. **Borders and light**: the turning border's colours, speed and thickness, hard colour bands, an inner line, and the top light. |
 | **Light** | **Window light**: tint colour, where it comes from (top, bottom or a drifting aurora) and its strength, plus world blur. **Effects**: scanlines, a drafting grid, dark screen edges, distant lightning, glitches. **Accent**: an accent gradient, a rainbow accent and its speed. |
-| **Motion** | **Particles**: show them, their style and colour. **Painted textures**, for themes that came with art. **Scene**: pick a scene, and change its colours: Circuit's traces and current, or Abyss's jellyfish, light shafts and plankton. |
+| **Motion** | **Particles**: show them, their style and colour. **Painted textures**, for themes that came with art. **Scene**: pick a scene, and change its colours: Circuit's traces and current, or Ocean's water and foam. "None" turns a theme's particles off. |
 | **Share** | **Save and share**: name, description, save, copy the share code, install a code. **My themes**: your saved themes, Start from, Revert, and Use in every script. |
 
 Every row explains itself when you hover it. Optional effects, such as the inner line or the tint, are switched on with a toggle that remembers the colour you picked.

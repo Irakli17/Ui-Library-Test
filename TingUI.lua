@@ -1,7 +1,7 @@
 --!nocheck
 --!nolint
 --[[
-	TingUI Library  v0.0.7-stable
+	TingUI Library  v0.0.8-stable
 	Single file, no dependencies. Loads with loadstring, or as a ModuleScript (require) in any Roblox game.
 
 	local TingUI = loadstring(game:HttpGet("https://raw.githubusercontent.com/Irakli17/Ui-Library-Test/main/TingUI.lua"))()
@@ -67,7 +67,7 @@ local Lighting = Service("Lighting")
 local TextService = Service("TextService")
 
 local TingUI = {
-	Version = "v0.0.7-stable",
+	Version = "v0.0.8-stable",
 	ConfirmsConfigDelete = true,                        -- the config tab asks before it deletes a config
 	ConfigProgressNotices = true,                       -- saving, loading and autoloading show Loading -> result
 	Id = InstanceId,
@@ -129,8 +129,17 @@ local TingUI = {
 	Presets = {
 		Lavender = { Accent = Color3.fromRGB(159, 150, 193), Background = Color3.fromRGB(14, 13, 17), Group = Color3.fromRGB(17, 16, 21), GroupBorder = Color3.fromRGB(25, 24, 30), Control = Color3.fromRGB(24, 23, 28), ControlHover = Color3.fromRGB(34, 33, 39), Border = Color3.fromRGB(48, 47, 58), Outline = Color3.fromRGB(38, 36, 45), Text = Color3.fromRGB(210, 209, 220), Label = Color3.fromRGB(187, 186, 195), TextDim = Color3.fromRGB(134, 133, 141), TextMuted = Color3.fromRGB(108, 107, 114),
 			Style = { Radius = 1, Glow = 1, Font = "Inter", Particles = "Snow", ParticleColor = Color3.new(1, 1, 1) } },
-		Ocean = { Accent = Color3.fromRGB(110, 165, 225), Background = Color3.fromRGB(10, 14, 20), Group = Color3.fromRGB(14, 19, 27), GroupBorder = Color3.fromRGB(22, 30, 41), Control = Color3.fromRGB(20, 27, 38), ControlHover = Color3.fromRGB(29, 39, 54), Border = Color3.fromRGB(40, 54, 72), Outline = Color3.fromRGB(33, 45, 61), Text = Color3.fromRGB(210, 218, 230), Label = Color3.fromRGB(180, 190, 204), TextDim = Color3.fromRGB(122, 138, 158), TextMuted = Color3.fromRGB(96, 110, 128),
-			Style = { Radius = 1.35, Glow = 1.35, Font = "Inter", Particles = "Bubbles", ParticleColor = Color3.fromRGB(140, 205, 255), Tint = Color3.fromRGB(40, 120, 200), TintPlace = "Bottom", TintAmount = 0.2, TopLine = { Color3.fromRGB(90, 210, 255), Color3.fromRGB(80, 110, 245) } } },
+		-- ocean: the window floats in water. Waves roll along its bottom edge and rise toward the pointer, caustic light
+		-- plays across the header, a tide washes over the window when you switch to it, clicks drop ripples, and the
+		-- bubbles are all different (fizz, glass, big wobbly ones, clusters) and pop at depth, at the surface or on touch
+		Ocean = { Accent = Color3.fromRGB(86, 196, 246), Background = Color3.fromRGB(7, 15, 24), Group = Color3.fromRGB(10, 21, 33), GroupBorder = Color3.fromRGB(20, 40, 58), Control = Color3.fromRGB(15, 30, 46), ControlHover = Color3.fromRGB(22, 42, 62), Border = Color3.fromRGB(42, 82, 112), Outline = Color3.fromRGB(28, 56, 80), Text = Color3.fromRGB(222, 240, 252), Label = Color3.fromRGB(188, 214, 232), TextDim = Color3.fromRGB(122, 156, 182), TextMuted = Color3.fromRGB(92, 122, 146),
+			Style = { Radius = 1.4, Glow = 1.45, Font = "JosefinSans", TextScale = 1.06, Particles = "Bubbles", ParticleColor = Color3.fromRGB(120, 210, 255), Scene = "Ocean",
+				WaterColor = Color3.fromRGB(64, 170, 236), FoamColor = Color3.fromRGB(205, 242, 255),
+				Tint = Color3.fromRGB(30, 130, 200), TintPlace = "Bottom", TintAmount = 0.24,
+				TopLine = { Color3.fromRGB(150, 236, 255), Color3.fromRGB(60, 120, 245) },
+				Aura = { Color3.fromRGB(90, 210, 255), Color3.fromRGB(30, 90, 170), Color3.fromRGB(140, 240, 255), Color3.fromRGB(40, 110, 200), Color3.fromRGB(90, 210, 255) },
+				AuraSpeed = 0.06, AuraThickness = 1.3,
+				AccentGradient = { Color3.fromRGB(140, 236, 255), Color3.fromRGB(50, 120, 236) } } },
 		Rose = { Accent = Color3.fromRGB(205, 120, 150), Background = Color3.fromRGB(17, 12, 15), Group = Color3.fromRGB(22, 16, 20), GroupBorder = Color3.fromRGB(33, 24, 29), Control = Color3.fromRGB(31, 23, 28), ControlHover = Color3.fromRGB(43, 32, 39), Border = Color3.fromRGB(62, 46, 54), Outline = Color3.fromRGB(50, 37, 44), Text = Color3.fromRGB(228, 214, 220), Label = Color3.fromRGB(200, 184, 191), TextDim = Color3.fromRGB(150, 130, 140), TextMuted = Color3.fromRGB(118, 100, 109),
 			Style = { Radius = 1.75, Glow = 1.6, Font = "Inter", Particles = "Petals", ParticleColor = Color3.fromRGB(242, 150, 186), Tint = Color3.fromRGB(215, 95, 150), TintPlace = "Top", TintAmount = 0.16, TopLine = { Color3.fromRGB(245, 140, 185), Color3.fromRGB(255, 190, 150) } } },
 		Sunset = { Accent = Color3.fromRGB(215, 150, 90), Background = Color3.fromRGB(17, 13, 11), Group = Color3.fromRGB(23, 18, 15), GroupBorder = Color3.fromRGB(34, 27, 22), Control = Color3.fromRGB(32, 26, 21), ControlHover = Color3.fromRGB(44, 36, 30), Border = Color3.fromRGB(64, 52, 43), Outline = Color3.fromRGB(51, 41, 34), Text = Color3.fromRGB(230, 220, 210), Label = Color3.fromRGB(202, 191, 180), TextDim = Color3.fromRGB(152, 138, 124), TextMuted = Color3.fromRGB(120, 108, 96),
@@ -143,9 +152,6 @@ local TingUI = {
 		-- midnight navy and gold, serif type, a gilded double border and glinting sparkles
 		Royal = { Accent = Color3.fromRGB(222, 184, 92), Background = Color3.fromRGB(11, 13, 24), Group = Color3.fromRGB(15, 18, 32), GroupBorder = Color3.fromRGB(26, 28, 46), Control = Color3.fromRGB(20, 24, 40), ControlHover = Color3.fromRGB(30, 34, 56), Border = Color3.fromRGB(92, 78, 44), Outline = Color3.fromRGB(48, 46, 60), Text = Color3.fromRGB(244, 236, 214), Label = Color3.fromRGB(222, 212, 186), TextDim = Color3.fromRGB(160, 150, 126), TextMuted = Color3.fromRGB(120, 112, 94),
 			Style = { Radius = 0.6, Glow = 1.1, Font = "Merriweather", TextScale = 0.94, Particles = "Sparkles", ParticleColor = Color3.fromRGB(255, 214, 120), Tint = Color3.fromRGB(200, 160, 70), TintPlace = "Top", TintAmount = 0.1, TopLine = { Color3.fromRGB(255, 214, 120), Color3.fromRGB(180, 130, 50) }, InnerLine = Color3.fromRGB(222, 184, 92), AccentGradient = { Color3.fromRGB(255, 226, 150), Color3.fromRGB(196, 148, 58) } } },
-		-- bubblegum pastels, a soft rounded display font, extra-round shapes and tumbling confetti
-		Candy = { Accent = Color3.fromRGB(255, 128, 190), Background = Color3.fromRGB(24, 16, 26), Group = Color3.fromRGB(32, 21, 35), GroupBorder = Color3.fromRGB(48, 32, 52), Control = Color3.fromRGB(42, 28, 46), ControlHover = Color3.fromRGB(58, 38, 62), Border = Color3.fromRGB(98, 66, 104), Outline = Color3.fromRGB(70, 46, 76), Text = Color3.fromRGB(255, 240, 250), Label = Color3.fromRGB(250, 220, 240), TextDim = Color3.fromRGB(200, 160, 190), TextMuted = Color3.fromRGB(160, 122, 150),
-			Style = { Radius = 2.2, Glow = 1.7, Font = "FredokaOne", TextScale = 1, Particles = "Confetti", ParticleColor = Color3.fromRGB(255, 128, 190), Tint = Color3.fromRGB(130, 255, 210), TintPlace = "Bottom", TintAmount = 0.14, TopLine = { Color3.fromRGB(255, 128, 190), Color3.fromRGB(130, 255, 210) }, Aura = { Color3.fromRGB(255, 128, 190), Color3.fromRGB(130, 255, 210), Color3.fromRGB(255, 220, 120), Color3.fromRGB(255, 128, 190) }, AuraSpeed = 0.25, AccentGradient = { Color3.fromRGB(255, 128, 190), Color3.fromRGB(255, 190, 120) } } },
 		-- deep space: drifting violet and blue nebula clouds over a parallax star layer inside the window, the same nebula
 		-- faintly across the whole screen, a slowly turning aurora border, twinkling stars, shooting stars and comets
 		Cosmos = { Accent = Color3.fromRGB(160, 130, 255), Background = Color3.fromRGB(7, 7, 17), Group = Color3.fromRGB(11, 11, 25), GroupBorder = Color3.fromRGB(26, 24, 52), Control = Color3.fromRGB(18, 17, 38), ControlHover = Color3.fromRGB(28, 26, 56), Border = Color3.fromRGB(70, 60, 130), Outline = Color3.fromRGB(42, 38, 82), Text = Color3.fromRGB(238, 236, 255), Label = Color3.fromRGB(214, 210, 248), TextDim = Color3.fromRGB(156, 150, 206), TextMuted = Color3.fromRGB(114, 108, 166),
@@ -163,7 +169,7 @@ local TingUI = {
 			Style = { Radius = 0.3, Glow = 0.35, Font = "PatrickHand", TextScale = 1.15, Particles = "Drafting", ParticleColor = Color3.fromRGB(210, 230, 255), Grid = true, GridColor = Color3.fromRGB(220, 235, 255), InnerLine = Color3.fromRGB(200, 225, 255) } },
 		-- hazard: industrial yellow and black, a striped warning-tape border, square corners and welding sparks
 		Hazard = { Accent = Color3.fromRGB(255, 200, 0), Background = Color3.fromRGB(16, 15, 10), Group = Color3.fromRGB(22, 21, 14), GroupBorder = Color3.fromRGB(40, 38, 24), Control = Color3.fromRGB(30, 28, 18), ControlHover = Color3.fromRGB(42, 40, 26), Border = Color3.fromRGB(90, 84, 40), Outline = Color3.fromRGB(56, 52, 30), Text = Color3.fromRGB(250, 246, 230), Label = Color3.fromRGB(228, 222, 200), TextDim = Color3.fromRGB(165, 158, 130), TextMuted = Color3.fromRGB(125, 118, 95),
-			Style = { Radius = 0.2, Glow = 0.9, Font = "Sarpanch", TextScale = 1.05, Particles = "Sparks", ParticleColor = Color3.fromRGB(255, 210, 90), Tint = Color3.fromRGB(255, 140, 0), TintPlace = "Bottom", TintAmount = 0.12,
+			Style = { Radius = 0.2, Glow = 0.9, Font = "Sarpanch", TextScale = 1.05, Particles = "None", Tint = Color3.fromRGB(255, 140, 0), TintPlace = "Bottom", TintAmount = 0.12,
 				Aura = { Color3.fromRGB(255, 200, 0), Color3.fromRGB(24, 22, 14), Color3.fromRGB(255, 200, 0), Color3.fromRGB(24, 22, 14), Color3.fromRGB(255, 200, 0), Color3.fromRGB(24, 22, 14), Color3.fromRGB(255, 200, 0), Color3.fromRGB(24, 22, 14), Color3.fromRGB(255, 200, 0), Color3.fromRGB(24, 22, 14) },
 				AuraHard = true, AuraSpeed = 0, AuraRotation = 45, AuraThickness = 3 } },
 		-- glass: see-through frosted surfaces over a blurred world, soft rounded type and drifting bokeh
@@ -185,28 +191,16 @@ local TingUI = {
 				TraceColor = Color3.fromRGB(150, 104, 58), EnergyColor = Color3.fromRGB(255, 196, 110),
 				Tint = Color3.fromRGB(255, 150, 40), TintPlace = "Top", TintAmount = 0.07, InnerLine = Color3.fromRGB(120, 88, 50),
 				TopLine = { Color3.fromRGB(255, 220, 150), Color3.fromRGB(255, 140, 40) }, AccentGradient = { Color3.fromRGB(255, 210, 120), Color3.fromRGB(255, 128, 40) } } },
-		-- abyss: the deep sea. Light shafts fall from far above, bioluminescent jellyfish pulse their way up around the window,
-		-- plankton glow as the pointer passes and a click blooms light that startles everything nearby
-		Abyss = { Accent = Color3.fromRGB(255, 96, 196), Background = Color3.fromRGB(4, 8, 16), Group = Color3.fromRGB(7, 13, 24), GroupBorder = Color3.fromRGB(18, 30, 48), Control = Color3.fromRGB(12, 21, 36), ControlHover = Color3.fromRGB(19, 31, 52), Border = Color3.fromRGB(40, 62, 96), Outline = Color3.fromRGB(26, 42, 66), Text = Color3.fromRGB(226, 238, 255), Label = Color3.fromRGB(196, 214, 238), TextDim = Color3.fromRGB(126, 150, 186), TextMuted = Color3.fromRGB(92, 112, 146),
-			Style = { Radius = 1.4, Glow = 1.6, Font = "JosefinSans", TextScale = 1.06, Particles = "MarineSnow", ParticleColor = Color3.fromRGB(170, 210, 255), Scene = "Abyss",
-				JellyColors = { Color3.fromRGB(255, 96, 196), Color3.fromRGB(150, 120, 255), Color3.fromRGB(90, 220, 255) },
-				RayColor = Color3.fromRGB(130, 205, 255), PlanktonColor = Color3.fromRGB(110, 230, 255), Vignette = true,
-				Tint = Color3.fromRGB(20, 110, 150), TintPlace = "Bottom", TintAmount = 0.22,
-				TopLine = { Color3.fromRGB(150, 230, 255), Color3.fromRGB(255, 96, 196) }, AccentGradient = { Color3.fromRGB(255, 120, 210), Color3.fromRGB(140, 120, 255) } } },
-		-- criminality: a grimy brick alley at night under a failing sodium street lamp, blood-red accents, condensed type,
-		-- the title and screen glitching for a moment now and then, dust hanging in the lamp light, a glint along a blade
-		Criminality = { Accent = Color3.fromRGB(216, 50, 60), Background = Color3.fromRGB(12, 12, 13), Group = Color3.fromRGB(17, 17, 18), GroupBorder = Color3.fromRGB(32, 30, 31), Control = Color3.fromRGB(24, 23, 24), ControlHover = Color3.fromRGB(36, 34, 35), Border = Color3.fromRGB(70, 62, 62), Outline = Color3.fromRGB(44, 41, 42), Text = Color3.fromRGB(240, 236, 230), Label = Color3.fromRGB(214, 208, 202), TextDim = Color3.fromRGB(152, 146, 142), TextMuted = Color3.fromRGB(114, 108, 106),
-			Style = { Radius = 0.45, Glow = 1.2, Font = "RobotoCondensed", TextScale = 1.08, Particles = "Grit", ParticleColor = Color3.fromRGB(255, 196, 120), Tint = Color3.fromRGB(255, 160, 70), TintPlace = "Top", TintAmount = 0.07,
-				TopLine = { Color3.fromRGB(255, 240, 225), Color3.fromRGB(216, 50, 60) }, Vignette = true, Glitch = true,
-				AccentGradient = { Color3.fromRGB(240, 70, 80), Color3.fromRGB(150, 24, 34) },
-				Texture = { { Image = "brick", Transparency = 0.62, Drift = 0.006, Zoom = 1 }, { Image = "lamp", Mode = "Lamp", Color = Color3.fromRGB(255, 184, 105), Transparency = 0.55, Flicker = true } } } },
-		-- MLG: Mountain Dew green on black, a comic font, a fast spinning rainbow border, rainbow accents, spinning doritos,
-		-- hitmarkers popping everywhere and rainbow words slamming in
-		MLG = { Accent = Color3.fromRGB(140, 232, 20), Background = Color3.fromRGB(8, 8, 8), Group = Color3.fromRGB(14, 14, 14), GroupBorder = Color3.fromRGB(34, 34, 34), Control = Color3.fromRGB(22, 22, 22), ControlHover = Color3.fromRGB(34, 34, 34), Border = Color3.fromRGB(80, 80, 80), Outline = Color3.fromRGB(46, 46, 46), Text = Color3.fromRGB(255, 255, 255), Label = Color3.fromRGB(232, 232, 232), TextDim = Color3.fromRGB(168, 168, 168), TextMuted = Color3.fromRGB(124, 124, 124),
-			Style = { Radius = 1, Glow = 1.9, Font = "Cartoon", TextScale = 1.04, Particles = "MLG", ParticleColor = Color3.fromRGB(255, 140, 0), AccentCycle = true, CycleSpeed = 0.3,
-				Tint = Color3.fromRGB(140, 232, 20), TintPlace = "Bottom", TintAmount = 0.12, TopLine = { Color3.fromRGB(140, 232, 20), Color3.fromRGB(255, 140, 0) },
-				Aura = { Color3.fromRGB(255, 60, 60), Color3.fromRGB(255, 170, 0), Color3.fromRGB(240, 255, 60), Color3.fromRGB(60, 255, 120), Color3.fromRGB(60, 200, 255), Color3.fromRGB(150, 90, 255), Color3.fromRGB(255, 70, 220), Color3.fromRGB(255, 60, 60) },
-				AuraSpeed = 0.9, AuraThickness = 2 } },
+		-- serotonin: a crisp classic cheat-menu look. Square corners, a hairline teal outline inside a dark teal frame,
+		-- teal light falling from the top edge, flat dark slate panels, a plain sans and white text. No particles.
+		Serotonin = { Accent = Color3.fromRGB(94, 213, 213), Background = Color3.fromRGB(17, 21, 27), Group = Color3.fromRGB(19, 25, 31), GroupBorder = Color3.fromRGB(46, 52, 61), Control = Color3.fromRGB(32, 38, 48), ControlHover = Color3.fromRGB(41, 48, 60), Border = Color3.fromRGB(46, 52, 61), Outline = Color3.fromRGB(46, 52, 61), Text = Color3.fromRGB(255, 255, 255), Label = Color3.fromRGB(232, 236, 240), TextDim = Color3.fromRGB(185, 185, 185), TextMuted = Color3.fromRGB(132, 138, 146),
+			TabActive = Color3.fromRGB(24, 28, 36), Toggle = Color3.fromRGB(94, 213, 213), AccentText = Color3.fromRGB(94, 213, 213),
+			Style = { Radius = 0, Glow = 0.85, Font = "Arial", TextScale = 1.08, Particles = "None",
+				Tint = Color3.fromRGB(94, 213, 213), TintPlace = "Top", TintAmount = 0.07,
+				TopLine = { Color3.fromRGB(94, 213, 213), Color3.fromRGB(94, 213, 213) },
+				Aura = { Color3.fromRGB(94, 213, 213), Color3.fromRGB(94, 213, 213) }, AuraSpeed = 0, AuraThickness = 1,
+				InnerLine = Color3.fromRGB(0, 52, 56),
+				AccentGradient = { Color3.fromRGB(150, 240, 240), Color3.fromRGB(70, 180, 186) } } },
 	},
 }
 env.TingUIInstances[InstanceId] = TingUI
@@ -277,7 +271,8 @@ local function SafeCall(label, fn, ...)
 			warn("[TingUI] error in " .. tostring(label) .. ": " .. tostring(err))
 			if TingUI.NotifyErrors and not TingUI.Unloaded and TingUI.Notify then
 				pcall(function()
-					TingUI:Notify({ Title = "Script error", Content = tostring(label) .. ": " .. FirstLine(err), Type = "Error", Duration = 7 })
+					TingUI:Notify({ Title = "Script error", Content = tostring(label) .. ": " .. FirstLine(err), Type = "Error", Duration = 9,
+						Details = tostring(err), Copy = tostring(label) .. "\n" .. tostring(err) })
 				end)
 			end
 		end
@@ -285,6 +280,38 @@ local function SafeCall(label, fn, ...)
 end
 TingUI.SafeCall = SafeCall
 local Gui, Overlay, OpenPopup
+
+-- Where the pointer is, in TingUI's own GUI coordinates (the space AbsolutePosition uses). GetMouseLocation counts
+-- from the very top of the screen; TingUI's ScreenGui ignores the top-bar inset, so normally the two agree. When they
+-- don't (IgnoreGuiInset changed, an executor container, a custom Parent), effects used to land a bar's height above
+-- or below the cursor. Every press on a small TingUI control re-learns the exact correction.
+local Pointer = { Service = Service("GuiService"), Shift = nil }
+function Pointer.Inset()
+	local ok, inset = pcall(function() return Pointer.Service:GetGuiInset() end)
+	return (ok and typeof(inset) == "Vector2") and inset or Vector2.new(0, 0)
+end
+function Pointer.Gui()
+	local m = UIS:GetMouseLocation()
+	if Pointer.Shift then return m + Pointer.Shift end
+	if Gui and not Gui.IgnoreGuiInset then return m - Pointer.Inset() end
+	return m
+end
+function Pointer.Calibrate(frame, input)
+	if not input or input.UserInputType ~= Enum.UserInputType.MouseButton1 then return end
+	local ap, sz = frame.AbsolutePosition, frame.AbsoluteSize
+	-- only frames shorter than the inset give a single answer
+	local inset = Pointer.Inset()
+	if sz.Y < 4 or sz.Y >= math.max(inset.Y, 30) then return end
+	local m = UIS:GetMouseLocation()
+	local function inside(d)
+		local v = m + d
+		return v.X >= ap.X - 1 and v.X <= ap.X + sz.X + 1 and v.Y >= ap.Y - 1 and v.Y <= ap.Y + sz.Y + 1
+	end
+	if Pointer.Shift and inside(Pointer.Shift) then return end
+	for _, d in ipairs({ Vector2.new(0, 0), -inset, inset }) do
+		if inside(d) then Pointer.Shift = d return end
+	end
+end
 local ZCounter = 10
 local Elements = {}
 
@@ -318,7 +345,7 @@ end
 
 local function ApplyFont(obj, weight)
 	local base = obj:GetAttribute("TS")
-	if base then obj.TextSize = math.max(6, math.floor(base * (TingUI._textScale or 1) + 0.5)) end
+	if base then obj.TextSize = math.max(6, math.floor(base * (TingUI._textScale or 1) * (obj:GetAttribute("TSK") or 1) + 0.5)) end
 	local fam = TingUI._fontFamily
 	if fam then
 		local ok = pcall(function() obj.FontFace = Font.new(fam, WeightEnum[weight]) end)
@@ -972,7 +999,7 @@ Connect(RunService.RenderStepped, function()
 		end
 		if e.Glitch then TexFX.Glitch(e, t) end
 	end
-	-- cycling themes (MLG): the accent gradient slowly cycles through the spectrum
+	-- cycling themes (AccentCycle): the accent gradient slowly cycles through the spectrum
 	if TingUI.Style.AccentCycle and t - (TingUI._cycleT or 0) > 0.05 then
 		TingUI._cycleT = t
 		for _, e in ipairs(AccentFills) do if e.Frame.Parent then PaintAccent(e) end end
@@ -1107,7 +1134,7 @@ end
 
 Connect(RunService.RenderStepped, function(dt)
 	local still = TingUI.ReducedMotion
-	local mouse = UIS:GetMouseLocation()
+	local mouse = Pointer.Gui()
 	Each(function(e, S)
 		if S.P <= 0.001 or not e.Frame.Visible then return end
 		S.W, S.H = WindowSize(e)
@@ -1145,10 +1172,9 @@ end
 Connect(UIS.InputBegan, function(input)
 	local touch = input.UserInputType == Enum.UserInputType.Touch
 	if input.UserInputType ~= Enum.UserInputType.MouseButton1 and not touch then return end
-	local pos = UIS:GetMouseLocation()
+	local pos = Pointer.Gui()
 	if touch then
-		local inset = GuiService:GetGuiInset()
-		pos = Vector2.new(input.Position.X, input.Position.Y) + inset
+		pos = Vector2.new(input.Position.X, input.Position.Y) + (Gui.IgnoreGuiInset and Pointer.Inset() or Vector2.new(0, 0))
 	end
 	for _, e in ipairs(Surfaces) do
 		if e.Scenes and e.Frame.Visible and next(e.Scenes) then
@@ -1551,190 +1577,162 @@ Kinds.Circuit = {
 }
 
 --------------------------------------------------------------------------
--- Abyss: the deep sea. Light shafts fall from far above, bioluminescent jellyfish pulse their way up around the
--- window, plankton light up as the pointer passes, and a click blooms light that startles everything nearby.
+-- Ocean: the window floats in water. Two layers of waves roll along its bottom edge (the front one capped with
+-- foam) and swell toward the pointer when it comes near; caustic light shimmers across the header. Switching to the
+-- theme (or opening the window) sends a tide washing up over the whole window and draining away, a tab switch rolls
+-- a swell through, and a click drops ripples and a few bubbles where you clicked.
 --------------------------------------------------------------------------
-local function JellySpot(S, rng, initial)
-	local W, H = S.W, S.H
-	local r = rng:NextNumber()
-	local x
-	if r < 0.4 then x = -40 - rng:NextNumber() * 130
-	elseif r < 0.8 then x = W + 40 + rng:NextNumber() * 130
-	else x = rng:NextNumber() * W end
-	local y = initial and (rng:NextNumber() * (H + 200) - 60) or (H + 150 + rng:NextNumber() * 80)
-	return x, y
+local function Smooth(x) x = math.clamp(x, 0, 1) return x * x * (3 - 2 * x) end
+local OCEAN_COL = 8
+local function OceanColumns(S)
+	for _, list in ipairs({ S.Back or {}, S.Front or {}, S.Crest or {} }) do
+		for _, f in ipairs(list) do f:Destroy() end
+	end
+	S.Back, S.Front, S.Crest = {}, {}, {}
+	local n = math.ceil(S.W / OCEAN_COL) + 1
+	for i = 1, n do
+		local x = (i - 1) * OCEAN_COL
+		S.Back[i] = New("Frame", { AnchorPoint = Vector2.new(0, 1), Position = UDim2.new(0, x, 1, 0), Size = UDim2.fromOffset(OCEAN_COL + 1, 0),
+			BackgroundTransparency = 1, BorderSizePixel = 0, ZIndex = 1, Parent = S.Top })
+		S.Front[i] = New("Frame", { AnchorPoint = Vector2.new(0, 1), Position = UDim2.new(0, x, 1, 0), Size = UDim2.fromOffset(OCEAN_COL + 1, 0),
+			BackgroundTransparency = 1, BorderSizePixel = 0, ZIndex = 2, Parent = S.Top })
+		S.Crest[i] = New("Frame", { AnchorPoint = Vector2.new(0, 0.5), Position = UDim2.new(0, x, 1, 0), Size = UDim2.fromOffset(OCEAN_COL + 1, 2),
+			BackgroundTransparency = 1, BorderSizePixel = 0, ZIndex = 3, Parent = S.Top })
+	end
+	S.ColsFor = S.W
+	if S.Water then
+		for i = 1, n do
+			S.Back[i].BackgroundColor3 = S.Deep
+			S.Front[i].BackgroundColor3 = S.Water
+			S.Crest[i].BackgroundColor3 = S.Foam
+		end
+	end
 end
-
-Kinds.Abyss = {
+local function OceanBubble(S, x, y, rise, size, delay)
+	task.delay(delay or 0, function()
+		if not S.Top.Parent then return end
+		local b = New("Frame", { AnchorPoint = Vector2.new(0.5, 0.5), Position = UDim2.fromOffset(x, y), Size = UDim2.fromOffset(size, size),
+			BackgroundTransparency = 1, ZIndex = 4, Parent = S.Top }, { CornerFixed(999) })
+		local rim = New("UIStroke", { Color = S.Foam or Color3.new(1, 1, 1), Thickness = 1, Transparency = S.Fade(0.25), Parent = b })
+		local hi = New("Frame", { AnchorPoint = Vector2.new(0.5, 0.5), Position = UDim2.fromScale(0.32, 0.3), Size = UDim2.fromOffset(math.max(1, size * 0.3), math.max(1, size * 0.3)),
+			BackgroundColor3 = Color3.new(1, 1, 1), BackgroundTransparency = S.Fade(0.3), Parent = b }, { CornerFixed(999) })
+		local life = 0.55 + rise / 220
+		TweenService:Create(b, TweenInfo.new(life, Enum.EasingStyle.Quad, Enum.EasingDirection.Out),
+			{ Position = UDim2.fromOffset(x + (math.random() - 0.5) * 16, y - rise) }):Play()
+		task.delay(life, function()
+			if not b.Parent then return end
+			-- pop: the bubble snaps open into a ring and is gone
+			TweenService:Create(b, TweenInfo.new(0.14, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), { Size = UDim2.fromOffset(size * 2.2, size * 2.2) }):Play()
+			TweenService:Create(rim, TweenInfo.new(0.14), { Transparency = 1 }):Play()
+			TweenService:Create(hi, TweenInfo.new(0.1), { BackgroundTransparency = 1 }):Play()
+			task.delay(0.16, function() b:Destroy() end)
+		end)
+	end)
+end
+Kinds.Ocean = {
 	Build = function(S)
-		local rng = S.Rng
-		S.Rays = {}
-		for i = 1, 5 do
-			local w = rng:NextInteger(30, 72)
-			local x = 0.1 + (i - 1) * 0.2 + rng:NextNumber() * 0.06
-			local rot = 8 + rng:NextNumber() * 9
-			local ray = { Phase = rng:NextNumber() * 6.28, Rot = rot, Base = 0.05 + rng:NextNumber() * 0.04, Parts = {} }
-			for j, k in ipairs({ 1, 0.4 }) do
-				ray.Parts[j] = New("Frame", {
-					AnchorPoint = Vector2.new(0.5, 0), Position = UDim2.new(x, 0, 0, -160), Size = UDim2.new(0, math.floor(w * k), 1, 60),
-					Rotation = rot, BackgroundTransparency = 1, Parent = S.Root,
-				}, { New("UIGradient", { Rotation = 90, Transparency = NumberSequence.new({
-					NumberSequenceKeypoint.new(0, 1), NumberSequenceKeypoint.new(0.22, 0.15), NumberSequenceKeypoint.new(1, 1) }) }) })
-			end
-			S.Rays[i] = ray
+		S.Tide, S.TideT, S.Swell, S.SwellT = 0, nil, 0, nil
+		OceanColumns(S)
+		S.Caustics = {}
+		for i = 1, 7 do
+			local c = New("Frame", { AnchorPoint = Vector2.new(0.5, 0.5), BackgroundTransparency = 1, Parent = S.Root }, { CornerFixed(999),
+				New("UIGradient", { Transparency = NumberSequence.new({ NumberSequenceKeypoint.new(0, 1), NumberSequenceKeypoint.new(0.5, 0), NumberSequenceKeypoint.new(1, 1) }) }) })
+			S.Caustics[i] = { Frame = c, X = S.Rng:NextNumber(), Y = S.Rng:NextNumber(), W = S.Rng:NextInteger(60, 150), Ph = S.Rng:NextNumber() * 6.28,
+				Sp = 0.15 + S.Rng:NextNumber() * 0.25 }
 		end
-		S.Plankton = {}
-		for i = 1, 46 do
-			local p = { X = rng:NextNumber() * (S.W + 320) - 160, Y = rng:NextNumber() * (S.H + 260) - 130, Glow = 0, Ph = rng:NextNumber() * 6.28, VX = 0, VY = 0 }
-			p.Frame = Dot(S.Root, 2)
-			S.Plankton[i] = p
-		end
-		S.Jellies = {}
-		for i = 1, 4 do
-			local size = rng:NextInteger(20, 34)
-			local J = { Size = size, Index = i, Phase = rng:NextNumber(), Freq = 0.5 + rng:NextNumber() * 0.35, Tent = {}, VX = 0, Boost = 0, Flash = 0 }
-			J.X, J.Y = JellySpot(S, rng, true)
-			J.Holder = New("Frame", { BackgroundTransparency = 1, Size = UDim2.fromOffset(0, 0), Parent = S.Root })
-			J.Halo = Dot(J.Holder, math.floor(size * 2.8))
-			J.Bell = New("Frame", { AnchorPoint = Vector2.new(0.5, 1), Size = UDim2.fromOffset(size, size * 0.7), BackgroundTransparency = 1, Parent = J.Holder }, {
-				CornerFixed(999), New("UIGradient", { Rotation = 90, Transparency = NumberSequence.new({
-					NumberSequenceKeypoint.new(0, 0.1), NumberSequenceKeypoint.new(0.7, 0.5), NumberSequenceKeypoint.new(1, 0.92) }) }) })
-			J.Core = Dot(J.Holder, math.floor(size * 0.3))
-			J.Rim = New("Frame", { AnchorPoint = Vector2.new(0.5, 0.5), Size = UDim2.fromOffset(size * 0.9, 2), BackgroundTransparency = 1, Parent = J.Holder }, { CornerFixed(1) })
-			for k = 1, 5 do
-				local tent = { X = (k - 3) / 2 * size * 0.34, Len = size * (0.9 + rng:NextNumber() * 1.1), Ph = rng:NextNumber() * 6.28, Segs = {} }
-				for s = 1, 3 do
-					tent.Segs[s] = New("Frame", { AnchorPoint = Vector2.new(0.5, 0.5), BackgroundTransparency = 1, Parent = J.Holder })
-				end
-				J.Tent[k] = tent
-			end
-			S.Jellies[i] = J
-		end
-		S.RayFlash = 0
 	end,
 	Paint = function(S)
 		local st, T = TingUI.Style, TingUI.Theme
-		local cols = st.JellyColors or { T.Accent }
-		local ray = st.RayColor or T.Text
-		for _, r in ipairs(S.Rays) do for _, p in ipairs(r.Parts) do p.BackgroundColor3 = ray end end
-		S.PlanktonColor = st.PlanktonColor or T.Accent
-		for _, J in ipairs(S.Jellies) do
-			local c = cols[(J.Index - 1) % #cols + 1]
-			J.Col = c
-			J.Halo.BackgroundColor3 = c
-			J.Bell.BackgroundColor3 = c
-			J.Core.BackgroundColor3 = c:Lerp(Color3.new(1, 1, 1), 0.65)
-			J.Rim.BackgroundColor3 = c:Lerp(Color3.new(1, 1, 1), 0.4)
-			for _, tent in ipairs(J.Tent) do for _, seg in ipairs(tent.Segs) do seg.BackgroundColor3 = c end end
+		S.Water = st.WaterColor or T.Accent
+		S.Foam = st.FoamColor or T.Text
+		S.Deep = S.Water:Lerp(T.Background, 0.45)
+		for i = 1, #(S.Front or {}) do
+			S.Back[i].BackgroundColor3 = S.Deep
+			S.Front[i].BackgroundColor3 = S.Water
+			S.Crest[i].BackgroundColor3 = S.Foam
 		end
+		for _, c in ipairs(S.Caustics or {}) do c.Frame.BackgroundColor3 = S.Foam:Lerp(S.Water, 0.4) end
 	end,
 	Update = function(S, dt, t)
-		local F, rng = S.Fade, S.Rng
-		S.RayFlash = S.RayFlash * (1 - math.min(1, dt * 1.6))
-		for _, r in ipairs(S.Rays) do
-			local shimmer = 0.7 + 0.3 * math.sin(t * 0.8 + r.Phase * 2) * math.sin(t * 0.37 + r.Phase)
-			for j, p in ipairs(r.Parts) do
-				p.Rotation = r.Rot + math.sin(t * 0.22 + r.Phase) * 2.5
-				p.BackgroundTransparency = F(1 - (r.Base * shimmer * (j == 2 and 1.3 or 1) + S.RayFlash * 0.07))
-			end
-		end
-		-- plankton: drift, light up near the pointer, fade back slowly
-		local W, H = S.W, S.H
-		local fall = math.min(1, dt * 0.8)
-		for _, p in ipairs(S.Plankton) do
-			p.X = p.X + (math.sin(t * 0.4 + p.Ph) * 4 + p.VX) * dt
-			p.Y = p.Y + (-3 + math.cos(t * 0.3 + p.Ph * 2) * 3 + p.VY) * dt
-			p.VX, p.VY = p.VX * (1 - math.min(1, dt * 1.2)), p.VY * (1 - math.min(1, dt * 1.2))
-			if p.X < -170 then p.X = W + 160 elseif p.X > W + 170 then p.X = -160 end
-			if p.Y < -140 then p.Y = H + 130 elseif p.Y > H + 140 then p.Y = -130 end
-			if S.Mouse and not S.Still then
-				local dx, dy = S.Mouse.X - p.X, S.Mouse.Y - p.Y
-				local d = math.sqrt(dx * dx + dy * dy)
-				if d < 90 then p.Glow = math.max(p.Glow, 1 - d / 90) end
-			end
-			p.Glow = p.Glow * (1 - fall)
-			local g = p.Glow
-			local sz = 2 + math.floor(g * 3 + 0.5)
-			p.Frame.Size = UDim2.fromOffset(sz, sz)
-			p.Frame.Position = UDim2.fromOffset(p.X, p.Y)
-			p.Frame.BackgroundColor3 = S.PlanktonColor:Lerp(Color3.new(1, 1, 1), g * 0.5)
-			p.Frame.BackgroundTransparency = F(0.78 - 0.74 * g + 0.1 * math.sin(t * 2 + p.Ph))
-		end
-		-- jellyfish
-		for _, J in ipairs(S.Jellies) do
-			local c = (t * J.Freq + J.Phase) % 1
-			local pulse = c < 0.3 and math.sin(c / 0.3 * math.pi) or 0
-			J.Boost = math.max(0, J.Boost - dt * 70)
-			J.Y = J.Y - (7 + 44 * pulse + J.Boost) * dt
-			J.X = J.X + (J.VX + math.sin(t * 0.3 + J.Phase * 6) * 6) * dt
-			J.VX = J.VX * (1 - math.min(1, dt * 1.4))
-			J.Flash = J.Flash * (1 - math.min(1, dt * 2))
-			if J.Y < -190 then J.X, J.Y = JellySpot(S, rng, false) end
-			J.Holder.Position = UDim2.fromOffset(J.X, J.Y)
-			local w, h = J.Size * (1 - 0.16 * pulse), J.Size * 0.7 * (1 + 0.12 * pulse)
-			J.Bell.Size = UDim2.fromOffset(w, h)
-			J.Core.Position = UDim2.fromOffset(0, -h * 0.45)
-			J.Rim.Size = UDim2.fromOffset(w * 0.9, 2)
-			J.Halo.Position = UDim2.fromOffset(0, -h * 0.4)
-			for _, tent in ipairs(J.Tent) do
-				local px, py = tent.X * (1 - 0.18 * pulse), 0
-				local len = tent.Len / 3
-				local ang = 0
-				for s, seg in ipairs(tent.Segs) do
-					ang = ang + math.sin(t * 2.2 + tent.Ph + s * 0.9) * 0.26 - J.VX * 0.004
-					local dx, dy = math.sin(ang) * len, math.cos(ang) * len * (1 + 0.25 * pulse)
-					seg.Position = UDim2.fromOffset(px + dx / 2, py + dy / 2)
-					seg.Size = UDim2.fromOffset(1, math.sqrt(dx * dx + dy * dy) + 1)
-					seg.Rotation = -math.deg(ang)
-					seg.BackgroundTransparency = F(0.4 + s * 0.16)
-					px, py = px + dx, py + dy
+		local F = S.Fade
+		if S.ColsFor ~= S.W then OceanColumns(S) Kinds.Ocean.Paint(S) end
+		-- the tide that washes over the window on a theme switch: up fast, a beat at the top, then draining away
+		if S.TideT then
+			S.TideT = S.TideT + dt
+			local k = S.TideT
+			if k < 0.55 then S.Tide = 1.12 * (1 - (1 - k / 0.55) ^ 3)
+			elseif k < 0.68 then S.Tide = 1.12
+			elseif k < 1.6 then S.Tide = 1.12 * (1 - Smooth((k - 0.68) / 0.92))
+			else S.Tide, S.TideT = 0, nil end
+			if S.TideT and k > 0.7 and not S.TideBubbles then
+				S.TideBubbles = true
+				for i = 1, 16 do
+					OceanBubble(S, S.Rng:NextNumber() * S.W, S.H * (0.35 + S.Rng:NextNumber() * 0.6), 40 + S.Rng:NextNumber() * 120, S.Rng:NextInteger(3, 9), i * 0.03)
 				end
 			end
-			local glow = 0.35 + 0.65 * pulse + J.Flash
-			J.Halo.BackgroundTransparency = F(1 - 0.08 * glow)
-			J.Bell.BackgroundTransparency = F(0.3 - 0.12 * pulse)
-			J.Core.BackgroundTransparency = F(0.7 - 0.4 * math.min(glow, 1))
-			J.Rim.BackgroundTransparency = F(0.5 - 0.3 * pulse)
+		end
+		if S.SwellT then
+			S.SwellT = S.SwellT + dt
+			S.Swell = math.max(0, 1 - S.SwellT / 0.9) * math.sin(math.min(S.SwellT / 0.9, 1) * math.pi) * 1.6
+			if S.SwellT > 0.9 then S.SwellT, S.Swell = nil, 0 end
+		end
+		local W, H = S.W, S.H
+		local tide = S.Tide * H
+		local mx, near = 0, 0
+		if S.Mouse and S.Mouse.X > -40 and S.Mouse.X < W + 40 then
+			mx = S.Mouse.X
+			near = math.clamp(1 - (H - S.Mouse.Y) / 110, 0, 1) * (S.Mouse.Y < H + 60 and 1 or 0)
+		end
+		local amp = 4 * (1 + S.Swell)
+		local flood = math.clamp(S.Tide / 0.3, 0, 1)
+		for i, col in ipairs(S.Front) do
+			local x = (i - 1) * OCEAN_COL + OCEAN_COL / 2
+			local bump = near > 0 and 11 * near * math.exp(-((x - mx) / 46) ^ 2) or 0
+			local hf = 10 + tide + amp * (math.sin(x * 0.034 - t * 1.7) * 0.6 + math.sin(x * 0.012 + t * 0.85) * 0.4) + bump + S.Swell * 6
+			local hb = 15 + tide * 1.03 + amp * 1.2 * (math.sin(x * 0.022 + t * 1.1 + 1.3) * 0.7 + math.sin(x * 0.05 - t * 0.6) * 0.3) + bump * 0.6 + S.Swell * 8
+			hf, hb = math.max(0, hf), math.max(0, hb)
+			col.Size = UDim2.fromOffset(OCEAN_COL + 1, hf)
+			S.Back[i].Size = UDim2.fromOffset(OCEAN_COL + 1, hb)
+			S.Crest[i].Position = UDim2.new(0, (i - 1) * OCEAN_COL, 1, -hf)
+			-- more see-through while it floods the window, so the UI stays readable under the water
+			col.BackgroundTransparency = F(0.76 + flood * 0.08)
+			S.Back[i].BackgroundTransparency = F(0.86 + flood * 0.05)
+			S.Crest[i].BackgroundTransparency = F(0.42 + 0.25 * (0.5 + 0.5 * math.sin(x * 0.09 + t * 2.2)))
+		end
+		-- caustic light across the header
+		for _, c in ipairs(S.Caustics) do
+			local cx = (c.X + math.sin(t * c.Sp + c.Ph) * 0.08) * W
+			local cy = 10 + c.Y * 70 + math.sin(t * c.Sp * 1.3 + c.Ph) * 8
+			local w = c.W * (0.8 + 0.2 * math.sin(t * 0.7 + c.Ph))
+			c.Frame.Position = UDim2.fromOffset(cx, cy)
+			c.Frame.Size = UDim2.fromOffset(w, w * 0.32)
+			c.Frame.Rotation = math.sin(t * 0.3 + c.Ph) * 18
+			c.Frame.BackgroundTransparency = F(0.9 + 0.06 * math.sin(t * 1.4 + c.Ph * 2))
 		end
 	end,
 	Feedback = function(S, kind, x, y)
-		if kind == "Tab" then S.RayFlash = 1 return end
 		if kind == "Open" then
-			S.RayFlash = 1
-			for _, J in ipairs(S.Jellies) do J.Flash = 1 end
-			return
-		end
-		if kind ~= "Click" then return end
-		-- light blooms where you clicked; nearby plankton flare and scatter, jellyfish flinch away
-		for _, p in ipairs(S.Plankton) do
-			local dx, dy = p.X - x, p.Y - y
-			local d = math.sqrt(dx * dx + dy * dy)
-			if d < 170 and d > 0 then
-				p.Glow = 1
-				p.VX, p.VY = p.VX + dx / d * 42, p.VY + dy / d * 42
+			S.TideT, S.TideBubbles = 0, false
+		elseif kind == "Tab" then
+			S.SwellT = 0
+		elseif kind == "Click" then
+			-- ripples spread out (flattened, like on a surface) and a few bubbles escape upward
+			for i = 0, 2 do
+				task.delay(i * 0.09, function()
+					if not S.Top.Parent then return end
+					local r = New("Frame", { AnchorPoint = Vector2.new(0.5, 0.5), Position = UDim2.fromOffset(x, y), Size = UDim2.fromOffset(6, 4),
+						BackgroundTransparency = 1, ZIndex = 5, Parent = S.Top }, { CornerFixed(999) })
+					local st = New("UIStroke", { Color = S.Foam or Color3.new(1, 1, 1), Thickness = 1.5 - i * 0.3, Transparency = S.Fade(0.2 + i * 0.15), Parent = r })
+					TweenService:Create(r, TweenInfo.new(0.7, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), { Size = UDim2.fromOffset(84 - i * 14, 44 - i * 7) }):Play()
+					TweenService:Create(st, TweenInfo.new(0.7, Enum.EasingStyle.Quad, Enum.EasingDirection.In), { Transparency = 1 }):Play()
+					task.delay(0.72, function() r:Destroy() end)
+				end)
 			end
+			for i = 1, 4 do OceanBubble(S, x + (math.random() - 0.5) * 18, y, 26 + math.random() * 40, math.random(3, 7), 0.05 + i * 0.06) end
 		end
-		for _, J in ipairs(S.Jellies) do
-			local dx = J.X - x
-			if math.abs(dx) < 280 and math.abs(J.Y - y) < 280 then
-				J.Boost, J.Flash = 80, 1
-				J.VX = J.VX + (dx >= 0 and 30 or -30)
-			end
-		end
-		local acc = TingUI.Theme.Accent
-		local ring = Dot(S.Top, 6)
-		ring.Position = UDim2.fromOffset(x, y)
-		local st = New("UIStroke", { Thickness = 2, Color = acc, Transparency = 0.15, Parent = ring })
-		local disc = Dot(S.Top, 6, acc)
-		disc.Position = UDim2.fromOffset(x, y)
-		disc.BackgroundTransparency = 0.75
-		local info = TweenInfo.new(0.7, Enum.EasingStyle.Quint, Enum.EasingDirection.Out)
-		TweenService:Create(ring, info, { Size = UDim2.fromOffset(96, 96) }):Play()
-		TweenService:Create(st, TweenInfo.new(0.7, Enum.EasingStyle.Quad, Enum.EasingDirection.In), { Transparency = 1 }):Play()
-		TweenService:Create(disc, info, { Size = UDim2.fromOffset(60, 60), BackgroundTransparency = 1 }):Play()
-		task.delay(0.75, function() ring:Destroy() disc:Destroy() end)
 	end,
 }
+
 end
 
 local Scales = {}
@@ -1938,7 +1936,7 @@ local function IsPress(i)
 end
 
 local function MouseInside(frame)
-	local m = UIS:GetMouseLocation()
+	local m = Pointer.Gui()
 	local p, s = frame.AbsolutePosition, frame.AbsoluteSize
 	return m.X >= p.X and m.X <= p.X + s.X and m.Y >= p.Y and m.Y <= p.Y + s.Y
 end
@@ -1952,6 +1950,7 @@ local function Dragger(frame, cb)
 	Connect(frame.InputBegan, function(i)
 		if IsPress(i) then
 			active = true
+			Pointer.Calibrate(frame, i)
 			local a = UIS:GetMouseLocation()
 			local b = Vector2.new(i.Position.X, i.Position.Y)
 			local ap, sz = frame.AbsolutePosition, frame.AbsoluteSize
@@ -2050,7 +2049,20 @@ local function Matches(input, v)
 end
 
 local function PresetLabel(n) return n == "Lavender" and "Lavender (Default)" or n end
+-- Retired themes: a script that asks for one at load (Theme = "Candy", Configure({Theme = ...})) gets the closest theme
+-- still shipped instead of a warning. Saved configs naming one keep the current theme, as before. Your own
+-- RegisterTheme of the same name always wins. Add your own with TingUI.PresetAliases.Old = "New".
+TingUI.PresetAliases = {
+	Candy = "Rose", Abyss = "Ocean", Criminality = "Storm", MLG = "Lavender",
+	Synthwave = "Cosmos", Noir = "Mono", Haunted = "Royal", Parchment = "Lavender", Emerald = "Lavender", Prism = "Hologram",
+}
 local function PresetName(l) return (tostring(l):gsub(" %(Default%)$", "")) end
+local function PresetAlias(n)
+	n = PresetName(n)
+	local alias = TingUI.PresetAliases[n]
+	if not TingUI.Presets[n] and type(alias) == "string" and TingUI.Presets[alias] then return alias end
+	return n
+end
 TingUI.PresetLabel = PresetLabel
 
 function TingUI:ApplyPreset(name)
@@ -2470,7 +2482,10 @@ local function AttachHint(inst, title, body)
 	end)
 	Connect(inst.MouseLeave, function() HideHint() end)
 	Connect(inst.InputBegan, function(i)
-		if i.UserInputType == Enum.UserInputType.MouseButton1 or i.UserInputType == Enum.UserInputType.Touch then HideHint() end
+		if i.UserInputType == Enum.UserInputType.MouseButton1 or i.UserInputType == Enum.UserInputType.Touch then
+			Pointer.Calibrate(inst, i)
+			HideHint()
+		end
 	end)
 end
 local function AttachTooltip(inst, text) AttachHint(inst, nil, text) end
@@ -2581,11 +2596,24 @@ local NOTIFY_KINDS = {
 	Error = { Key = "Error", Icon = "cross", Shape = "square" },
 	Info = { Key = "Info", Icon = "info", Shape = "circle" },
 	Loading = { Key = "Accent", Icon = "spinner", Shape = "circle" },
+	-- task-specific kinds, each with its own animated glyph
+	Download = { Key = "Info", Icon = "download", Shape = "circle" },
+	Upload = { Key = "Info", Icon = "upload", Shape = "circle" },
+	Message = { Key = "Accent", Icon = "message", Shape = "square" },
+	Friend = { Key = "Success", Icon = "user", Shape = "circle" },
+	Achievement = { Key = "Caution", Icon = "sparkle", Shape = "diamond" },
+	Security = { Key = "Error", Icon = "lock", Shape = "square" },
+	Update = { Key = "Accent", Icon = "gear", Shape = "circle" },
+	Heart = { Key = "Error", Icon = "heart", Shape = "circle" },
 }
+TingUI.NotifyTypes = {}
+for k in pairs(NOTIFY_KINDS) do table.insert(TingUI.NotifyTypes, k) end
+table.sort(TingUI.NotifyTypes)
 local NotifyCount = 0
 local LiveNotifs = {}
 local NOTIFY_POS = { TopRight = { 1, 0 }, BottomRight = { 1, 1 }, TopLeft = { 0, 0 }, BottomLeft = { 0, 1 } }
 TingUI.NotifyPositions = { "TopRight", "BottomRight", "TopLeft", "BottomLeft" }
+TingUI.NotificationHistory = {}
 
 local function Spinner(parent, color)
 	return New("Frame", { BackgroundTransparency = 1, Size = UDim2.fromOffset(14, 14), Parent = parent }, {
@@ -2595,6 +2623,36 @@ local function Spinner(parent, color)
 				NumberSequenceKeypoint.new(0, 0), NumberSequenceKeypoint.new(0.5, 0.15), NumberSequenceKeypoint.new(0.52, 1), NumberSequenceKeypoint.new(1, 1) }) }),
 		}),
 	})
+end
+
+-- glyphs that aren't icons: an arrow dropping into a tray (download / upload) and a chat bubble with typing dots
+local NotifyKit = {}
+function NotifyKit.ArrowGlyph(parent, size, color, up)
+	local g = New("Frame", { BackgroundTransparency = 1, Size = UDim2.fromOffset(size, size), ClipsDescendants = true, Parent = parent })
+	local arrow = New("Frame", { Name = "Arrow", BackgroundTransparency = 1, Size = UDim2.fromScale(1, 1), Parent = g })
+	local th = math.max(2, math.floor(size / 7))
+	New("Frame", { AnchorPoint = Vector2.new(0.5, 0), Position = UDim2.new(0.5, 0, 0, up and size * 0.3 or size * 0.08), Size = UDim2.fromOffset(th, size * 0.52),
+		BackgroundColor3 = color, Parent = arrow }, { CornerFixed(th) })
+	for _, s in ipairs({ -1, 1 }) do
+		New("Frame", { AnchorPoint = Vector2.new(0.5, 0.5), Position = UDim2.new(0.5, s * size * 0.12, 0, up and size * 0.3 or size * 0.55),
+			Size = UDim2.fromOffset(size * 0.36, th), Rotation = (up and -1 or 1) * s * 45, BackgroundColor3 = color, Parent = arrow }, { CornerFixed(th) })
+	end
+	-- the tray it drops into (or lifts out of)
+	New("Frame", { AnchorPoint = Vector2.new(0.5, 1), Position = UDim2.new(0.5, 0, 1, -size * 0.04), Size = UDim2.fromOffset(size * 0.8, th),
+		BackgroundColor3 = color, Parent = g }, { CornerFixed(th) })
+	return g
+end
+function NotifyKit.BubbleGlyph(parent, size, color)
+	local g = New("Frame", { BackgroundTransparency = 1, Size = UDim2.fromOffset(size, size), Parent = parent })
+	local body = New("Frame", { Position = UDim2.fromOffset(0, size * 0.1), Size = UDim2.fromOffset(size, size * 0.66), BackgroundColor3 = color, Parent = g },
+		{ CornerFixed(math.floor(size * 0.24)) })
+	New("Frame", { AnchorPoint = Vector2.new(0.5, 0.5), Position = UDim2.fromOffset(size * 0.3, size * 0.78), Size = UDim2.fromOffset(size * 0.24, size * 0.24),
+		Rotation = 45, BackgroundColor3 = color, Parent = g }, { CornerFixed(1) })
+	for i = 1, 3 do
+		New("Frame", { Name = "Dot" .. i, AnchorPoint = Vector2.new(0.5, 0.5), Position = UDim2.new((i * 0.25), 0, 0.5, 0),
+			Size = UDim2.fromOffset(math.max(2, size * 0.14), math.max(2, size * 0.14)), BackgroundColor3 = TingUI.Theme.Background, Parent = body }, { CornerFixed(999) })
+	end
+	return g
 end
 
 -- A coloured status badge: circle (success / info), diamond (warning) or rounded square (error), with a centred glyph.
@@ -2619,10 +2677,15 @@ local function StatusBadge(parent, kind, size)
 			New("UIStroke", { Color = color:Lerp(T.Background, 0.35), Thickness = 1 }) })
 	end
 	local glyph
+	local gs = math.floor(size * 0.6 + 0.5)
 	if kind.Icon == "spinner" then
 		glyph = Spinner(holder, color)
+	elseif kind.Icon == "download" or kind.Icon == "upload" then
+		glyph = NotifyKit.ArrowGlyph(holder, gs, color, kind.Icon == "upload")
+	elseif kind.Icon == "message" then
+		glyph = NotifyKit.BubbleGlyph(holder, gs, color)
 	else
-		glyph = Icon(kind.Icon, holder, math.floor(size * 0.6 + 0.5), kind.Key)
+		glyph = Icon(kind.Icon, holder, gs, kind.Key)
 	end
 	glyph.AnchorPoint = Vector2.new(0.5, 0.5)
 	glyph.Position = UDim2.fromScale(0.5, 0.5)
@@ -2645,31 +2708,119 @@ function TingUI:SetNotifyPosition(pos)
 	SyncOption("TingUI_NotifyPos", pos)
 end
 
+-- a "Clear all" pill that appears under the stack once three or more cards are showing
+NotifyKit.ClearPill = New("TextButton", {
+	Size = UDim2.fromOffset(0, 22), AutomaticSize = Enum.AutomaticSize.X, Text = "Clear all", TextSize = 11, LayoutOrder = 1e9,
+	BackgroundTransparency = 1, Visible = false, Parent = NotifHolder, Theme = { BackgroundColor3 = "Control", TextColor3 = "TextDim" },
+}, { Corner(11), Pad(10, 0, 10, 0), Stroke("Outline") })
+function NotifyKit.UpdateClearPill()
+	local ClearPill = NotifyKit.ClearPill
+	local n = 0
+	for _, h in ipairs(LiveNotifs) do if not h.Closed then n = n + 1 end end
+	local show = n >= 3
+	if show and not ClearPill.Visible then
+		ClearPill.Visible = true
+		ClearPill.BackgroundTransparency = 1
+		ClearPill.TextTransparency = 1
+		Tween(ClearPill, 0.2, { BackgroundTransparency = 0.1, TextTransparency = 0 })
+	elseif not show then
+		ClearPill.Visible = false
+	end
+	ClearPill.Text = "Clear all (" .. n .. ")"
+end
+Connect(NotifyKit.ClearPill.MouseButton1Click, function() TingUI:ClearNotifications() end)
+Connect(NotifyKit.ClearPill.MouseEnter, function() Tween(NotifyKit.ClearPill, 0.1, { TextColor3 = TingUI.Theme.Text }) end)
+Connect(NotifyKit.ClearPill.MouseLeave, function() Tween(NotifyKit.ClearPill, 0.1, { TextColor3 = TingUI.Theme.TextDim }) end)
+
+-- every notification that is still on screen (handles: :Update, :Dismiss, :SetProgress, :Pin, ...)
+-- the pointer in TingUI's GUI coordinates (what AbsolutePosition uses), corrected for the top-bar inset
+function TingUI:GetPointer() return Pointer.Gui() end
+
+function TingUI:GetNotifications()
+	local out = {}
+	for _, h in ipairs(LiveNotifs) do if not h.Closed then table.insert(out, h) end end
+	return out
+end
+function TingUI:ClearNotifications()
+	for _, h in ipairs(self:GetNotifications()) do h:Dismiss() end
+end
+
+function NotifyKit.HistoryAdd(o)
+	local hist = TingUI.NotificationHistory
+	table.insert(hist, 1, { Title = o.Title, Content = o.Content and tostring(o.Content):gsub("<[^>]+>", "") or nil, Type = o.Type,
+		Source = o.Source, Time = os.time(), Clock = os.clock() })
+	while #hist > 60 do table.remove(hist) end
+	TingUI._unread = (TingUI._unread or 0) + 1
+	if TingUI._RefreshCenter then pcall(TingUI._RefreshCenter) end
+end
+
 -- o: string, or {
---   Title, Content, Type = "Success" | "Warning" | "Error" | "Info" | "Loading", Duration, Progress (bool),
---   Actions = {{Text = "Undo", Callback = fn}, ...}   -- small buttons under the text; clicking one closes the card
---   Source = "My Hub"                                  -- a small tag above the title (the Shell sets it for you)
+--   Title, Content, Type (Success | Warning | Error | Info | Loading | Download | Upload | Message | Friend |
+--   Achievement | Security | Update | Heart), Duration (seconds; math.huge = stays), Progress (countdown bar, bool),
+--   Actions = {{Text = "Undo", Callback = fn, Style = "Primary" | "Danger", Close = false}, ...}
+--   Value = 0-1                       a progress bar with a percentage (move it with handle:SetProgress)
+--   Undo = fn, OnCommit = fn          an Undo button that counts down; OnCommit runs if the card closes without Undo
+--   Copy = "text" | true              a Copy button (true copies Content); it flips to "Copied" and stays open
+--   Details = "long text"             a "Details" toggle that unfolds a scrollable monospace box (stack traces, logs)
+--   Input = {Placeholder, Button = "Send", Callback = fn(text)}   reply right from the card
+--   Image = "rbxassetid://..."        a picture instead of the badge (an avatar, an item)
+--   Callback = fn(handle)             runs when the card itself is clicked (it then closes)
+--   Persistent = true                 never times out (it can still be closed, swiped or cleared)
+--   Group = "key" | false             cards with the same key (default: same title, text and type) merge into one
+--                                     card with a x2, x3 counter instead of stacking up
+--   Sound = "rbxassetid://..."        plays once when it appears
+--   Source = "My Hub"                 a small tag above the title (the Shell sets it for you)
 -- }
--- Returns a handle: handle:Update({...}) morphs it in place (e.g. Loading -> Success), handle:Dismiss() closes it.
--- Hover pauses the countdown, clicking the card dismisses it.
+-- Returns a handle: :Update({...}) morphs it in place (Loading -> Success), :SetProgress(v, text), :SetTitle(t),
+-- :SetContent(t), :Pin(bool), :Dismiss(). handle.Count is how many times it was merged.
+-- Hover pauses the countdown and shows pin / close buttons; drag it sideways to fling it away; click to dismiss.
 -- fromShell is internal: another TingUI script's card shown in this script's stack (see the Shell further down).
+function NotifyKit.NoopHandle()
+	local H = { Closed = true, Count = 1 }
+	for _, m in ipairs({ "Update", "Dismiss", "SetProgress", "SetTitle", "SetContent", "Pin" }) do H[m] = function() return H end end
+	return H
+end
 function TingUI:Notify(o, duration, fromShell)
 	if type(o) == "string" then o = { Content = o, Duration = duration } end
 	o = o or {}
-	local H = { Closed = false }
-	function H:Update() end
-	function H:Dismiss() end
-	if self.Unloaded or (not fromShell and not self.ShowNotifications) then return H end
+	if self.Unloaded or (not fromShell and not self.ShowNotifications) then return NotifyKit.NoopHandle() end
 	if not fromShell then
 		self.Events.Notified:Fire(o)
+		NotifyKit.HistoryAdd(o)
 		-- in a Shell, every script's cards share the host's stack, tagged with the script that sent them
 		local routed, tag
 		if self._ShellNotify then routed, tag = self:_ShellNotify(o) end
-		if routed then return routed end
+		if routed then
+			-- a host on an older version may not have every method
+			for k, v in pairs(NotifyKit.NoopHandle()) do if routed[k] == nil and type(v) == "function" then routed[k] = v end end
+			return routed
+		end
 		if tag and o.Source == nil then
 			o = table.clone(o)
 			o.Source = tag
 		end
+	end
+
+	-- same notification again: bump the existing card's counter instead of stacking a copy
+	local groupKey = o.Group
+	if groupKey == nil and o.Type ~= "Loading" and not o.Input and not o.Undo and o.Value == nil then
+		groupKey = tostring(o.Title) .. "\0" .. tostring(o.Content) .. "\0" .. tostring(o.Type) .. "\0" .. tostring(o.Source)
+	end
+	if groupKey then
+		for _, h in ipairs(LiveNotifs) do
+			if not h.Closed and h._group == groupKey then
+				h:_Bump(o)
+				return h
+			end
+		end
+	end
+
+	local H = { Closed = false, Count = 1, _group = groupKey, Options = o }
+	local conns = {}
+	local function Hook(signal, fn)
+		local c = signal:Connect(fn)
+		table.insert(conns, c)
+		return c
 	end
 
 	local side = NOTIFY_POS[self.NotifyPosition] or NOTIFY_POS.TopRight
@@ -2682,15 +2833,17 @@ function TingUI:Notify(o, duration, fromShell)
 		Size = UDim2.fromOffset(280, 34), Position = UDim2.fromOffset(offX, 0), ClipsDescendants = true,
 		Parent = holder, Theme = { BackgroundColor3 = "Background" },
 	}, { Corner(9) })
-	if side[1] == 1 then card.Position = UDim2.fromOffset(offX, 0) end
+	H.Frame = card
 	-- border drawn 1px inside so the canvas can't clip it
-	New("Frame", { Position = UDim2.fromOffset(1, 1), Size = UDim2.new(1, -2, 1, -2), BackgroundTransparency = 1, ZIndex = 8, Parent = card },
-		{ Corner(8), Stroke("Outline") })
-	local hit = New("TextButton", { Size = UDim2.fromScale(1, 1), ZIndex = 1, Parent = card })
+	local border = New("Frame", { Position = UDim2.fromOffset(1, 1), Size = UDim2.new(1, -2, 1, -2), BackgroundTransparency = 1, ZIndex = 8, Parent = card },
+		{ Corner(8) })
+	local borderStroke = Stroke("Outline")
+	borderStroke.Parent = border
+	local hit = New("TextButton", { Name = "Hit", Size = UDim2.fromScale(1, 1), ZIndex = 1, Parent = card })
 	local body = New("Frame", {
 		BackgroundTransparency = 1, Size = UDim2.new(1, 0, 0, 0), AutomaticSize = Enum.AutomaticSize.Y, ZIndex = 3, Parent = card,
 	}, { Pad(12, 9, 12, 10), New("UISizeConstraint", { MinSize = Vector2.new(0, 34) }),
-		List(11, Enum.FillDirection.Horizontal, Enum.HorizontalAlignment.Left, Enum.VerticalAlignment.Center) })
+		List(11, Enum.FillDirection.Horizontal, Enum.HorizontalAlignment.Left, Enum.VerticalAlignment.Top) })
 	local bar = New("Frame", { Size = UDim2.new(0, 3, 1, -12), Position = UDim2.fromOffset(0, 6), BackgroundColor3 = Color3.new(1, 1, 1),
 		Visible = false, ZIndex = 4, Parent = card }, { CornerFixed(2) })
 	local wash = New("Frame", { Size = UDim2.fromScale(1, 1), BackgroundColor3 = Color3.new(1, 1, 1), BackgroundTransparency = 1, ZIndex = 2, Parent = card }, { Corner(9) })
@@ -2706,15 +2859,43 @@ function TingUI:Notify(o, duration, fromShell)
 		Parent = card, Theme = { BackgroundColor3 = "Outline" },
 	}, { CornerFixed(1) })
 	local fill = New("Frame", { Size = UDim2.fromScale(1, 1), BackgroundColor3 = Color3.new(1, 1, 1), ZIndex = 5, Parent = track }, { CornerFixed(1) })
-	local fade = Fader(card)
-	bar:SetAttribute("NoFade", true)
 	-- bright head on the countdown bar
 	local head = New("Frame", { AnchorPoint = Vector2.new(0.5, 0.5), Position = UDim2.new(1, 0, 0.5, 0), Size = UDim2.fromOffset(10, 2),
 		BackgroundColor3 = Color3.new(1, 1, 1), BackgroundTransparency = 0.2, ZIndex = 6, Parent = fill }, { CornerFixed(1) })
 
-	local kind, color, dur, remaining, hovered = nil, nil, 4, 4, false
+	-- hover tools: merge counter, pin and close (top right)
+	local tools = New("Frame", { AnchorPoint = Vector2.new(1, 0), Position = UDim2.new(1, -6, 0, 6), Size = UDim2.fromOffset(0, 18),
+		AutomaticSize = Enum.AutomaticSize.X, BackgroundTransparency = 1, ZIndex = 9, Parent = card },
+		{ List(3, Enum.FillDirection.Horizontal, Enum.HorizontalAlignment.Right, Enum.VerticalAlignment.Center) })
+	local countPill = New("TextLabel", { Size = UDim2.fromOffset(0, 16), AutomaticSize = Enum.AutomaticSize.X, Text = "x2", TextSize = 10,
+		Font = Enum.Font.GothamBold, Visible = false, LayoutOrder = 1, ZIndex = 9, Parent = tools,
+		Theme = { BackgroundColor3 = "Control", TextColor3 = "Text" }, BackgroundTransparency = 0 }, { Corner(8), Pad(6, 0, 6, 0) })
+	local countScale = New("UIScale", { Scale = 1, Parent = countPill })
+	local function ToolButton(order, tip)
+		local b = New("TextButton", { Size = UDim2.fromOffset(18, 18), BackgroundTransparency = 1, LayoutOrder = order, ZIndex = 9, Parent = tools,
+			Theme = { BackgroundColor3 = "ControlHover" } }, { Corner(5) })
+		b:SetAttribute("NoFade", true)
+		AttachTooltip(b, tip)
+		return b
+	end
+	local pinBtn = ToolButton(2, "Keep open")
+	local pinHead = New("Frame", { AnchorPoint = Vector2.new(0.5, 0.5), Position = UDim2.fromOffset(10, 8), Size = UDim2.fromOffset(7, 7),
+		ZIndex = 10, Parent = pinBtn, Theme = { BackgroundColor3 = "TextDim" } }, { CornerFixed(4) })
+	local pinNeedle = New("Frame", { AnchorPoint = Vector2.new(0.5, 0), Position = UDim2.fromOffset(8, 10), Size = UDim2.fromOffset(2, 5), Rotation = 30,
+		ZIndex = 10, Parent = pinBtn, Theme = { BackgroundColor3 = "TextDim" } }, { CornerFixed(1) })
+	local closeBtn = ToolButton(3, "Dismiss")
+	for _, r in ipairs({ 45, -45 }) do
+		New("Frame", { AnchorPoint = Vector2.new(0.5, 0.5), Position = UDim2.fromScale(0.5, 0.5), Size = UDim2.fromOffset(9, 1.6), Rotation = r,
+			ZIndex = 10, Parent = closeBtn, Theme = { BackgroundColor3 = "TextDim" } }, { CornerFixed(1) })
+	end
+	local fade = Fader(card)
+	bar:SetAttribute("NoFade", true)
+
+	local kind, color, dur, remaining, hovered, focused, pinned = nil, nil, 4, 4, false, false, false
 	local anim = { t = 0 }
 	local glyph, plate, iconFrame, spin, ring
+	local valueFill, valueLabel, valueBar
+	local undoBtn, undone = nil, false
 	local conn
 
 	local function Fit()
@@ -2722,33 +2903,77 @@ function TingUI:Notify(o, duration, fromShell)
 		card.Size = UDim2.fromOffset(280, h)
 		if not H.Closed then Tween(holder, 0.25, { Size = UDim2.fromOffset(290, h + 6) }) end
 	end
-	Connect(body:GetPropertyChangedSignal("AbsoluteSize"), Fit)
+	Hook(body:GetPropertyChangedSignal("AbsoluteSize"), Fit)
 
-	local function Close()
+	local function ShowTools(v)
+		local a = (v or pinned) and 0 or 1
+		for _, b in ipairs({ pinBtn, closeBtn }) do
+			for _, d in ipairs(b:GetChildren()) do
+				if d:IsA("Frame") then Tween(d, 0.15, { BackgroundTransparency = (b == pinBtn and pinned and not v) and 0 or a }) end
+			end
+		end
+	end
+
+	local function Close(fling)
 		if H.Closed then return end
 		H.Closed = true
 		if conn then conn:Disconnect() end
+		for _, c in ipairs(conns) do c:Disconnect() end
 		for i, n in ipairs(LiveNotifs) do if n == H then table.remove(LiveNotifs, i) break end end
-		TweenService:Create(card, TweenInfo.new(0.3, Enum.EasingStyle.Quint, Enum.EasingDirection.In),
-			{ Position = UDim2.fromOffset(offX, 0) }):Play()
-		fade:Tween(0.3, 1, Enum.EasingStyle.Quint, Enum.EasingDirection.In)
+		NotifyKit.UpdateClearPill()
+		if o.Undo and not undone and o.OnCommit then SafeCall("notification '" .. tostring(o.Title) .. "' OnCommit", o.OnCommit) end
+		local goalX = fling or offX
+		TweenService:Create(card, TweenInfo.new(fling and 0.22 or 0.3, Enum.EasingStyle.Quint, Enum.EasingDirection.In),
+			{ Position = UDim2.fromOffset(goalX, 0) }):Play()
+		fade:Tween(fling and 0.22 or 0.3, 1, Enum.EasingStyle.Quint, Enum.EasingDirection.In)
 		task.delay(0.24, function()
 			if holder.Parent then Tween(holder, 0.24, { Size = UDim2.fromOffset(290, 0) }) end
 		end)
 		task.delay(0.55, function() holder:Destroy() end)
 	end
 
+	-- one small button in the card's action row
+	local function ActionButton(row, order, text, style, onClick)
+		local T = TingUI.Theme
+		local base = kind and color or T.Accent
+		local primary = style == "Primary"
+		local danger = style == "Danger"
+		local tone = danger and T.Error or base
+		local b = New("TextButton", {
+			AutomaticSize = Enum.AutomaticSize.X, Size = UDim2.fromOffset(0, 20), Text = tostring(text), TextSize = 11,
+			BackgroundTransparency = 0, LayoutOrder = order, ZIndex = 7, TextColor3 = primary and T.Background or tone,
+			BackgroundColor3 = primary and tone or tone:Lerp(T.Background, 0.82), Parent = row,
+		}, { Corner(6), Pad(9, 0, 9, 0), New("UIStroke", { Color = tone:Lerp(T.Background, primary and 0.2 or 0.5), Thickness = 1 }) })
+		local rest = b.BackgroundColor3
+		Connect(b.MouseEnter, function() Tween(b, 0.1, { BackgroundColor3 = primary and tone:Lerp(Color3.new(1, 1, 1), 0.15) or tone:Lerp(T.Background, 0.66) }) end)
+		Connect(b.MouseLeave, function() Tween(b, 0.1, { BackgroundColor3 = rest }) end)
+		Connect(b.MouseButton1Down, function() Tween(b, 0.06, { Size = UDim2.fromOffset(0, 19) }) end)
+		Connect(b.MouseButton1Up, function() Tween(b, 0.1, { Size = UDim2.fromOffset(0, 20) }) end)
+		Connect(b.MouseButton1Click, function() onClick(b) end)
+		return b
+	end
+
 	local function Build(opts)
 		for _, c in ipairs(body:GetChildren()) do
 			if c:IsA("GuiObject") then c:Destroy() end
 		end
-		spin, ring, glyph, plate = nil, nil, nil, nil
+		spin, ring, glyph, plate, valueFill, valueLabel, valueBar, undoBtn = nil, nil, nil, nil, nil, nil, nil, nil
 		kind = NOTIFY_KINDS[opts.Type or ""]
 		local T = TingUI.Theme
 		color = kind and T[kind.Key] or T.Label
 
-		-- icon
-		if kind then
+		-- icon: a picture, or the type's badge
+		if type(opts.Image) == "string" and opts.Image ~= "" then
+			iconFrame = New("Frame", { BackgroundTransparency = 1, Size = UDim2.fromOffset(32, 32), LayoutOrder = 1, Parent = body })
+			glyph = New("ImageLabel", { Size = UDim2.fromScale(1, 1), Image = opts.Image, BackgroundTransparency = 0, Parent = iconFrame,
+				Theme = { BackgroundColor3 = "Control" } }, { CornerFixed(9), New("UIStroke", { Color = (kind and color or T.Outline), Thickness = 1, Transparency = 0.3 }) })
+			if kind and kind.Icon ~= "spinner" then
+				local mini = StatusBadge(iconFrame, kind, 14)
+				mini.AnchorPoint = Vector2.new(1, 1)
+				mini.Position = UDim2.new(1, 3, 1, 3)
+				mini.ZIndex = 5
+			end
+		elseif kind then
 			local holderB
 			holderB, plate, glyph = StatusBadge(body, kind, 26)
 			holderB.LayoutOrder = 1
@@ -2767,12 +2992,13 @@ function TingUI:Notify(o, duration, fromShell)
 			iconFrame = New("Frame", { BackgroundTransparency = 1, Size = UDim2.fromOffset(16, 16), LayoutOrder = 1, Parent = body })
 			glyph = Icon("bell", iconFrame, 16, "Label")
 		end
+		local iconW = iconFrame.Size.X.Offset
 
 		-- text
 		local text = New("Frame", {
-			BackgroundTransparency = 1, Size = UDim2.new(1, -(kind and 37 or 27), 0, 0), AutomaticSize = Enum.AutomaticSize.Y,
+			BackgroundTransparency = 1, Size = UDim2.new(1, -(iconW + 11), 0, 0), AutomaticSize = Enum.AutomaticSize.Y,
 			LayoutOrder = 2, Parent = body,
-		}, { List(2) })
+		}, { List(2), Pad(0, 0, 34, 0) })
 		if type(opts.Source) == "string" and opts.Source ~= "" then
 			New("TextLabel", {
 				Size = UDim2.new(1, 0, 0, 13), Text = opts.Source:upper(), TextSize = 10, Font = Enum.Font.GothamBold,
@@ -2781,35 +3007,110 @@ function TingUI:Notify(o, duration, fromShell)
 			})
 		end
 		if opts.Title then
-			New("TextLabel", {
-				Size = UDim2.new(1, 0, 0, 0), AutomaticSize = Enum.AutomaticSize.Y, TextWrapped = true, Text = opts.Title,
+			H._titleLabel = New("TextLabel", {
+				Size = UDim2.new(1, 0, 0, 0), AutomaticSize = Enum.AutomaticSize.Y, TextWrapped = true, Text = tostring(opts.Title),
 				TextColor3 = kind and color or T.Text, TextXAlignment = Enum.TextXAlignment.Left, LayoutOrder = 1, Parent = text,
 			})
 		end
 		if opts.Content then
-			New("TextLabel", {
-				Size = UDim2.new(1, 0, 0, 0), AutomaticSize = Enum.AutomaticSize.Y, Text = opts.Content, TextWrapped = true, RichText = true,
+			H._contentLabel = New("TextLabel", {
+				Size = UDim2.new(1, 0, 0, 0), AutomaticSize = Enum.AutomaticSize.Y, Text = tostring(opts.Content), TextWrapped = true, RichText = true,
 				TextXAlignment = Enum.TextXAlignment.Left, LayoutOrder = 2, TextSize = 12,
 				Font = opts.Title and Enum.Font.GothamMedium or Enum.Font.GothamSemibold,
 				TextColor3 = T.Label, Parent = text,
 			})
 		end
-		if type(opts.Actions) == "table" and #opts.Actions > 0 then
-			local row = New("Frame", { BackgroundTransparency = 1, Size = UDim2.new(1, 0, 0, 22), LayoutOrder = 3, Parent = text },
-				{ Pad(0, 4, 0, 0), List(6, Enum.FillDirection.Horizontal, Enum.HorizontalAlignment.Left, Enum.VerticalAlignment.Center) })
-			for i, act in ipairs(opts.Actions) do
-				local b = New("TextButton", {
-					AutomaticSize = Enum.AutomaticSize.X, Size = UDim2.fromOffset(0, 20), Text = tostring(act.Text or "OK"), TextSize = 11,
-					BackgroundTransparency = 0, LayoutOrder = i, ZIndex = 7, TextColor3 = kind and color or T.Label,
-					BackgroundColor3 = (kind and color or T.Accent):Lerp(T.Background, 0.82), Parent = row,
-				}, { Corner(6), Pad(9, 0, 9, 0), New("UIStroke", { Color = (kind and color or T.Accent):Lerp(T.Background, 0.5), Thickness = 1 }) })
-				Connect(b.MouseEnter, function() Tween(b, 0.1, { BackgroundColor3 = (kind and color or T.Accent):Lerp(T.Background, 0.66) }) end)
-				Connect(b.MouseLeave, function() Tween(b, 0.1, { BackgroundColor3 = (kind and color or T.Accent):Lerp(T.Background, 0.82) }) end)
-				Connect(b.MouseButton1Click, function()
-					SafeCall("notification action '" .. tostring(act.Text) .. "'", act.Callback)
-					Close()
-				end)
+
+		-- determinate progress (downloads, uploads, anything with a percentage)
+		if type(opts.Value) == "number" then
+			local vrow = New("Frame", { BackgroundTransparency = 1, Size = UDim2.new(1, 0, 0, 16), LayoutOrder = 3, Parent = text }, { Pad(0, 5, 0, 0) })
+			valueBar = New("Frame", { AnchorPoint = Vector2.new(0, 0.5), Position = UDim2.new(0, 0, 0.5, 2), Size = UDim2.new(1, -38, 0, 4),
+				Parent = vrow, Theme = { BackgroundColor3 = "Outline" } }, { CornerFixed(2) })
+			valueFill = New("Frame", { Size = UDim2.fromScale(math.clamp(opts.Value, 0, 1), 1), BackgroundColor3 = kind and color or T.Accent, Parent = valueBar },
+				{ CornerFixed(2) })
+			-- a soft highlight that slides along the filled part
+			New("Frame", { Name = "Sweep", Size = UDim2.fromScale(0.35, 1), Position = UDim2.fromScale(-0.4, 0), BackgroundColor3 = Color3.new(1, 1, 1),
+				BackgroundTransparency = 0.5, Parent = valueFill }, { New("UIGradient", { Transparency = NumberSequence.new({
+				NumberSequenceKeypoint.new(0, 1), NumberSequenceKeypoint.new(0.5, 0.3), NumberSequenceKeypoint.new(1, 1) }) }) })
+			valueFill.ClipsDescendants = true
+			valueLabel = New("TextLabel", { AnchorPoint = Vector2.new(1, 0.5), Position = UDim2.new(1, 0, 0.5, 2), Size = UDim2.fromOffset(34, 14),
+				Text = math.floor(math.clamp(opts.Value, 0, 1) * 100 + 0.5) .. "%", TextSize = 11, Font = Enum.Font.GothamBold,
+				TextXAlignment = Enum.TextXAlignment.Right, TextColor3 = T.Label, Parent = vrow })
+		end
+
+		-- reply box
+		if type(opts.Input) == "table" then
+			local irow = New("Frame", { BackgroundTransparency = 1, Size = UDim2.new(1, 0, 0, 30), LayoutOrder = 4, Parent = text }, { Pad(0, 6, 0, 0) })
+			local box = New("TextBox", { Size = UDim2.new(1, -58, 0, 24), Text = "", PlaceholderText = tostring(opts.Input.Placeholder or "Type a reply..."),
+				ClearTextOnFocus = false, TextXAlignment = Enum.TextXAlignment.Left, TextSize = 12, Font = Enum.Font.GothamMedium, ZIndex = 7, Parent = irow,
+				Theme = { BackgroundColor3 = "Control", TextColor3 = "Text", PlaceholderColor3 = "TextMuted" } }, { Corner(6), Pad(8, 0, 8, 0), Stroke("Outline") })
+			local function Send()
+				local v = box.Text
+				if v == "" then return end
+				SafeCall("notification input", opts.Input.Callback, v, H)
+				if opts.Input.Close ~= false then Close() else box.Text = "" end
 			end
+			local send = ActionButton(irow, 2, opts.Input.Button or "Send", "Primary", Send)
+			send.AnchorPoint = Vector2.new(1, 0)
+			send.Position = UDim2.new(1, 0, 0, 2)
+			Connect(box.Focused, function() focused = true end)
+			Connect(box.FocusLost, function(enter)
+				focused = false
+				if enter then Send() end
+			end)
+		end
+
+		-- buttons: your actions, plus Copy / Undo / Details when asked for
+		local acts = {}
+		if type(opts.Undo) == "function" then table.insert(acts, { Kind = "Undo" }) end
+		if opts.Copy then table.insert(acts, { Kind = "Copy" }) end
+		if type(opts.Details) == "string" and opts.Details ~= "" then table.insert(acts, { Kind = "Details" }) end
+		if type(opts.Actions) == "table" then for _, a in ipairs(opts.Actions) do table.insert(acts, a) end end
+		local detailsBox
+		if #acts > 0 then
+			local row = New("Frame", { BackgroundTransparency = 1, Size = UDim2.new(1, 0, 0, 26), LayoutOrder = 5, Parent = text },
+				{ Pad(0, 6, 0, 0), List(6, Enum.FillDirection.Horizontal, Enum.HorizontalAlignment.Left, Enum.VerticalAlignment.Center) })
+			for i, act in ipairs(acts) do
+				if act.Kind == "Undo" then
+					undoBtn = ActionButton(row, i, "Undo", "Primary", function()
+						undone = true
+						SafeCall("notification '" .. tostring(opts.Title) .. "' Undo", opts.Undo)
+						Close()
+					end)
+				elseif act.Kind == "Copy" then
+					ActionButton(row, i, "Copy", nil, function(b)
+						local what = opts.Copy == true and tostring(opts.Content or opts.Title or "") or tostring(opts.Copy)
+						local ok = TingUI:Clipboard((what:gsub("<[^>]+>", "")))
+						b.Text = ok and "Copied" or "Can't copy here"
+						Tween(b, 0.15, { TextColor3 = ok and TingUI.Theme.Success or TingUI.Theme.Error })
+						task.delay(1.4, function() if b.Parent then b.Text = "Copy" Tween(b, 0.2, { TextColor3 = kind and color or TingUI.Theme.Accent }) end end)
+					end)
+				elseif act.Kind == "Details" then
+					ActionButton(row, i, "Details", nil, function(b)
+						if detailsBox then
+							local open = not detailsBox.Visible
+							detailsBox.Visible = open
+							b.Text = open and "Hide details" or "Details"
+							-- reading the details holds the card open
+							if open then pinned = true ShowTools(hovered) end
+						end
+					end)
+				else
+					ActionButton(row, i, act.Text or "OK", act.Style, function()
+						SafeCall("notification action '" .. tostring(act.Text) .. "'", act.Callback, H)
+						if act.Close ~= false then Close() end
+					end)
+				end
+			end
+		end
+		if type(opts.Details) == "string" and opts.Details ~= "" then
+			detailsBox = New("ScrollingFrame", { Size = UDim2.new(1, 0, 0, 0), AutomaticSize = Enum.AutomaticSize.Y, LayoutOrder = 6, Visible = false,
+				BackgroundTransparency = 0, ScrollBarThickness = 2, CanvasSize = UDim2.new(), AutomaticCanvasSize = Enum.AutomaticSize.Y, ZIndex = 7,
+				Parent = text, Theme = { BackgroundColor3 = "Group", ScrollBarImageColor3 = "AccentBorder" } },
+				{ Corner(6), Stroke("Outline"), New("UISizeConstraint", { MaxSize = Vector2.new(math.huge, 130) }) })
+			New("TextLabel", { Size = UDim2.new(1, -8, 0, 0), AutomaticSize = Enum.AutomaticSize.Y, Text = opts.Details, TextWrapped = true,
+				TextXAlignment = Enum.TextXAlignment.Left, TextYAlignment = Enum.TextYAlignment.Top, Font = Enum.Font.Code, TextSize = 11, ZIndex = 7,
+				TextColor3 = T.TextDim, Parent = detailsBox }, { Pad(7, 6, 7, 6) })
 		end
 
 		-- accent bar, colour wash and countdown only for typed notifications
@@ -2818,51 +3119,177 @@ function TingUI:Notify(o, duration, fromShell)
 		wash.BackgroundTransparency = kind and 0 or 1
 		wash.BackgroundColor3 = color
 		local loading = kind and kind.Icon == "spinner"
-		dur = opts.Duration or (loading and math.huge or (kind and 4.5 or 4))
+		local stays = opts.Persistent == true or opts.Sticky == true or type(opts.Input) == "table"
+		dur = opts.Duration or ((loading or stays) and math.huge or (opts.Undo and 6 or (kind and 4.5 or 4)))
+		if stays then dur = math.huge end
 		remaining = dur
-		track.Visible = (opts.Progress ~= false) and (kind ~= nil or opts.Progress == true) and not loading
+		track.Visible = (opts.Progress ~= false) and (kind ~= nil or opts.Progress == true) and dur ~= math.huge
 		fill.BackgroundColor3 = color
 		head.BackgroundColor3 = color:Lerp(Color3.new(1, 1, 1), 0.5)
 		fill.Size = UDim2.fromScale(1, 1)
+		borderStroke.Color = kind and color:Lerp(T.Background, 0.55) or T.Outline
 
-		-- entrance: every type has its own little motion
+		-- entrance: every type has its own motion
 		anim.t = 0
-		anim.kind = kind and kind.Icon or "bell"
+		anim.kind = (kind and kind.Icon) or (opts.Image and "image") or "bell"
+		anim.rays = nil
 		local sc = New("UIScale", { Scale = 0.3, Parent = glyph })
 		TweenService:Create(sc, TweenInfo.new(0.5, Enum.EasingStyle.Back, Enum.EasingDirection.Out), { Scale = 1 }):Play()
-		if anim.kind == "check" then
+		local k = anim.kind
+		if k == "check" then
 			glyph.Rotation = -35
 			TweenService:Create(glyph, TweenInfo.new(0.55, Enum.EasingStyle.Back, Enum.EasingDirection.Out), { Rotation = 0 }):Play()
-		elseif anim.kind == "cross" then
+		elseif k == "cross" then
 			glyph.Rotation = 90
 			TweenService:Create(glyph, TweenInfo.new(0.5, Enum.EasingStyle.Back, Enum.EasingDirection.Out), { Rotation = 0 }):Play()
-		elseif anim.kind == "info" then
-			glyph.Position = UDim2.new(0.5, 0, 0.5, -9)
-			TweenService:Create(glyph, TweenInfo.new(0.6, Enum.EasingStyle.Bounce, Enum.EasingDirection.Out), { Position = UDim2.fromScale(0.5, 0.5) }):Play()
+		elseif k == "info" or k == "user" then
+			glyph.Position = UDim2.new(0.5, 0, 0.5, k == "user" and 10 or -9)
+			TweenService:Create(glyph, TweenInfo.new(0.6, k == "user" and Enum.EasingStyle.Back or Enum.EasingStyle.Bounce, Enum.EasingDirection.Out),
+				{ Position = UDim2.fromScale(0.5, 0.5) }):Play()
+		elseif k == "sparkle" then
+			glyph.Rotation = -180
+			TweenService:Create(glyph, TweenInfo.new(0.8, Enum.EasingStyle.Back, Enum.EasingDirection.Out), { Rotation = 0 }):Play()
 		end
-		shine.Position = UDim2.new(-0.6, 0, 0, 0)
-		TweenService:Create(shine, TweenInfo.new(0.9, Enum.EasingStyle.Sine, Enum.EasingDirection.Out), { Position = UDim2.new(1.2, 0, 0, 0) }):Play()
+		-- success and achievements throw out a ring of sparks from the badge
+		if (k == "check" or k == "sparkle") and iconFrame then
+			local n = k == "sparkle" and 10 or 6
+			for i = 1, n do
+				local ang = (i / n) * math.pi * 2
+				local spark = New("Frame", { AnchorPoint = Vector2.new(0.5, 0.5), Position = UDim2.fromScale(0.5, 0.5),
+					Size = UDim2.fromOffset(k == "sparkle" and 6 or 3, k == "sparkle" and 2 or 3), Rotation = math.deg(ang),
+					BackgroundColor3 = color:Lerp(Color3.new(1, 1, 1), 0.35), ZIndex = 4, Parent = iconFrame }, { CornerFixed(2) })
+				spark:SetAttribute("NoFade", true)
+				local dist = k == "sparkle" and 24 or 19
+				TweenService:Create(spark, TweenInfo.new(0.55, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {
+					Position = UDim2.new(0.5, math.cos(ang) * dist, 0.5, math.sin(ang) * dist), BackgroundTransparency = 1 }):Play()
+				task.delay(0.6, function() spark:Destroy() end)
+			end
+		end
+		shine.Position = UDim2.new(-0.6, 0, 0, 9)
+		TweenService:Create(shine, TweenInfo.new(k == "sparkle" and 1.3 or 0.9, Enum.EasingStyle.Sine, Enum.EasingDirection.Out), { Position = UDim2.new(1.2, 0, 0, 9) }):Play()
+		if k == "sparkle" then
+			-- achievements get a second, slower golden sweep
+			task.delay(0.9, function()
+				if shine.Parent and not H.Closed then
+					shine.Position = UDim2.new(-0.6, 0, 0, 9)
+					TweenService:Create(shine, TweenInfo.new(1.4, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut), { Position = UDim2.new(1.2, 0, 0, 9) }):Play()
+				end
+			end)
+		end
 		Fit()
 	end
 
 	function H:Update(o2)
-		if self.Closed then return end
+		if self.Closed then return self end
 		for k, v in pairs(o2 or {}) do o[k] = v end
 		if o2 and o2.Type == nil then o.Type = nil end
 		Build(o)
 		fade:Recapture()
+		return self
 	end
-	function H:Dismiss() Close() end
+	function H:Dismiss() Close() return self end
+	function H:SetTitle(t)
+		o.Title = t
+		if self._titleLabel and self._titleLabel.Parent then self._titleLabel.Text = tostring(t) else self:Update({ Title = t, Type = o.Type }) end
+		return self
+	end
+	function H:SetContent(t)
+		o.Content = t
+		if self._contentLabel and self._contentLabel.Parent then self._contentLabel.Text = tostring(t) else self:Update({ Content = t, Type = o.Type }) end
+		return self
+	end
+	-- v = 0-1. Passing text updates the content line too (e.g. "12.4 / 30 MB").
+	function H:SetProgress(v, txt)
+		if self.Closed then return self end
+		v = math.clamp(tonumber(v) or 0, 0, 1)
+		if not valueFill then o.Value = v self:Update({ Value = v, Type = o.Type }) end
+		o.Value = v
+		if valueFill then
+			Tween(valueFill, 0.25, { Size = UDim2.fromScale(v, 1) })
+			valueLabel.Text = math.floor(v * 100 + 0.5) .. "%"
+		end
+		if txt then self:SetContent(txt) end
+		return self
+	end
+	function H:Pin(v)
+		pinned = v ~= false
+		ShowTools(hovered)
+		return self
+	end
+	function H:_Bump(o2)
+		self.Count = self.Count + 1
+		countPill.Text = "x" .. self.Count
+		countPill.Visible = true
+		countScale.Scale = 1.5
+		TweenService:Create(countScale, TweenInfo.new(0.35, Enum.EasingStyle.Back, Enum.EasingDirection.Out), { Scale = 1 }):Play()
+		remaining = dur
+		anim.t = 0
+		-- a nudge so you notice it came again
+		card.Position = UDim2.fromOffset(side[1] == 1 and -10 or 10, 0)
+		Tween(card, 0.3, { Position = UDim2.fromOffset(0, 0) })
+		if ring then
+			local st = ring:FindFirstChildOfClass("UIStroke")
+			ring.Size = UDim2.fromOffset(26, 26)
+			st.Transparency = 0.25
+			TweenService:Create(ring, TweenInfo.new(0.75, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), { Size = UDim2.fromOffset(52, 52) }):Play()
+			TweenService:Create(st, TweenInfo.new(0.75, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), { Transparency = 1 }):Play()
+		end
+	end
 
-	Connect(card.MouseEnter, function()
+	Hook(card.MouseEnter, function()
 		hovered = true
-		Tween(card, 0.18, { Position = UDim2.fromOffset(side[1] == 1 and -5 or 5, 0) })
+		ShowTools(true)
+		if not H._dragging then Tween(card, 0.18, { Position = UDim2.fromOffset(side[1] == 1 and -5 or 5, 0) }) end
 	end)
-	Connect(card.MouseLeave, function()
+	Hook(card.MouseLeave, function()
 		hovered = false
-		if not H.Closed then Tween(card, 0.18, { Position = UDim2.fromOffset(0, 0) }) end
+		ShowTools(false)
+		if not H.Closed and not H._dragging then Tween(card, 0.18, { Position = UDim2.fromOffset(0, 0) }) end
 	end)
-	Connect(hit.MouseButton1Click, Close)
+	Hook(pinBtn.MouseButton1Click, function()
+		pinned = not pinned
+		ShowTools(true)
+		local T = TingUI.Theme
+		for _, d in ipairs({ pinHead, pinNeedle }) do Tween(d, 0.15, { BackgroundColor3 = pinned and T.Accent or T.TextDim }) end
+	end)
+	Hook(closeBtn.MouseButton1Click, function() Close() end)
+
+	-- swipe: drag the card sideways and let go past the line to fling it away
+	local dragStart, dragged = nil, false
+	Hook(hit.InputBegan, function(i)
+		if IsPress(i) then dragStart, dragged = UIS:GetMouseLocation().X, false end
+	end)
+	Hook(UIS.InputChanged, function(i)
+		if dragStart and (i.UserInputType == Enum.UserInputType.MouseMovement or i.UserInputType == Enum.UserInputType.Touch) then
+			local dx = UIS:GetMouseLocation().X - dragStart
+			if math.abs(dx) > 6 then
+				dragged = true
+				H._dragging = true
+				card.Position = UDim2.fromOffset(dx, 0)
+				fade:Set(math.clamp((math.abs(dx) - 30) / 160, 0, 0.7))
+			end
+		end
+	end)
+	Hook(UIS.InputEnded, function(i)
+		if dragStart and IsPress(i) then
+			local dx = UIS:GetMouseLocation().X - dragStart
+			dragStart = nil
+			H._dragging = false
+			if dragged then
+				if math.abs(dx) > 70 then
+					Close(dx > 0 and 340 or -340)
+				else
+					Tween(card, 0.25, { Position = UDim2.fromOffset(0, 0) })
+					fade:Tween(0.2, 0)
+				end
+			end
+		end
+	end)
+	Hook(hit.MouseButton1Click, function()
+		if dragged then dragged = false return end
+		if type(o.Callback) == "function" then SafeCall("notification '" .. tostring(o.Title) .. "' Callback", o.Callback, H) end
+		Close()
+	end)
 
 	conn = RunService.RenderStepped:Connect(function(dt)
 		if H.Closed then return end
@@ -2874,17 +3301,50 @@ function TingUI:Notify(o, duration, fromShell)
 			local k = (kind.Key == "Caution" or kind.Key == "Error") and 0.4 or 0.2
 			bar.BackgroundTransparency = 1 - (1 - k * (0.5 + 0.5 * math.sin(t * 4.5))) * (1 - fade.Alpha)
 		end
-		if anim.kind == "warn" and glyph and at < 1.1 then
+		local k = anim.kind
+		if k == "warn" and glyph and at < 1.1 then
 			-- the exclamation mark wobbles, settling over a second
 			glyph.Rotation = math.sin(at * 22) * 16 * (1 - at / 1.1)
-		elseif anim.kind == "bell" and glyph and at < 1.2 then
+		elseif k == "bell" and glyph and at < 1.2 then
 			-- the bell rings
 			glyph.Rotation = math.sin(at * 26) * 20 * (1 - at / 1.2)
-		elseif anim.kind == "cross" and at < 0.5 then
+		elseif k == "cross" and at < 0.5 then
 			-- errors shake the whole card
 			card.Position = UDim2.fromOffset(math.sin(at * 70) * 7 * (1 - at / 0.5), 0)
+		elseif k == "lock" and glyph and at < 0.7 then
+			glyph.Rotation = math.sin(at * 34) * 12 * (1 - at / 0.7)
+		elseif k == "gear" and glyph then
+			-- the gear spins up and coasts to a stop
+			glyph.Rotation = 360 * (1 - (1 - math.min(at / 1.6, 1)) ^ 3)
+		elseif k == "heart" and glyph and at < 1.2 then
+			-- two heartbeats
+			local beat = math.max(0, math.sin(at * 2 * math.pi * 1.7)) ^ 4 * (1 - at / 1.2)
+			glyph.Size = UDim2.fromOffset(16 * (1 + beat * 0.35), 16 * (1 + beat * 0.35))
+		elseif (k == "download" or k == "upload") and glyph then
+			-- the arrow keeps dropping into the tray (or lifting out of it) while the transfer runs
+			local arrow = glyph:FindFirstChild("Arrow")
+			local busy = o.Value == nil or o.Value < 1
+			if arrow then
+				local c = busy and ((at * 1.3) % 1) or 0
+				local off = (k == "download" and 1 or -1) * (c < 0.7 and (c / 0.7) * 9 or -9 + (c - 0.7) / 0.3 * 9)
+				arrow.Position = UDim2.fromOffset(0, busy and off or 0)
+			end
+		elseif k == "message" and glyph then
+			-- someone's typing: the dots bounce for a moment, then settle
+			for i = 1, 3 do
+				local d = glyph:FindFirstChild("Dot" .. i, true)
+				if d then
+					local y = at < 1.6 and math.max(0, math.sin(at * 9 - i * 0.9)) * -2.5 or 0
+					d.Position = UDim2.new(i * 0.25, 0, 0.5, y)
+				end
+			end
 		end
-		if not hovered and remaining ~= math.huge then
+		if valueFill then
+			local sweep = valueFill:FindFirstChild("Sweep")
+			if sweep and (o.Value or 0) < 1 then sweep.Position = UDim2.fromScale(((t * 0.8) % 1.6) - 0.4, 0) end
+		end
+		if undoBtn and remaining ~= math.huge then undoBtn.Text = "Undo  " .. math.max(0, math.ceil(remaining)) end
+		if not hovered and not focused and not pinned and not H._dragging and remaining ~= math.huge then
 			remaining = remaining - dt
 			fill.Size = UDim2.fromScale(math.clamp(remaining / dur, 0, 1), 1)
 			if remaining <= 0 then Close() end
@@ -2893,15 +3353,113 @@ function TingUI:Notify(o, duration, fromShell)
 	table.insert(Connections, conn)
 
 	Build(o)
+	ShowTools(false)
 	-- slide in from the screen edge with a little overshoot
 	card.Position = UDim2.fromOffset(offX, 0)
 	fade:Hide()
 	TweenService:Create(card, TweenInfo.new(0.55, Enum.EasingStyle.Back, Enum.EasingDirection.Out), { Position = UDim2.fromOffset(0, 0) }):Play()
 	fade:Tween(0.3, 0)
+	if type(o.Sound) == "string" and o.Sound ~= "" then
+		pcall(function()
+			local snd = Instance.new("Sound")
+			snd.SoundId = o.Sound
+			snd.Volume = 0.5
+			snd.Parent = Gui
+			snd:Play()
+			task.delay(6, function() snd:Destroy() end)
+		end)
+	end
 
 	table.insert(LiveNotifs, H)
-	if #LiveNotifs > 6 then LiveNotifs[1]:Dismiss() end
+	if #LiveNotifs > 6 then
+		-- make room by closing the oldest card that isn't pinned or waiting on you
+		for _, old in ipairs(LiveNotifs) do
+			if old ~= H and not old.Closed and not old._busy then old:Dismiss() break end
+		end
+	end
+	H._busy = o.Input ~= nil or o.Type == "Loading"
+	NotifyKit.UpdateClearPill()
 	return H
+end
+
+-- Notification center: the last 60 notifications this script showed, newest first, with type, source and age.
+-- TingUI:OpenNotificationCenter() / :ToggleNotificationCenter(); also a dock button (Dock = {..., "notifications"}).
+local function Ago(clock)
+	local s = math.max(0, os.clock() - clock)
+	if s < 10 then return "now" elseif s < 60 then return math.floor(s) .. "s" elseif s < 3600 then return math.floor(s / 60) .. "m" end
+	return math.floor(s / 3600) .. "h"
+end
+function TingUI:_BuildNotificationCenter()
+	local P = self:CreatePanel({ Title = "Notifications", Subtitle = "Everything this script told you", Width = 320,
+		Position = UDim2.new(1, -350, 0, 64), Visible = false, HeaderIcon = { Icon = "cross", Tooltip = "Clear history", Callback = function()
+			table.clear(TingUI.NotificationHistory)
+			TingUI._unread = 0
+			TingUI._RefreshCenter()
+		end } })
+	P.Name = "Notifications"
+	local list = New("ScrollingFrame", { Size = UDim2.new(1, 0, 0, 60), BackgroundTransparency = 1, ScrollBarThickness = 2, CanvasSize = UDim2.new(),
+		AutomaticCanvasSize = Enum.AutomaticSize.Y, LayoutOrder = 2, Parent = P._container, Theme = { ScrollBarImageColor3 = "AccentBorder" } }, { List(6) })
+	local empty = New("TextLabel", { Size = UDim2.new(1, 0, 0, 40), Text = "Nothing yet. Notifications you get show up here.", TextWrapped = true,
+		TextSize = 12, Font = Enum.Font.GothamMedium, LayoutOrder = 1, Parent = P._container, Theme = { TextColor3 = "TextMuted" } })
+	local function Refresh()
+		if not P.Frame.Parent then return end
+		for _, c in ipairs(list:GetChildren()) do if c:IsA("GuiObject") then c:Destroy() end end
+		local hist = TingUI.NotificationHistory
+		empty.Visible = #hist == 0
+		list.Visible = #hist > 0
+		local T = TingUI.Theme
+		for i, e in ipairs(hist) do
+			local row = New("Frame", { Size = UDim2.new(1, -4, 0, 0), AutomaticSize = Enum.AutomaticSize.Y, LayoutOrder = i, Parent = list,
+				Theme = { BackgroundColor3 = "Group" } }, { Corner(7), Stroke("GroupBorder"), Pad(9, 7, 9, 8),
+				List(9, Enum.FillDirection.Horizontal, Enum.HorizontalAlignment.Left, Enum.VerticalAlignment.Top) })
+			local kind = NOTIFY_KINDS[e.Type or ""]
+			if kind then
+				local b = StatusBadge(row, kind, 18)
+				b.LayoutOrder = 1
+			else
+				local f = New("Frame", { BackgroundTransparency = 1, Size = UDim2.fromOffset(18, 18), LayoutOrder = 1, Parent = row })
+				Icon("bell", f, 14, "TextDim")
+			end
+			local col = New("Frame", { BackgroundTransparency = 1, Size = UDim2.new(1, -27, 0, 0), AutomaticSize = Enum.AutomaticSize.Y, LayoutOrder = 2, Parent = row }, { List(1) })
+			local top = New("Frame", { BackgroundTransparency = 1, Size = UDim2.new(1, 0, 0, 15), LayoutOrder = 1, Parent = col })
+			New("TextLabel", { Size = UDim2.new(1, -34, 1, 0), Text = tostring(e.Title or e.Content or "Notification"), TextTruncate = Enum.TextTruncate.AtEnd,
+				TextXAlignment = Enum.TextXAlignment.Left, TextSize = 12, TextColor3 = kind and T[kind.Key] or T.Text, Parent = top })
+			New("TextLabel", { AnchorPoint = Vector2.new(1, 0), Position = UDim2.new(1, 0, 0, 0), Size = UDim2.fromOffset(32, 15), Text = Ago(e.Clock),
+				TextXAlignment = Enum.TextXAlignment.Right, TextSize = 10, Font = Enum.Font.GothamMedium, TextColor3 = T.TextMuted, Parent = top })
+			if e.Title and e.Content then
+				New("TextLabel", { Size = UDim2.new(1, 0, 0, 0), AutomaticSize = Enum.AutomaticSize.Y, Text = tostring(e.Content), TextWrapped = true,
+					TextXAlignment = Enum.TextXAlignment.Left, TextSize = 11, Font = Enum.Font.GothamMedium, TextColor3 = T.Label, LayoutOrder = 2, Parent = col })
+			end
+			if e.Source then
+				New("TextLabel", { Size = UDim2.new(1, 0, 0, 12), Text = tostring(e.Source):upper(), TextXAlignment = Enum.TextXAlignment.Left, TextSize = 9,
+					Font = Enum.Font.GothamBold, TextColor3 = T.TextMuted, LayoutOrder = 3, Parent = col })
+			end
+		end
+		task.defer(function()
+			if list.Parent then list.Size = UDim2.new(1, 0, 0, math.min(list.AbsoluteCanvasSize.Y / math.max(TingUI.Scale, 0.1) + 2, 340)) end
+		end)
+	end
+	TingUI._RefreshCenter = function() if P.Frame.Visible then Refresh() end end
+	Connect(P.Frame:GetPropertyChangedSignal("Visible"), function()
+		if P.Frame.Visible then TingUI._unread = 0 Refresh() end
+	end)
+	task.spawn(function()
+		while P.Frame.Parent and not TingUI.Unloaded do
+			task.wait(15)
+			if P.Frame.Visible then Refresh() end
+		end
+	end)
+	self._center = P
+	return P
+end
+function TingUI:OpenNotificationCenter(show)
+	if not self._center or not self._center.Frame.Parent then self:_BuildNotificationCenter() end
+	self._center:SetVisible(show ~= false)
+	return self._center
+end
+function TingUI:ToggleNotificationCenter()
+	local open = self._center and self._center.Frame.Parent and self._center.Frame.Visible
+	return self:OpenNotificationCenter(not open)
 end
 
 local Fps, WatermarkOverride, WatermarkTitle = 60, nil, nil
@@ -5109,19 +5667,125 @@ KINDS.Snow = {
 		f.Frame.Position = UDim2.fromScale(f.X + math.sin(t * f.Sway + f.Phase) * 0.008, f.Y)
 	end,
 }
+-- ocean: no two bubbles alike. Fizzing strings of tiny beads, glassy bubbles with a coloured rim and a highlight that
+-- wobble as they rise, big lazy ones that squash and stretch, and little clusters drifting together. They pop at a
+-- random depth, at the surface, or when the pointer touches them: a ring snaps outward and droplets spray off.
+local BUBBLE_TYPES = { "Fizz", "Fizz", "Glass", "Glass", "Glass", "Glass", "Big", "Cluster" }
+local function BubbleBody(f, parent, c, pos, size, scaled)
+	local white = Color3.new(1, 1, 1)
+	local b = New("Frame", { AnchorPoint = Vector2.new(0.5, 0.5), Position = pos or UDim2.fromScale(0.5, 0.5),
+		Size = scaled and UDim2.fromScale(1, 1) or UDim2.fromOffset(size, size), BackgroundColor3 = white, Parent = parent }, { CornerFixed(999) })
+	-- glassy body: light at the top, the water's colour underneath
+	New("UIGradient", { Rotation = 90, Color = ColorSequence.new(c:Lerp(white, 0.55), c:Lerp(Color3.new(0, 0, 0), 0.15)), Parent = b })
+	local rim = New("UIStroke", { Color = c:Lerp(white, 0.3), Thickness = size >= 20 and 1.5 or 1, Parent = b })
+	local hi = New("Frame", { AnchorPoint = Vector2.new(0.5, 0.5), Position = UDim2.fromScale(0.32, 0.28), Rotation = -35,
+		Size = UDim2.fromScale(0.36, 0.2), BackgroundColor3 = white, Parent = b }, { CornerFixed(999) })
+	table.insert(f.Extra, { b, "BackgroundTransparency", size >= 20 and 0.88 or 0.84 })
+	table.insert(f.Extra, { rim, "Transparency", 0.25 + math.random() * 0.25 })
+	table.insert(f.Extra, { hi, "BackgroundTransparency", 0.2 })
+	if size >= 11 then
+		local hi2 = New("Frame", { AnchorPoint = Vector2.new(0.5, 0.5), Position = UDim2.fromScale(0.7, 0.74), Size = UDim2.fromScale(0.12, 0.12),
+			BackgroundColor3 = white, Parent = b }, { CornerFixed(999) })
+		table.insert(f.Extra, { hi2, "BackgroundTransparency", 0.5 })
+	end
+	return b
+end
+local function BubbleRespawn(f, first)
+	f.X = math.random()
+	f.Y = first and math.random() or (1.04 + math.random() * 0.12)
+	-- most rise all the way and burst at the surface; some burst on the way up
+	if f.Type == "Fizz" then f.PopAt = 0.25 + math.random() * 0.6
+	else f.PopAt = (math.random() < 0.55) and (0.08 + math.random() * 0.55) or -0.04 end
+	if first and f.PopAt > f.Y then f.PopAt = -0.04 end
+	f.Speed = f.BaseSpeed * (0.8 + math.random() * 0.45)
+	f.Pop, f.Vis = nil, first and 1 or 0
+end
+local function BubblePop(f)
+	f.Pop = 0
+	if f.Type == "Fizz" or not f.Frame.Parent then return end
+	local a = f.LastAlpha or 1
+	local pos = f.Frame.Position
+	local c = f.Color:Lerp(Color3.new(1, 1, 1), 0.45)
+	local size = f.Size
+	local ring = New("Frame", { AnchorPoint = Vector2.new(0.5, 0.5), Position = pos, Size = UDim2.fromOffset(size * 0.8, size * 0.8),
+		BackgroundTransparency = 1, Parent = f.Frame.Parent }, { CornerFixed(999) })
+	local rs = New("UIStroke", { Color = c, Thickness = size >= 20 and 2 or 1.5, Transparency = 1 - 0.75 * a, Parent = ring })
+	TweenService:Create(ring, TweenInfo.new(0.26, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), { Size = UDim2.fromOffset(size * 2.3, size * 2.3) }):Play()
+	TweenService:Create(rs, TweenInfo.new(0.26, Enum.EasingStyle.Quad, Enum.EasingDirection.In), { Transparency = 1 }):Play()
+	local n = size >= 20 and 8 or (f.Type == "Cluster" and 5 or 6)
+	for i = 1, n do
+		local ang = (i / n) * math.pi * 2 + math.random() * 0.5
+		local dist = size * (0.8 + math.random() * 0.9)
+		local d = New("Frame", { AnchorPoint = Vector2.new(0.5, 0.5), Position = pos, Size = UDim2.fromOffset(2, 2), BackgroundColor3 = c,
+			BackgroundTransparency = 1 - 0.7 * a, Parent = f.Frame.Parent }, { CornerFixed(999) })
+		TweenService:Create(d, TweenInfo.new(0.34, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
+			Position = pos + UDim2.fromOffset(math.cos(ang) * dist, math.sin(ang) * dist + 4), BackgroundTransparency = 1 }):Play()
+		task.delay(0.36, function() d:Destroy() end)
+	end
+	task.delay(0.3, function() ring:Destroy() end)
+end
 KINDS.Bubbles = {
 	Build = function(f, c, p)
-		local size = math.random(6, 20)
-		f.Speed = 0.025 + (size / 20) * 0.05
-		f.Base = 0.92
-		f.Frame = Dot(p, size, c, 0.92)
-		f.Extra = { { New("UIStroke", { Color = c, Thickness = 1.2, Transparency = 0.5, Parent = f.Frame }), "Transparency", 0.35 + math.random() * 0.4 },
-			{ Dot(f.Frame, math.max(2, math.floor(size / 4)), Color3.new(1, 1, 1), 0.45), "BackgroundTransparency", 0.45 } }
-		f.Extra[2][1].Position = UDim2.fromScale(0.22, 0.2)
+		f.Type = BUBBLE_TYPES[math.random(#BUBBLE_TYPES)]
+		f.Color = c
+		f.Container = true
+		f.Base = 0
+		f.Extra = {}
+		local size = (f.Type == "Fizz" and math.random(2, 4)) or (f.Type == "Glass" and math.random(8, 17)) or (f.Type == "Big" and math.random(20, 34)) or 18
+		f.Size = size
+		f.BaseSpeed = (f.Type == "Fizz" and 0.11) or (f.Type == "Big" and 0.03) or 0.05
+		f.Frame = New("Frame", { AnchorPoint = Vector2.new(0.5, 0.5), BackgroundTransparency = 1, Size = UDim2.fromOffset(size, size), Parent = p })
+		f.Scale = New("UIScale", { Scale = 1, Parent = f.Frame })
+		if f.Type == "Fizz" then
+			-- a string of beads, smallest at the bottom
+			for i = 0, 2 do
+				local s2 = math.max(1, size - i)
+				local bead = New("Frame", { AnchorPoint = Vector2.new(0.5, 0.5), Position = UDim2.new(0.5, 0, 0.5, i * (size + 3)),
+					Size = UDim2.fromOffset(s2, s2), BackgroundColor3 = c:Lerp(Color3.new(1, 1, 1), 0.5), Parent = f.Frame }, { CornerFixed(999) })
+				table.insert(f.Extra, { bead, "BackgroundTransparency", 0.3 + i * 0.2 })
+			end
+		elseif f.Type == "Cluster" then
+			BubbleBody(f, f.Frame, c, UDim2.fromOffset(6, 7), 10)
+			BubbleBody(f, f.Frame, c, UDim2.fromOffset(15, 4), 6)
+			BubbleBody(f, f.Frame, c, UDim2.fromOffset(13, 14), 7)
+		else
+			BubbleBody(f, f.Frame, c, nil, size, true)
+		end
+		BubbleRespawn(f, true)
 	end,
 	Update = function(f, dt, t, sp)
-		Fall(f, dt, sp, -1)
-		f.Frame.Position = UDim2.fromScale(f.X + math.sin(t * f.Sway * 1.6 + f.Phase) * 0.012, f.Y)
+		if f.Pop then
+			f.Pop = f.Pop + dt
+			f.Vis = math.max(0, 1 - f.Pop / 0.08)
+			f.Scale.Scale = 1 + f.Pop * 4
+			if f.Pop > 0.12 then
+				f.Scale.Scale = 1
+				BubbleRespawn(f, false)
+			end
+			return 0
+		end
+		f.Vis = math.min(1, (f.Vis or 1) + dt * 2)
+		f.Y = f.Y - f.Speed * sp * dt
+		local sway
+		if f.Type == "Fizz" then sway = math.sin(t * 7 + f.Phase) * 0.002
+		elseif f.Type == "Big" then sway = math.sin(t * 0.8 + f.Phase) * 0.022
+		else sway = math.sin(t * f.Sway * 1.6 + f.Phase) * 0.012 end
+		f.Frame.Position = UDim2.fromScale(f.X + sway, f.Y)
+		-- big and glassy bubbles squash and stretch as they rise
+		if f.Type == "Big" or f.Type == "Glass" then
+			local w = math.sin(t * (f.Type == "Big" and 3.1 or 4.6) + f.Phase) * (f.Type == "Big" and 0.09 or 0.05)
+			f.Frame.Size = UDim2.fromOffset(f.Size * (1 + w), f.Size * (1 - w))
+		end
+		local pop = f.Y <= f.PopAt
+		if not pop and f.Type ~= "Fizz" and f.Vis > 0.6 then
+			local m = Pointer.Gui()
+			local ap, as = f.Frame.AbsolutePosition, f.Frame.AbsoluteSize
+			local cx, cy = ap.X + as.X / 2, ap.Y + as.Y / 2
+			local r = as.X / 2 + 6
+			if (m.X - cx) ^ 2 + (m.Y - cy) ^ 2 < r * r then pop = true end
+		end
+		if pop then BubblePop(f) end
+		return 0
 	end,
 }
 KINDS.Petals = {
@@ -5322,20 +5986,6 @@ KINDS.Static = {
 		return 1
 	end,
 }
--- abyss: marine snow sinking slowly through the dark, a few flecks glowing faintly
-KINDS.MarineSnow = {
-	Build = function(f, c, p)
-		f.Speed = 0.006 + math.random() * 0.012
-		f.Base = 0.4 + math.random() * 0.45
-		f.Glows = math.random() < 0.12
-		f.Frame = Dot(p, f.Glows and 3 or math.random(1, 2), f.Glows and c or c:Lerp(Color3.new(1, 1, 1), 0.6), f.Base)
-	end,
-	Update = function(f, dt, t, sp)
-		Fall(f, dt, sp)
-		f.Frame.Position = UDim2.fromScale(f.X + math.sin(t * 0.25 + f.Phase) * 0.01, f.Y)
-		if f.Glows then return 0.2 + 0.6 * (0.5 + 0.5 * math.sin(t * 0.9 + f.Phase * 3)) end
-	end,
-}
 -- twinkling stars with the occasional shooting star
 KINDS.Starfield = {
 	Build = function(f, c, p)
@@ -5512,27 +6162,79 @@ KINDS.Sparks = {
 		return k * k
 	end,
 }
--- glass: big soft out-of-focus circles of light drifting upward and breathing
+-- glass: real lens bokeh. Discs sit at different focus depths: near ones are big, soft and nearly all glow; far ones
+-- are small and crisp with a bright rim and a faint chromatic fringe; some take the hexagon of a camera aperture.
+-- Each drifts at its own depth, breathes slowly in and out of focus, and now and then a glint streaks across the glass.
+local BOKEH_LIGHTS = { Color3.fromRGB(255, 244, 228), Color3.fromRGB(255, 210, 180), Color3.fromRGB(180, 230, 255),
+	Color3.fromRGB(214, 196, 255), Color3.fromRGB(190, 255, 226), Color3.fromRGB(255, 226, 240) }
 KINDS.Bokeh = {
 	Build = function(f, c, p)
-		local size = math.random(28, 90)
-		f.Speed = 0.004 + math.random() * 0.008
-		f.Pulse = 0.2 + math.random() * 0.5
-		f.Base = 0.9
-		local col = c:Lerp(Color3.fromHSV(math.random(), 0.35, 1), 0.35)
-		f.Frame = New("Frame", { AnchorPoint = Vector2.new(0.5, 0.5), Size = UDim2.fromOffset(size, size), BackgroundColor3 = col,
-			BackgroundTransparency = 0.9, Parent = p }, { CornerFixed(size) })
-		local core = New("Frame", { AnchorPoint = Vector2.new(0.5, 0.5), Position = UDim2.fromScale(0.5, 0.5), Size = UDim2.fromScale(0.62, 0.62),
-			BackgroundColor3 = col, BackgroundTransparency = 0.88, Parent = f.Frame }, { CornerFixed(size) })
-		local rim = New("UIStroke", { Color = col, Thickness = 1, Transparency = 0.75, Parent = f.Frame })
-		f.Extra = { { core, "BackgroundTransparency", 0.88 }, { rim, "Transparency", 0.75 } }
+		local depth = math.random()                         -- 0 far / crisp ... 1 near / soft
+		local size = math.floor(16 + depth ^ 1.4 * 92)
+		f.Depth, f.Size = depth, size
+		f.Speed = 0.003 + (1 - depth) * 0.004 + depth * 0.006
+		f.Pulse = 0.15 + math.random() * 0.35
+		f.Container = true
+		f.Base = 0.3
+		f.Extra = {}
+		local col = c:Lerp(BOKEH_LIGHTS[math.random(#BOKEH_LIGHTS)], 0.55)
+		f.Frame = New("Frame", { AnchorPoint = Vector2.new(0.5, 0.5), BackgroundTransparency = 1, Size = UDim2.fromOffset(size, size), Parent = p })
+		f.Scale = New("UIScale", { Scale = 1, Parent = f.Frame })
+		local soft = depth
+		local hex = math.random() < 0.22 and depth < 0.75
+		local function Shape(parent, scale, color, base, stroke)
+			local shape
+			if hex then
+				-- a hexagon from three rounded bars at 60 degrees
+				shape = New("Frame", { AnchorPoint = Vector2.new(0.5, 0.5), Position = UDim2.fromScale(0.5, 0.5), Size = UDim2.fromScale(scale, scale),
+					BackgroundTransparency = 1, Parent = parent })
+				for _, r in ipairs({ 0, 60, 120 }) do
+					local bar = New("Frame", { AnchorPoint = Vector2.new(0.5, 0.5), Position = UDim2.fromScale(0.5, 0.5), Size = UDim2.fromScale(1, 0.577),
+						Rotation = r, BackgroundColor3 = color, Parent = shape }, { CornerFixed(2) })
+					table.insert(f.Extra, { bar, "BackgroundTransparency", 1 - (1 - base) / 2.2 })
+				end
+			else
+				shape = New("Frame", { AnchorPoint = Vector2.new(0.5, 0.5), Position = UDim2.fromScale(0.5, 0.5), Size = UDim2.fromScale(scale, scale),
+					BackgroundColor3 = color, Parent = parent }, { CornerFixed(999) })
+				table.insert(f.Extra, { shape, "BackgroundTransparency", base })
+				if stroke then
+					local st = New("UIStroke", { Color = stroke, Thickness = 1, Parent = shape })
+					table.insert(f.Extra, { st, "Transparency", 0.35 + soft * 0.5 })
+				end
+			end
+			return shape
+		end
+		-- halo, body, then the bright onion-ring edge that makes it read as a lens highlight
+		Shape(f.Frame, 1.32, col, 0.965)
+		local fringeColor = Color3.fromHSV((select(1, col:ToHSV()) + 0.5) % 1, 0.45, 1)
+		if not hex and depth < 0.6 then Shape(f.Frame, 1.06, fringeColor, 1, fringeColor) end
+		Shape(f.Frame, 1, col, 0.86 + soft * 0.06, not hex and col:Lerp(Color3.new(1, 1, 1), 0.4) or nil)
+		Shape(f.Frame, 0.55, col:Lerp(Color3.new(1, 1, 1), 0.3), 0.93)
+		f.Frame.Position = UDim2.fromScale(f.X, f.Y)
 	end,
 	Update = function(f, dt, t, sp)
-		f.X = (f.X + math.sin(t * 0.2 + f.Phase) * f.Speed * sp * dt) % 1
+		f.X = (f.X + math.sin(t * 0.18 + f.Phase) * f.Speed * 0.6 * sp * dt + 0.0015 * (f.Depth - 0.5) * sp * dt) % 1
 		f.Y = f.Y - f.Speed * sp * dt
-		if f.Y < -0.1 then f.Y = 1.1 end
+		if f.Y < -0.12 then f.Y = 1.12 f.X = math.random() end
 		f.Frame.Position = UDim2.fromScale(f.X, f.Y)
-		return 0.86 + 0.08 * math.sin(t * f.Pulse + f.Phase)
+		-- breathing focus: grows softer and dimmer, then sharpens again
+		local focus = 0.5 + 0.5 * math.sin(t * f.Pulse + f.Phase)
+		f.Scale.Scale = 0.92 + focus * 0.16
+		return 0.15 + focus * 0.35
+	end,
+	Layer = function(layer, dt, t, sp, color)
+		layer.NextGlint = layer.NextGlint or (t + 3)
+		if t >= layer.NextGlint then
+			layer.NextGlint = t + 6 + math.random() * 7
+			local vis = layer.Alpha * Snow.Show
+			local streak = New("Frame", { AnchorPoint = Vector2.new(0.5, 0.5), Position = UDim2.fromScale(-0.2, 0.2 + math.random() * 0.5),
+				Size = UDim2.new(0.5, 0, 0, math.random(40, 90)), Rotation = -24, BackgroundColor3 = Color3.new(1, 1, 1),
+				BackgroundTransparency = 1 - vis * 0.9, Parent = layer.Folder }, {
+				New("UIGradient", { Rotation = 90, Transparency = NumberSequence.new({ NumberSequenceKeypoint.new(0, 1), NumberSequenceKeypoint.new(0.5, 0.86), NumberSequenceKeypoint.new(1, 1) }) }) })
+			TweenService:Create(streak, TweenInfo.new(1.6, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut),
+				{ Position = UDim2.fromScale(1.25, streak.Position.Y.Scale - 0.2) }):Play()
+			task.delay(1.65, function() streak:Destroy() end)
+		end
 	end,
 }
 -- haunted: bats flapping across the screen; each wing is hinged at the body
@@ -5677,162 +6379,37 @@ KINDS.Galaxy = {
 	end,
 }
 
--- criminality: dust motes hanging in street-lamp light, catching it now and then; the screen glitches for a moment,
--- and a glint runs down an unseen blade
-local GRIT_GLITCH = { Color3.new(1, 1, 1), Color3.fromRGB(255, 40, 70), Color3.fromRGB(40, 220, 255) }
-KINDS.Grit = {
-	Build = function(f, c, p)
-		local size = math.random(1, 3)
-		f.Base = 0.45 + math.random() * 0.4
-		f.Pulse = 0.3 + math.random() * 0.9
-		f.VX, f.VY = (math.random() - 0.5) * 0.006, (math.random() - 0.35) * 0.008
-		f.Frame = Dot(p, size, c:Lerp(Color3.fromRGB(200, 200, 200), math.random() * 0.5), f.Base)
-	end,
-	Update = function(f, dt, t, sp)
-		f.X = (f.X + (f.VX + math.sin(t * 0.3 + f.Phase) * 0.004) * sp * dt) % 1
-		f.Y = f.Y + f.VY * sp * dt
-		if f.Y > 1.02 then f.Y = -0.02 elseif f.Y < -0.02 then f.Y = 1.02 end
-		f.Frame.Position = UDim2.fromScale(f.X, f.Y)
-		-- a mote drifting through the light flares briefly
-		local glint = math.max(0, math.sin(t * f.Pulse + f.Phase)) ^ 6
-		return f.Base - (f.Base - 0.05) * glint
-	end,
-	Layer = function(layer, dt, t, sp, color)
-		local vis = layer.Alpha * Snow.Show
-		layer.NextGlitch = layer.NextGlitch or (t + 2)
-		layer.NextGlint = layer.NextGlint or (t + 4)
-		if t >= layer.NextGlitch then
-			layer.NextGlitch = t + 3 + math.random() * 5
-			for _ = 1, math.random(2, 4) do
-				local y, h = math.random(), math.random(2, 14)
-				local bar = New("Frame", { Position = UDim2.new(0, 0, y, 0), Size = UDim2.new(1, 0, 0, h), BackgroundColor3 = GRIT_GLITCH[math.random(#GRIT_GLITCH)],
-					BackgroundTransparency = 1 - vis * (0.08 + math.random() * 0.1), Parent = layer.Folder })
-				local life = 0.1 + math.random() * 0.18
-				task.delay(life * 0.5, function() if bar.Parent then bar.Position = UDim2.new(0, math.random(-30, 30), y + (math.random() - 0.5) * 0.02, 0) end end)
-				task.delay(life, function() bar:Destroy() end)
-			end
-		end
-		if t >= layer.NextGlint then
-			layer.NextGlint = t + 6 + math.random() * 7
-			local len = math.random(180, 300)
-			local blade = New("Frame", { AnchorPoint = Vector2.new(0.5, 0.5), Position = UDim2.fromScale(0.15 + math.random() * 0.7, 0.15 + math.random() * 0.7),
-				Size = UDim2.fromOffset(len, 2), Rotation = -20 - math.random() * 25, BackgroundColor3 = Color3.new(1, 1, 1),
-				BackgroundTransparency = 1 - vis * 0.85, Parent = layer.Folder }, { CornerFixed(1) })
-			local g = New("UIGradient", { Color = ColorSequence.new(Color3.fromRGB(255, 214, 150), Color3.new(1, 1, 1)), Offset = Vector2.new(-1, 0),
-				Transparency = NumberSequence.new({ NumberSequenceKeypoint.new(0, 1), NumberSequenceKeypoint.new(0.42, 1), NumberSequenceKeypoint.new(0.5, 0),
-				NumberSequenceKeypoint.new(0.58, 1), NumberSequenceKeypoint.new(1, 1) }), Parent = blade })
-			Fade(g, 0.55, { Offset = Vector2.new(1, 0) }, Enum.EasingStyle.Quad, Enum.EasingDirection.InOut)
-			task.delay(0.6, function() blade:Destroy() end)
-		end
-	end,
-}
 
--- MLG: spinning doritos rain down, hitmarkers pop all over, and rainbow words slam in
-local MLG_WORDS = { "WOW", "360", "NO SCOPE", "MLG", "REKT", "GG", "EZ", "HEADSHOT", "!!", "OH BABY", "1v1 ME" }
-local function ComicFont(weight)
-	local f
-	pcall(function() f = Font.new(Font.fromEnum(Enum.Font.Cartoon).Family, weight or Enum.FontWeight.Bold) end)
-	return f
-end
-KINDS.MLG = {
-	Build = function(f, c, p)
-		local sz = math.random(14, 30)
-		f.Speed = 0.05 + math.random() * 0.08
-		f.Spin, f.Rot = (math.random() - 0.5) * 420, math.random() * 360
-		f.Base = 0.05 + math.random() * 0.15
-		local img = TextureImage("dorito")
-		if img ~= "" then
-			f.Frame = New("ImageLabel", { AnchorPoint = Vector2.new(0.5, 0.5), Size = UDim2.fromOffset(sz, sz), BackgroundTransparency = 1, Image = img, Parent = p })
-			f.NoSelf = true
-			f.Extra = { { f.Frame, "ImageTransparency" } }
-		else
-			-- until the chip image arrives: an orange diamond
-			f.Frame = New("Frame", { AnchorPoint = Vector2.new(0.5, 0.5), Size = UDim2.fromOffset(sz * 0.6, sz * 0.6), BackgroundColor3 = c, Parent = p }, { CornerFixed(2) })
-		end
-	end,
-	Update = function(f, dt, t, sp)
-		Fall(f, dt, sp)
-		f.Rot = f.Rot + f.Spin * sp * dt
-		f.Frame.Rotation = f.Rot
-		f.Frame.Position = UDim2.fromScale(f.X + math.sin(t * f.Sway * 1.4 + f.Phase) * 0.012, f.Y)
-	end,
-	Layer = function(layer, dt, t, sp, color)
-		local vis = layer.Alpha * Snow.Show
-		layer.NextHit = layer.NextHit or (t + 0.6)
-		layer.NextWord = layer.NextWord or (t + 1.4)
-		if t >= layer.NextHit then
-			layer.NextHit = t + 0.35 + math.random() * 1.1
-			local hx, hy = 0.05 + math.random() * 0.9, 0.05 + math.random() * 0.9
-			for n = 0, (math.random() < 0.35 and 1 or 0) do
-				task.delay(n * 0.09, function()
-					if not layer.Folder.Parent then return end
-					local hit = New("Frame", { AnchorPoint = Vector2.new(0.5, 0.5), Position = UDim2.fromScale(hx, hy), Size = UDim2.fromOffset(26, 26),
-						BackgroundTransparency = 1, Rotation = 45, Parent = layer.Folder })
-					local sc = New("UIScale", { Scale = 1.6, Parent = hit })
-					-- four short arms with a gap in the middle: the classic hitmarker
-					local arms = {}
-					for i, spec in ipairs({ { 0, 0.5, 9, 2 }, { 1, 0.5, 9, 2 }, { 0.5, 0, 2, 9 }, { 0.5, 1, 2, 9 } }) do
-						arms[i] = New("Frame", { AnchorPoint = Vector2.new(spec[1], spec[2]), Position = UDim2.fromScale(spec[1], spec[2]),
-							Size = UDim2.fromOffset(spec[3], spec[4]), BackgroundColor3 = Color3.new(1, 1, 1), BackgroundTransparency = 1 - vis, Parent = hit })
-					end
-					Fade(sc, 0.09, { Scale = 1 }, Enum.EasingStyle.Back, Enum.EasingDirection.Out)
-					task.delay(0.22, function()
-						for _, a in ipairs(arms) do Fade(a, 0.3, { BackgroundTransparency = 1 }) end
-					end)
-					task.delay(0.6, function() hit:Destroy() end)
-				end)
-			end
-		end
-		if t >= layer.NextWord then
-			layer.NextWord = t + 1.4 + math.random() * 2.2
-			local word = Instance.new("TextLabel")
-			word.BackgroundTransparency = 1
-			word.AnchorPoint = Vector2.new(0.5, 0.5)
-			word.Position = UDim2.fromScale(0.1 + math.random() * 0.8, 0.12 + math.random() * 0.76)
-			word.Size = UDim2.fromOffset(260, 60)
-			word.Text = MLG_WORDS[math.random(#MLG_WORDS)]
-			word.TextSize = math.random(24, 40)
-			word.Font = Enum.Font.GothamBlack
-			local cf = ComicFont(Enum.FontWeight.Bold)
-			if cf then pcall(function() word.FontFace = cf end) end
-			local hue = math.random()
-			word.TextColor3 = Color3.fromHSV(hue, 0.85, 1)
-			word.TextStrokeColor3 = Color3.new(0, 0, 0)
-			word.TextStrokeTransparency = 1 - vis
-			word.TextTransparency = 1 - vis
-			word.Rotation = (math.random() - 0.5) * 36
-			word.Parent = layer.Folder
-			local sc = Instance.new("UIScale")
-			sc:SetAttribute("TingUI", true)
-			sc.Scale = 0.2
-			sc.Parent = word
-			Fade(sc, 0.32, { Scale = 1 }, Enum.EasingStyle.Back, Enum.EasingDirection.Out)
-			Fade(word, 1.6, { TextColor3 = Color3.fromHSV((hue + 0.5) % 1, 0.85, 1), Rotation = word.Rotation + (math.random() - 0.5) * 30,
-				Position = word.Position + UDim2.fromScale(0, -0.05) }, Enum.EasingStyle.Sine, Enum.EasingDirection.Out)
-			task.delay(1.1, function()
-				if word.Parent then Fade(word, 0.45, { TextTransparency = 1, TextStrokeTransparency = 1 }, Enum.EasingStyle.Quad, Enum.EasingDirection.In) end
-			end)
-			task.delay(1.65, function() word:Destroy() end)
-		end
-	end,
-}
 end
 
 end
 
 local BUILTIN_KINDS = { "Snow", "Bubbles", "Petals", "Embers", "Fireflies", "Stars", "Glyphs", "Rain", "Confetti", "Sparkles", "Starfield", "Crystals", "Neon",
-	"Drafting", "FilmGrain", "Sparks", "Bokeh", "Bats", "Leaves", "Galaxy", "Grit", "MLG", "Holo", "Static", "MarineSnow" }
+	"Drafting", "FilmGrain", "Sparks", "Bokeh", "Bats", "Leaves", "Galaxy", "Holo", "Static" }
 TingUI.ParticleKinds = { "Theme" }
 for _, k in ipairs(BUILTIN_KINDS) do table.insert(TingUI.ParticleKinds, k) end
 TingUI._particleDropdowns = {}
 
 local function CurrentKind()
-	if Snow.Kind == "Theme" then return TingUI.Style.Particles or "Snow" end
+	if Snow.Kind == "Theme" then
+		if TingUI.Style.Particles == false then return "None" end
+		return TingUI.Style.Particles or "Snow"
+	end
 	return Snow.Kind
 end
 
 local function ApplyFlake(f, tr, alpha)
+	-- f.Vis (0-1) lets a kind fade one particle on its own (a bubble popping); f.LastAlpha is the layer's fade
+	f.LastAlpha = alpha
+	if f.Vis then alpha = alpha * f.Vis end
 	local final = 1 - (1 - math.clamp(tr, 0, 1)) * alpha
+	if f.Container then
+		-- a see-through holder: each part keeps its own resting transparency, dimmed further by the returned value
+		for _, x in ipairs(f.Extra) do
+			x[1][x[2]] = 1 - (1 - (x[3] or 0)) * (1 - math.clamp(tr, 0, 1)) * alpha
+		end
+		return
+	end
 	if not f.NoSelf then
 		if f.Frame:IsA("TextLabel") then f.Frame.TextTransparency = final else f.Frame.BackgroundTransparency = final end
 	end
@@ -5848,6 +6425,8 @@ local function BuildFlakes()
 	for _, L in ipairs(Snow.Layers) do L.Target = 0 end
 	if not Snow.Enabled then return end
 	local kind = CurrentKind()
+	-- a theme with Particles = "None" (or false) shows none; the old ones fade out
+	if kind == "None" or kind == false then return end
 	local def = KINDS[kind]
 	if not def then kind, def = "Snow", KINDS.Snow end
 	local color = (Snow.Kind == "Theme" and TingUI.Style.ParticleColor) or Color3.new(1, 1, 1)
@@ -5857,9 +6436,8 @@ local function BuildFlakes()
 			Sparkles = Color3.fromRGB(255, 214, 120), Crystals = Color3.fromRGB(215, 240, 255),
 			Neon = Color3.fromRGB(0, 229, 255), Drafting = Color3.fromRGB(210, 230, 255), FilmGrain = Color3.fromRGB(230, 230, 230),
 			Sparks = Color3.fromRGB(255, 210, 90), Bokeh = Color3.fromRGB(180, 210, 255), Bats = Color3.fromRGB(130, 90, 170),
-			Leaves = Color3.fromRGB(200, 110, 50), Galaxy = Color3.fromRGB(225, 228, 255), Grit = Color3.fromRGB(255, 196, 120),
-			MLG = Color3.fromRGB(255, 140, 0), Holo = Color3.fromRGB(120, 230, 255), Static = Color3.fromRGB(255, 200, 120),
-			MarineSnow = Color3.fromRGB(170, 210, 255) })[kind] or color
+			Leaves = Color3.fromRGB(200, 110, 50), Galaxy = Color3.fromRGB(225, 228, 255),
+			Holo = Color3.fromRGB(120, 230, 255), Static = Color3.fromRGB(255, 200, 120) })[kind] or color
 	end
 	local L = { Kind = kind, Def = def, Color = color, Flakes = {}, Alpha = 0, Target = 1,
 		Folder = New("Frame", { BackgroundTransparency = 1, Size = UDim2.fromScale(1, 1), ZIndex = 1, Parent = BackdropFrame }) }
@@ -5994,8 +6572,8 @@ end)
 --   Grid + GridColor, Vignette, SurfaceTransparency, Blur, AccentCycle + CycleSpeed, AuraHard, AuraRotation,
 --   Texture = { {Image, Transparency, Drift, Zoom, Pulse, Color, Mode = "Fill" | "Lamp", Flicker}, ... } (art inside windows),
 --   BackdropTexture = {Image, Transparency, Drift, Zoom} (art across the screen), Glitch (bool: title + screen glitches),
---   Scene = "Hologram" | "Circuit" | "Abyss" | your own (animated artwork around windows that reacts to clicks; see Scenes),
---   scene colours: TraceColor + EnergyColor (Circuit), JellyColors + RayColor + PlanktonColor (Abyss)
+--   Scene = "Hologram" | "Circuit" | "Ocean" | your own (animated artwork around windows that reacts to clicks; see Scenes),
+--   scene colours: TraceColor + EnergyColor (Circuit), WaterColor + FoamColor (Ocean)
 -- fade (seconds): corners, glow, fonts, surfaces and particles all blend instead of switching.
 ------------------------------------------------------------------------------
 
@@ -6519,6 +7097,9 @@ function TingUI:_InitDock(W, which)
 		Callback = function() TingUI:SetHotkeysVisible(not TingUI.ShowHotkeys) end, Active = function() return TingUI.ShowHotkeys end })
 	self:AddDockButton({ Icon = "snow", Tooltip = "Particles", Order = 34, Visible = want.particles ~= nil, _builtIn = true,
 		Callback = function() TingUI:SetSnow(not Snow.Enabled) end, Active = function() return Snow.Enabled end })
+	self:AddDockButton({ Icon = "bell", Tooltip = "Notifications", Order = 36, Visible = (want.notifications or want.inbox) ~= nil, _builtIn = true,
+		Callback = function() TingUI:ToggleNotificationCenter() end,
+		Active = function() return TingUI._center ~= nil and TingUI._center.Frame.Parent ~= nil and TingUI._center.Frame.Visible end })
 	self:AddDockButton({ Icon = "command", Tooltip = "Command palette (Ctrl+K)", Order = 40, Visible = want.palette ~= nil, _builtIn = true,
 		Callback = function() TingUI:TogglePalette() end, Active = function() return Palette.Open end })
 end
@@ -7142,6 +7723,118 @@ function TingUI:CreateWindow(o)
 	AccentOverlay(under, 1, true)
 	Glow(under, "Accent", 1, true):Set(0.8)
 	local indTween = nil
+
+	-- Tabs always fit. A theme with a wide font (or a narrow window, or many tabs) used to push the last tabs past the
+	-- edge. Now the padding tightens first, then the gap, then the labels shrink a little (never below 84%), and only
+	-- if that still isn't enough does the bar scroll: the active tab is slid into view and soft fades mark the edges.
+	local fadeL = New("Frame", { Size = UDim2.new(0, 22, 1, 0), Position = tabbar.Position, BackgroundTransparency = 1, Visible = false,
+		ZIndex = 3, Parent = main, Theme = { BackgroundColor3 = "Background" } },
+		{ New("UIGradient", { Transparency = NumberSequence.new(0, 1) }) })
+	local fadeR = New("Frame", { AnchorPoint = Vector2.new(1, 0), Size = UDim2.new(0, 22, 1, 0), Position = UDim2.new(1, -17, 0, 49),
+		BackgroundTransparency = 1, Visible = false, ZIndex = 3, Parent = main, Theme = { BackgroundColor3 = "Background" } },
+		{ New("UIGradient", { Transparency = NumberSequence.new(1, 0) }) })
+	fadeL.Size = UDim2.fromOffset(22, 28)
+	fadeR.Size = UDim2.fromOffset(22, 28)
+	local tabLayout = tabbar:FindFirstChildOfClass("UIListLayout")
+	local fitQueued, fitting = false, false
+	local function TabEdges()
+		local scrolls = tabbar.AbsoluteCanvasSize.X > tabbar.AbsoluteSize.X + 1
+		local x = tabbar.CanvasPosition.X
+		local maxX = math.max(0, tabbar.AbsoluteCanvasSize.X - tabbar.AbsoluteSize.X)
+		fadeL.Visible = scrolls and x > 1
+		fadeR.Visible = scrolls and x < maxX - 1
+		fadeL.BackgroundTransparency = 0
+		fadeR.BackgroundTransparency = 0
+	end
+	function W:_FitTabs()
+		if fitting then return end
+		fitting = true
+		local sc = (W._scale and W._scale.Scale) or TingUI.Scale
+		if sc <= 0 then sc = 1 end
+		local avail = tabbar.AbsoluteSize.X / sc
+		local list = {}
+		for _, t in ipairs(W.Tabs) do if t.Button.Parent and t.Button.Visible then table.insert(list, t) end end
+		local n = #list
+		if n > 0 and avail > 20 then
+			-- every label's full-size width (a shrunk label's width scales back up by its shrink factor)
+			local texts = 0
+			for _, t in ipairs(list) do
+				local b = t.Button
+				local tb = b.TextBounds
+				local w = (tb and tb.X > 0) and (tb.X / sc) or (#tostring(b.Text) * 7)
+				texts = texts + w / (b:GetAttribute("TSK") or 1)
+			end
+			local gap = 5
+			local pad = math.floor(math.clamp((avail - texts - gap * (n - 1)) / (2 * n), 4, 11))
+			local need = texts + pad * 2 * n + gap * (n - 1)
+			if need > avail then
+				gap = 2
+				need = texts + pad * 2 * n + gap * (n - 1)
+			end
+			local k = 1
+			if need > avail then
+				k = math.clamp((avail - pad * 2 * n - gap * (n - 1)) / math.max(texts, 1), 0.84, 1)
+			end
+			for _, t in ipairs(list) do
+				local b = t.Button
+				local p2 = b:FindFirstChildOfClass("UIPadding")
+				if p2 and p2.PaddingLeft.Offset ~= pad then
+					p2.PaddingLeft = UDim.new(0, pad)
+					p2.PaddingRight = UDim.new(0, pad)
+				end
+				if math.abs((b:GetAttribute("TSK") or 1) - k) > 0.01 then
+					b:SetAttribute("TSK", k < 0.995 and k or nil)
+					ApplyFont(b, "SemiBold")
+				end
+			end
+			if tabLayout and tabLayout.Padding.Offset ~= gap then tabLayout.Padding = UDim.new(0, gap) end
+		end
+		fitting = false
+		task.defer(function()
+			TabEdges()
+			if W._ScrollTabIntoView then W._ScrollTabIntoView(true) end
+		end)
+	end
+	local function QueueFit()
+		if fitQueued then return end
+		fitQueued = true
+		task.defer(function()
+			fitQueued = false
+			if not TingUI.Unloaded then W:_FitTabs() end
+		end)
+	end
+	W._QueueFitTabs = QueueFit
+	Connect(tabbar:GetPropertyChangedSignal("AbsoluteSize"), QueueFit)
+	Connect(tabbar:GetPropertyChangedSignal("CanvasPosition"), TabEdges)
+	Connect(tabbar:GetPropertyChangedSignal("AbsoluteCanvasSize"), TabEdges)
+	table.insert(Refreshers, QueueFit)
+	-- keep the active tab fully visible when the bar has to scroll
+	function W._ScrollTabIntoView(instant)
+		local t = W.Active
+		if not t or not t.Button.Parent then return end
+		if tabbar.AbsoluteCanvasSize.X <= tabbar.AbsoluteSize.X + 1 then
+			if tabbar.CanvasPosition.X ~= 0 then tabbar.CanvasPosition = Vector2.new(0, 0) end
+			return
+		end
+		local sc = (W._scale and W._scale.Scale) or TingUI.Scale
+		if sc <= 0 then sc = 1 end
+		local b = t.Button
+		local left = (b.AbsolutePosition.X - tabbar.AbsolutePosition.X) / sc
+		local right = left + b.AbsoluteSize.X / sc
+		local view = tabbar.AbsoluteSize.X / sc
+		local x = tabbar.CanvasPosition.X
+		local goal = x
+		if left < 24 then goal = x + left - 24 elseif right > view - 24 then goal = x + right - view + 24 end
+		local maxX = math.max(0, (tabbar.AbsoluteCanvasSize.X - tabbar.AbsoluteSize.X) / sc)
+		goal = math.clamp(goal, 0, maxX)
+		if math.abs(goal - x) < 0.5 then return end
+		if instant then
+			tabbar.CanvasPosition = Vector2.new(goal, 0)
+		else
+			TweenService:Create(tabbar, TweenInfo.new(0.3, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), { CanvasPosition = Vector2.new(goal, 0) }):Play()
+		end
+	end
+
 	local function Ghost(t)
 		if not t or t == W.Active or not t.Button.Parent then
 			Tween(ghost, 0.18, { BackgroundTransparency = 1 })
@@ -7331,6 +8024,7 @@ function TingUI:CreateWindow(o)
 		local mine = TabToken
 		Ghost(nil)
 		self:_StyleTabs(true)
+		if self._ScrollTabIntoView then self._ScrollTabIntoView(false) end
 		local function Finish()
 			for _, x in ipairs(self.Tabs) do
 				if x ~= t then x.Page.Visible = false x.Page.Position = UDim2.new() end
@@ -7723,6 +8417,7 @@ function TingUI:CreateWindow(o)
 		function T:Destroy()
 			for i, t in ipairs(W.Tabs) do if t == T then table.remove(W.Tabs, i) break end end
 			T.Button:Destroy()
+			W._QueueFitTabs()
 			T.Page:Destroy()
 			if W.Active == T then
 				W.Active = nil
@@ -7733,6 +8428,7 @@ function TingUI:CreateWindow(o)
 		end
 
 		Connect(T.Button.MouseButton1Click, function() W:SelectTab(T) end)
+		Connect(T.Button.InputBegan, function(i) Pointer.Calibrate(T.Button, i) end)
 		Connect(T.Button.MouseEnter, function()
 			if W.Active ~= T then Tween(T.Button, 0.12, { TextColor3 = TingUI.Theme.Label }) end
 			Ghost(T)
@@ -7742,6 +8438,9 @@ function TingUI:CreateWindow(o)
 			Ghost(nil)
 		end)
 		Connect(T.Button:GetPropertyChangedSignal("AbsoluteSize"), function() if W.Active == T then MoveIndicator(true) end end)
+		Connect(T.Button:GetPropertyChangedSignal("TextBounds"), W._QueueFitTabs)
+		Connect(T.Button:GetPropertyChangedSignal("Visible"), W._QueueFitTabs)
+		W._QueueFitTabs()
 		Connect(T.Button:GetPropertyChangedSignal("AbsolutePosition"), function() if W.Active == T then MoveIndicator(true) end end)
 		table.insert(W.Tabs, T)
 		if not W.Active then W:SelectTab(T) task.defer(function() MoveIndicator(true) end) end
@@ -7910,23 +8609,20 @@ function TingUI:CreateWindow(o)
 		end)
 		local DESCRIPTIONS = {
 			Lavender = "The reference look: soft lilac, snow.",
-			Ocean = "Rounder, deep-water glow, rising bubbles.",
+			Ocean = "The window floats in water: rolling waves that rise toward your cursor, caustic light, a tide that washes over on switching, click ripples, and bubbles that pop at depth, at the surface or when you touch them.",
 			Rose = "Extra round and glowy, drifting petals.",
 			Sunset = "Warm glow from below, rising embers.",
 			Mono = "Sharp corners, no glow, monospace, scanlines, glyph rain.",
 			Frost = "Pale ice, thin rounded type, a frosted double border, spinning ice crystals.",
 			Royal = "Midnight navy and gold, serif type, a gilded double border, glinting sparkles.",
-			Candy = "Bubblegum pastels, a soft rounded font, extra-round shapes, tumbling confetti.",
 			Cosmos = "Deep space: drifting nebula clouds over a parallax star layer, a turning aurora border, twinkling stars, shooting stars and comets.",
 			Storm = "Slate and steel, condensed type, slanted rain and distant lightning.",
 			Blueprint = "Drafting paper: navy blue, a white grid, a ruled double border, handwritten labels, drafting marks.",
-			Hazard = "Industrial yellow and black, a striped warning-tape border, square corners, welding sparks.",
-			Glass = "See-through frosted surfaces over a blurred world, soft rounded type, drifting bokeh lights.",
+			Hazard = "Industrial yellow and black, a striped warning-tape border, square corners.",
+			Serotonin = "A crisp classic cheat-menu look: square corners, a hairline teal outline in a dark teal frame, teal light from the top, plain type. No particles.",
+			Glass = "See-through frosted surfaces over a blurred world, soft rounded type, real lens bokeh drifting at different depths with a glint now and then.",
 			Hologram = "A cyan light projection: brackets lock on as it opens, a scan line sweeps each page, the image tears now and then, clicks ripple out as hexagons, a projector beam glows underneath.",
 			Circuit = "The window is a chip on a circuit board: copper traces run from its pins, current races along them, pins warm up under your cursor and every click fires a burst down the nearest traces.",
-			Abyss = "The deep sea: light shafts from far above, bioluminescent jellyfish pulsing around the window, plankton that glow as your cursor passes and bloom when you click.",
-			Criminality = "A grimy brick alley under a flickering street lamp, blood-red accents, glitching title, dust in the light, a glint along a blade.",
-			MLG = "Comic font, a fast rainbow border, rainbow accents, spinning doritos, hitmarkers and rainbow words. WOW.",
 		}
 		local desc
 		local presetDrop = th:AddDropdown({ Text = "Preset", Values = names, Default = PresetLabel(TingUI.Preset), Flag = "TingUI_Preset",
@@ -7984,6 +8680,41 @@ function TingUI:CreateWindow(o)
 			local n = TingUI:Notify({ Title = "Loading", Content = "Fetching your config...", Type = "Loading" })
 			task.delay(2, function() n:Update({ Title = "Done", Content = "Config loaded.", Type = "Success" }) end)
 		end }):AddSubButton({ Text = "Plain", Callback = function() TingUI:Notify("test notif") end })
+		tests:AddButton({ Text = "Download", Description = "A download with a live progress bar; the arrow keeps dropping into the tray until it's done.", Callback = function()
+			local n = TingUI:Notify({ Title = "Downloading", Content = "assets.pak  0 / 24 MB", Type = "Download", Value = 0 })
+			task.spawn(function()
+				for i = 1, 24 do
+					task.wait(0.12)
+					if n.Closed then return end
+					n:SetProgress(i / 24, string.format("assets.pak  %d / 24 MB", i))
+				end
+				n:Update({ Title = "Downloaded", Content = "assets.pak is ready.", Type = "Success", Value = 1, Duration = 4 })
+			end)
+		end }):AddSubButton({ Text = "Undo", Description = "Something that can be taken back for a few seconds.", Callback = function()
+			TingUI:Notify({ Title = "Config deleted", Content = "\"pvp\" was removed.", Type = "Warning",
+				Undo = function() TingUI:Notify({ Content = "Restored \"pvp\".", Type = "Success" }) end,
+				OnCommit = function() end })
+		end })
+		tests:AddButton({ Text = "Message", Description = "A message you can answer right from the card.", Callback = function()
+			TingUI:Notify({ Title = "builderman", Content = "gg, want to run it back?", Type = "Message",
+				Input = { Placeholder = "Reply...", Button = "Send", Callback = function(text) TingUI:Notify({ Title = "Sent", Content = text, Type = "Success" }) end } })
+		end }):AddSubButton({ Text = "Achievement", Description = "A gold card with a spin-in star, sparks and a double shine.", Callback = function()
+			TingUI:Notify({ Title = "Achievement unlocked", Content = "Opened every tab.", Type = "Achievement", Duration = 6 })
+		end })
+		tests:AddButton({ Text = "Details + copy", Description = "An error with the full details tucked away and a copy button.", Callback = function()
+			TingUI:Notify({ Title = "Request failed", Content = "The server answered 503.", Type = "Error", Duration = 10,
+				Details = "POST /api/v1/sync\nstatus: 503 Service Unavailable\nretry-after: 30\nrequest-id: 7f3c-91aa-02de", Copy = "request-id: 7f3c-91aa-02de" })
+		end }):AddSubButton({ Text = "Merge x3", Description = "The same notification three times becomes one card with a counter.", Callback = function()
+			for i = 1, 3 do task.delay((i - 1) * 0.35, function() TingUI:Notify({ Title = "Player joined", Content = "The server is filling up.", Type = "Friend" }) end) end
+		end })
+		tests:AddButton({ Text = "More kinds", Description = "Security, Update, Heart and Upload, each with its own animation.", Callback = function()
+			TingUI:Notify({ Title = "New login", Content = "Your account was used on a new device.", Type = "Security", Actions = { { Text = "It was me", Style = "Primary" }, { Text = "Secure it", Style = "Danger" } } })
+			task.delay(0.25, function() TingUI:Notify({ Title = "Update ready", Content = "Restart to apply.", Type = "Update" }) end)
+			task.delay(0.5, function() TingUI:Notify({ Title = "Liked", Content = "Someone liked your build.", Type = "Heart" }) end)
+			task.delay(0.75, function() TingUI:Notify({ Title = "Uploading", Content = "Saving your config to the cloud...", Type = "Upload", Value = 0.4 }) end)
+		end }):AddSubButton({ Text = "History", Description = "Every notification so far, newest first.", Callback = function()
+			TingUI:OpenNotificationCenter()
+		end })
 		tests:AddButton({ Text = "With actions", Description = "A notification with buttons inside it.", Callback = function()
 			TingUI:Notify({ Title = "Config changed", Content = "You switched to a new theme.", Type = "Info", Duration = 8,
 				Actions = {
@@ -8257,7 +8988,7 @@ do
 			or (type(http) == "table" and has(http.request)) or (type(fluxus) == "table" and has(fluxus.request)),
 		HiddenGui = has(gethui),
 		Studio = RunService:IsStudio(),
-		Version = "0.0.7",
+		Version = "0.0.8",
 	}
 end
 
@@ -8498,7 +9229,7 @@ do local function Setup()
 		elseif kind == FONT then
 			return ValidFont(v) and v or nil
 		elseif kind == PARTICLES then
-			return (type(v) == "string" and v ~= "Theme" and table.find(TingUI.ParticleKinds, v)) and v or nil
+			return (type(v) == "string" and v ~= "Theme" and (v == "None" or table.find(TingUI.ParticleKinds, v))) and v or nil
 		elseif kind == SCENE then
 			return (type(v) == "string" and TingUI.SceneKinds[v] ~= nil) and v or nil
 		elseif kind == LAYER then
@@ -8756,7 +9487,7 @@ TingUI.API = {
 -- It edits a draft (the twelve base colours, the status colours and the whole style) and pushes it to SetTheme and
 -- SetStyle a few times a second while you drag. A theme change from anywhere else reloads the draft.
 TingUI.FontNames = { "Inter", "Gotham", "Mono", "Michroma", "Jura", "Merriweather", "FredokaOne", "Arcade", "TitilliumWeb", "Oswald", "Ubuntu",
-	"Nunito", "SourceSans", "PatrickHand", "SpecialElite", "Sarpanch", "Creepster", "Fondamento", "RobotoCondensed", "Cartoon", "JosefinSans" }
+	"Nunito", "SourceSans", "PatrickHand", "SpecialElite", "Sarpanch", "Creepster", "Fondamento", "RobotoCondensed", "Cartoon", "JosefinSans", "Arial" }
 do local function Setup()
 	local BASE = { "Accent", "Background", "Group", "GroupBorder", "Control", "ControlHover", "Border", "Outline", "Text", "Label", "TextDim", "TextMuted" }
 	local STATUS = { "Success", "Warning", "Danger", "Info", "Caution", "Error" }
@@ -9052,7 +9783,7 @@ do local function Setup()
 			Description = "Particles drift behind the UI while a window is open. This is the same switch as in the config tab.",
 			Callback = Quiet(function(v) TingUI:SetSnow(v) end) })
 		Sync(function() showParts:Set(Snow.Enabled, true) end)
-		local kinds = {}
+		local kinds = { "None" }
 		for _, k in ipairs(TingUI.ParticleKinds) do if k ~= "Theme" then table.insert(kinds, k) end end
 		Choice(parts, "Particles", "Particle style", kinds, "Snow", "The particles this theme brings.", function()
 			-- the config tab can pin a particle style over the theme's; editing the theme's means showing it
@@ -9072,7 +9803,7 @@ do local function Setup()
 		end
 
 		local scene = motionTab:AddGroup({ Title = "Scene", Side = "Right" })
-		local sceneRows = { Circuit = {}, Abyss = {}, Hologram = {}, Other = {} }
+		local sceneRows = { Circuit = {}, Ocean = {}, Hologram = {}, Other = {} }
 		local function ShowSceneRows()
 			local cur = St.Draft.Style.Scene
 			local which = cur == nil and "" or (sceneRows[cur] and cur or "Other")
@@ -9097,10 +9828,8 @@ do local function Setup()
 		end)
 		table.insert(sceneRows.Circuit, ColorFlag(scene, "TraceColor", "Copper traces", "The traces' colour. Off uses the border colour.", Draft("Border")))
 		table.insert(sceneRows.Circuit, ColorFlag(scene, "EnergyColor", "Current", "The pulses racing along the traces. Off uses the accent.", Draft("Accent")))
-		table.insert(sceneRows.Abyss, ColorList(scene, "JellyColors", "Jellyfish", "The jellyfish colours. Off uses the accent.", 3, false,
-			function() return { St.Draft.Colors.Accent } end))
-		table.insert(sceneRows.Abyss, ColorFlag(scene, "RayColor", "Light shafts", "The light falling from above. Off uses the text colour.", Draft("Text")))
-		table.insert(sceneRows.Abyss, ColorFlag(scene, "PlanktonColor", "Plankton", "The glowing plankton. Off uses the accent.", Draft("Accent")))
+		table.insert(sceneRows.Ocean, ColorFlag(scene, "WaterColor", "Water", "The waves along the bottom and the tide that sweeps over on a theme switch. Off uses the accent.", Draft("Accent")))
+		table.insert(sceneRows.Ocean, ColorFlag(scene, "FoamColor", "Foam", "The bright crest on each wave, the ripples and the caustic light. Off uses the text colour.", Draft("Text")))
 		table.insert(sceneRows.Hologram, scene:AddLabel("Hologram draws in the accent colour.", { Dim = true }))
 		table.insert(sceneRows.Other, scene:AddLabel("This scene reads its own style keys. Set them in code; share codes carry their colours and numbers.", { Dim = true }))
 		ShowSceneRows()
@@ -10116,6 +10845,7 @@ function TingUI:Configure(o, initial)
 	if o.Theme then
 		-- one of your saved themes (Theme Studio, ImportTheme) works here too
 		if not self.Presets[o.Theme] and self._LoadSavedThemes then pcall(self._LoadSavedThemes, self, true) end
+		if not self.Presets[o.Theme] and self.Presets[PresetAlias(o.Theme)] then o = table.clone(o) o.Theme = PresetAlias(o.Theme) end
 		if self.Presets[o.Theme] then
 			local fade = self.ThemeTransition
 			if initial then self.ThemeTransition = 0 end
@@ -10244,8 +10974,6 @@ RequestTexture = function(name)
 		if TextureImages[name] and not TingUI.Unloaded then
 			for _, fn in ipairs(Refreshers) do pcall(fn) end
 			pcall(StyleVignette)
-			-- sprite-based particles pick up their image with a crossfade
-			if name == "dorito" and CurrentKind() == "MLG" then pcall(function() TingUI:_RefreshParticles() end) end
 		end
 	end)
 end

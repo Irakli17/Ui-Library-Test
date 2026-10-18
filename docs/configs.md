@@ -20,7 +20,7 @@
 | **HUD Positions** | Return-to-place on or off, the delay, which pieces return (dock, hotkey list, watermark), Return now, Set as home |
 | **Layout** | Dropdowns for tabs, sections, panels and dock buttons. Tick or untick entries to show or hide them. |
 | **Theme** | A preset dropdown with a one-line description of each look, the theme fade time, a colour picker for each theme colour, a reset button, and **Open Theme Studio** with **Use in every script** |
-| **Tests** | Each notification type, Loading to Done, action buttons, a deliberate script error and a hold-to-confirm dialog |
+| **Tests** | Each notification type, Loading to Done, a download with live progress, Undo, a reply box, details with copy, an achievement, merging, the new kinds, the notification history, action buttons, a deliberate script error and a hold-to-confirm dialog |
 | **Configs** | Save, load, delete and autoload |
 | **Credits** | Optional: `Window:AddConfigTab("Config", { Credits = { ...entries } })` |
 
