@@ -3139,9 +3139,12 @@ function TingUI:Notify(o, duration, fromShell)
 
 		-- entrance: every type has its own motion
 		anim.t = 0
-		anim.kind = (kind and kind.Icon) or (opts.Image and "image") or "bell"
+		-- a picture keeps its place: the type motions (drop-ins, spins) move the glyph to the badge centre, which would
+		-- shove a picture half out of its frame, so a picture just pops in as a whole
+		local picture = type(opts.Image) == "string" and opts.Image ~= ""
+		anim.kind = (picture and "image") or (kind and kind.Icon) or "bell"
 		anim.rays = nil
-		local sc = New("UIScale", { Scale = 0.3, Parent = glyph })
+		local sc = New("UIScale", { Scale = 0.3, Parent = picture and iconFrame or glyph })
 		TweenService:Create(sc, TweenInfo.new(0.5, Enum.EasingStyle.Back, Enum.EasingDirection.Out), { Scale = 1 }):Play()
 		local k = anim.kind
 		if k == "check" then
