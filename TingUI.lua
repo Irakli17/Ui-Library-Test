@@ -2968,10 +2968,18 @@ function TingUI:Notify(o, duration, fromShell)
 			glyph = New("ImageLabel", { Size = UDim2.fromScale(1, 1), Image = opts.Image, BackgroundTransparency = 0, Parent = iconFrame,
 				Theme = { BackgroundColor3 = "Control" } }, { CornerFixed(9), New("UIStroke", { Color = (kind and color or T.Outline), Thickness = 1, Transparency = 0.3 }) })
 			if kind and kind.Icon ~= "spinner" then
-				local mini = StatusBadge(iconFrame, kind, 14)
-				mini.AnchorPoint = Vector2.new(1, 1)
-				mini.Position = UDim2.new(1, 3, 1, 3)
-				mini.ZIndex = 5
+				-- the type badge sits inside the picture's bottom-right corner, ringed in the card colour so it
+				-- reads as a corner badge (it used to hang half outside the picture and look misplaced)
+				local mini, miniPlate, miniGlyph = StatusBadge(iconFrame, kind, 16)
+				mini.AnchorPoint = Vector2.new(0.5, 0.5)
+				mini.Position = UDim2.new(1, -3, 1, -3)
+				mini.ZIndex = 6
+				miniPlate.ZIndex = 6
+				miniGlyph.ZIndex = 7
+				for _, d in ipairs(miniGlyph:GetDescendants()) do if d:IsA("GuiObject") then d.ZIndex = 7 end end
+				local plateRing = New("Frame", { AnchorPoint = Vector2.new(0.5, 0.5), Position = UDim2.fromScale(0.5, 0.5), Size = UDim2.fromOffset(19, 19),
+					ZIndex = 5, Parent = mini, Theme = { BackgroundColor3 = "Background" } }, { CornerFixed(10) })
+				plateRing.ZIndex = 5
 			end
 		elseif kind then
 			local holderB
