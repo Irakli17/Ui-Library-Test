@@ -12,6 +12,7 @@
 - Open lists stay attached to their box while the window is dragged or its page scrolls, and close by themselves when the box scrolls out of view or is hidden.
 
 **Fixes**
+- Loading with `loadstring` failed with "attempt to call a nil value" on executors that compile without optimisation: the file used more than Luau's 200 local slots there. Three self-contained sections now keep their helpers in blocks, leaving plenty of room, and `tests/run.sh` checks an unoptimised compile.
 - Switching tabs could leave the page dimmed (a dark veil stayed behind after a fast double switch, or a switch interrupted by hiding the window). The veil now always clears.
 - The notification history window has a close button (the cross in its header, a Close button in its top bar, or Esc).
 

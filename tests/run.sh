@@ -22,3 +22,12 @@ pack() { printf '%s = [=====[\n' "$1"; cat "$2"; printf ']=====],\n'; }
 
 trap "rm -f tests/.sources.lua" EXIT
 "$LUAU" tests/run.lua
+
+# Executors compile loadstring code without optimisation (-O0), where every local takes a register: Build must stay
+# under Luau's 200-local limit there too, or loadstring returns nil ("attempt to call a nil value").
+LUAU_COMPILE="${LUAU_COMPILE:-luau-compile}"
+if command -v "$LUAU_COMPILE" >/dev/null 2>&1; then
+	"$LUAU_COMPILE" -O0 TingUI.lua >/dev/null && echo "PASS  compiles at -O0 (executor loadstring)"
+else
+	echo "skip  -O0 compile check (no luau-compile on PATH)"
+fi

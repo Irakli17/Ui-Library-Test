@@ -3281,6 +3281,8 @@ Overlay = New("Frame", {
 
 TingUI.Gui = Gui
 
+local ClosePopup, ShowPopup, Fader, HideHint, AttachHint, AttachTooltip
+do
 local PopupCatcher = New("TextButton", {
 	Name = "PopupCatcher", BackgroundTransparency = 1, Size = UDim2.fromScale(1, 1), Visible = false, ZIndex = 1,
 	Active = true, Parent = Overlay,
@@ -3289,7 +3291,7 @@ local PopupCatcher = New("TextButton", {
 local PopupInfoOpen = TweenInfo.new(0.22, Enum.EasingStyle.Quint, Enum.EasingDirection.Out)
 local PopupInfoClose = TweenInfo.new(0.12, Enum.EasingStyle.Quad, Enum.EasingDirection.In)
 
-local function ClosePopup()
+function ClosePopup()
 	PopupCatcher.Visible = false
 	if OpenPopup then
 		local p = OpenPopup
@@ -3360,7 +3362,7 @@ local function TriggerShown(trigger)
 	end
 	return true
 end
-local function ShowPopup(frame, trigger, onClose)
+function ShowPopup(frame, trigger, onClose)
 	ClosePopup()
 	if HideHintNow then HideHintNow() end
 	local sc = frame:FindFirstChildOfClass("UIScale")
@@ -3398,7 +3400,7 @@ end)
 -- positions), so hints, notifications and dialogs use this instead. At rest (Alpha = 0) it lets go of the tree
 -- completely, so elements can change their own transparency freely. Mark an object with the attribute NoFade
 -- when it animates its own transparency.
-local Fader
+-- (declared above)
 do
 local FADE_PROPS = {
 	TextLabel = { "BackgroundTransparency", "TextTransparency" }, TextButton = { "BackgroundTransparency", "TextTransparency" },
@@ -3570,7 +3572,7 @@ local function ShowHint(anchor, title, body)
 	end)
 end
 
-local function HideHint(now)
+function HideHint(now)
 	Hint.Token = Hint.Token + 1
 	local mine = Hint.Token
 	task.delay(now == true and 0 or 0.07, function()
@@ -3584,7 +3586,7 @@ HideHintNow = function() HideHint(true) end
 TingUI.ShowHint, TingUI.HideHint = function(_, anchor, title, body) ShowHint(anchor, title, body) end, function() HideHint() end
 
 -- title / body may be strings or functions (read each time the hint opens)
-local function AttachHint(inst, title, body)
+function AttachHint(inst, title, body)
 	Connect(inst.MouseEnter, function()
 		local t = type(title) == "function" and title() or title
 		local b = type(body) == "function" and body() or body
@@ -3598,12 +3600,13 @@ local function AttachHint(inst, title, body)
 		end
 	end)
 end
-local function AttachTooltip(inst, text) AttachHint(inst, nil, text) end
+function AttachTooltip(inst, text) AttachHint(inst, nil, text) end
 
 ------------------------------------------------------------------------------
 -- Option base (shared by every element)
 ------------------------------------------------------------------------------
 
+end -- (block: keeps its helpers out of Build's local slots)
 local OptBase = {}
 OptBase.__index = OptBase
 
@@ -5061,8 +5064,10 @@ function TingUI:ToggleNotificationCenter()
 	return self:OpenNotificationCenter(not open)
 end
 
+local Watermark
+do
 local Fps, WatermarkOverride, WatermarkTitle = 60, nil, nil
-local Watermark = New("Frame", {
+Watermark = New("Frame", {
 	Position = UDim2.fromOffset(12, 12), Size = UDim2.fromOffset(0, 32), AutomaticSize = Enum.AutomaticSize.X,
 	ZIndex = 5, Parent = Gui, Theme = { BackgroundColor3 = "Background" },
 }, { Corner(9), Stroke(nil, true), Pad(11, 0, 14, 0),
@@ -5254,6 +5259,7 @@ end)
 -- Color picker addon
 ------------------------------------------------------------------------------
 
+end -- (block: keeps its helpers out of Build's local slots)
 local function MakeColorPicker(holder, o, owner)
 	local C = NewOpt("ColorPicker", o)
 	local default = o.Default or Color3.fromRGB(255, 255, 255)
@@ -8549,6 +8555,7 @@ end
 -- Command palette: search every option, see its path and value (Ctrl+K or the dock button)
 ------------------------------------------------------------------------------
 
+do
 local Palette = { Open = false, Results = {}, Selected = 1, Rows = {} }
 local PaletteDim, PaletteFrame, PaletteInput, PaletteList
 local PaletteRefresh
@@ -9408,6 +9415,7 @@ end Setup() end
 -- Window
 ------------------------------------------------------------------------------
 
+end -- (block: keeps its helpers out of Build's local slots)
 local function PillSpec(v, default)
 	if type(v) == "string" then return { Text = v, Color = default } end
 	if type(v) == "table" then return { Text = v.Text, Color = v.Color or default } end
