@@ -3,7 +3,7 @@
 
 	local TingUI = loadstring(game:HttpGet("https://raw.githubusercontent.com/Irakli17/Ui-Library-Test/main/Loader.lua"))()({
 		Id = "MyHub",          -- any TingUI load option (Id, Theme, Folder, Font, ...)
-		Version = "main",      -- branch or tag to load, e.g. "v0.0.8-stable" to pin a release
+		Version = "main",      -- branch or tag to load, e.g. "v0.0.9-stable" to pin a release
 	})
 
 	What it does:

@@ -22,7 +22,7 @@ local LocalPlayer = Players.LocalPlayer
 local Window = TingUI:CreateWindow({
 	Title = "TingUI Interface Suite",
 	Tag = "Pro",                         -- green pill
-	Version = "v0.0.8",                  -- red pill
+	Version = "v0.0.9",                  -- red pill
 	Subtitle = "Example Game",
 	Footer = "discord.gg/yourserver",
 	WatermarkTitle = "TingUI V2",
@@ -169,6 +169,76 @@ Tests:AddButton({ Text = "Pinned", Description = "Never times out. Hover any car
 	TingUI:Notify({ Title = "Server restarting", Content = "In 5 minutes. This stays until you close it.", Type = "Update", Persistent = true })
 end }):AddSubButton({ Text = "History", Description = "Every notification so far, newest first (also the bell in the dock).", Callback = function()
 	TingUI:OpenNotificationCenter()
+end })
+-- game events: each type has its own animated badge (twenty of them; see docs/elements.md for the full list)
+local function Pair(a, b)
+	Tests:AddButton({ Text = a[1], Description = a[2], Callback = a[3] }):AddSubButton({ Text = b[1], Description = b[2], Callback = b[3] })
+end
+local function Run(n, finish)
+	task.spawn(function()
+		for i = 1, 10 do
+			task.wait(0.2)
+			if n.Closed then return end
+			n:SetProgress(i / 10)
+		end
+		n:Update(finish)
+	end)
+end
+Pair({ "Teleport", "The pin drops onto its spot and pings it.", function()
+	TingUI:Notify({ Title = "Teleported", Content = "Moved to the safe zone.", Type = "Teleport" })
+end }, { "Server hop", "The globe spins and a dot hops round it while it searches.", function()
+	Run(TingUI:Notify({ Title = "Server hop", Content = "Looking for a quieter server...", Type = "ServerHop", Value = 0 }),
+		{ Title = "Server found", Content = "9 / 30 players. Joining...", Type = "ServerHop", Value = 1, Duration = 4 })
+end })
+Pair({ "Reward", "The box shakes, pops open and throws confetti.", function()
+	TingUI:Notify({ Title = "Daily reward", Content = "You got 3 crates.", Type = "Reward", Actions = { { Text = "Open", Style = "Primary" } } })
+end }, { "Currency", "The coin flips three times and glints.", function()
+	TingUI:Notify({ Title = "+250 coins", Content = "Balance: 4,180.", Type = "Currency" })
+end })
+Pair({ "Level up", "The trophy rises while chevrons climb past it.", function()
+	TingUI:Notify({ Title = "Level 24", Content = "1,450 / 12,000 XP to the next one.", Type = "LevelUp", Value = 0.12, Duration = 5 })
+end }, { "Timer", "A stopwatch hand sweeps; it ticks every second.", function()
+	TingUI:Notify({ Title = "Boss in 30 seconds", Content = "Head to the arena.", Type = "Timer", Duration = 8 })
+end })
+Pair({ "Connection", "The signal bars light one by one, then hold.", function()
+	Run(TingUI:Notify({ Title = "Reconnecting", Content = "The connection dropped. Trying again...", Type = "Connection", Value = 0 }),
+		{ Title = "Connected", Content = "Ping 48 ms.", Type = "Connection", Value = 1, Duration = 4 })
+end }, { "Target", "Brackets close in and lock on.", function()
+	TingUI:Notify({ Title = "Target locked", Content = "Nearest player, 42 studs away.", Type = "Target" })
+end })
+Pair({ "Invite", "The envelope slides in and an unread dot pops on.", function()
+	TingUI:Notify({ Title = "Party invite", Content = "builderman invited you to their party.", Type = "Invite", Duration = 10,
+		Actions = { { Text = "Join", Style = "Primary" }, { Text = "Decline" } } })
+end }, { "Streak", "The flame flickers and throws off embers.", function()
+	TingUI:Notify({ Title = "5-day streak", Content = "Come back tomorrow to keep it going.", Type = "Streak", Duration = 6 })
+end })
+Pair({ "Boost", "The rocket rumbles, launches and comes back round.", function()
+	TingUI:Notify({ Title = "Speed boost", Content = "x2 walk speed for 60 seconds.", Type = "Boost" })
+end }, { "Protected", "The shield slams in and a dome hums round it.", function()
+	TingUI:Notify({ Title = "Spawn protection", Content = "You can't be damaged for 10 seconds.", Type = "Protected" })
+end })
+Pair({ "Key", "The key turns in the lock and clicks.", function()
+	TingUI:Notify({ Title = "Key accepted", Content = "Premium features unlocked.", Type = "Key" })
+end }, { "Party", "The group hops and members pop in around it.", function()
+	TingUI:Notify({ Title = "Party ready", Content = "4 / 4 players joined.", Type = "Party" })
+end })
+Pair({ "MVP", "The crown drops on with a bounce and glints.", function()
+	TingUI:Notify({ Title = "MVP", Content = "Most eliminations this round.", Type = "MVP", Duration = 6 })
+end }, { "Combat", "The sword swings, a slash crosses the badge, the card jolts.", function()
+	TingUI:Notify({ Title = "Under attack", Content = "You took 35 damage from behind.", Type = "Combat" })
+end })
+Pair({ "Copied", "A second copy peels off and settles beside it.", function()
+	TingUI:Notify({ Title = "Copied", Content = "Job ID copied to the clipboard.", Type = "Copied" })
+end }, { "Deleted", "Something drops into the bin; Undo puts it back.", function()
+	TingUI:Notify({ Title = "Waypoint deleted", Content = "\"Spawn\" was removed.", Type = "Deleted",
+		Undo = function() TingUI:Notify({ Content = "\"Spawn\" is back.", Type = "Success" }) end })
+end })
+Pair({ "Sync", "Spins while it works, then eases to a stop.", function()
+	Run(TingUI:Notify({ Title = "Syncing", Content = "Saving your config...", Type = "Sync", Value = 0 }),
+		{ Title = "Synced", Content = "Everything is saved.", Type = "Sync", Value = 1, Duration = 4 })
+end }, { "AFK", "The moon rocks and little z's drift up.", function()
+	TingUI:Notify({ Title = "AFK detected", Content = "You'll be kicked in 2 minutes. Move to stay.", Type = "AFK", Duration = 8,
+		Actions = { { Text = "I'm here", Style = "Primary" } } })
 end })
 Tests:AddButton({
 	Text = "Reset Everything",

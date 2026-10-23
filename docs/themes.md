@@ -54,13 +54,13 @@ Add your own mapping with `TingUI.PresetAliases.OldName = "NewName"`.
 |---|---|---|---|---|---|---|
 | [Lavender](#lavender) | reference | Inter | flat, as in the reference | solid | Snow | |
 | [Ocean](#ocean) | round, deep glow | Josefin Sans | waves along the bottom edge, caustic light, slow water-shimmer border | aqua-to-deep-blue gradient | Bubbles: fizz, glassy, big wobbly and clusters, all popping | **Ocean** |
-| [Rose](#rose) | very round, strong glow | Inter | pink haze from above, pink-peach top light | solid | Petals spinning down | |
-| [Sunset](#sunset) | reference | Inter | warm glow from below | solid | Embers rising | |
+| [Rose](#rose) | very round, strong glow | Inter | pink haze from above, pink-peach top light | solid | Petals: ovals, blades, hearts and blossoms that tumble and ride gusts | **Rose** |
+| [Sunset](#sunset) | reference | Inter | warm glow from below | solid | Embers: sparks, glowing embers, ash and streaks that cool as they climb | **Sunset** |
 | [Mono](#mono) | sharp, no glow | RobotoMono | scanlines | solid | Glyph rain | |
-| [Frost](#frost) | round | Jura | icy top light, frosted inner border | white-to-ice gradient | Spinning ice crystals | |
+| [Frost](#frost) | round | Jura | icy top light, frosted inner border | white-to-ice gradient | Spinning ice crystals | **Frost** |
 | [Royal](#royal) | sharp-ish | Merriweather (serif) | gold top light, gilded double border | gold gradient | Glinting sparkles | |
 | [Cosmos](#cosmos) | round | Titillium Web | drifting nebula and parallax stars in the window, nebula across the screen, turning aurora border | violet-to-cyan gradient | Galaxy: stars, shooting stars, comets | |
-| [Storm](#storm) | reference | Oswald (condensed) | steel top light | solid | Slanted rain and distant lightning | |
+| [Storm](#storm) | reference | Oswald (condensed) | steel top light | solid | Rain: fine, heavy and mist in a shifting wind, heavy drops splash; distant lightning | **Storm** |
 | [Blueprint](#blueprint) | sharp | Patrick Hand | drafting grid, white inner line | solid | Pencil marks | |
 | [Hazard](#hazard) | square | Sarpanch | static yellow and black striped border at 45° | solid | none | |
 | [Glass](#glass) | very round | Nunito | translucent, blurred surfaces, white inner line | gradient | Lens bokeh at different depths, glints | |
@@ -106,9 +106,20 @@ They're also careful with performance and safety. A scene pauses while its windo
 | Pointer | The water swells up toward your cursor when it comes near the bottom edge. |
 | Open, switching to Ocean | A tide washes up over the whole window (see-through, so the UI stays readable), holds for a beat and drains away, releasing a rush of bubbles. |
 | Tab | A swell rolls through the waves. |
-| Click | Flattened ripples spread out from where you clicked, and a few bubbles rise and pop. |
+| Click | A few small, soft, round bubbles slip out beside the cursor and wobble up away from it, with one faint round ring. Nothing covers what you clicked. |
 
-Scenes take their colours from the theme, so they follow your accent. Circuit also reads `TraceColor` and `EnergyColor`, and Ocean reads `WaterColor` and `FoamColor` (see [Style keys](#style-keys)). To write your own, see [Scenes in Extending](extending.md#scenes).
+The other scenes:
+
+| Scene | Always | Pointer | Open, switching to it | Tab | Click |
+|---|---|---|---|---|---|
+| **Frost** | A thin drift of snow along the bottom edge and a dusting on top of the window, a few pixels tall, tapering before the corners, with glints | Brushing the drift kicks up a puff; the dent fills back in | A short snowfall drifts through and settles into the drift (the first time builds it, later ones are a light flurry) | A few flakes shake loose | A small six-armed frost star |
+| **Rose** | Climbing roses in both lower corners; now and then a breeze carries tumbling petals across | Blooms open wider and lean toward the cursor; petals swerve around it | The stems draw in, leaves unfurl and the buds open, and petals fall | A gust: leaves flutter, petals blow through | A bloom opens and sheds its petals |
+| **Sunset** | A low sun on the lower edge, cut by drifting horizon bands, with soft glow and slow rays; flocks of birds cross | The sun drifts a little with the cursor; birds climb away from it | The sun rises into place, the rays fan out and a flock takes off | A warm flare along the horizon | A warm glow and embers that cool as they rise |
+| **Storm** | Clouds along the top; drops bead on the glass, swell and run down in trails; rain splashes along the bottom | Moving through drops wipes them away | A bolt forks across the window | A gust of rain sweeps across and drops start running | A crown of droplets and a small round ripple |
+
+Distant lightning (`Lightning = true`) lights the Storm clouds from inside and sometimes strikes through the window.
+
+Scenes take their colours from the theme, so they follow your accent. Circuit also reads `TraceColor` and `EnergyColor`, Ocean reads `WaterColor` and `FoamColor`, Frost reads `SnowColor`, Rose reads `BloomColor` and `VineColor`, Sunset reads `SunColor` and `BirdColor`, and Storm reads `CloudColor` and `BoltColor` (see [Style keys](#style-keys)). To write your own, see [Scenes in Extending](extending.md#scenes).
 
 ## Gallery
 
@@ -137,7 +148,7 @@ The window floats in water: waves roll along its bottom and rise toward your cur
 ### Rose
 <img src="images/themes/rose.png" alt="Rose">
 
-Extra round and glowy, with drifting petals.
+Extra round and glowy. Climbing roses grow in from the lower corners and open toward your cursor, and a breeze carries tumbling petals of every shape across. It has a live [scene](#scenes).
 
 </td>
     <td valign="top">
@@ -145,7 +156,7 @@ Extra round and glowy, with drifting petals.
 ### Sunset
 <img src="images/themes/sunset.png" alt="Sunset">
 
-A warm glow from below and rising embers.
+Warm light from below: a low banded sun with slow rays, flocks of birds that climb away from your cursor, and embers that cool from gold to red as they rise. It has a live [scene](#scenes).
 
 </td>
   </tr>
@@ -163,7 +174,7 @@ Sharp corners, no glow, monospace type, scanlines and glyph rain.
 ### Frost
 <img src="images/themes/frost.png" alt="Frost">
 
-Pale ice, thin rounded type, a frosted double border and spinning ice crystals.
+Pale ice, thin rounded type, a frosted double border and spinning ice crystals. A short snowfall settles into a thin drift along the bottom and a dusting on top, and it stays. It has a live [scene](#scenes).
 
 </td>
   </tr>
@@ -199,7 +210,7 @@ Deep space: drifting nebula clouds over a parallax star layer, a turning aurora 
 ### Storm
 <img src="images/themes/storm.png" alt="Storm">
 
-Slate and steel, condensed type, slanted rain and distant lightning.
+Slate and steel, condensed type, rain in a shifting wind and distant lightning. Clouds light up, drops bead and run down the glass, and bolts fork through. It has a live [scene](#scenes).
 
 </td>
   </tr>
@@ -294,6 +305,10 @@ Every key is optional.
 | `Scene` | A [scene](#scenes) name: `"Hologram"`, `"Circuit"`, `"Ocean"` or one you registered. |
 | `TraceColor`, `EnergyColor` | Circuit's copper traces and current. They default to `Border` and `Accent`. |
 | `WaterColor`, `FoamColor` | Ocean's waves and tide, and its foam, ripples and caustic light. They default to `Accent` and `Text`. |
+| `SnowColor` | Frost's snowfall and the drift it leaves. Defaults to `ParticleColor`. |
+| `BloomColor`, `VineColor` | Rose's blooms and breeze petals (default `ParticleColor`), and its stems and leaves. |
+| `SunColor`, `BirdColor` | The top of Sunset's sun (it shades into the second `TopLine` colour) and its birds (default `Text`). |
+| `CloudColor`, `BoltColor` | Storm's cloud bank (default: the panel colour) and its bolts and cloud light. |
 
 **Theme keys** (colours): `Background, Group, GroupBorder, Control, ControlHover, Border, Outline, Text, Label, TextDim, TextMuted, Chip, ChipText, Accent, AccentText, AccentBorder, Toggle, TabActive, Success, Warning, Danger, Info, Caution, Error`. Setting `Accent` or `Background` also derives `AccentText`, `AccentBorder`, `Toggle` and `TabActive` unless you pass them.
 

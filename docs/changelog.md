@@ -2,6 +2,42 @@
 
 <sub>[Docs](README.md) › Changelog</sub>
 
+## v0.0.9-stable
+
+> [!NOTE]
+> Nothing in your script has to change. Every link, option, config, theme name and notification call works as before, and the UI keeps the size you set. New icons and notification types are additions only.
+
+**Dropdowns and popups**
+- A dropdown list opens below its box when it fits, above it when that fits better, and otherwise on the larger side, shrinking (and scrolling) to fit rather than sliding over the box you clicked.
+- Open lists stay attached to their box while the window is dragged or its page scrolls, and close by themselves when the box scrolls out of view or is hidden.
+
+**Fixes**
+- Switching tabs could leave the page dimmed (a dark veil stayed behind after a fast double switch, or a switch interrupted by hiding the window). The veil now always clears.
+- The notification history window has a close button (the cross in its header, a Close button in its top bar, or Esc).
+
+**Icons** ([docs](extending.md#icons))
+- 36 new icons, drawn to match the originals: `home, star, bolt, shield, trophy, crown, target, pin, globe, clock, calendar, download, upload, trash, copy, edit, folder, flag, fire, code, link, refresh, play, key, coin, gift, rocket, mail, wifi, chart, sword, users, moon, sun, bug, plus`. Use them anywhere an `Icon` is accepted. Each also has a vector stand-in shown until its image has downloaded. `TingUI.IconNames` lists them all.
+
+**Notifications** ([docs](elements.md#notifications))
+- Twenty new types for game events, each with an animation of its own: `Teleport` (the pin drops and pings), `ServerHop` (the globe spins while a dot orbits it), `Reward` (the box shakes, pops and throws confetti), `Currency` (the coin flips and glints), `LevelUp` (the trophy rises past climbing chevrons), `Timer` (a stopwatch hand sweeps), `Connection` (signal bars light in turn), `Target` (brackets lock on), `Invite` (the envelope slides in and an unread dot pops), `Streak` (the flame flickers and throws embers), `Boost` (the rocket launches and comes back), `Protected` (the shield slams in under a humming dome), `Key` (it turns and clicks), `Party` (members pop in), `MVP` (the crown drops on and glints), `Combat` (a slash, and the card jolts), `Copied` (a copy peels off), `Deleted` (something drops into the bin), `Sync` (spins while working, eases to a stop) and `AFK` (z's drift up).
+- Every card's background moves: two tints of its colour drift slowly across it, a little brighter while the cursor is on it. No card is a flat fill any more.
+- The config tab's Tests group and Example.lua have a button for each new type, plus "Play every event".
+
+**Themes** ([docs](themes.md))
+- **Ocean**: clicks now release a few small, soft, round bubbles that wobble up beside the cursor, with one faint round ring. The large flattened ripples that covered what you clicked are gone.
+- **Frost**: when the theme arrives a short snowfall drifts through the window and settles into a thin drift along the bottom and a dusting on top of the window, and it stays. It's a few pixels tall and tapers off before the corners. Brush the drift with the cursor to kick up a puff; the dent fills back in. Clicks leave a small frost star; tab switches shake a few flakes loose. Style key: `SnowColor`.
+- **Rose**: climbing roses grow in from the lower corners (stems draw in, leaves unfurl, buds open) and open wider and lean toward the cursor. A breeze carries tumbling petals across now and then; clicks open a bloom that sheds its petals; tab switches send a gust. Petal particles now come as ovals, slender blades, notched hearts and whole blossoms that turn over in the air, ride gusts and drift around the cursor. Style keys: `BloomColor`, `VineColor`.
+- **Sunset**: a low sun sits on the lower edge, cut by horizon bands drifting through it, with slow rays behind and a little parallax with the cursor. Flocks of birds cross, flap and glide, and climb away from the cursor. Clicks release embers; tab switches flare along the horizon. Ember particles are now sparks, glowing embers with halos, tumbling ash and streaks that cool from gold to red and swirl around the cursor. Style keys: `SunColor`, `BirdColor`.
+- **Storm**: clouds roll along the top and light up with the lightning, which sometimes forks through the window itself. Drops bead on the glass, swell and run down in trails, and moving the cursor through them wipes them away. Rain splashes along the bottom edge; tab switches send a gust; clicks splash a crown of droplets. Rain particles now come as fine drops, heavy streaks and mist in a wind that veers and gusts, and heavy drops splash. Style keys: `CloudColor`, `BoltColor`.
+- The four new scenes are in the Theme Studio's Scene list with colour rows for their keys.
+
+**Showcase images**
+- New banner and restyled showcase images: split dark panels, a plain headline and subtitle, and the product itself (code and what it makes, the notification types, the anatomy, the Shell and the Theme Studio) on a clean stage. Theme previews carry a short caption and their main colours.
+- `tools/build_previews.py` draws the four new scenes (with GIFs), the new particle variety, the new notification types with their icons, and the moving card backgrounds.
+
+**Tests**
+- Two new headless tests: the Frost, Rose, Sunset, Storm and Ocean scenes with clicks, tab switches and opening (including the Frost drift staying a few pixels tall), the new particle kinds, every icon, and all twenty new notification types with their moving backgrounds. 27 tests in all.
+
 ## v0.0.8-stable
 
 > [!NOTE]

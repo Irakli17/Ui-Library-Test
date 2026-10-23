@@ -3,7 +3,7 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/version-v0.0.8--stable-9f96c1?style=flat-square" alt="version v0.0.8-stable">
+  <img src="https://img.shields.io/badge/version-v0.0.9--stable-9f96c1?style=flat-square" alt="version v0.0.9-stable">
   <img src="https://img.shields.io/badge/Luau-one%20file-00a2ff?style=flat-square" alt="one Luau file">
   <img src="https://img.shields.io/badge/themes-15-ff60c4?style=flat-square" alt="15 themes">
   <img src="https://img.shields.io/badge/Rojo-ready-e13835?style=flat-square" alt="Rojo ready">
@@ -30,7 +30,7 @@ TingUI is a dark, compact UI library for Roblox in a single Luau file. It loads 
 ```lua
 local TingUI = loadstring(game:HttpGet("https://raw.githubusercontent.com/Irakli17/Ui-Library-Test/main/TingUI.lua"))({ Id = "MyHub" })
 
-local Window = TingUI:CreateWindow({ Title = "My Hub", Tag = "Pro", Version = "v0.0.8", Snow = true })
+local Window = TingUI:CreateWindow({ Title = "My Hub", Tag = "Pro", Version = "v0.0.9", Snow = true })
 local Tab = Window:AddTab("Main")
 local Group = Tab:AddGroup("Hello")
 
@@ -65,7 +65,7 @@ Requiring it on the server gives a clear error instead of a broken UI. See [Gett
 ```toml
 # wally.toml
 [dependencies]
-TingUI = "irakli17/tingui@0.0.8"
+TingUI = "irakli17/tingui@0.0.9"
 ```
 
 With Rojo, `default.project.json` maps `TingUI.lua` as the package. `rojo serve dev.project.json` builds a test place with TingUI, a DataStore config server and a small demo.
@@ -80,11 +80,36 @@ With Rojo, `default.project.json` maps `TingUI.lua` as the package. `rojo serve 
 
 ```lua
 local TingUI, err = loadstring(game:HttpGet("https://raw.githubusercontent.com/Irakli17/Ui-Library-Test/main/Loader.lua"))()({
-	Id = "MyHub", Version = "v0.0.8-stable",
+	Id = "MyHub", Version = "v0.0.9-stable",
 })
 if not TingUI then return warn(err) end
 ```
 </details>
+
+## New in v0.0.9
+
+<table>
+  <tr>
+    <td width="50%" valign="top">
+
+**Four themes get living scenes**
+
+**Frost**'s first snowfall settles into a thin drift along the window and stays. **Rose** grows climbing roses that open toward your cursor, with petals of every shape tumbling past. **Sunset** has a low banded sun and birds that climb away from you. **Storm** beads rain on the glass for you to wipe, lights its clouds and forks bolts through the window. Ocean's clicks are now small, soft bubbles. [Read more](docs/themes.md#scenes)
+
+<img src="docs/images/themes/frost.gif" alt="Frost theme, animated" width="100%">
+
+</td>
+    <td width="50%" valign="top">
+
+**Twenty game-event notifications, 36 new icons**
+
+Teleport, ServerHop, Reward, Currency, LevelUp, Timer, Connection, Target, Invite, Streak, Boost, Protected, Key, Party, MVP, Combat, Copied, Deleted, Sync and AFK, each with an animation of its own, on cards whose backgrounds slowly move. Dropdowns never cover the box you clicked, tab switches never leave the page dimmed, and the history window closes. [Read more](docs/elements.md#notifications)
+
+<img src="docs/images/notifications.png" alt="Notification cards" width="100%">
+
+</td>
+  </tr>
+</table>
 
 ## New in v0.0.8
 
@@ -295,4 +320,4 @@ Switching themes blends everything at once: colours, corner shapes, glow, fonts,
 - **Images.** Upload the `assets` folder with `TingUI.lua`. The library downloads icons and theme art from the same repo when it needs them and caches them. `tools/build_icons.py` and `tools/build_textures.py` rebuild them.
 - **Doc previews.** `python3 tools/build_previews.py` redraws every image in `docs/images` from the presets in `TingUI.lua`, so the gallery always matches the code.
 
-Versions are `vX.X.X`. The current version is **v0.0.8-stable**.
+Versions are `vX.X.X`. The current version is **v0.0.9-stable**.

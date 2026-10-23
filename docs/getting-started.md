@@ -28,7 +28,7 @@ The sturdiest way is `Loader.lua`. It tries GitHub, then the jsDelivr mirror, th
 ```lua
 local TingUI, err = loadstring(game:HttpGet("https://raw.githubusercontent.com/Irakli17/Ui-Library-Test/main/Loader.lua"))()({
 	Id = "MyHub",
-	Version = "main",   -- or a tag like "v0.0.8-stable" to pin a release
+	Version = "main",   -- or a tag like "v0.0.9-stable" to pin a release
 })
 if not TingUI then return warn(err) end
 ```
@@ -42,7 +42,7 @@ You can also set `getgenv().TingUIOptions = {...}` before loading. It's read onc
 
 `TingUI.lua` is also a plain **ModuleScript**. It needs nothing from your game's hierarchy and only runs on the client.
 
-1. Put `TingUI.lua` in **ReplicatedStorage** as a ModuleScript named `TingUI`. Alternatively, sync it with Rojo (`default.project.json` maps it) or install it with Wally (`TingUI = "irakli17/tingui@0.0.8"`).
+1. Put `TingUI.lua` in **ReplicatedStorage** as a ModuleScript named `TingUI`. Alternatively, sync it with Rojo (`default.project.json` maps it) or install it with Wally (`TingUI = "irakli17/tingui@0.0.9"`).
 2. Require it from a **LocalScript**. StarterPlayerScripts is a good home. Requiring it from a server Script errors with a clear message.
 
 ```lua

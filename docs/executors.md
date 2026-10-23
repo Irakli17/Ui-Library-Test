@@ -34,7 +34,7 @@ TingUI was built for `loadstring` first. It looks for each executor function bef
 ```lua
 local E = TingUI.Environment
 -- { Executor = "Name", ExecutorVersion = "1.2", Files = true, CustomAssets = true, Clipboard = true,
---   Http = true, HiddenGui = true, Studio = false, Version = "0.0.8" }
+--   Http = true, HiddenGui = true, Studio = false, Version = "0.0.9" }
 
 if not E.Files then
 	TingUI:Notify({ Title = "Heads up", Content = "Your executor can't save files, so configs reset when you leave.", Type = "Warning" })
@@ -83,7 +83,7 @@ Instances with different Ids share the screen through [the Shell](shell.md): one
 ```lua
 local TingUI, err = loadstring(game:HttpGet("https://raw.githubusercontent.com/Irakli17/Ui-Library-Test/main/Loader.lua"))()({
 	Id = "MyHub",
-	Version = "v0.0.8-stable",   -- pin a release so updates never surprise your users
+	Version = "v0.0.9-stable",   -- pin a release so updates never surprise your users
 })
 if not TingUI then return warn(err) end
 ```

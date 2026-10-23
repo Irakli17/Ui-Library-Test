@@ -4,7 +4,7 @@
 
 # TingUI documentation
 
-<sub>v0.0.8-stable · [Back to the project](../README.md)</sub>
+<sub>v0.0.9-stable · [Back to the project](../README.md)</sub>
 
 <table>
   <tr>

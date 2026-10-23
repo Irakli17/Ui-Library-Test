@@ -1,7 +1,7 @@
 --!nocheck
 --!nolint
 --[[
-	TingUI Library  v0.0.8-stable
+	TingUI Library  v0.0.9-stable
 	Single file, no dependencies. Loads with loadstring, or as a ModuleScript (require) in any Roblox game.
 
 	local TingUI = loadstring(game:HttpGet("https://raw.githubusercontent.com/Irakli17/Ui-Library-Test/main/TingUI.lua"))()
@@ -67,7 +67,7 @@ local Lighting = Service("Lighting")
 local TextService = Service("TextService")
 
 local TingUI = {
-	Version = "v0.0.8-stable",
+	Version = "v0.0.9-stable",
 	ConfirmsConfigDelete = true,                        -- the config tab asks before it deletes a config
 	ConfigProgressNotices = true,                       -- saving, loading and autoloading show Loading -> result
 	Id = InstanceId,
@@ -140,15 +140,20 @@ local TingUI = {
 				Aura = { Color3.fromRGB(90, 210, 255), Color3.fromRGB(30, 90, 170), Color3.fromRGB(140, 240, 255), Color3.fromRGB(40, 110, 200), Color3.fromRGB(90, 210, 255) },
 				AuraSpeed = 0.06, AuraThickness = 1.3,
 				AccentGradient = { Color3.fromRGB(140, 236, 255), Color3.fromRGB(50, 120, 236) } } },
+		-- rose: climbing roses grow in from the lower corners and open toward the pointer, a breeze carries tumbling
+		-- petals (ovals, blades, hearts, whole blossoms) across now and then, and clicks open a bloom that sheds its petals
 		Rose = { Accent = Color3.fromRGB(205, 120, 150), Background = Color3.fromRGB(17, 12, 15), Group = Color3.fromRGB(22, 16, 20), GroupBorder = Color3.fromRGB(33, 24, 29), Control = Color3.fromRGB(31, 23, 28), ControlHover = Color3.fromRGB(43, 32, 39), Border = Color3.fromRGB(62, 46, 54), Outline = Color3.fromRGB(50, 37, 44), Text = Color3.fromRGB(228, 214, 220), Label = Color3.fromRGB(200, 184, 191), TextDim = Color3.fromRGB(150, 130, 140), TextMuted = Color3.fromRGB(118, 100, 109),
-			Style = { Radius = 1.75, Glow = 1.6, Font = "Inter", Particles = "Petals", ParticleColor = Color3.fromRGB(242, 150, 186), Tint = Color3.fromRGB(215, 95, 150), TintPlace = "Top", TintAmount = 0.16, TopLine = { Color3.fromRGB(245, 140, 185), Color3.fromRGB(255, 190, 150) } } },
+			Style = { Radius = 1.75, Glow = 1.6, Font = "Inter", Particles = "Petals", ParticleColor = Color3.fromRGB(242, 150, 186), Scene = "Rose", Tint = Color3.fromRGB(215, 95, 150), TintPlace = "Top", TintAmount = 0.16, TopLine = { Color3.fromRGB(245, 140, 185), Color3.fromRGB(255, 190, 150) } } },
+		-- sunset: a low banded sun with slow rays sits on the lower edge, flocks of birds cross and climb away from the
+		-- pointer, embers cool from gold to red as they rise and swirl around the pointer, and clicks release sparks
 		Sunset = { Accent = Color3.fromRGB(215, 150, 90), Background = Color3.fromRGB(17, 13, 11), Group = Color3.fromRGB(23, 18, 15), GroupBorder = Color3.fromRGB(34, 27, 22), Control = Color3.fromRGB(32, 26, 21), ControlHover = Color3.fromRGB(44, 36, 30), Border = Color3.fromRGB(64, 52, 43), Outline = Color3.fromRGB(51, 41, 34), Text = Color3.fromRGB(230, 220, 210), Label = Color3.fromRGB(202, 191, 180), TextDim = Color3.fromRGB(152, 138, 124), TextMuted = Color3.fromRGB(120, 108, 96),
-			Style = { Radius = 1, Glow = 1.3, Font = "Inter", Particles = "Embers", ParticleColor = Color3.fromRGB(255, 150, 70), Tint = Color3.fromRGB(235, 110, 60), TintPlace = "Bottom", TintAmount = 0.2, TopLine = { Color3.fromRGB(255, 160, 80), Color3.fromRGB(230, 80, 140) } } },
+			Style = { Radius = 1, Glow = 1.3, Font = "Inter", Particles = "Embers", ParticleColor = Color3.fromRGB(255, 150, 70), Scene = "Sunset", Tint = Color3.fromRGB(235, 110, 60), TintPlace = "Bottom", TintAmount = 0.2, TopLine = { Color3.fromRGB(255, 160, 80), Color3.fromRGB(230, 80, 140) } } },
 		Mono = { Accent = Color3.fromRGB(190, 190, 196), Background = Color3.fromRGB(12, 12, 12), Group = Color3.fromRGB(17, 17, 17), GroupBorder = Color3.fromRGB(26, 26, 26), Control = Color3.fromRGB(25, 25, 25), ControlHover = Color3.fromRGB(36, 36, 36), Border = Color3.fromRGB(52, 52, 52), Outline = Color3.fromRGB(41, 41, 41), Text = Color3.fromRGB(222, 222, 222), Label = Color3.fromRGB(194, 194, 194), TextDim = Color3.fromRGB(136, 136, 136), TextMuted = Color3.fromRGB(106, 106, 106),
 			Style = { Radius = 0.25, Glow = 0, Font = "Mono", Particles = "Glyphs", ParticleColor = Color3.fromRGB(205, 205, 205), Scanlines = true } },
-		-- pale ice, thin rounded type, a frosted inner border and slowly spinning crystals
+		-- pale ice, thin rounded type, a frosted inner border and slowly spinning crystals. When the theme arrives a
+		-- short snowfall settles into a thin drift along the bottom and a dusting on top of the window, and it stays
 		Frost = { Accent = Color3.fromRGB(150, 215, 255), Background = Color3.fromRGB(12, 18, 26), Group = Color3.fromRGB(16, 24, 34), GroupBorder = Color3.fromRGB(26, 38, 52), Control = Color3.fromRGB(22, 32, 44), ControlHover = Color3.fromRGB(32, 46, 62), Border = Color3.fromRGB(60, 86, 112), Outline = Color3.fromRGB(42, 60, 80), Text = Color3.fromRGB(232, 244, 255), Label = Color3.fromRGB(205, 224, 240), TextDim = Color3.fromRGB(140, 166, 190), TextMuted = Color3.fromRGB(105, 128, 150),
-			Style = { Radius = 1.25, Glow = 1.2, Font = "Jura", TextScale = 1.08, Particles = "Crystals", ParticleColor = Color3.fromRGB(215, 240, 255), Tint = Color3.fromRGB(120, 190, 255), TintPlace = "Top", TintAmount = 0.14, TopLine = { Color3.fromRGB(230, 248, 255), Color3.fromRGB(120, 190, 255) }, InnerLine = Color3.fromRGB(170, 215, 255), AccentGradient = { Color3.fromRGB(235, 248, 255), Color3.fromRGB(120, 190, 255) } } },
+			Style = { Radius = 1.25, Glow = 1.2, Font = "Jura", TextScale = 1.08, Particles = "Crystals", ParticleColor = Color3.fromRGB(215, 240, 255), Scene = "Frost", Tint = Color3.fromRGB(120, 190, 255), TintPlace = "Top", TintAmount = 0.14, TopLine = { Color3.fromRGB(230, 248, 255), Color3.fromRGB(120, 190, 255) }, InnerLine = Color3.fromRGB(170, 215, 255), AccentGradient = { Color3.fromRGB(235, 248, 255), Color3.fromRGB(120, 190, 255) } } },
 		-- midnight navy and gold, serif type, a gilded double border and glinting sparkles
 		Royal = { Accent = Color3.fromRGB(222, 184, 92), Background = Color3.fromRGB(11, 13, 24), Group = Color3.fromRGB(15, 18, 32), GroupBorder = Color3.fromRGB(26, 28, 46), Control = Color3.fromRGB(20, 24, 40), ControlHover = Color3.fromRGB(30, 34, 56), Border = Color3.fromRGB(92, 78, 44), Outline = Color3.fromRGB(48, 46, 60), Text = Color3.fromRGB(244, 236, 214), Label = Color3.fromRGB(222, 212, 186), TextDim = Color3.fromRGB(160, 150, 126), TextMuted = Color3.fromRGB(120, 112, 94),
 			Style = { Radius = 0.6, Glow = 1.1, Font = "Merriweather", TextScale = 0.94, Particles = "Sparkles", ParticleColor = Color3.fromRGB(255, 214, 120), Tint = Color3.fromRGB(200, 160, 70), TintPlace = "Top", TintAmount = 0.1, TopLine = { Color3.fromRGB(255, 214, 120), Color3.fromRGB(180, 130, 50) }, InnerLine = Color3.fromRGB(222, 184, 92), AccentGradient = { Color3.fromRGB(255, 226, 150), Color3.fromRGB(196, 148, 58) } } },
@@ -161,9 +166,10 @@ local TingUI = {
 				AccentGradient = { Color3.fromRGB(180, 140, 255), Color3.fromRGB(90, 210, 255) },
 				Texture = { { Image = "nebula", Transparency = 0.5, Drift = 0.03, Zoom = 0.9 }, { Image = "stars", Transparency = 0.15, Drift = 0.055, Zoom = 1.15, Pulse = 0.25 } },
 				BackdropTexture = { Image = "nebula", Transparency = 0.84, Drift = 0.012, Zoom = 0.6 } } },
-		-- slate and steel, condensed type, slanted rain and distant lightning
+		-- slate and steel, condensed type and rain in shifting wind (fine, heavy and mist; heavy drops splash). Clouds roll
+		-- along the top and light up, drops bead and run on the glass (the pointer wipes them), bolts fork through
 		Storm = { Accent = Color3.fromRGB(120, 180, 255), Background = Color3.fromRGB(13, 15, 19), Group = Color3.fromRGB(18, 21, 26), GroupBorder = Color3.fromRGB(28, 32, 40), Control = Color3.fromRGB(24, 28, 35), ControlHover = Color3.fromRGB(34, 39, 48), Border = Color3.fromRGB(62, 72, 88), Outline = Color3.fromRGB(42, 48, 60), Text = Color3.fromRGB(226, 232, 242), Label = Color3.fromRGB(200, 208, 222), TextDim = Color3.fromRGB(140, 150, 168), TextMuted = Color3.fromRGB(104, 112, 128),
-			Style = { Radius = 0.9, Glow = 1.25, Font = "Oswald", TextScale = 1.05, Particles = "Rain", ParticleColor = Color3.fromRGB(170, 200, 240), Tint = Color3.fromRGB(90, 120, 170), TintPlace = "Top", TintAmount = 0.16, TopLine = { Color3.fromRGB(200, 225, 255), Color3.fromRGB(120, 180, 255) }, Lightning = true } },
+			Style = { Radius = 0.9, Glow = 1.25, Font = "Oswald", TextScale = 1.05, Particles = "Rain", ParticleColor = Color3.fromRGB(170, 200, 240), Scene = "Storm", Tint = Color3.fromRGB(90, 120, 170), TintPlace = "Top", TintAmount = 0.16, TopLine = { Color3.fromRGB(200, 225, 255), Color3.fromRGB(120, 180, 255) }, Lightning = true } },
 		-- drafting paper: navy blue, a white grid, a ruled double border, handwritten labels and drafting marks
 		Blueprint = { Accent = Color3.fromRGB(225, 238, 255), Background = Color3.fromRGB(18, 48, 92), Group = Color3.fromRGB(22, 56, 104), GroupBorder = Color3.fromRGB(52, 90, 140), Control = Color3.fromRGB(28, 64, 116), ControlHover = Color3.fromRGB(40, 80, 136), Border = Color3.fromRGB(120, 160, 210), Outline = Color3.fromRGB(70, 110, 165), Text = Color3.fromRGB(240, 246, 255), Label = Color3.fromRGB(214, 228, 248), TextDim = Color3.fromRGB(150, 180, 220), TextMuted = Color3.fromRGB(115, 145, 190),
 			Style = { Radius = 0.3, Glow = 0.35, Font = "PatrickHand", TextScale = 1.15, Particles = "Drafting", ParticleColor = Color3.fromRGB(210, 230, 255), Grid = true, GridColor = Color3.fromRGB(220, 235, 255), InnerLine = Color3.fromRGB(200, 225, 255) } },
@@ -1583,6 +1589,8 @@ Kinds.Circuit = {
 -- a swell through, and a click drops ripples and a few bubbles where you clicked.
 --------------------------------------------------------------------------
 local function Smooth(x) x = math.clamp(x, 0, 1) return x * x * (3 - 2 * x) end
+-- shared pieces for the scenes from here on (one table, so they don't eat Build's local slots)
+local FX = {}
 local OCEAN_COL = 8
 local function OceanColumns(S)
 	for _, list in ipairs({ S.Back or {}, S.Front or {}, S.Crest or {} }) do
@@ -1609,29 +1617,11 @@ local function OceanColumns(S)
 	end
 end
 local function OceanBubble(S, x, y, rise, size, delay)
-	task.delay(delay or 0, function()
-		if not S.Top.Parent then return end
-		local b = New("Frame", { AnchorPoint = Vector2.new(0.5, 0.5), Position = UDim2.fromOffset(x, y), Size = UDim2.fromOffset(size, size),
-			BackgroundTransparency = 1, ZIndex = 4, Parent = S.Top }, { CornerFixed(999) })
-		local rim = New("UIStroke", { Color = S.Foam or Color3.new(1, 1, 1), Thickness = 1, Transparency = S.Fade(0.25), Parent = b })
-		local hi = New("Frame", { AnchorPoint = Vector2.new(0.5, 0.5), Position = UDim2.fromScale(0.32, 0.3), Size = UDim2.fromOffset(math.max(1, size * 0.3), math.max(1, size * 0.3)),
-			BackgroundColor3 = Color3.new(1, 1, 1), BackgroundTransparency = S.Fade(0.3), Parent = b }, { CornerFixed(999) })
-		local life = 0.55 + rise / 220
-		TweenService:Create(b, TweenInfo.new(life, Enum.EasingStyle.Quad, Enum.EasingDirection.Out),
-			{ Position = UDim2.fromOffset(x + (math.random() - 0.5) * 16, y - rise) }):Play()
-		task.delay(life, function()
-			if not b.Parent then return end
-			-- pop: the bubble snaps open into a ring and is gone
-			TweenService:Create(b, TweenInfo.new(0.14, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), { Size = UDim2.fromOffset(size * 2.2, size * 2.2) }):Play()
-			TweenService:Create(rim, TweenInfo.new(0.14), { Transparency = 1 }):Play()
-			TweenService:Create(hi, TweenInfo.new(0.1), { BackgroundTransparency = 1 }):Play()
-			task.delay(0.16, function() b:Destroy() end)
-		end)
-	end)
+	FX.Bubble(S, x, y, size, rise, delay)
 end
 Kinds.Ocean = {
 	Build = function(S)
-		S.Tide, S.TideT, S.Swell, S.SwellT = 0, nil, 0, nil
+		S.Tide, S.TideT, S.Swell, S.SwellT, S.Pops = 0, nil, 0, nil, {}
 		OceanColumns(S)
 		S.Caustics = {}
 		for i = 1, 7 do
@@ -1709,6 +1699,7 @@ Kinds.Ocean = {
 			c.Frame.Rotation = math.sin(t * 0.3 + c.Ph) * 18
 			c.Frame.BackgroundTransparency = F(0.9 + 0.06 * math.sin(t * 1.4 + c.Ph * 2))
 		end
+		FX.UpdateBubbles(S, dt)
 	end,
 	Feedback = function(S, kind, x, y)
 		if kind == "Open" then
@@ -1716,22 +1707,966 @@ Kinds.Ocean = {
 		elseif kind == "Tab" then
 			S.SwellT = 0
 		elseif kind == "Click" then
-			-- ripples spread out (flattened, like on a surface) and a few bubbles escape upward
-			for i = 0, 2 do
-				task.delay(i * 0.09, function()
-					if not S.Top.Parent then return end
-					local r = New("Frame", { AnchorPoint = Vector2.new(0.5, 0.5), Position = UDim2.fromOffset(x, y), Size = UDim2.fromOffset(6, 4),
-						BackgroundTransparency = 1, ZIndex = 5, Parent = S.Top }, { CornerFixed(999) })
-					local st = New("UIStroke", { Color = S.Foam or Color3.new(1, 1, 1), Thickness = 1.5 - i * 0.3, Transparency = S.Fade(0.2 + i * 0.15), Parent = r })
-					TweenService:Create(r, TweenInfo.new(0.7, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), { Size = UDim2.fromOffset(84 - i * 14, 44 - i * 7) }):Play()
-					TweenService:Create(st, TweenInfo.new(0.7, Enum.EasingStyle.Quad, Enum.EasingDirection.In), { Transparency = 1 }):Play()
-					task.delay(0.72, function() r:Destroy() end)
-				end)
+			-- a few small, soft, round bubbles slip out beside the pointer and wobble up away from it; one faint round
+			-- ring marks the spot. Nothing large and nothing sits on what you clicked.
+			local r = New("Frame", { AnchorPoint = Vector2.new(0.5, 0.5), Position = UDim2.fromOffset(x, y), Size = UDim2.fromOffset(4, 4),
+				BackgroundTransparency = 1, ZIndex = 5, Parent = S.Top }, { CornerFixed(999) })
+			local st = New("UIStroke", { Color = S.Foam or Color3.new(1, 1, 1), Thickness = 1, Transparency = S.Fade(0.6), Parent = r })
+			TweenService:Create(r, TweenInfo.new(0.42, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), { Size = UDim2.fromOffset(20, 20) }):Play()
+			TweenService:Create(st, TweenInfo.new(0.42, Enum.EasingStyle.Quad, Enum.EasingDirection.In), { Transparency = 1 }):Play()
+			task.delay(0.44, function() r:Destroy() end)
+			local n = math.random(4, 6)
+			for i = 1, n do
+				local side = (i % 2 == 0) and 1 or -1
+				FX.Bubble(S, x + side * (5 + math.random() * 9), y - 4 - math.random() * 4, math.random(3, 8), 24 + math.random() * 34, (i - 1) * 0.055)
 			end
-			for i = 1, 4 do OceanBubble(S, x + (math.random() - 0.5) * 18, y, 26 + math.random() * 40, math.random(3, 7), 0.05 + i * 0.06) end
 		end
 	end,
 }
+
+local WHITE = Color3.new(1, 1, 1)
+-- Roblox turns a frame around its centre, so a bar that should pivot on one end is placed by its midpoint:
+-- one end at (x, y), pointing along deg, len long
+function FX.Arm(f, x, y, deg, len, th)
+	local a = math.rad(deg)
+	f.Position = UDim2.fromOffset(x + math.cos(a) * len / 2, y + math.sin(a) * len / 2)
+	f.Size = UDim2.fromOffset(len, th)
+	f.Rotation = deg
+end
+function FX.Ease(x) x = math.clamp(x, 0, 1) return 1 - (1 - x) ^ 3 end
+-- a soft vertical fade (opaque at the top, see-through at the bottom), for snow drifts and clouds
+function FX.VFade(a, b)
+	return New("UIGradient", { Rotation = 90, Transparency = NumberSequence.new(a, b) })
+end
+-- one petal: an oval, a slender blade or a notched heart; sized by Scale so a holder can squash it to tumble
+function FX.Petal(parent, kind, color, z)
+	local holder = New("Frame", { AnchorPoint = Vector2.new(0.5, 0.5), BackgroundTransparency = 1, ZIndex = z or 3, Parent = parent })
+	local parts = {}
+	local function Oval(px, py, sx, sy, rot)
+		local o = New("Frame", { AnchorPoint = Vector2.new(0.5, 0.5), Position = UDim2.fromScale(px, py), Size = UDim2.fromScale(sx, sy), Rotation = rot or 0,
+			BackgroundColor3 = color, BackgroundTransparency = 1, ZIndex = z or 3, Parent = holder }, { CornerFixed(999),
+			New("UIGradient", { Color = ColorSequence.new(color:Lerp(WHITE, 0.35), color) }) })
+		table.insert(parts, o)
+	end
+	if kind == "Heart" then
+		Oval(0.36, 0.5, 0.62, 0.9, -18) Oval(0.64, 0.5, 0.62, 0.9, 18)
+	elseif kind == "Slender" then
+		Oval(0.5, 0.5, 1, 0.45)
+	else
+		Oval(0.5, 0.5, 1, 0.72)
+	end
+	return holder, parts
+end
+
+--------------------------------------------------------------------------
+-- Ocean clicks: a few small round bubbles slip out where you clicked, wobble up past the pointer (never under it)
+-- and pop quietly. Tide bubbles use the same bubbles.
+--------------------------------------------------------------------------
+function FX.Bubble(S, x, y, size, rise, delay)
+	S.Pops = S.Pops or {}
+	if #S.Pops > 48 then return end
+	local b = New("Frame", { AnchorPoint = Vector2.new(0.5, 0.5), Position = UDim2.fromOffset(x, y), Size = UDim2.fromOffset(size, size),
+		BackgroundColor3 = S.Foam or WHITE, BackgroundTransparency = 1, ZIndex = 4, Parent = S.Top }, { CornerFixed(999),
+		New("UIGradient", { Rotation = 90, Transparency = NumberSequence.new(0.55, 1) }) })
+	local rim = New("UIStroke", { Color = S.Foam or WHITE, Thickness = 1, Transparency = 1, Parent = b })
+	local hi = New("Frame", { AnchorPoint = Vector2.new(0.5, 0.5), Position = UDim2.fromScale(0.33, 0.3), Size = UDim2.fromScale(0.3, 0.22),
+		Rotation = -30, BackgroundColor3 = WHITE, BackgroundTransparency = 1, ZIndex = 4, Parent = b }, { CornerFixed(999) })
+	table.insert(S.Pops, { Frame = b, Rim = rim, Hi = hi, X0 = x, Y = y, Size = size, Vy = rise * 0.9, Age = -(delay or 0),
+		Life = 0.5 + rise / 160 + math.random() * 0.25, Ph = math.random() * 6.28, Wob = 1.5 + size * 0.35 })
+end
+function FX.UpdateBubbles(S, dt)
+	local F = S.Fade
+	for i = #(S.Pops or {}), 1, -1 do
+		local p = S.Pops[i]
+		p.Age = p.Age + dt
+		if p.Age < 0 then
+			p.Frame.Visible = false
+		elseif p.Age < p.Life then
+			p.Frame.Visible = true
+			p.Vy = p.Vy + 22 * dt -- buoyancy: they pick up speed as they rise
+			p.Y = p.Y - p.Vy * dt
+			local x = p.X0 + math.sin(p.Age * 7 + p.Ph) * p.Wob
+			local w = 1 + 0.08 * math.sin(p.Age * 11 + p.Ph)
+			p.Frame.Position = UDim2.fromOffset(x, p.Y)
+			p.Frame.Size = UDim2.fromOffset(p.Size * w, p.Size * (2 - w))
+			local a = math.min(1, p.Age / 0.12) * (1 - math.max(0, (p.Age - p.Life + 0.15) / 0.15) * 0.4)
+			p.Rim.Transparency = F(1 - 0.55 * a)
+			p.Frame.BackgroundTransparency = F(1 - 0.5 * a)
+			p.Hi.BackgroundTransparency = F(1 - 0.75 * a)
+		else
+			-- pop: a thin ring snaps a little wider and is gone
+			table.remove(S.Pops, i)
+			local b, rim = p.Frame, p.Rim
+			p.Hi.BackgroundTransparency = 1
+			b.BackgroundTransparency = 1
+			TweenService:Create(b, TweenInfo.new(0.16, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), { Size = UDim2.fromOffset(p.Size * 1.7, p.Size * 1.7) }):Play()
+			TweenService:Create(rim, TweenInfo.new(0.16), { Transparency = 1 }):Play()
+			task.delay(0.18, function() b:Destroy() end)
+		end
+	end
+end
+
+--------------------------------------------------------------------------
+-- Frost: when the theme arrives a short snowfall drifts down through the window. The flakes settle into a thin, soft
+-- drift along the bottom edge and a light dusting on top of the window, and that little bit of snow stays (a few
+-- pixels, tapered at the corners, never over the controls). Running the pointer through the drift kicks a puff of snow
+-- up and leaves a dent that slowly fills back in; a click leaves a small frost star; a tab switch shakes a few flakes loose.
+--------------------------------------------------------------------------
+local FROST_COL = 3
+function FX.FrostMax(S, x, top)
+	local W = S.W
+	local edge = top and 22 or 12
+	local taper = Smooth(math.min(x - edge, W - edge - x) / 30)
+	local bumps = 0.72 + 0.16 * math.sin(x * 0.045 + 1.3) + 0.12 * math.sin(x * 0.13 + 0.4)
+	return (top and 3.2 or 5.5) * taper * bumps
+end
+function FX.FrostColumns(S)
+	local old, oldCap, oldW = S.Drift, S.Cap, S.ColsFor
+	for _, list in ipairs({ S.DriftF or {}, S.CapF or {} }) do for _, f in ipairs(list) do f:Destroy() end end
+	S.DriftF, S.CapF, S.Drift, S.Cap = {}, {}, {}, {}
+	local n = math.ceil(S.W / FROST_COL) + 1
+	for i = 1, n do
+		local x = (i - 1) * FROST_COL
+		S.DriftF[i] = New("Frame", { AnchorPoint = Vector2.new(0, 1), Position = UDim2.new(0, x, 1, 0), Size = UDim2.fromOffset(FROST_COL + 1, 0),
+			BackgroundColor3 = S.Snow or WHITE, BackgroundTransparency = 1, BorderSizePixel = 0, ZIndex = 2, Parent = S.Top }, { FX.VFade(0.05, 0.55) })
+		S.CapF[i] = New("Frame", { AnchorPoint = Vector2.new(0, 1), Position = UDim2.fromOffset(x, 1), Size = UDim2.fromOffset(FROST_COL + 1, 0),
+			BackgroundColor3 = S.Snow or WHITE, BackgroundTransparency = 1, BorderSizePixel = 0, Parent = S.Root }, { FX.VFade(0, 0.35) })
+		-- keep what had already settled when the window is resized
+		local j = old and oldW and math.clamp(math.floor(x / oldW * #old) + 1, 1, #old)
+		S.Drift[i] = j and old[j] or 0
+		S.Cap[i] = j and oldCap[j] or 0
+	end
+	S.ColsFor = S.W
+end
+function FX.Flake(S, x, y, inside, delay)
+	S.Flakes = S.Flakes or {}
+	if #S.Flakes > 140 then return nil end
+	local size = math.random() < 0.18 and math.random(5, 6) or math.random(2, 4)
+	local f = New("Frame", { AnchorPoint = Vector2.new(0.5, 0.5), Position = UDim2.fromOffset(x, y), Size = UDim2.fromOffset(size, size),
+		BackgroundTransparency = 1, ZIndex = 3, Parent = inside and S.Top or S.Root })
+	local parts = {}
+	if size >= 5 then
+		-- a tiny six-armed crystal
+		for k = 0, 2 do
+			table.insert(parts, New("Frame", { AnchorPoint = Vector2.new(0.5, 0.5), Position = UDim2.fromScale(0.5, 0.5), Size = UDim2.new(1, 2, 0, 1),
+				Rotation = k * 60, BackgroundColor3 = S.Snow or WHITE, BackgroundTransparency = 1, BorderSizePixel = 0, ZIndex = 3, Parent = f }))
+		end
+	else
+		table.insert(parts, New("Frame", { Size = UDim2.fromScale(1, 1), BackgroundColor3 = S.Snow or WHITE, BackgroundTransparency = 1, ZIndex = 3, Parent = f }, { CornerFixed(999) }))
+	end
+	table.insert(S.Flakes, { Frame = f, Parts = parts, X = x, Y = y, Vy = 26 + math.random() * 34 + size * 3, Size = size, Inside = inside,
+		Age = -(delay or 0), Ph = math.random() * 6.28, Sw = 0.8 + math.random() * 1.4, Amp = 4 + math.random() * 9, Spin = (math.random() - 0.5) * 120 })
+	return S.Flakes[#S.Flakes]
+end
+function FX.Settle(S, list, x, amount, top)
+	local i = math.clamp(math.floor(x / FROST_COL) + 1, 1, #list)
+	for d = -2, 2 do
+		local j = i + d
+		if list[j] then
+			local cap = FX.FrostMax(S, (j - 1) * FROST_COL + FROST_COL / 2, top)
+			list[j] = math.min(cap, list[j] + amount * (d == 0 and 0.4 or (math.abs(d) == 1 and 0.2 or 0.1)))
+		end
+	end
+end
+Kinds.Frost = {
+	Build = function(S)
+		S.Flakes, S.Glints, S.LastMouse = {}, {}, nil
+		FX.FrostColumns(S)
+		for i = 1, 7 do
+			S.Glints[i] = { Frame = New("Frame", { AnchorPoint = Vector2.new(0.5, 0.5), Size = UDim2.fromOffset(2, 2), BackgroundColor3 = WHITE,
+				BackgroundTransparency = 1, ZIndex = 3, Parent = S.Top }, { CornerFixed(999) }), U = S.Rng:NextNumber(), Ph = S.Rng:NextNumber() * 6.28,
+				Sp = 0.6 + S.Rng:NextNumber() * 1.2 }
+		end
+	end,
+	Paint = function(S)
+		local st = TingUI.Style
+		S.Snow = (st.SnowColor or st.ParticleColor or TingUI.Theme.Text):Lerp(WHITE, 0.35)
+		for _, list in ipairs({ S.DriftF or {}, S.CapF or {} }) do for _, f in ipairs(list) do f.BackgroundColor3 = S.Snow end end
+		for _, fl in ipairs(S.Flakes or {}) do for _, p in ipairs(fl.Parts) do p.BackgroundColor3 = S.Snow end end
+	end,
+	Update = function(S, dt, t)
+		local F = S.Fade
+		if S.ColsFor ~= S.W then FX.FrostColumns(S) Kinds.Frost.Paint(S) end
+		local W, H = S.W, S.H
+		-- falling flakes: they sway down and settle into the drift (or the dusting on top) where they land
+		for i = #S.Flakes, 1, -1 do
+			local fl = S.Flakes[i]
+			fl.Age = fl.Age + dt
+			if fl.Age < 0 then
+				fl.Frame.Visible = false
+			else
+				fl.Frame.Visible = true
+				fl.Y = fl.Y + fl.Vy * dt
+				local x = fl.X + math.sin(fl.Age * fl.Sw + fl.Ph) * fl.Amp
+				fl.Frame.Position = UDim2.fromOffset(x, fl.Y)
+				fl.Frame.Rotation = fl.Age * fl.Spin
+				local col = math.clamp(math.floor(x / FROST_COL) + 1, 1, #S.Drift)
+				local floor = fl.Inside and (H - S.Drift[col] - 1) or (-S.Cap[col])
+				local a = math.min(1, fl.Age / 0.3)
+				if fl.Y >= floor then
+					fl.Melt = (fl.Melt or 0) + dt
+					if not fl.Landed then
+						fl.Landed = true
+						FX.Settle(S, fl.Inside and S.Drift or S.Cap, x, fl.Size * (fl.Inside and 4 or 5.5), not fl.Inside)
+					end
+					fl.Y = floor
+					a = a * math.max(0, 1 - fl.Melt / 0.35)
+				end
+				for _, p in ipairs(fl.Parts) do p.BackgroundTransparency = F(1 - 0.85 * a) end
+				if fl.Melt and fl.Melt > 0.35 or fl.Y > H + 10 then
+					fl.Frame:Destroy()
+					table.remove(S.Flakes, i)
+				end
+			end
+		end
+		-- the pointer brushing through the drift: a dent and a little puff of snow
+		local m = S.Mouse
+		if m and S.LastMouse and m.Y > H - 16 and m.Y < H + 4 and m.X > 0 and m.X < W then
+			local speed = (m - S.LastMouse).Magnitude / math.max(dt, 1 / 240)
+			if speed > 90 then
+				local c = math.clamp(math.floor(m.X / FROST_COL) + 1, 1, #S.Drift)
+				for d = -3, 3 do
+					local j = c + d
+					if S.Drift[j] then S.Drift[j] = math.max(0, S.Drift[j] - dt * 30 * (1 - math.abs(d) / 4)) end
+				end
+				S.PuffT = (S.PuffT or 0) - dt
+				if S.PuffT <= 0 then
+					S.PuffT = 0.07
+					local puff = FX.Flake(S, m.X + (math.random() - 0.5) * 10, H - 4, true)
+					if puff then puff.Vy, puff.Puff = -(40 + math.random() * 40), true end
+				end
+			end
+		end
+		S.LastMouse = m
+		-- puffed flakes arc back down
+		for _, fl in ipairs(S.Flakes) do if fl.Puff then fl.Vy = fl.Vy + 260 * dt end end
+		-- the snow stays soft and rounded, and dents slowly fill back in once it has settled
+		local relax = math.min(1, dt * 5) * 0.5
+		for _, pair in ipairs({ { S.Drift, S.DriftF, false }, { S.Cap, S.CapF, true } }) do
+			local list, frames, top = pair[1], pair[2], pair[3]
+			local n = #list
+			for i = 1, n do
+				local l, r = list[math.max(1, i - 1)], list[math.min(n, i + 1)]
+				local x = (i - 1) * FROST_COL + FROST_COL / 2
+				local cap = FX.FrostMax(S, x, top)
+				local h = list[i] + ((l + r) / 2 - list[i]) * relax
+				if S.Settled and h < cap * 0.8 then h = h + dt * 0.6 end
+				list[i] = math.clamp(h, 0, cap)
+				frames[i].Size = UDim2.fromOffset(FROST_COL + 1, list[i])
+				frames[i].BackgroundTransparency = list[i] > 0.3 and F(top and 0.3 or 0.38) or 1
+			end
+		end
+		-- a few glints twinkle on top of the drift
+		for _, g in ipairs(S.Glints) do
+			local x = 16 + g.U * (W - 32)
+			local c = math.clamp(math.floor(x / FROST_COL) + 1, 1, #S.Drift)
+			local h = S.Drift[c]
+			local tw = math.max(0, math.sin(t * g.Sp + g.Ph)) ^ 6
+			g.Frame.Position = UDim2.fromOffset(x, H - h + 1)
+			g.Frame.BackgroundTransparency = h > 1.5 and F(1 - tw * 0.85) or 1
+		end
+	end,
+	Feedback = function(S, kind, x, y)
+		local W = S.W
+		if kind == "Open" then
+			-- the first snowfall builds the drift; later ones are a light flurry over what's already there
+			local first = not S.Settled
+			local n = first and 64 or 18
+			for i = 1, n do FX.Flake(S, 8 + math.random() * (W - 16), -6 - math.random() * 30, true, (i / n) * (first and 1.8 or 1.2)) end
+			for i = 1, first and 26 or 8 do FX.Flake(S, 24 + math.random() * (W - 48), -40 - math.random() * 40, false, (i / 26) * 1.5) end
+			if first then task.delay(3.2, function() S.Settled = true end) end
+		elseif kind == "Tab" then
+			for i = 1, 9 do FX.Flake(S, 10 + math.random() * (W - 20), -4, true, i * 0.05) end
+		elseif kind == "Click" then
+			-- a small six-armed frost star blooms and fades
+			local star = New("Frame", { AnchorPoint = Vector2.new(0.5, 0.5), Position = UDim2.fromOffset(x, y), Size = UDim2.fromOffset(4, 4),
+				Rotation = math.random(0, 30), BackgroundTransparency = 1, ZIndex = 5, Parent = S.Top })
+			local arms = {}
+			for k = 0, 2 do
+				arms[k + 1] = New("Frame", { AnchorPoint = Vector2.new(0.5, 0.5), Position = UDim2.fromScale(0.5, 0.5), Size = UDim2.new(1, 0, 0, 1),
+					Rotation = k * 60, BackgroundColor3 = S.Snow or WHITE, BackgroundTransparency = S.Fade(0.35), BorderSizePixel = 0, ZIndex = 5, Parent = star },
+					{ New("UIGradient", { Transparency = NumberSequence.new({ NumberSequenceKeypoint.new(0, 1), NumberSequenceKeypoint.new(0.5, 0), NumberSequenceKeypoint.new(1, 1) }) }) })
+			end
+			TweenService:Create(star, TweenInfo.new(0.5, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), { Size = UDim2.fromOffset(26, 26), Rotation = star.Rotation + 30 }):Play()
+			for _, a in ipairs(arms) do TweenService:Create(a, TweenInfo.new(0.5, Enum.EasingStyle.Quad, Enum.EasingDirection.In), { BackgroundTransparency = 1 }):Play() end
+			task.delay(0.52, function() star:Destroy() end)
+		end
+	end,
+}
+
+--------------------------------------------------------------------------
+-- Rose: a climbing rose grows in from both lower corners when the theme arrives: the stem draws itself along the
+-- edge, leaves unfurl, and buds open into small blooms that open wider and lean toward the pointer when it comes near.
+-- Now and then a breeze carries a few loose petals across the window, each tumbling in its own way and swerving
+-- around the pointer. A click opens a small bloom that sheds its petals; a tab switch sends a light gust through.
+--------------------------------------------------------------------------
+function FX.Bezier(p0, p1, p2, p3, u)
+	local v = 1 - u
+	return p0 * v ^ 3 + p1 * 3 * v * v * u + p2 * 3 * v * u * u + p3 * u ^ 3
+end
+function FX.RoseVines(S)
+	for _, v in ipairs(S.Vines or {}) do v.Holder:Destroy() end
+	S.Vines = {}
+	local W, H = S.W, S.H
+	local len = math.min(W * 0.36, 230)
+	for side = 1, 2 do
+		local m = side == 1 and 1 or -1
+		local ox = side == 1 and 0 or W
+		local P = function(x, y) return Vector2.new(ox + x * m, y) end
+		local v = { Holder = New("Frame", { BackgroundTransparency = 1, Size = UDim2.fromScale(1, 1), ZIndex = 2, Parent = S.Top }),
+			Segs = {}, Leaves = {}, Blooms = {}, Side = m }
+		-- hugging the edge, below the footer text
+		local p0, p1, p2, p3 = P(3, H - (side == 1 and 70 or 50)), P(2, H - 6), P(30, H - 2), P(side == 1 and len or len * 0.72, H - 4)
+		local N = 30
+		local pts = {}
+		for i = 0, N do
+			local u = i / N
+			local p = FX.Bezier(p0, p1, p2, p3, u)
+			-- a gentle wander so the stem looks grown, not drawn with a ruler
+			local wob = math.sin(u * 13 + side) * 1.6 * Smooth(u * 4)
+			pts[i] = p + Vector2.new(0, -math.abs(wob))
+		end
+		for i = 1, N do
+			local a, b = pts[i - 1], pts[i]
+			local th = 1.8 - (i / N) * 0.8
+			local s = Seg(v.Holder, a.X, a.Y, b.X, b.Y, th)
+			s.BorderSizePixel = 0
+			s.ZIndex = 2
+			v.Segs[i] = { Frame = s, U = i / N }
+			-- leaves on alternating sides, unfurling as the stem reaches them
+			if i % 4 == 2 and i < N - 1 then
+				local dir = (b - a).Unit
+				local ang = math.deg(atan(dir.Y, dir.X)) + ((i % 8 == 2) and -48 or 48)
+				local leaf = New("Frame", { AnchorPoint = Vector2.new(0.5, 0.5), Position = UDim2.fromOffset(b.X, b.Y), Size = UDim2.fromOffset(0, 0),
+					Rotation = ang, BackgroundTransparency = 1, ZIndex = 2, Parent = v.Holder }, { CornerFixed(999),
+					New("UIGradient", { Transparency = NumberSequence.new(0.1, 0.45) }) })
+				table.insert(v.Leaves, { Frame = leaf, U = i / N, Rot = ang, Ph = i * 0.7, Len = 8 + (i % 3) * 1.5, At = b })
+			end
+		end
+		-- buds along the stem and a bloom at the tip
+		for _, at in ipairs(side == 1 and { 0.42, 0.74, 1 } or { 0.55, 1 }) do
+			local i = math.floor(at * N + 0.5)
+			local p = pts[i]
+			local holder = New("Frame", { AnchorPoint = Vector2.new(0.5, 0.5), Position = UDim2.fromOffset(p.X, p.Y - 1), Size = UDim2.fromOffset(0, 0),
+				BackgroundTransparency = 1, ZIndex = 3, Parent = v.Holder })
+			local petals = {}
+			for k = 1, 5 do
+				petals[k] = New("Frame", { AnchorPoint = Vector2.new(0.5, 0.5), Size = UDim2.fromOffset(7, 5),
+					BackgroundTransparency = 1, ZIndex = 3, Parent = holder }, { CornerFixed(999),
+					New("UIGradient", { Transparency = NumberSequence.new(0.35, 0) }) })
+			end
+			local heart = New("Frame", { AnchorPoint = Vector2.new(0.5, 0.5), Position = UDim2.fromScale(0.5, 0.5), Size = UDim2.fromOffset(3, 3),
+				BackgroundTransparency = 1, ZIndex = 4, Parent = holder }, { CornerFixed(999) })
+			table.insert(v.Blooms, { Holder = holder, Petals = petals, Heart = heart, U = at, Pos = p, Open = 0, Size = at == 1 and 1.1 or 0.9, Ph = at * 9 })
+		end
+		table.insert(S.Vines, v)
+	end
+	S.VinesFor = Vector2.new(W, H)
+	if S.Stem then Kinds.Rose.Paint(S) end
+end
+local ROSE_KINDS = { "Oval", "Oval", "Slender", "Heart" }
+function FX.LoosePetal(S, x, y, vx, vy, opts)
+	S.Loose = S.Loose or {}
+	if #S.Loose > 40 then return end
+	opts = opts or {}
+	local kind = opts.Kind or ROSE_KINDS[math.random(#ROSE_KINDS)]
+	local color = (S.Bloom or Color3.fromRGB(242, 150, 186)):Lerp(WHITE, math.random() * 0.3)
+	local holder, parts = FX.Petal(S.Top, kind, color, 4)
+	local size = opts.Size or math.random(6, 10)
+	table.insert(S.Loose, { Frame = holder, Parts = parts, X = x, Y = y, Vx = vx, Vy = vy, W = size * (kind == "Slender" and 1.6 or 1.25), H = size,
+		Rot = math.random() * 360, Spin = (math.random() - 0.5) * 200, Flip = math.random() * 6.28, FlipSp = 2 + math.random() * 3,
+		Age = -(opts.Delay or 0), Life = opts.Life or 6, Ph = math.random() * 6.28, Open = opts.Open, OX = x, OY = y, Alpha = opts.Alpha or 0.6 })
+end
+function FX.Breeze(S, n, strength)
+	local H = S.H
+	for i = 1, n do
+		FX.LoosePetal(S, -12 - math.random() * 30, 20 + math.random() * H * 0.6, (55 + math.random() * 60) * strength, 8 + math.random() * 16,
+			{ Delay = i * 0.12 + math.random() * 0.2 })
+	end
+end
+Kinds.Rose = {
+	Build = function(S)
+		S.Grow, S.GrowT, S.Gust, S.Loose = 1, nil, 0, {}
+		S.NextBreeze = 4 + S.Rng:NextNumber() * 4
+		FX.RoseVines(S)
+	end,
+	Paint = function(S)
+		local st, T = TingUI.Style, TingUI.Theme
+		S.Bloom = st.BloomColor or st.ParticleColor or T.Accent
+		S.Stem = (st.VineColor or Color3.fromRGB(120, 150, 112)):Lerp(T.Background, 0.25)
+		S.Leaf = S.Stem:Lerp(Color3.fromRGB(150, 196, 120), 0.35)
+		for _, v in ipairs(S.Vines or {}) do
+			for _, s in ipairs(v.Segs) do s.Frame.BackgroundColor3 = S.Stem end
+			for _, l in ipairs(v.Leaves) do l.Frame.BackgroundColor3 = S.Leaf end
+			for _, b in ipairs(v.Blooms) do
+				for k, p in ipairs(b.Petals) do p.BackgroundColor3 = S.Bloom:Lerp(WHITE, (k % 2) * 0.18) end
+				b.Heart.BackgroundColor3 = S.Bloom:Lerp(Color3.fromRGB(255, 220, 160), 0.6)
+			end
+		end
+	end,
+	Update = function(S, dt, t)
+		local F = S.Fade
+		if not S.VinesFor or S.VinesFor.X ~= S.W or S.VinesFor.Y ~= S.H then FX.RoseVines(S) end
+		if S.GrowT then
+			S.GrowT = S.GrowT + dt
+			S.Grow = math.clamp(S.GrowT / 1.6, 0, 1)
+			if S.GrowT > 2.6 then S.GrowT = nil end
+		end
+		S.Gust = math.max(0, S.Gust - dt * 0.7)
+		local g = S.Gust
+		-- the breeze: every few seconds a handful of petals blows through
+		if t >= S.NextBreeze then
+			S.NextBreeze = t + 8 + S.Rng:NextNumber() * 7
+			FX.Breeze(S, S.Rng:NextInteger(3, 6), 1)
+			S.Gust = math.max(S.Gust, 0.45)
+		end
+		local m = S.Mouse
+		for _, v in ipairs(S.Vines) do
+			for _, s in ipairs(v.Segs) do
+				local k = math.clamp((S.Grow - s.U + 0.04) / 0.04, 0, 1)
+				s.Frame.BackgroundTransparency = F(1 - 0.55 * k)
+			end
+			for _, l in ipairs(v.Leaves) do
+				local k = FX.Ease((S.Grow - l.U) / 0.18)
+				local flutter = math.sin(t * (1.6 + g * 6) + l.Ph) * (5 + g * 14)
+				FX.Arm(l.Frame, l.At.X, l.At.Y, l.Rot + flutter, l.Len * k, 4.2 * k)
+				l.Frame.BackgroundTransparency = k > 0.01 and F(0.42) or 1
+			end
+			for _, b in ipairs(v.Blooms) do
+				local grown = FX.Ease((S.Grow - b.U + 0.05) / 0.25)
+				-- open wider and lean toward the pointer when it comes near
+				local near, lean = 0, 0
+				if m then
+					local d = (m - b.Pos)
+					near = math.clamp(1 - d.Magnitude / 90, 0, 1)
+					lean = math.clamp(d.X / 90, -1, 1) * near * 14
+				end
+				local want = grown * (0.55 + 0.45 * near)
+				b.Open = b.Open + (want - b.Open) * math.min(1, dt * 6)
+				local o, sz = b.Open, b.Size
+				b.Holder.Rotation = lean + math.sin(t * 0.9 + b.Ph) * 4 * (1 + g * 2)
+				for k, p in ipairs(b.Petals) do
+					-- closed: short petals pressed together; open: longer, wider, spread out from the heart
+					local len = 7.5 * sz * (0.55 + 0.45 * o) * grown
+					FX.Arm(p, 0, 0, k * 72 - 90 + (1 - o) * 26 + math.sin(t * 1.3 + k) * 3, len, 5.4 * sz * (0.45 + 0.55 * o) * grown)
+					p.BackgroundTransparency = grown > 0.01 and F(0.3 + (1 - o) * 0.25) or 1
+				end
+				b.Heart.Size = UDim2.fromOffset(3 * sz * (0.4 + 0.6 * o), 3 * sz * (0.4 + 0.6 * o))
+				b.Heart.BackgroundTransparency = grown > 0.01 and F(0.25) or 1
+			end
+		end
+		-- loose petals: tumble (they turn over in 3D: narrow, then wide again), flutter, and swerve around the pointer
+		local W, H = S.W, S.H
+		for i = #S.Loose, 1, -1 do
+			local p = S.Loose[i]
+			p.Age = p.Age + dt
+			if p.Age < 0 then
+				p.Frame.Visible = false
+			else
+				p.Frame.Visible = true
+				if p.Open and p.Age < 0.42 then
+					-- part of a click bloom: unfold out from the centre first
+					local k = BackOut(math.min(1, p.Age / 0.3))
+					p.X, p.Y = p.OX + p.Open.X * 9 * k, p.OY + p.Open.Y * 9 * k
+					p.Rot = math.deg(atan(p.Open.Y, p.Open.X))
+					p.Flip = 0
+				else
+					if p.Open then p.Vx, p.Vy, p.Open = p.Open.X * 30, p.Open.Y * 20 - 12, nil end
+					p.Vy = math.min(p.Vy + 24 * dt, 46)
+					p.Vx = p.Vx + (g * 60 - p.Vx * 0.15) * dt
+					if m then
+						local d = Vector2.new(p.X, p.Y) - m
+						local dist = d.Magnitude
+						if dist < 46 and dist > 0.1 then
+							local push = (1 - dist / 46) * 260 * dt
+							p.Vx, p.Vy = p.Vx + d.X / dist * push, p.Vy + d.Y / dist * push
+						end
+					end
+					p.X = p.X + (p.Vx + math.sin(p.Age * 2.4 + p.Ph) * 18) * dt
+					p.Y = p.Y + p.Vy * dt
+					p.Rot = p.Rot + p.Spin * dt
+					p.Flip = p.Flip + p.FlipSp * dt
+				end
+				local turn = 0.22 + 0.78 * math.abs(math.cos(p.Flip))
+				p.Frame.Position = UDim2.fromOffset(p.X, p.Y)
+				p.Frame.Size = UDim2.fromOffset(p.W * turn, p.H)
+				p.Frame.Rotation = p.Rot
+				local a = math.min(1, p.Age / 0.2) * math.clamp((p.Life - p.Age) / 0.6, 0, 1)
+				for _, part in ipairs(p.Parts) do part.BackgroundTransparency = F(1 - p.Alpha * a) end
+				if p.Age > p.Life or p.X > W + 30 or p.Y > H + 20 then
+					p.Frame:Destroy()
+					table.remove(S.Loose, i)
+				end
+			end
+		end
+	end,
+	Feedback = function(S, kind, x, y)
+		if kind == "Open" then
+			S.Grow, S.GrowT = 0, 0
+			for i = 1, 7 do
+				FX.LoosePetal(S, math.random() * S.W, -10 - math.random() * 20, (math.random() - 0.3) * 30, 20 + math.random() * 20, { Delay = 0.3 + i * 0.16, Life = 7 })
+			end
+		elseif kind == "Tab" then
+			S.Gust = 1
+			FX.Breeze(S, 4, 1.5)
+		elseif kind == "Click" then
+			-- a small bloom opens where you clicked, then lets its petals go
+			local n = 6
+			local spin = math.random() * 6.28
+			for k = 1, n do
+				local a = spin + k / n * math.pi * 2
+				FX.LoosePetal(S, x, y, 0, 0, { Open = Vector2.new(math.cos(a), math.sin(a)), Kind = k % 2 == 0 and "Oval" or "Heart", Size = 7, Life = 1.6, Alpha = 0.55 })
+			end
+		end
+	end,
+}
+
+--------------------------------------------------------------------------
+-- Sunset: a low sun sits on the window's lower edge, sliced by horizon bands that drift down through it, with a
+-- soft glow and long rays turning slowly behind it; the sun follows the pointer a little, like something far away.
+-- Small flocks of birds cross now and then, flapping, gliding, and climbing away from the pointer. When the theme
+-- arrives the sun rises into place and a flock takes off; a tab switch sends a warm flare along the horizon; clicks
+-- release a few embers that cool from gold to red as they climb.
+--------------------------------------------------------------------------
+local SUN_ROWS = 2
+function FX.SunBuild(S)
+	if S.Sun then S.Sun:Destroy() end
+	local W, H = S.W, S.H
+	local d = math.floor(math.clamp(W * 0.24, 90, 140))
+	S.SunD = d
+	S.Sun = New("Frame", { AnchorPoint = Vector2.new(0.5, 0.5), Size = UDim2.fromOffset(d, d), BackgroundTransparency = 1, ZIndex = 1, Parent = S.Top })
+	S.Glow = {}
+	for i, k in ipairs({ 2.3, 1.75, 1.32 }) do
+		S.Glow[i] = New("Frame", { AnchorPoint = Vector2.new(0.5, 0.5), Position = UDim2.fromScale(0.5, 0.5), Size = UDim2.fromOffset(d * k, d * k),
+			BackgroundTransparency = 1, ZIndex = 1, Parent = S.Sun }, { CornerFixed(999) })
+	end
+	S.Rays = {}
+	for i = 1, 7 do
+		local ray = New("Frame", { AnchorPoint = Vector2.new(0.5, 0.5), Size = UDim2.fromOffset(W * 1.1, 2 + (i % 3) * 2),
+			BackgroundTransparency = 1, BorderSizePixel = 0, ZIndex = 1, Parent = S.Sun },
+			{ New("UIGradient", { Transparency = NumberSequence.new({ NumberSequenceKeypoint.new(0, 0.2), NumberSequenceKeypoint.new(0.45, 0.7), NumberSequenceKeypoint.new(1, 1) }) }) })
+		S.Rays[i] = { Frame = ray, Ang = 196 + (i - 1) * 24 + S.Rng:NextNumber() * 8, Ph = S.Rng:NextNumber() * 6.28, Th = 2 + (i % 3) * 2 }
+	end
+	-- the disc is built from thin rows so the horizon bands can cut through it
+	S.Rows = {}
+	local r = d / 2
+	for y = 0, d - 1, SUN_ROWS do
+		local cy = y + SUN_ROWS / 2 - r
+		local w = 2 * math.sqrt(math.max(0, r * r - cy * cy))
+		S.Rows[#S.Rows + 1] = { Frame = New("Frame", { AnchorPoint = Vector2.new(0.5, 0), Position = UDim2.new(0.5, 0, 0, y), Size = UDim2.fromOffset(w, SUN_ROWS),
+			BackgroundTransparency = 1, BorderSizePixel = 0, ZIndex = 2, Parent = S.Sun }), V = y / d }
+	end
+	S.SunFor = Vector2.new(W, H)
+	if S.Hot then Kinds.Sunset.Paint(S) end
+end
+function FX.Flock(S)
+	S.Birds = S.Birds or {}
+	if #S.Birds > 10 then return end
+	local W, H = S.W, S.H
+	local dir = math.random() < 0.5 and 1 or -1
+	local y = 26 + math.random() * H * 0.28
+	local n = math.random(3, 5)
+	local speed = 42 + math.random() * 22
+	for i = 1, n do
+		-- a loose V: the leader in front, the rest staggered behind and to the sides
+		local row = math.ceil((i - 1) / 2)
+		local sideOff = ((i % 2 == 0) and -1 or 1) * row * 9
+		local holder = New("Frame", { AnchorPoint = Vector2.new(0.5, 0.5), Size = UDim2.fromOffset(1, 1), BackgroundTransparency = 1, ZIndex = 3, Parent = S.Top })
+		local wl = New("Frame", { AnchorPoint = Vector2.new(0.5, 0.5), Size = UDim2.fromOffset(6, 1.4),
+			BackgroundTransparency = 1, BorderSizePixel = 0, ZIndex = 3, Parent = holder }, { CornerFixed(1) })
+		local wr = New("Frame", { AnchorPoint = Vector2.new(0.5, 0.5), Size = UDim2.fromOffset(6, 1.4),
+			BackgroundTransparency = 1, BorderSizePixel = 0, ZIndex = 3, Parent = holder }, { CornerFixed(1) })
+		local size = 0.8 + math.random() * 0.45
+		table.insert(S.Birds, { Holder = holder, L = wl, R = wr, X = (dir == 1 and -20 or W + 20) - dir * row * 16, Y = y + sideOff, Vx = speed * dir * (0.95 + math.random() * 0.1),
+			Vy = 0, Ph = math.random() * 6.28, Flap = 7 + math.random() * 3, Size = size, Glide = 0 })
+	end
+end
+function FX.Ember(S, x, y, delay)
+	S.Embers = S.Embers or {}
+	if #S.Embers > 40 then return end
+	local size = math.random(2, 3)
+	local f = New("Frame", { AnchorPoint = Vector2.new(0.5, 0.5), Position = UDim2.fromOffset(x, y), Size = UDim2.fromOffset(size, size),
+		BackgroundTransparency = 1, BorderSizePixel = 0, ZIndex = 5, Parent = S.Top }, { CornerFixed(1) })
+	table.insert(S.Embers, { Frame = f, X = x, Y = y, Vx = (math.random() - 0.5) * 40, Vy = -(45 + math.random() * 55), Age = -(delay or 0),
+		Life = 0.8 + math.random() * 0.6, Ph = math.random() * 6.28 })
+end
+Kinds.Sunset = {
+	Build = function(S)
+		S.Rise, S.RiseT, S.Flare, S.Birds, S.Embers = 1, nil, 0, {}, {}
+		S.NextFlock = 5 + S.Rng:NextNumber() * 5
+		S.Lean = 0
+		FX.SunBuild(S)
+	end,
+	Paint = function(S)
+		local st, T = TingUI.Style, TingUI.Theme
+		local tl = st.TopLine or { T.Accent, T.Accent }
+		local c1 = st.SunColor or tl[1]
+		local c2 = tl[2] or c1
+		S.Hot = c1:Lerp(Color3.fromRGB(255, 236, 170), 0.45)
+		S.Low = c2
+		S.BirdColor = st.BirdColor or T.Text:Lerp(c2, 0.35)
+		for _, row in ipairs(S.Rows or {}) do row.Frame.BackgroundColor3 = S.Hot:Lerp(S.Low, row.V) end
+		for _, g in ipairs(S.Glow or {}) do g.BackgroundColor3 = c1 end
+		for _, r in ipairs(S.Rays or {}) do r.Frame.BackgroundColor3 = S.Hot end
+		for _, b in ipairs(S.Birds or {}) do b.L.BackgroundColor3 = S.BirdColor b.R.BackgroundColor3 = S.BirdColor end
+	end,
+	Update = function(S, dt, t)
+		local F = S.Fade
+		local W, H = S.W, S.H
+		if not S.SunFor or S.SunFor.X ~= W or S.SunFor.Y ~= H then FX.SunBuild(S) end
+		if S.RiseT then
+			S.RiseT = S.RiseT + dt
+			S.Rise = FX.Ease(S.RiseT / 1.5)
+			if S.RiseT > 1.5 then S.RiseT = nil end
+		end
+		S.Flare = math.max(0, S.Flare - dt * 1.4)
+		-- the sun sits low on the right and drifts a little with the pointer
+		local want = S.Mouse and math.clamp((S.Mouse.X / W - 0.5) * 2, -1, 1) or 0
+		S.Lean = S.Lean + (want - S.Lean) * math.min(1, dt * 1.5)
+		local d = S.SunD
+		local cx = W * 0.76 + S.Lean * 14
+		local cy = H - d * 0.18 + (1 - S.Rise) * d * 0.9 + math.sin(t * 0.4) * 1.5
+		S.Sun.Position = UDim2.fromOffset(cx, cy)
+		-- horizon bands: gaps that widen toward the bottom and drift down through the disc
+		local glowA = 0.6 + 0.4 * S.Rise
+		for _, row in ipairs(S.Rows) do
+			local v = row.V
+			local gap = math.clamp((v - 0.42) / 0.58, 0, 1) * 0.55
+			local phase = (v * 9 - t * 0.35) % 1
+			local cut = gap > 0 and phase < gap
+			row.Frame.BackgroundTransparency = cut and 1 or F(0.84 + v * 0.05 - S.Flare * 0.1)
+		end
+		for i, g in ipairs(S.Glow) do
+			g.BackgroundTransparency = F(1 - (0.035 + i * 0.02 + S.Flare * 0.05) * glowA * (1 + 0.15 * math.sin(t * 0.8 + i)))
+		end
+		for _, r in ipairs(S.Rays) do
+			FX.Arm(r.Frame, d / 2, d / 2, r.Ang + math.sin(t * 0.12 + r.Ph) * 4, W * 1.1 * (0.3 + 0.7 * S.Rise), r.Th)
+			r.Frame.BackgroundTransparency = F(0.93 - 0.025 * math.sin(t * 0.5 + r.Ph) - S.Flare * 0.05)
+		end
+		-- birds: flap in bursts, glide between, climb away from the pointer
+		if t >= S.NextFlock then
+			S.NextFlock = t + 12 + S.Rng:NextNumber() * 10
+			FX.Flock(S)
+		end
+		local m = S.Mouse
+		for i = #S.Birds, 1, -1 do
+			local b = S.Birds[i]
+			local scared = 0
+			if m then
+				local dist = (Vector2.new(b.X, b.Y) - m).Magnitude
+				scared = math.clamp(1 - dist / 70, 0, 1)
+			end
+			b.Vy = b.Vy + (-scared * 120 - b.Vy * 1.2) * dt
+			b.X = b.X + b.Vx * (1 + scared * 0.6) * dt
+			b.Y = b.Y + (b.Vy + math.sin(t * 1.3 + b.Ph) * 3) * dt
+			local cycle = (t * 0.5 + b.Ph) % 1
+			local flapping = cycle < 0.55 or scared > 0.1
+			local ang = flapping and math.sin(t * b.Flap * (1 + scared) + b.Ph) * 32 or -6
+			b.Holder.Position = UDim2.fromOffset(b.X, b.Y)
+			-- each wing pivots on the body: tips up on the downstroke's start, level in a glide
+			FX.Arm(b.L, 0.5, 0.5, 180 + ang, 6 * b.Size, 1.4)
+			FX.Arm(b.R, 0.5, 0.5, -ang, 6 * b.Size, 1.4)
+			b.L.BackgroundColor3 = S.BirdColor
+			b.R.BackgroundColor3 = S.BirdColor
+			local edge = math.clamp(math.min(b.X + 20, W + 20 - b.X) / 40, 0, 1)
+			b.L.BackgroundTransparency = F(1 - 0.6 * edge)
+			b.R.BackgroundTransparency = F(1 - 0.6 * edge)
+			if b.X < -40 or b.X > W + 40 or b.Y < -30 then
+				b.Holder:Destroy()
+				table.remove(S.Birds, i)
+			end
+		end
+		-- click embers: rise with a little turbulence and cool from gold to deep red
+		for i = #S.Embers, 1, -1 do
+			local e = S.Embers[i]
+			e.Age = e.Age + dt
+			if e.Age < 0 then
+				e.Frame.Visible = false
+			else
+				e.Frame.Visible = true
+				local k = e.Age / e.Life
+				e.Vx = e.Vx * (1 - dt * 1.5) + math.sin(e.Age * 9 + e.Ph) * 60 * dt
+				e.Vy = e.Vy * (1 - dt * 0.6)
+				e.X, e.Y = e.X + e.Vx * dt, e.Y + e.Vy * dt
+				e.Frame.Position = UDim2.fromOffset(e.X, e.Y)
+				e.Frame.Rotation = e.Age * 220
+				e.Frame.BackgroundColor3 = k < 0.5 and Color3.fromRGB(255, 236, 170):Lerp(S.Hot, k * 2) or S.Hot:Lerp(Color3.fromRGB(190, 60, 40), (k - 0.5) * 2)
+				local flick = 0.75 + 0.25 * math.sin(e.Age * 40 + e.Ph)
+				e.Frame.BackgroundTransparency = F(1 - flick * (1 - k) * 0.9)
+				if k >= 1 then
+					e.Frame:Destroy()
+					table.remove(S.Embers, i)
+				end
+			end
+		end
+	end,
+	Feedback = function(S, kind, x, y)
+		if kind == "Open" then
+			S.Rise, S.RiseT = 0, 0
+			task.delay(0.7, function() if S.Top.Parent then FX.Flock(S) end end)
+		elseif kind == "Tab" then
+			-- a warm flare along the horizon
+			S.Flare = 1
+			local cy = S.Sun.Position.Y.Offset
+			local streak = New("Frame", { AnchorPoint = Vector2.new(0.5, 0.5), Position = UDim2.fromOffset(S.Sun.Position.X.Offset, cy), Size = UDim2.fromOffset(S.W * 0.2, 2),
+				BackgroundColor3 = S.Hot or WHITE, BackgroundTransparency = S.Fade(0.45), BorderSizePixel = 0, ZIndex = 4, Parent = S.Top },
+				{ New("UIGradient", { Transparency = NumberSequence.new({ NumberSequenceKeypoint.new(0, 1), NumberSequenceKeypoint.new(0.5, 0), NumberSequenceKeypoint.new(1, 1) }) }) })
+			TweenService:Create(streak, TweenInfo.new(0.7, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), { Size = UDim2.fromOffset(S.W * 1.3, 1), BackgroundTransparency = 1 }):Play()
+			task.delay(0.72, function() streak:Destroy() end)
+		elseif kind == "Click" then
+			local glow = New("Frame", { AnchorPoint = Vector2.new(0.5, 0.5), Position = UDim2.fromOffset(x, y), Size = UDim2.fromOffset(10, 10),
+				BackgroundColor3 = S.Hot or WHITE, BackgroundTransparency = S.Fade(0.78), ZIndex = 4, Parent = S.Top }, { CornerFixed(999) })
+			TweenService:Create(glow, TweenInfo.new(0.4, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), { Size = UDim2.fromOffset(30, 30), BackgroundTransparency = 1 }):Play()
+			task.delay(0.42, function() glow:Destroy() end)
+			for i = 1, 7 do FX.Ember(S, x + (math.random() - 0.5) * 8, y - 3, i * 0.025) end
+		end
+	end,
+}
+
+--------------------------------------------------------------------------
+-- Storm: low clouds roll along the top of the window and light up from inside when lightning strikes. Raindrops bead
+-- on the glass, swell, and run down in short trails; moving the pointer through them wipes them aside. Rain splashes
+-- along the bottom edge. When the theme arrives a bolt forks across the window; distant lightning sometimes strikes
+-- through it too; a tab switch sends a gust of rain sweeping across; clicks splash a small crown of droplets.
+--------------------------------------------------------------------------
+function FX.Bolt(S, x0, y0, x1, y1)
+	local holder = New("Frame", { BackgroundTransparency = 1, Size = UDim2.fromScale(1, 1), ZIndex = 1, Parent = S.Top })
+	local segs = {}
+	local function Line(a, b, th, glow)
+		local core = Seg(holder, a.X, a.Y, b.X, b.Y, th)
+		core.BorderSizePixel = 0
+		core.BackgroundColor3 = S.BoltColor or WHITE
+		core.ZIndex = 2
+		table.insert(segs, { core, 0.05 + (2.2 - th) * 0.2 })
+		local g = Seg(holder, a.X, a.Y, b.X, b.Y, th * 4)
+		g.BorderSizePixel = 0
+		g.BackgroundColor3 = S.BoltColor or WHITE
+		g.ZIndex = 1
+		table.insert(segs, { g, glow })
+	end
+	-- jagged path by repeated midpoint displacement, with a fork or two off the way down
+	local function Path(a, b, depth, rough)
+		local pts = { a, b }
+		for _ = 1, depth do
+			local out = { pts[1] }
+			for i = 2, #pts do
+				local p, q = pts[i - 1], pts[i]
+				local mid = (p + q) / 2
+				local n = Vector2.new(-(q - p).Y, (q - p).X).Unit
+				table.insert(out, mid + n * (math.random() - 0.5) * (q - p).Magnitude * rough)
+				table.insert(out, q)
+			end
+			pts = out
+		end
+		return pts
+	end
+	local main = Path(Vector2.new(x0, y0), Vector2.new(x1, y1), 4, 0.55)
+	for i = 2, #main do Line(main[i - 1], main[i], 2.2 - i / #main, 0.82) end
+	for _ = 1, math.random(1, 2) do
+		local at = main[math.random(3, math.max(3, #main - 4))]
+		local dir = (Vector2.new(x1, y1) - Vector2.new(x0, y0)).Unit
+		local side = Vector2.new(dir.Y, -dir.X) * (math.random() < 0.5 and -1 or 1)
+		local tip = at + (dir * 0.6 + side * 0.8).Unit * (30 + math.random() * 50)
+		local fork = Path(at, tip, 3, 0.6)
+		for i = 2, #fork do Line(fork[i - 1], fork[i], 1.1, 0.9) end
+	end
+	-- strike, flicker once, fade
+	local F = S.Fade
+	local function Set(k) for _, s in ipairs(segs) do s[1].BackgroundTransparency = F(1 - (1 - s[2]) * k) end end
+	Set(1)
+	task.delay(0.06, function() if holder.Parent then Set(0.25) end end)
+	task.delay(0.11, function() if holder.Parent then Set(1) end end)
+	task.delay(0.16, function()
+		if not holder.Parent then return end
+		for _, s in ipairs(segs) do TweenService:Create(s[1], TweenInfo.new(0.4, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), { BackgroundTransparency = 1 }):Play() end
+		task.delay(0.42, function() holder:Destroy() end)
+	end)
+	S.CloudFlash = 1
+	if S.Flash then
+		S.Flash.BackgroundTransparency = F(0.9)
+		TweenService:Create(S.Flash, TweenInfo.new(0.45, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), { BackgroundTransparency = 1 }):Play()
+	end
+end
+function FX.Drop(S, x, y, size)
+	S.Drops = S.Drops or {}
+	if #S.Drops > 18 then return end
+	local f = New("Frame", { AnchorPoint = Vector2.new(0.5, 0.5), Position = UDim2.fromOffset(x, y), Size = UDim2.fromOffset(0, 0),
+		BackgroundColor3 = S.Rain or WHITE, BackgroundTransparency = 1, ZIndex = 3, Parent = S.Top }, { CornerFixed(999),
+		New("UIGradient", { Rotation = 90, Transparency = NumberSequence.new(0.85, 0.45) }) })
+	local rim = New("UIStroke", { Color = S.Rain or WHITE, Thickness = 1, Transparency = 1, Parent = f })
+	local hi = New("Frame", { AnchorPoint = Vector2.new(0.5, 0.5), Position = UDim2.fromScale(0.35, 0.3), Size = UDim2.fromScale(0.3, 0.3),
+		BackgroundColor3 = WHITE, BackgroundTransparency = 1, ZIndex = 3, Parent = f }, { CornerFixed(999) })
+	-- light bent through the drop gathers in a small bright crescent at its bottom
+	local lo = New("Frame", { AnchorPoint = Vector2.new(0.5, 0.5), Position = UDim2.fromScale(0.55, 0.78), Size = UDim2.fromScale(0.5, 0.18),
+		BackgroundColor3 = WHITE, BackgroundTransparency = 1, ZIndex = 3, Parent = f }, { CornerFixed(999) })
+	table.insert(S.Drops, { Frame = f, Rim = rim, Hi = hi, Lo = lo, X = x, Y = y, Y0 = y, Size = size, Age = 0, Vy = 0, Vx = 0,
+		RunAt = 1.5 + math.random() * 5, Max = 3.5 + math.random() * 3.5, Ph = math.random() * 6.28 })
+end
+function FX.Splash(S, x, y, n, power, tr)
+	S.Bits = S.Bits or {}
+	for i = 1, n do
+		if #S.Bits > 60 then return end
+		local a = -math.pi / 2 + (i / (n + 1) - 0.5) * 2.4 + (math.random() - 0.5) * 0.3
+		local sp = power * (0.7 + math.random() * 0.5)
+		local f = New("Frame", { AnchorPoint = Vector2.new(0.5, 0.5), Position = UDim2.fromOffset(x, y), Size = UDim2.fromOffset(2, 2),
+			BackgroundColor3 = S.Rain or WHITE, BackgroundTransparency = 1, ZIndex = 4, Parent = S.Top }, { CornerFixed(999) })
+		table.insert(S.Bits, { Frame = f, X = x, Y = y, Vx = math.cos(a) * sp, Vy = math.sin(a) * sp, Age = 0, Life = 0.35 + math.random() * 0.15, Tr = tr })
+	end
+end
+Kinds.Storm = {
+	Build = function(S)
+		S.Drops, S.Bits, S.Trails, S.Streaks = {}, {}, {}, {}
+		S.NextDrop, S.NextSplash, S.CloudFlash, S.SeenBolt = 0.5, 0, 0, Scenes.Bolt or 0
+		S.Flash = New("Frame", { Size = UDim2.fromScale(1, 1), BackgroundColor3 = Color3.fromRGB(215, 228, 255), BackgroundTransparency = 1, ZIndex = 1, Parent = S.Top })
+		S.Clouds = {}
+		for i = 1, 8 do
+			local w = S.Rng:NextInteger(110, 210)
+			local c = New("Frame", { AnchorPoint = Vector2.new(0.5, 0.5), Size = UDim2.fromOffset(w, w * 0.32), BackgroundTransparency = 1, ZIndex = 1, Parent = S.Top },
+				{ CornerFixed(999), FX.VFade(0, 1) })
+			S.Clouds[i] = { Frame = c, U = (i - 1) / 8 + S.Rng:NextNumber() * 0.08, W = w, Y = -4 + S.Rng:NextNumber() * 12, Sp = 0.006 + S.Rng:NextNumber() * 0.01, Ph = S.Rng:NextNumber() * 6.28 }
+		end
+	end,
+	Paint = function(S)
+		local st, T = TingUI.Style, TingUI.Theme
+		S.Rain = (st.ParticleColor or T.Text):Lerp(WHITE, 0.25)
+		S.BoltColor = st.BoltColor or Color3.fromRGB(225, 236, 255)
+		S.Cloud = st.CloudColor or T.Group:Lerp(T.TextDim, 0.28)
+		for _, c in ipairs(S.Clouds or {}) do c.Frame.BackgroundColor3 = S.Cloud end
+	end,
+	Update = function(S, dt, t)
+		local F = S.Fade
+		local W, H = S.W, S.H
+		-- distant lightning (the backdrop flash) lights the clouds, and now and then strikes through the window
+		if Scenes.Bolt and Scenes.Bolt > S.SeenBolt then
+			S.SeenBolt = Scenes.Bolt
+			if math.random() < 0.35 then
+				local x0 = W * (0.15 + math.random() * 0.7)
+				FX.Bolt(S, x0, -4, x0 + (math.random() - 0.5) * W * 0.3, H * (0.35 + math.random() * 0.3))
+			else
+				S.CloudFlash = 0.7
+			end
+		end
+		S.CloudFlash = math.max(0, S.CloudFlash - dt * 2.2)
+		for _, c in ipairs(S.Clouds) do
+			local u = (c.U + t * c.Sp) % 1.3 - 0.15
+			c.Frame.Position = UDim2.fromOffset(u * W, c.Y + math.sin(t * 0.3 + c.Ph) * 2)
+			c.Frame.BackgroundColor3 = S.CloudFlash > 0.01 and S.Cloud:Lerp(S.BoltColor, S.CloudFlash * 0.7) or S.Cloud
+			c.Frame.BackgroundTransparency = F(0.8 - S.CloudFlash * 0.3)
+		end
+		-- drops bead on the glass
+		S.NextDrop = S.NextDrop - dt
+		if S.NextDrop <= 0 then
+			S.NextDrop = 0.5 + math.random() * 1.1
+			FX.Drop(S, 10 + math.random() * (W - 20), 30 + math.random() * (H - 60), 2)
+		end
+		local m = S.Mouse
+		local mv = (m and S.LastMouse) and (m - S.LastMouse) / math.max(dt, 1 / 240) or Vector2.new(0, 0)
+		S.LastMouse = m
+		for i = #S.Drops, 1, -1 do
+			local d = S.Drops[i]
+			d.Age = d.Age + dt
+			local running = d.Age > d.RunAt
+			if not running then
+				d.Size = math.min(d.Max, d.Size + dt * 0.9)
+			else
+				d.Vy = math.min(d.Vy + 90 * dt, 70)
+				d.X = d.X + math.sin(d.Age * 5 + d.Ph) * 0.15
+				-- the trail it leaves behind
+				if not d.Trail then
+					d.Trail = New("Frame", { AnchorPoint = Vector2.new(0.5, 0), Position = UDim2.fromOffset(d.X, d.Y), Size = UDim2.fromOffset(1, 0),
+						BackgroundColor3 = S.Rain, BackgroundTransparency = 1, BorderSizePixel = 0, ZIndex = 2, Parent = S.Top }, { FX.VFade(1, 0.2) })
+					table.insert(S.Trails, { Frame = d.Trail, Age = 0, Life = 1.6 })
+				end
+				d.Trail.Size = UDim2.fromOffset(math.max(1, d.Size * 0.35), d.Y - d.Y0)
+				d.Size = math.max(1.5, d.Size - dt * 0.6)
+			end
+			-- wiped by the pointer: pushed along with it and gone
+			if m and not d.Wiped and mv.Magnitude > 120 and (Vector2.new(d.X, d.Y) - m).Magnitude < 20 then
+				d.Wiped, d.Vx, d.Vy = 0, mv.X * 0.5, mv.Y * 0.5
+			end
+			if d.Wiped then
+				d.Wiped = d.Wiped + dt
+				d.Vx = d.Vx * (1 - dt * 6)
+				d.Vy = d.Vy * (1 - dt * 6)
+				d.X = d.X + d.Vx * dt
+			end
+			d.Y = d.Y + d.Vy * dt
+			if not running then d.Y0 = d.Y end
+			local a = math.min(1, d.Age / 0.4) * (d.Wiped and math.max(0, 1 - d.Wiped / 0.25) or 1)
+			d.Frame.Position = UDim2.fromOffset(d.X, d.Y)
+			d.Frame.Size = UDim2.fromOffset(d.Size, d.Size * (running and 1.25 or 1))
+			d.Frame.BackgroundTransparency = F(1 - 0.5 * a)
+			d.Rim.Transparency = F(1 - 0.45 * a)
+			d.Hi.BackgroundTransparency = F(1 - 0.75 * a)
+			d.Lo.BackgroundTransparency = F(1 - 0.45 * a)
+			if (d.Wiped and d.Wiped > 0.25) or d.Y > H + 8 or (running and d.Y - d.Y0 > 140) then
+				d.Frame:Destroy()
+				table.remove(S.Drops, i)
+			end
+		end
+		for i = #S.Trails, 1, -1 do
+			local tr = S.Trails[i]
+			tr.Age = tr.Age + dt
+			tr.Frame.BackgroundTransparency = F(1 - 0.4 * math.max(0, 1 - tr.Age / tr.Life))
+			if tr.Age > tr.Life then tr.Frame:Destroy() table.remove(S.Trails, i) end
+		end
+		-- rain splashing along the bottom edge
+		S.NextSplash = S.NextSplash - dt
+		if S.NextSplash <= 0 then
+			S.NextSplash = 0.12 + math.random() * 0.3
+			FX.Splash(S, 8 + math.random() * (W - 16), H - 1, math.random(2, 3), 40 + math.random() * 30, 0.55)
+		end
+		for i = #S.Bits, 1, -1 do
+			local b = S.Bits[i]
+			b.Age = b.Age + dt
+			b.Vy = b.Vy + 340 * dt
+			b.X, b.Y = b.X + b.Vx * dt, b.Y + b.Vy * dt
+			b.Frame.Position = UDim2.fromOffset(b.X, b.Y)
+			b.Frame.BackgroundTransparency = F(b.Tr + (1 - b.Tr) * (b.Age / b.Life))
+			if b.Age > b.Life then b.Frame:Destroy() table.remove(S.Bits, i) end
+		end
+		-- gust streaks
+		for i = #S.Streaks, 1, -1 do
+			local s = S.Streaks[i]
+			s.Age = s.Age + dt
+			if s.Age >= 0 then
+				s.X, s.Y = s.X + s.Vx * dt, s.Y + s.Vy * dt
+				s.Frame.Position = UDim2.fromOffset(s.X, s.Y)
+				s.Frame.BackgroundTransparency = F(0.62 + 0.38 * math.clamp(s.Age / s.Life, 0, 1))
+			end
+			if s.Age > s.Life then s.Frame:Destroy() table.remove(S.Streaks, i) end
+		end
+	end,
+	Feedback = function(S, kind, x, y)
+		local W, H = S.W, S.H
+		if kind == "Open" then
+			local x0 = W * (0.25 + math.random() * 0.5)
+			task.delay(0.15, function() if S.Top.Parent then FX.Bolt(S, x0, -4, x0 + (math.random() - 0.5) * W * 0.35, H * 0.62) end end)
+			for i = 1, 6 do FX.Drop(S, 10 + math.random() * (W - 20), 30 + math.random() * (H - 60), 1 + math.random() * 2) end
+		elseif kind == "Tab" then
+			-- a gust of rain sweeps across
+			for i = 1, 16 do
+				local len = 26 + math.random() * 26
+				local sx, sy = -30 - math.random() * 80, math.random() * H
+				local f = New("Frame", { AnchorPoint = Vector2.new(0.5, 0.5), Position = UDim2.fromOffset(sx, sy), Size = UDim2.fromOffset(len, 1),
+					Rotation = 22, BackgroundColor3 = S.Rain or WHITE, BackgroundTransparency = 1, BorderSizePixel = 0, ZIndex = 3, Parent = S.Top },
+					{ New("UIGradient", { Transparency = NumberSequence.new(1, 0) }) })
+				table.insert(S.Streaks, { Frame = f, X = sx, Y = sy, Vx = 900 + math.random() * 300, Vy = 360, Age = -i * 0.018, Life = (W + 160) / 1000 })
+			end
+			for _, d in ipairs(S.Drops) do d.RunAt = math.min(d.RunAt, d.Age + math.random() * 0.4) end
+		elseif kind == "Click" then
+			-- a crown of droplets and a small round ripple
+			FX.Splash(S, x, y, 7, 70, 0.35)
+			local r = New("Frame", { AnchorPoint = Vector2.new(0.5, 0.5), Position = UDim2.fromOffset(x, y), Size = UDim2.fromOffset(4, 4),
+				BackgroundTransparency = 1, ZIndex = 4, Parent = S.Top }, { CornerFixed(999) })
+			local st = New("UIStroke", { Color = S.Rain or WHITE, Thickness = 1, Transparency = S.Fade(0.45), Parent = r })
+			TweenService:Create(r, TweenInfo.new(0.45, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), { Size = UDim2.fromOffset(22, 22) }):Play()
+			TweenService:Create(st, TweenInfo.new(0.45, Enum.EasingStyle.Quad, Enum.EasingDirection.In), { Transparency = 1 }):Play()
+			task.delay(0.47, function() r:Destroy() end)
+		end
+	end,
+}
+
 
 end
 
@@ -1762,7 +2697,12 @@ end
 -- the executor can't load files, e.g. Studio) every icon falls back to the vector version drawn from frames below.
 -- Studio / your own uploads: pass Icons = {window = "rbxassetid://...", ...} as a load option, or set TingUI.IconAssets.
 local ICON_NAMES = { "window", "scan", "keyboard", "command", "user", "bell", "check", "cross", "warn", "info", "discord",
-	"gear", "snow", "list", "heart", "chevron", "search", "eye", "sparkle", "lock", "palette" }
+	"gear", "snow", "list", "heart", "chevron", "search", "eye", "sparkle", "lock", "palette",
+	-- v0.0.9
+	"home", "star", "bolt", "shield", "trophy", "crown", "target", "pin", "globe", "clock", "calendar", "download", "upload",
+	"trash", "copy", "edit", "folder", "flag", "fire", "code", "link", "refresh", "play", "key", "coin", "gift", "rocket",
+	"mail", "wifi", "chart", "sword", "users", "moon", "sun", "bug", "plus" }
+TingUI.IconNames = ICON_NAMES
 local ICON_VERSION = "v1"
 local IconImages = {}
 TingUI.IconAssets = IconImages
@@ -1797,11 +2737,13 @@ local function Icon(kind, parent, size, colorKey)
 			Theme = { BackgroundColor3 = colorKey },
 		}, { CornerFixed(th / 2 * s) })
 	end
-	local function Dot(cx, cy, d)
-		return New("Frame", {
+	local function Dot(cx, cy, d, key)
+		local o = New("Frame", {
 			AnchorPoint = Vector2.new(0.5, 0.5), Position = UDim2.fromOffset(cx * s, cy * s), Size = UDim2.fromOffset(d * s, d * s),
-			Parent = f, Theme = { BackgroundColor3 = colorKey },
+			Parent = f, Theme = { BackgroundColor3 = key or colorKey },
 		}, { CornerFixed(d / 2 * s) })
+		if key then o:SetAttribute("Fixed", true) end
+		return o
 	end
 	if CustomIcons[kind] then
 		local ok, err = pcall(CustomIcons[kind], f, size, colorKey, { Seg = Seg, Dot = Dot })
@@ -1902,6 +2844,119 @@ local function Icon(kind, parent, size, colorKey)
 		Bar(2.4, 1.8, 4, 4, 2); Bar(9.6, 1.8, 4, 4, 2)
 		Bar(1, 3.8, 14, 9.4, 4.7)
 		Bar(4.4, 7.2, 2.2, 3, 1.1, "Background"); Bar(9.4, 7.2, 2.2, 3, 1.1, "Background")
+	-- simpler stand-ins for the rest, shown until the high-res images arrive (or where they can't load)
+	elseif kind == "heart" then
+		Dot(5.6, 6.2, 5.4); Dot(10.4, 6.2, 5.4)
+		New("Frame", { AnchorPoint = Vector2.new(0.5, 0.5), Position = UDim2.fromOffset(8 * s, 9 * s), Size = UDim2.fromOffset(6.6 * s, 6.6 * s),
+			Rotation = 45, Parent = f, Theme = { BackgroundColor3 = colorKey } }, { CornerFixed(1 * s) })
+	elseif kind == "chevron" then
+		Seg(4, 6.2, 8, 10.2, 1.8); Seg(8, 10.2, 12, 6.2, 1.8)
+	elseif kind == "search" then
+		Ring(2, 2, 8.6, 8.6, 4.3, th); Seg(9.6, 9.6, 13.6, 13.6, 1.9)
+	elseif kind == "eye" then
+		Ring(1.4, 4.4, 13.2, 7.2, 3.6, th); Dot(8, 8, 3.6)
+	elseif kind == "sparkle" or kind == "star" then
+		Seg(8, 1.6, 8, 14.4, 2.4); Seg(1.6, 8, 14.4, 8, 2.4)
+		local d = New("Frame", { AnchorPoint = Vector2.new(0.5, 0.5), Position = UDim2.fromOffset(8 * s, 8 * s), Size = UDim2.fromOffset(6 * s, 6 * s),
+			Rotation = 45, Parent = f, Theme = { BackgroundColor3 = colorKey } }, { CornerFixed(1 * s) })
+	elseif kind == "lock" then
+		Ring(4.6, 1.6, 6.8, 8, 3.4, th); Bar(3, 6.8, 10, 7.6, 1.8)
+	elseif kind == "palette" or kind == "coin" then
+		Dot(8, 8, 13); Dot(5.2, 7, 2, "Background"); Dot(8, 4.6, 2, "Background"); Dot(10.8, 7, 2, "Background")
+	elseif kind == "home" then
+		Seg(2.4, 7.4, 8, 2.6, 1.6); Seg(8, 2.6, 13.6, 7.4, 1.6); Bar(4, 7, 8, 7, 1.2); Bar(6.8, 9.6, 2.4, 4.4, 0.6, "Background")
+	elseif kind == "bolt" then
+		Seg(9.6, 1.6, 5.2, 8.6, 2.2); Seg(5.2, 8.6, 10.8, 7.4, 2.2); Seg(10.8, 7.4, 6.4, 14.4, 2.2)
+	elseif kind == "shield" then
+		Bar(3, 2, 10, 7, 1.6)
+		New("Frame", { AnchorPoint = Vector2.new(0.5, 0.5), Position = UDim2.fromOffset(8 * s, 9.4 * s), Size = UDim2.fromOffset(7.2 * s, 7.2 * s),
+			Rotation = 45, Parent = f, Theme = { BackgroundColor3 = colorKey } }, { CornerFixed(1.2 * s) })
+	elseif kind == "trophy" then
+		Bar(4.6, 2, 6.8, 6, 3); Seg(8, 8.4, 8, 11.4, 1.8); Bar(5, 11.6, 6, 2.2, 1)
+		Ring(1.6, 3, 3.8, 3.6, 1.8, math.max(1, 1.1 * s)); Ring(10.6, 3, 3.8, 3.6, 1.8, math.max(1, 1.1 * s))
+	elseif kind == "crown" then
+		Bar(2.4, 8.2, 11.2, 4.4, 0.8); Seg(2.8, 4.6, 4.4, 9, 1.8); Seg(8, 3, 8, 9, 1.8); Seg(13.2, 4.6, 11.6, 9, 1.8); Bar(2.4, 13, 11.2, 1.6, 0.8)
+	elseif kind == "target" then
+		Ring(1.6, 1.6, 12.8, 12.8, 6.4, th); Ring(4.8, 4.8, 6.4, 6.4, 3.2, th); Dot(8, 8, 2.2)
+	elseif kind == "pin" then
+		Dot(8, 6.4, 9.6)
+		New("Frame", { AnchorPoint = Vector2.new(0.5, 0.5), Position = UDim2.fromOffset(8 * s, 9.8 * s), Size = UDim2.fromOffset(6 * s, 6 * s),
+			Rotation = 45, Parent = f, Theme = { BackgroundColor3 = colorKey } }, { CornerFixed(1 * s) })
+		Dot(8, 6.4, 3.4, "Background")
+	elseif kind == "globe" then
+		Ring(1.6, 1.6, 12.8, 12.8, 6.4, th); Ring(5.2, 1.6, 5.6, 12.8, 2.8, math.max(1, 1.1 * s)); Seg(2, 8, 14, 8, 1.2)
+	elseif kind == "clock" then
+		Ring(1.6, 1.6, 12.8, 12.8, 6.4, th); Seg(8, 4.6, 8, 8.2, 1.6); Seg(8, 8.2, 10.6, 9.8, 1.6)
+	elseif kind == "calendar" then
+		Ring(1.8, 3, 12.4, 11.2, 2, th); Seg(2.4, 6.4, 13.6, 6.4, 1.4); Seg(5.2, 1.6, 5.2, 4.2, 1.6); Seg(10.8, 1.6, 10.8, 4.2, 1.6)
+		for _, x in ipairs({ 5.2, 8, 10.8 }) do Dot(x, 9.4, 1.6) Dot(x, 11.8, 1.6) end
+	elseif kind == "download" or kind == "upload" then
+		local up = kind == "upload"
+		Seg(8, 2, 8, 9.6, 1.7)
+		local tip = up and 2 or 9.6
+		Seg(8, tip, 5, tip + (up and 3 or -3), 1.7); Seg(8, tip, 11, tip + (up and 3 or -3), 1.7)
+		Seg(2.6, 13.4, 13.4, 13.4, 1.7); Seg(2.6, 10.6, 2.6, 13.4, 1.7); Seg(13.4, 10.6, 13.4, 13.4, 1.7)
+	elseif kind == "trash" then
+		Seg(2.6, 4, 13.4, 4, 1.6); Bar(6, 1.6, 4, 2.4, 0.8); Ring(3.8, 4.6, 8.4, 9.8, 1.6, th)
+	elseif kind == "copy" then
+		Ring(5.6, 5.6, 8.6, 8.6, 1.6, th); Ring(1.8, 1.8, 8.6, 8.6, 1.6, th)
+	elseif kind == "edit" then
+		Seg(3.6, 12.4, 12, 4, 3); Dot(3, 13, 2)
+	elseif kind == "folder" then
+		Bar(1.6, 3.4, 5.6, 3, 1); Bar(1.6, 5, 12.8, 8.6, 1.4)
+	elseif kind == "flag" then
+		Seg(3.6, 1.8, 3.6, 14.4, 1.7); Bar(3.6, 2.4, 9.6, 6.4, 1)
+	elseif kind == "fire" then
+		Dot(8, 10, 9); Dot(8.6, 5.4, 5.4)
+		New("Frame", { AnchorPoint = Vector2.new(0.5, 0.5), Position = UDim2.fromOffset(9 * s, 3.6 * s), Size = UDim2.fromOffset(4 * s, 4 * s),
+			Rotation = 45, Parent = f, Theme = { BackgroundColor3 = colorKey } }, { CornerFixed(0.6 * s) })
+	elseif kind == "code" then
+		Seg(5.4, 4.6, 2, 8, 1.7); Seg(2, 8, 5.4, 11.4, 1.7); Seg(10.6, 4.6, 14, 8, 1.7); Seg(14, 8, 10.6, 11.4, 1.7); Seg(9.2, 3, 6.8, 13, 1.5)
+	elseif kind == "link" then
+		Ring(1.6, 5.4, 7.4, 5.2, 2.6, th); Ring(7, 5.4, 7.4, 5.2, 2.6, th)
+	elseif kind == "refresh" then
+		Ring(2, 2, 12, 12, 6, th); Bar(9.6, 0.8, 4.6, 4.6, 0.8, "Background"); Seg(10.6, 1.8, 13.2, 1.8, 1.6); Seg(13.2, 1.8, 13.2, 4.4, 1.6)
+	elseif kind == "play" then
+		Seg(5, 3, 5, 13, 2); Seg(5, 3, 12.6, 8, 2); Seg(12.6, 8, 5, 13, 2); Bar(5, 5.6, 4, 4.8, 0.8)
+	elseif kind == "key" then
+		Ring(1.6, 7.6, 6.4, 6.4, 3.2, th); Seg(6.8, 8.8, 13.6, 2, 1.7); Seg(11.4, 4.2, 13.2, 6, 1.6)
+	elseif kind == "gift" then
+		Bar(2, 5.2, 12, 2.8, 0.8); Bar(3, 8.4, 10, 5.8, 1); Bar(7.2, 5.2, 1.6, 9, 0.4, "Background")
+		Ring(4.4, 1.8, 3.6, 3.4, 1.7, math.max(1, s)); Ring(8, 1.8, 3.6, 3.4, 1.7, math.max(1, s))
+	elseif kind == "rocket" then
+		Bar(5.4, 1.4, 5.2, 10, 2.6); Seg(5, 7.6, 2.6, 11.2, 1.8); Seg(11, 7.6, 13.4, 11.2, 1.8); Dot(8, 13.4, 2.2); Dot(8, 5.6, 2, "Background")
+	elseif kind == "mail" then
+		Ring(1.6, 3.4, 12.8, 9.2, 1.8, th); Seg(2.4, 4.4, 8, 8.6, 1.4); Seg(8, 8.6, 13.6, 4.4, 1.4)
+	elseif kind == "wifi" then
+		Dot(8, 12.8, 2.4)
+		for i, r in ipairs({ 4, 7.2, 10.4 }) do
+			local c = Clip(8 - r / 2 - 1, 11 - r / 2 - 1, r + 2, r / 2 + 1)
+			New("Frame", { BackgroundTransparency = 1, Size = UDim2.fromOffset((r + 2) * s, (r + 2) * s), Parent = c },
+				{ CornerFixed((r / 2 + 1) * s), New("UIStroke", { Thickness = th, Theme = { Color = colorKey } }) })
+		end
+	elseif kind == "chart" then
+		Bar(2.6, 8.4, 2.6, 5, 0.6); Bar(6.7, 5.4, 2.6, 8, 0.6); Bar(10.8, 2.4, 2.6, 11, 0.6); Seg(1.6, 14.2, 14.4, 14.2, 1.2)
+	elseif kind == "sword" then
+		Seg(4.8, 11.2, 13.6, 2.4, 2.4); Seg(3, 8.6, 7.4, 13, 1.7); Seg(4.8, 11.2, 2, 14, 1.7)
+	elseif kind == "users" then
+		Dot(6, 4.8, 4.6); Dot(11.4, 5.4, 3.4)
+		local c = Clip(1.2, 9, 9.6, 5.2)
+		New("Frame", { Size = UDim2.fromOffset(9.6 * s, 10 * s), Parent = c, Theme = { BackgroundColor3 = colorKey } }, { CornerFixed(4.8 * s) })
+		local c2 = Clip(9.4, 9, 5.6, 4.4)
+		New("Frame", { Size = UDim2.fromOffset(5.6 * s, 8 * s), Parent = c2, Theme = { BackgroundColor3 = colorKey } }, { CornerFixed(2.8 * s) })
+	elseif kind == "moon" then
+		Dot(8, 8, 12.4); Dot(11, 5.6, 9.4, "Background")
+	elseif kind == "sun" then
+		Dot(8, 8, 6)
+		for i = 0, 7 do
+			local a = i * math.pi / 4
+			Seg(8 + math.cos(a) * 4.8, 8 + math.sin(a) * 4.8, 8 + math.cos(a) * 6.6, 8 + math.sin(a) * 6.6, 1.5)
+		end
+	elseif kind == "bug" then
+		Bar(4.8, 4.2, 6.4, 9.6, 3.2); Seg(2, 7, 4.8, 7, 1.3); Seg(11.2, 7, 14, 7, 1.3); Seg(2.2, 10.6, 4.8, 10.6, 1.3); Seg(11.2, 10.6, 13.8, 10.6, 1.3)
+		Seg(5.8, 4.4, 4.6, 2.2, 1.3); Seg(10.2, 4.4, 11.4, 2.2, 1.3)
+	elseif kind == "plus" then
+		Seg(8, 2.6, 8, 13.4, 2.2); Seg(2.6, 8, 13.4, 8, 2.2)
 	end
 	return f
 end
@@ -2258,6 +3313,53 @@ Connect(PopupCatcher.MouseButton2Down, function() ClosePopup() end)
 
 -- popups unfold downward from their trigger (and fold back up when closed) instead of popping in
 local HideHintNow -- set once the hint card exists
+-- Where a popup goes: under its trigger if it fits, otherwise above it, otherwise on whichever side has more room
+-- (a list marked Shrinkable gets shorter and scrolls). It never lands on top of the box you clicked.
+local function PlacePopup(p)
+	local frame, trigger, full = p.Frame, p.Trigger, p.Full
+	local sc = TingUI.Scale
+	local vp = TingUI:_Viewport()
+	local w, h = full.X.Offset * sc, full.Y.Offset * sc
+	local tp, ts = trigger.AbsolutePosition, trigger.AbsoluteSize
+	local x = math.clamp(tp.X, 6, math.max(6, vp.X - w - 6))
+	local below, above = vp.Y - 6 - (tp.Y + ts.Y + 4), tp.Y - 4 - 6
+	local y, height = nil, full.Y.Offset
+	if h <= below then
+		y = tp.Y + ts.Y + 4
+	elseif h <= above then
+		y = tp.Y - h - 4
+	elseif frame:GetAttribute("Shrinkable") then
+		local room = math.max(below, above)
+		height = math.max(56, math.floor(room / sc))
+		y = (below >= above) and (tp.Y + ts.Y + 4) or (tp.Y - height * sc - 4)
+	else
+		y = (below >= above) and (tp.Y + ts.Y + 4) or math.max(6, tp.Y - h - 4)
+	end
+	p.Height = height
+	frame.Position = UDim2.fromOffset(math.floor(x + 0.5), math.floor(y + 0.5))
+	return height
+end
+-- the trigger is still on screen and not scrolled out of its page
+local function TriggerShown(trigger)
+	if not trigger.Parent or not trigger:IsDescendantOf(Gui) then return false end
+	local o = trigger
+	while o and o ~= Gui do
+		if o:IsA("GuiObject") and not o.Visible then return false end
+		o = o.Parent
+	end
+	local tp, ts = trigger.AbsolutePosition, trigger.AbsoluteSize
+	if ts.X <= 0 or ts.Y <= 0 then return false end
+	o = trigger.Parent
+	while o and o ~= Gui do
+		if o:IsA("ScrollingFrame") then
+			local sp, ss = o.AbsolutePosition, o.AbsoluteSize
+			local cy = tp.Y + ts.Y / 2
+			if cy < sp.Y or cy > sp.Y + ss.Y then return false end
+		end
+		o = o.Parent
+	end
+	return true
+end
 local function ShowPopup(frame, trigger, onClose)
 	ClosePopup()
 	if HideHintNow then HideHintNow() end
@@ -2265,13 +3367,8 @@ local function ShowPopup(frame, trigger, onClose)
 	if not sc then sc = New("UIScale", { Parent = frame }) end
 	sc.Scale = TingUI.Scale
 	local full = frame.Size
-	local vp = TingUI:_Viewport()
-	local w, h = full.X.Offset * TingUI.Scale, full.Y.Offset * TingUI.Scale
-	local tp, ts = trigger.AbsolutePosition, trigger.AbsoluteSize
-	local x = math.clamp(tp.X, 6, math.max(6, vp.X - w - 6))
-	local y = tp.Y + ts.Y + 4
-	if y + h > vp.Y - 6 then y = math.max(6, tp.Y - h - 4) end
-	frame.Position = UDim2.fromOffset(x, y)
+	local p = { Frame = frame, Trigger = trigger, OnClose = onClose, Full = full }
+	local height = PlacePopup(p)
 	frame.ZIndex = 5
 	frame.ClipsDescendants = true
 	local tok = (frame:GetAttribute("PopTok") or 0) + 1
@@ -2279,9 +3376,22 @@ local function ShowPopup(frame, trigger, onClose)
 	frame.Size = UDim2.fromOffset(full.X.Offset, 0)
 	PopupCatcher.Visible = true
 	frame.Visible = true
-	TweenService:Create(frame, PopupInfoOpen, { Size = full }):Play()
-	OpenPopup = { Frame = frame, Trigger = trigger, OnClose = onClose, Full = full }
+	TweenService:Create(frame, PopupInfoOpen, { Size = UDim2.fromOffset(full.X.Offset, height) }):Play()
+	OpenPopup = p
+	p.Settled = os.clock() + 0.25
 end
+-- an open popup stays glued to its trigger while the page scrolls or the window moves, and closes if the trigger
+-- scrolls out of view or its window hides
+Connect(RunService.RenderStepped, function()
+	local p = OpenPopup
+	if not p or not p.Trigger then return end
+	if not TriggerShown(p.Trigger) then ClosePopup() return end
+	local before = p.Height
+	PlacePopup(p)
+	if p.Height ~= before and os.clock() >= (p.Settled or 0) then
+		p.Frame.Size = UDim2.fromOffset(p.Full.X.Offset, p.Height)
+	end
+end)
 
 -- Fader: fades a whole Frame tree like a CanvasGroup would, but leaves text rendered natively.
 -- CanvasGroups rasterise their contents to a texture, which makes text soft (worse with UI scale or half-pixel
@@ -2605,6 +3715,27 @@ local NOTIFY_KINDS = {
 	Security = { Key = "Error", Icon = "lock", Shape = "square" },
 	Update = { Key = "Accent", Icon = "gear", Shape = "circle" },
 	Heart = { Key = "Error", Icon = "heart", Shape = "circle" },
+	-- v0.0.9: game events, each with a motion of its own (see NotifyKit.Motions)
+	Teleport = { Key = "Info", Icon = "pin", Shape = "circle" },
+	ServerHop = { Key = "Info", Icon = "globe", Shape = "circle" },
+	Reward = { Key = "Caution", Icon = "gift", Shape = "square" },
+	Currency = { Key = "Caution", Icon = "coin", Shape = "circle" },
+	LevelUp = { Key = "Success", Icon = "trophy", Shape = "diamond" },
+	Timer = { Key = "Accent", Icon = "timer", Shape = "circle" },
+	Connection = { Key = "Success", Icon = "wifi", Shape = "circle" },
+	Target = { Key = "Error", Icon = "target", Shape = "circle" },
+	Invite = { Key = "Accent", Icon = "mail", Shape = "square" },
+	Streak = { Key = "Caution", Icon = "fire", Shape = "diamond" },
+	Boost = { Key = "Accent", Icon = "rocket", Shape = "circle" },
+	Protected = { Key = "Success", Icon = "shield", Shape = "square" },
+	Key = { Key = "Caution", Icon = "key", Shape = "circle" },
+	Party = { Key = "Accent", Icon = "users", Shape = "circle" },
+	MVP = { Key = "Caution", Icon = "crown", Shape = "diamond" },
+	Combat = { Key = "Error", Icon = "sword", Shape = "square" },
+	Copied = { Key = "Info", Icon = "copy", Shape = "square" },
+	Deleted = { Key = "Error", Icon = "trash", Shape = "square" },
+	Sync = { Key = "Info", Icon = "refresh", Shape = "circle" },
+	AFK = { Key = "Accent", Icon = "moon", Shape = "circle" },
 }
 TingUI.NotifyTypes = {}
 for k in pairs(NOTIFY_KINDS) do table.insert(TingUI.NotifyTypes, k) end
@@ -2655,6 +3786,406 @@ function NotifyKit.BubbleGlyph(parent, size, color)
 	return g
 end
 
+-- glyphs drawn from frames so their parts can move: a stopwatch with a sweeping hand, and signal bars that light in turn
+function NotifyKit.TimerGlyph(parent, size, color)
+	local g = New("Frame", { BackgroundTransparency = 1, Size = UDim2.fromOffset(size, size), Parent = parent })
+	local th = math.max(1.5, size / 9)
+	New("Frame", { AnchorPoint = Vector2.new(0.5, 0.5), Position = UDim2.fromScale(0.5, 0.56), Size = UDim2.fromOffset(size * 0.84, size * 0.84),
+		BackgroundTransparency = 1, Parent = g }, { CornerFixed(999), New("UIStroke", { Thickness = th, Color = color }) })
+	New("Frame", { AnchorPoint = Vector2.new(0.5, 0), Position = UDim2.fromScale(0.5, 0), Size = UDim2.fromOffset(size * 0.3, th),
+		BackgroundColor3 = color, Parent = g }, { CornerFixed(th) })
+	local hand = New("Frame", { Name = "Hand", AnchorPoint = Vector2.new(0.5, 0.5), Position = UDim2.fromScale(0.5, 0.56), Size = UDim2.fromOffset(th, size * 0.62),
+		BackgroundTransparency = 1, Parent = g })
+	New("Frame", { Size = UDim2.new(1, 0, 0.5, 0), BackgroundColor3 = color, Parent = hand }, { CornerFixed(th) })
+	New("Frame", { AnchorPoint = Vector2.new(0.5, 0.5), Position = UDim2.fromScale(0.5, 0.56), Size = UDim2.fromOffset(th * 1.8, th * 1.8),
+		BackgroundColor3 = color, Parent = g }, { CornerFixed(999) })
+	return g
+end
+function NotifyKit.WifiGlyph(parent, size, color)
+	local g = New("Frame", { BackgroundTransparency = 1, Size = UDim2.fromOffset(size, size), Parent = parent })
+	local th = math.max(1.5, size / 8)
+	New("Frame", { Name = "Dot", AnchorPoint = Vector2.new(0.5, 0.5), Position = UDim2.new(0.5, 0, 0.84, 0), Size = UDim2.fromOffset(th * 1.9, th * 1.9),
+		BackgroundColor3 = color, Parent = g }, { CornerFixed(999) })
+	for i = 1, 3 do
+		local d = size * (0.3 + i * 0.25)
+		-- an arc: the top part of a ring, cut off by a clipping box
+		local clip = New("Frame", { Name = "Arc" .. i, AnchorPoint = Vector2.new(0.5, 1), Position = UDim2.new(0.5, 0, 0.84, -th * 1.2),
+			Size = UDim2.fromOffset(d + th * 2, d * 0.42), BackgroundTransparency = 1, ClipsDescendants = true, Parent = g })
+		New("Frame", { AnchorPoint = Vector2.new(0.5, 0), Position = UDim2.new(0.5, 0, 0, th), Size = UDim2.fromOffset(d, d), BackgroundTransparency = 1, Parent = clip },
+			{ CornerFixed(999), New("UIStroke", { Thickness = th, Color = color }) })
+	end
+	return g
+end
+
+-- little effects thrown off a badge: they fly from one place to another and fade, then clean themselves up
+function NotifyKit.Bit(parent, size, color, from, to, life, opts)
+	opts = opts or {}
+	local b = New("Frame", { AnchorPoint = Vector2.new(0.5, 0.5), Position = from, Size = size, BackgroundColor3 = color, Rotation = opts.Rot or 0,
+		BackgroundTransparency = opts.Tr or 0, BorderSizePixel = 0, ZIndex = opts.Z or 4, Parent = parent }, { CornerFixed(opts.Square and 1 or 999) })
+	b:SetAttribute("NoFade", true)
+	TweenService:Create(b, TweenInfo.new(life, opts.Style or Enum.EasingStyle.Quad, opts.Dir or Enum.EasingDirection.Out),
+		{ Position = to, BackgroundTransparency = 1, Rotation = opts.RotTo or b.Rotation, Size = opts.SizeTo or size }):Play()
+	task.delay(life + 0.05, function() b:Destroy() end)
+	return b
+end
+-- a four-point glint (two thin crossed bars) that twinkles once
+function NotifyKit.Glint(parent, pos, color, size, delay)
+	task.delay(delay or 0, function()
+		if not parent.Parent then return end
+		local g = New("Frame", { AnchorPoint = Vector2.new(0.5, 0.5), Position = pos, Size = UDim2.fromOffset(1, 1), BackgroundTransparency = 1, ZIndex = 5, Parent = parent })
+		g:SetAttribute("NoFade", true)
+		for _, r in ipairs({ 0, 90 }) do
+			local bar = New("Frame", { AnchorPoint = Vector2.new(0.5, 0.5), Position = UDim2.fromScale(0.5, 0.5), Size = UDim2.fromOffset(size, 1.5), Rotation = r,
+				BackgroundColor3 = color, BorderSizePixel = 0, ZIndex = 5, Parent = g }, { CornerFixed(1) })
+			bar:SetAttribute("NoFade", true)
+			TweenService:Create(bar, TweenInfo.new(0.5, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut), { Size = UDim2.fromOffset(1, 1), BackgroundTransparency = 1 }):Play()
+		end
+		TweenService:Create(g, TweenInfo.new(0.5, Enum.EasingStyle.Sine), { Rotation = 45 }):Play()
+		task.delay(0.55, function() g:Destroy() end)
+	end)
+end
+
+do -- (a block, so its helpers don't take up Build's local slots)
+-- the motions for the newer types. Enter(st) runs once when the card is built; Tick(st, at, dt) every frame after.
+-- st: Glyph, Frame (the badge holder), Color, Scale (the glyph's UIScale), Kind, Options, Card, Size (glyph size)
+local M = {}
+NotifyKit.Motions = M
+local function C(x, y) return UDim2.new(0.5, x, 0.5, y) end
+local function BackOutEase(x) x = math.clamp(x, 0, 1) return 1 + 2.70158 * (x - 1) ^ 3 + 1.70158 * (x - 1) ^ 2 end
+local function Once(st, key) if st[key] then return false end st[key] = true return true end
+local CONFETTI_COLORS = { Color3.fromRGB(255, 128, 190), Color3.fromRGB(130, 255, 210), Color3.fromRGB(255, 220, 120), Color3.fromRGB(150, 170, 255), Color3.fromRGB(255, 160, 110) }
+
+-- Teleport: the pin drops onto its spot and pings it, twice
+M.pin = {
+	Enter = function(st)
+		st.Glyph.Position = C(0, -15)
+		TweenService:Create(st.Glyph, TweenInfo.new(0.6, Enum.EasingStyle.Bounce, Enum.EasingDirection.Out), { Position = C(0, 0) }):Play()
+	end,
+	Tick = function(st, at)
+		for i, when in ipairs({ 0.45, 0.85 }) do
+			if at > when and Once(st, "ping" .. i) then
+				NotifyKit.Bit(st.Frame, UDim2.fromOffset(6, 2), st.Color, C(0, 10), C(0, 10), 0.6, { SizeTo = UDim2.fromOffset(26, 7), Tr = 0.2, Z = 1 })
+			end
+		end
+	end,
+}
+-- Server hop: the globe spins up and a small dot hops around it on a tilted orbit, passing behind and in front
+M.globe = {
+	Enter = function(st)
+		st.Orbit = New("Frame", { AnchorPoint = Vector2.new(0.5, 0.5), Size = UDim2.fromOffset(4, 4), BackgroundColor3 = st.Color:Lerp(Color3.new(1, 1, 1), 0.4),
+			ZIndex = 5, Parent = st.Frame }, { CornerFixed(999) })
+	end,
+	Tick = function(st, at)
+		st.Glyph.Rotation = 360 * (1 - (1 - math.min(at / 1.4, 1)) ^ 3)
+		local a = at * 4.2
+		local x, y = math.cos(a) * 15, math.sin(a) * 5
+		local r = math.rad(-22)
+		st.Orbit.Position = C(x * math.cos(r) - y * math.sin(r), x * math.sin(r) + y * math.cos(r))
+		st.Orbit.ZIndex = math.sin(a) > 0 and 5 or 0
+	end,
+}
+-- Reward: the box shakes, pops open with a bump and throws confetti
+M.gift = {
+	Tick = function(st, at)
+		if at < 0.62 then
+			st.Glyph.Rotation = math.sin(at * 42) * 12 * math.min(1, at / 0.2)
+		elseif Once(st, "burst") then
+			st.Glyph.Rotation = 0
+			for i = 1, 14 do
+				local a = -math.pi / 2 + (math.random() - 0.5) * 2.6
+				local d = 18 + math.random() * 16
+				NotifyKit.Bit(st.Frame, UDim2.fromOffset(math.random(3, 5), 2), CONFETTI_COLORS[(i % #CONFETTI_COLORS) + 1], C(0, -4),
+					C(math.cos(a) * d, math.sin(a) * d + 10), 0.7 + math.random() * 0.3, { Square = true, Rot = math.random(0, 180), RotTo = math.random(200, 540), Style = Enum.EasingStyle.Quad })
+			end
+		end
+		if at >= 0.62 and at < 0.9 then st.Scale.Scale = 1 + 0.28 * math.sin((at - 0.62) / 0.28 * math.pi) end
+	end,
+}
+-- Currency: the coin flips three times, slowing down, then glints
+M.coin = {
+	Tick = function(st, at)
+		local g = st.Glyph
+		if at < 1.3 then
+			local k = 1 - (1 - at / 1.3) ^ 2
+			g.Size = UDim2.fromOffset(st.Size * math.max(0.08, math.abs(math.cos(k * math.pi * 3))), st.Size)
+		elseif Once(st, "glint") then
+			g.Size = UDim2.fromOffset(st.Size, st.Size)
+			NotifyKit.Glint(st.Frame, C(7, -7), Color3.new(1, 1, 1), 9)
+			NotifyKit.Glint(st.Frame, C(-8, 5), Color3.new(1, 1, 1), 6, 0.15)
+		end
+	end,
+}
+-- Level up: the trophy rises into place while chevrons climb past it
+M.trophy = {
+	Enter = function(st)
+		st.Glyph.Position = C(0, 12)
+		TweenService:Create(st.Glyph, TweenInfo.new(0.55, Enum.EasingStyle.Back, Enum.EasingDirection.Out), { Position = C(0, 0) }):Play()
+	end,
+	Tick = function(st, at)
+		for i, when in ipairs({ 0.1, 0.28, 0.46 }) do
+			if at > when and Once(st, "chev" .. i) then
+				local x = (i - 2) * 10
+				for s = -1, 1, 2 do
+					NotifyKit.Bit(st.Frame, UDim2.fromOffset(5, 1.6), st.Color:Lerp(Color3.new(1, 1, 1), 0.3), C(x + s * 1.8, 12), C(x + s * 1.8, -16), 0.65,
+						{ Rot = -s * 40, Z = 5 })
+				end
+			end
+		end
+	end,
+}
+-- Timer: the hand sweeps round and the stopwatch ticks once a second
+M.timer = {
+	Tick = function(st, at)
+		local hand = st.Glyph:FindFirstChild("Hand")
+		if hand then hand.Rotation = (at * 180) % 360 end
+		if at > 0.55 then st.Scale.Scale = 1 + 0.07 * math.max(0, math.sin(at * math.pi * 2)) ^ 10 end
+	end,
+}
+-- Connection: the bars light one after another while it connects, then all stay on
+M.wifi = {
+	Tick = function(st, at)
+		local busy = at < 2.1 or (st.Options.Value ~= nil and st.Options.Value < 1)
+		local level = busy and math.floor(at * 3.5) % 4 or 3
+		for i = 1, 3 do
+			local arc = st.Glyph:FindFirstChild("Arc" .. i)
+			local stroke = arc and arc:FindFirstChildOfClass("Frame") and arc:FindFirstChildOfClass("Frame"):FindFirstChildOfClass("UIStroke")
+			if stroke then stroke.Transparency = i <= level and 0 or 0.75 end
+		end
+	end,
+}
+-- Target: four brackets close in and lock onto the badge, pulse once, then let go
+M.target = {
+	Enter = function(st)
+		st.Brackets = {}
+		for i = 0, 3 do
+			local b = New("Frame", { AnchorPoint = Vector2.new(0.5, 0.5), Size = UDim2.fromOffset(7, 7), Rotation = i * 90, BackgroundTransparency = 1, ZIndex = 5, Parent = st.Frame })
+			b:SetAttribute("NoFade", true)
+			for _, spec in ipairs({ { UDim2.fromOffset(0, 0), UDim2.fromOffset(7, 1.6) }, { UDim2.fromOffset(0, 0), UDim2.fromOffset(1.6, 7) } }) do
+				local bar = New("Frame", { Position = spec[1], Size = spec[2], BackgroundColor3 = st.Color, BorderSizePixel = 0, ZIndex = 5, Parent = b }, { CornerFixed(1) })
+				bar:SetAttribute("NoFade", true)
+			end
+			st.Brackets[i + 1] = b
+		end
+	end,
+	Tick = function(st, at)
+		local close = 1 - (1 - math.min(at / 0.45, 1)) ^ 3
+		local d = 20 - 8 * close + (at > 0.5 and at < 0.8 and math.sin((at - 0.5) / 0.3 * math.pi) * 2 or 0)
+		local tr = at > 1.6 and math.min(1, (at - 1.6) / 0.4) or 0
+		for i, b in ipairs(st.Brackets) do
+			local sx = (i == 1 or i == 4) and -1 or 1
+			local sy = (i <= 2) and -1 or 1
+			b.Position = C(sx * d, sy * d)
+			b.Rotation = (i - 1) * 90 + (1 - close) * 45
+			for _, bar in ipairs(b:GetChildren()) do if bar:IsA("Frame") then bar.BackgroundTransparency = tr end end
+		end
+		if at > 0.5 and at < 0.75 then st.Scale.Scale = 1 + 0.12 * math.sin((at - 0.5) / 0.25 * math.pi) end
+	end,
+}
+-- Invite: the envelope slides in, settles, and an unread dot pops on its corner and breathes
+M.mail = {
+	Enter = function(st)
+		st.Glyph.Position = C(-16, 0)
+		st.Glyph.Rotation = -18
+		TweenService:Create(st.Glyph, TweenInfo.new(0.5, Enum.EasingStyle.Back, Enum.EasingDirection.Out), { Position = C(0, 0), Rotation = 0 }):Play()
+		st.Dot = New("Frame", { AnchorPoint = Vector2.new(0.5, 0.5), Position = C(8, -7), Size = UDim2.fromOffset(0, 0), BackgroundColor3 = TingUI.Theme.Error,
+			ZIndex = 6, Parent = st.Frame }, { CornerFixed(999), New("UIStroke", { Thickness = 1.5, Color = TingUI.Theme.Background }) })
+	end,
+	Tick = function(st, at)
+		if at > 0.45 then
+			local k = math.min(1, (at - 0.45) / 0.25)
+			local s = 6 * (k < 1 and (1 + 0.5 * math.sin(k * math.pi)) or (1 + 0.08 * math.sin(at * 4)))
+			st.Dot.Size = UDim2.fromOffset(s, s)
+		end
+	end,
+}
+-- Streak: the flame flickers and sways and throws off small embers
+M.fire = {
+	Tick = function(st, at)
+		st.Glyph.Rotation = math.sin(at * 6) * 5
+		if at > 0.5 then st.Scale.Scale = 1 + 0.05 * math.sin(at * 17) + 0.03 * math.sin(at * 29) end
+		st.NextEmber = st.NextEmber or 0.2
+		if at > st.NextEmber then
+			st.NextEmber = at + (at < 3 and 0.16 or 0.5) + math.random() * 0.12
+			local x = (math.random() - 0.5) * 10
+			NotifyKit.Bit(st.Frame, UDim2.fromOffset(2, 2), st.Color:Lerp(Color3.fromRGB(255, 230, 150), math.random() * 0.6), C(x, -4),
+				C(x + (math.random() - 0.5) * 10, -18 - math.random() * 8), 0.6 + math.random() * 0.3, { Z = 5 })
+		end
+	end,
+}
+-- Boost: the rocket rumbles, launches up out of the badge on a trail of smoke and comes back round from below
+M.rocket = {
+	Tick = function(st, at)
+		local g = st.Glyph
+		if at < 0.5 then
+			g.Position = C((math.random() - 0.5) * 2.4 * math.min(1, at / 0.2), (math.random() - 0.5) * 1.6)
+		elseif at < 0.82 then
+			local k = (at - 0.5) / 0.32
+			g.Position = C(0, -30 * k * k)
+			if Once(st, "smoke") then
+				for i = 1, 6 do
+					task.delay(i * 0.035, function()
+						if st.Frame.Parent then
+							NotifyKit.Bit(st.Frame, UDim2.fromOffset(4, 4), Color3.fromRGB(220, 220, 230), C((math.random() - 0.5) * 4, 6 - i * 3),
+								C((math.random() - 0.5) * 14, 14), 0.5, { SizeTo = UDim2.fromOffset(9, 9), Tr = 0.35, Z = 1 })
+						end
+					end)
+				end
+			end
+		elseif at < 1.25 then
+			local k = (at - 0.82) / 0.43
+			g.Position = C(0, 26 * (1 - k) ^ 3)
+		else
+			g.Position = C(0, 0)
+		end
+	end,
+}
+-- Protected: the shield slams in with a shockwave and a dome of light hums around it for a moment
+M.shield = {
+	Enter = function(st)
+		st.Scale.Scale = 1.8
+		TweenService:Create(st.Scale, TweenInfo.new(0.3, Enum.EasingStyle.Quint, Enum.EasingDirection.In), { Scale = 1 }):Play()
+		st.Dome = New("Frame", { AnchorPoint = Vector2.new(0.5, 0.5), Position = C(0, 0), Size = UDim2.fromOffset(34, 34), BackgroundColor3 = st.Color,
+			BackgroundTransparency = 1, ZIndex = 1, Parent = st.Frame }, { CornerFixed(999) })
+		st.DomeStroke = New("UIStroke", { Thickness = 1, Color = st.Color, Transparency = 1, Parent = st.Dome })
+		st.Dome:SetAttribute("NoFade", true)
+		st.DomeStroke:SetAttribute("NoFade", true)
+	end,
+	Tick = function(st, at)
+		if at > 0.3 and Once(st, "wave") then
+			NotifyKit.Bit(st.Frame, UDim2.fromOffset(20, 20), st.Color, C(0, 0), C(0, 0), 0.45, { SizeTo = UDim2.fromOffset(46, 46), Tr = 0.6, Z = 1 })
+		end
+		local on = at > 0.35 and math.clamp(math.min((at - 0.35) / 0.3, (2.8 - at) / 0.5), 0, 1) or 0
+		st.Dome.BackgroundTransparency = 1 - on * (0.1 + 0.04 * math.sin(at * 5))
+		st.DomeStroke.Transparency = 1 - on * (0.55 + 0.2 * math.sin(at * 5))
+	end,
+}
+-- Key: the key turns in the lock and clicks
+M.key = {
+	Enter = function(st) st.Glyph.Rotation = -90 end,
+	Tick = function(st, at)
+		if at > 0.3 and at < 0.7 then
+			st.Glyph.Rotation = -90 * (1 - BackOutEase((at - 0.3) / 0.4))
+		elseif at >= 0.7 and Once(st, "click") then
+			st.Glyph.Rotation = 0
+			NotifyKit.Glint(st.Frame, C(9, -8), st.Color:Lerp(Color3.new(1, 1, 1), 0.5), 8)
+		end
+		if at > 0.7 and at < 0.9 then st.Scale.Scale = 1 + 0.14 * math.sin((at - 0.7) / 0.2 * math.pi) end
+	end,
+}
+-- Party: the group hops, and members pop in around the badge one by one
+M.users = {
+	Tick = function(st, at)
+		if at < 0.95 then st.Glyph.Position = C(0, -math.abs(math.sin(at * math.pi * 2.2)) * 4 * (1 - at / 0.95)) end
+		for i, spec in ipairs({ { 0.2, -13, -9 }, { 0.34, 13, -9 }, { 0.48, 0, 14 } }) do
+			if at > spec[1] and Once(st, "m" .. i) then
+				local d = New("Frame", { AnchorPoint = Vector2.new(0.5, 0.5), Position = C(spec[2], spec[3]), Size = UDim2.fromOffset(0, 0), BackgroundColor3 = st.Color,
+					ZIndex = 5, Parent = st.Frame }, { CornerFixed(999), New("UIStroke", { Thickness = 1.5, Color = TingUI.Theme.Background }) })
+				d:SetAttribute("NoFade", true)
+				TweenService:Create(d, TweenInfo.new(0.35, Enum.EasingStyle.Back, Enum.EasingDirection.Out), { Size = UDim2.fromOffset(6, 6) }):Play()
+				task.delay(1.6, function()
+					if d.Parent then TweenService:Create(d, TweenInfo.new(0.4), { Size = UDim2.fromOffset(0, 0), BackgroundTransparency = 1 }):Play() end
+					task.delay(0.45, function() d:Destroy() end)
+				end)
+			end
+		end
+	end,
+}
+-- MVP: the crown drops on with a bounce and glints
+M.crown = {
+	Enter = function(st)
+		st.Glyph.Position = C(0, -16)
+		st.Glyph.Rotation = -14
+		TweenService:Create(st.Glyph, TweenInfo.new(0.7, Enum.EasingStyle.Bounce, Enum.EasingDirection.Out), { Position = C(0, 0), Rotation = 0 }):Play()
+	end,
+	Tick = function(st, at)
+		for i, spec in ipairs({ { 0.6, -10, -9, 8 }, { 0.8, 11, -6, 6 }, { 1.05, 2, -13, 7 }, { 1.9, -10, -9, 6 }, { 2.1, 11, -6, 8 } }) do
+			if at > spec[1] and Once(st, "g" .. i) then NotifyKit.Glint(st.Frame, C(spec[2], spec[3]), Color3.fromRGB(255, 240, 200), spec[4]) end
+		end
+	end,
+}
+-- Combat: the sword swings down and a slash streaks across the badge
+M.sword = {
+	Enter = function(st)
+		st.Glyph.Rotation = -75
+		TweenService:Create(st.Glyph, TweenInfo.new(0.32, Enum.EasingStyle.Back, Enum.EasingDirection.Out), { Rotation = 0 }):Play()
+	end,
+	Tick = function(st, at)
+		if at > 0.12 and Once(st, "slash") then
+			NotifyKit.Bit(st.Frame, UDim2.fromOffset(4, 2), Color3.new(1, 1, 1), C(-8, -8), C(4, 4), 0.32,
+				{ SizeTo = UDim2.fromOffset(40, 1), Rot = 45, Tr = 0.1, Z = 6, Style = Enum.EasingStyle.Quint })
+		end
+		-- the jolt waits for the card to finish sliding in
+		if at > 0.55 and at < 0.85 then
+			local k = (at - 0.55) / 0.3
+			st.Card.Position = UDim2.fromOffset(math.sin(k * 18) * 3 * (1 - k), 0)
+		elseif at >= 0.85 and Once(st, "still") then
+			st.Card.Position = UDim2.fromOffset(0, 0)
+		end
+	end,
+}
+-- Copied: a second copy peels off the first and settles beside it
+M.copy = {
+	Tick = function(st, at)
+		if at > 0.3 and Once(st, "ghost") then
+			local ghost = Icon(st.Kind.Icon, st.Frame, st.Size, st.Kind.Key)
+			ghost.AnchorPoint = Vector2.new(0.5, 0.5)
+			ghost.Position = C(0, 0)
+			ghost.ZIndex = st.Glyph.ZIndex
+			ghost:SetAttribute("NoFade", true)
+			for _, d in ipairs(ghost:GetDescendants()) do if d:IsA("GuiObject") then d:SetAttribute("NoFade", true) end end
+			TweenService:Create(ghost, TweenInfo.new(0.45, Enum.EasingStyle.Back, Enum.EasingDirection.Out), { Position = C(5, 5), Rotation = 8 }):Play()
+			task.delay(0.55, function()
+				for _, d in ipairs(ghost:GetDescendants()) do
+					if d:IsA("ImageLabel") then TweenService:Create(d, TweenInfo.new(0.35), { ImageTransparency = 1 }):Play()
+					elseif d:IsA("Frame") then TweenService:Create(d, TweenInfo.new(0.35), { BackgroundTransparency = 1 }):Play() end
+				end
+				task.delay(0.4, function() ghost:Destroy() end)
+			end)
+		end
+	end,
+}
+-- Deleted: something drops into the bin, which tips and settles
+M.trash = {
+	Tick = function(st, at)
+		if at > 0.25 and Once(st, "drop") then
+			NotifyKit.Bit(st.Frame, UDim2.fromOffset(5, 6), st.Color:Lerp(Color3.new(1, 1, 1), 0.4), C(0, -16), C(0, 0), 0.32,
+				{ Square = true, Rot = -20, RotTo = 15, Style = Enum.EasingStyle.Quad, Dir = Enum.EasingDirection.In, Z = 6 })
+		end
+		if at > 0.55 and at < 1.1 then
+			local k = (at - 0.55) / 0.55
+			st.Glyph.Rotation = math.sin(k * math.pi * 3) * 9 * (1 - k)
+		end
+	end,
+}
+-- Sync: spins while it's working (Value < 1 or Persistent), then eases to a stop
+M.refresh = {
+	Tick = function(st, at, dt)
+		local o = st.Options
+		local busy = (o.Value ~= nil and o.Value < 1) or (o.Persistent and o.Value == nil) or at < 1
+		st.Spin = st.Spin or 0
+		st.Speed = st.Speed or 420
+		if busy then st.Speed = 420 else st.Speed = math.max(0, st.Speed - dt * 500) end
+		st.Spin = (st.Spin + st.Speed * dt) % 360
+		st.Glyph.Rotation = st.Spin
+	end,
+}
+-- AFK: the moon rocks gently and little z's drift up from it
+M.moon = {
+	Tick = function(st, at)
+		st.Glyph.Rotation = math.sin(at * 1.3) * 12
+		st.NextZ = st.NextZ or 0.3
+		if at > st.NextZ then
+			st.NextZ = at + 0.85
+			local z = New("TextLabel", { AnchorPoint = Vector2.new(0.5, 0.5), Position = C(6, -6), Size = UDim2.fromOffset(10, 10), BackgroundTransparency = 1,
+				Text = "z", TextSize = 8 + math.random(0, 3), Font = Enum.Font.GothamBold, TextColor3 = st.Color, ZIndex = 6, Parent = st.Frame })
+			z:SetAttribute("NoFade", true)
+			TweenService:Create(z, TweenInfo.new(1.2, Enum.EasingStyle.Sine, Enum.EasingDirection.Out), { Position = C(16, -20), TextTransparency = 1, Rotation = 18 }):Play()
+			task.delay(1.25, function() z:Destroy() end)
+		end
+	end,
+}
+end
+
 -- A coloured status badge: circle (success / info), diamond (warning) or rounded square (error), with a centred glyph.
 -- Distinct shapes as well as colours, so the type reads at a glance.
 local function StatusBadge(parent, kind, size)
@@ -2684,6 +4215,10 @@ local function StatusBadge(parent, kind, size)
 		glyph = NotifyKit.ArrowGlyph(holder, gs, color, kind.Icon == "upload")
 	elseif kind.Icon == "message" then
 		glyph = NotifyKit.BubbleGlyph(holder, gs, color)
+	elseif kind.Icon == "timer" then
+		glyph = NotifyKit.TimerGlyph(holder, gs, color)
+	elseif kind.Icon == "wifi" then
+		glyph = NotifyKit.WifiGlyph(holder, gs, color)
 	else
 		glyph = Icon(kind.Icon, holder, gs, kind.Key)
 	end
@@ -2756,7 +4291,8 @@ end
 
 -- o: string, or {
 --   Title, Content, Type (Success | Warning | Error | Info | Loading | Download | Upload | Message | Friend |
---   Achievement | Security | Update | Heart), Duration (seconds; math.huge = stays), Progress (countdown bar, bool),
+--   Achievement | Security | Update | Heart | Teleport | ServerHop | Reward | Currency | LevelUp | Timer | Connection | Target |
+--   Invite | Streak | Boost | Protected | Key | Party | MVP | Combat | Copied | Deleted | Sync | AFK), Duration (seconds; math.huge = stays), Progress (countdown bar, bool),
 --   Actions = {{Text = "Undo", Callback = fn, Style = "Primary" | "Danger", Close = false}, ...}
 --   Value = 0-1                       a progress bar with a percentage (move it with handle:SetProgress)
 --   Undo = fn, OnCommit = fn          an Undo button that counts down; OnCommit runs if the card closes without Undo
@@ -2849,6 +4385,11 @@ function TingUI:Notify(o, duration, fromShell)
 	local wash = New("Frame", { Size = UDim2.fromScale(1, 1), BackgroundColor3 = Color3.new(1, 1, 1), BackgroundTransparency = 1, ZIndex = 2, Parent = card }, { Corner(9) })
 	New("UIGradient", { Transparency = NumberSequence.new({
 		NumberSequenceKeypoint.new(0, 0.84), NumberSequenceKeypoint.new(0.5, 1), NumberSequenceKeypoint.new(1, 1) }), Parent = wash })
+	-- living background (animated in the frame loop below): two tints of the card's colour on a gradient that slowly
+	-- turns and drifts, so the card is never one flat colour
+	local living = New("Frame", { Size = UDim2.fromScale(1, 1), BackgroundColor3 = Color3.new(1, 1, 1), ZIndex = 2, Parent = card }, { Corner(9) })
+	local livingGrad = New("UIGradient", { Parent = living })
+	local livingSeed, livingGlow = math.random() * 6.28, 0
 	-- the sheen stays clear of the rounded corners (a plain Frame clips square)
 	local shine = New("Frame", {
 		Size = UDim2.new(0.45, 0, 1, -18), Position = UDim2.new(-0.6, 0, 0, 9), BackgroundColor3 = Color3.new(1, 1, 1), ZIndex = 6, Parent = card,
@@ -3126,6 +4667,12 @@ function TingUI:Notify(o, duration, fromShell)
 		bar.BackgroundColor3 = color
 		wash.BackgroundTransparency = kind and 0 or 1
 		wash.BackgroundColor3 = color
+		do
+			local tint = kind and color or T.Accent
+			local twin = tint:Lerp(T.Accent, kind and 0.5 or 0):Lerp(T.Text, 0.15)
+			livingGrad.Color = ColorSequence.new({ ColorSequenceKeypoint.new(0, tint), ColorSequenceKeypoint.new(0.5, T.Background), ColorSequenceKeypoint.new(1, twin) })
+			anim.livingBase = kind and 0.87 or 0.92
+		end
 		local loading = kind and kind.Icon == "spinner"
 		local stays = opts.Persistent == true or opts.Sticky == true or type(opts.Input) == "table"
 		dur = opts.Duration or ((loading or stays) and math.huge or (opts.Undo and 6 or (kind and 4.5 or 4)))
@@ -3160,6 +4707,16 @@ function TingUI:Notify(o, duration, fromShell)
 		elseif k == "sparkle" then
 			glyph.Rotation = -180
 			TweenService:Create(glyph, TweenInfo.new(0.8, Enum.EasingStyle.Back, Enum.EasingDirection.Out), { Rotation = 0 }):Play()
+		end
+		-- the newer types bring their own motion
+		anim.st = nil
+		local motion = NotifyKit.Motions[k]
+		if motion and glyph and iconFrame and not picture then
+			anim.st = { Glyph = glyph, Frame = iconFrame, Color = color, Scale = sc, Kind = kind, Options = opts, Card = card, Size = glyph.Size.X.Offset }
+			if motion.Enter then
+				local ok, err = pcall(motion.Enter, anim.st)
+				if not ok then anim.st = nil warn("[TingUI] notification motion '" .. tostring(k) .. "' failed: " .. FirstLine(err)) end
+			end
 		end
 		-- success and achievements throw out a ring of sparks from the badge
 		if (k == "check" or k == "sparkle") and iconFrame then
@@ -3350,6 +4907,19 @@ function TingUI:Notify(o, duration, fromShell)
 				end
 			end
 		end
+		if anim.st then
+			local m = NotifyKit.Motions[k]
+			if m and m.Tick then
+				local ok, err = pcall(m.Tick, anim.st, at, dt)
+				if not ok then anim.st = nil warn("[TingUI] notification motion '" .. tostring(k) .. "' failed: " .. FirstLine(err)) end
+			end
+		end
+		-- the card's background is never a flat fill: soft light in its colour drifts across it, a little brighter on hover
+		livingGlow = livingGlow + ((hovered and 1 or 0) - livingGlow) * math.min(1, dt * 6)
+		local lb = (anim.livingBase or 0.9) - livingGlow * 0.06
+		livingGrad.Rotation = 15 + math.sin(t * 0.31 + livingSeed) * 30
+		livingGrad.Offset = Vector2.new(math.sin(t * 0.23 + livingSeed) * 0.32, math.cos(t * 0.17 + livingSeed) * 0.25)
+		livingGrad.Transparency = NumberSequence.new({ NumberSequenceKeypoint.new(0, lb), NumberSequenceKeypoint.new(0.5, 0.985), NumberSequenceKeypoint.new(1, lb + 0.04) })
 		if valueFill then
 			local sweep = valueFill:FindFirstChild("Sweep")
 			if sweep and (o.Value or 0) < 1 then sweep.Position = UDim2.fromScale(((t * 0.8) % 1.6) - 0.4, 0) end
@@ -3401,13 +4971,31 @@ local function Ago(clock)
 	return math.floor(s / 3600) .. "h"
 end
 function TingUI:_BuildNotificationCenter()
-	local P = self:CreatePanel({ Title = "Notifications", Subtitle = "Everything this script told you", Width = 320,
-		Position = UDim2.new(1, -350, 0, 64), Visible = false, HeaderIcon = { Icon = "cross", Tooltip = "Clear history", Callback = function()
-			table.clear(TingUI.NotificationHistory)
-			TingUI._unread = 0
-			TingUI._RefreshCenter()
-		end } })
+	local P
+	P = self:CreatePanel({ Title = "Notifications", Subtitle = "Everything this script told you", Width = 320,
+		Position = UDim2.new(1, -350, 0, 64), Visible = false,
+		HeaderIcon = { Icon = "cross", Tooltip = "Close", Callback = function() P:SetVisible(false) end } })
 	P.Name = "Notifications"
+	-- Esc closes it too
+	Connect(UIS.InputBegan, function(i, gp)
+		if not gp and i.KeyCode == Enum.KeyCode.Escape and P.Frame.Parent and P.Frame.Visible then P:SetVisible(false) end
+	end)
+	local bar = New("Frame", { BackgroundTransparency = 1, Size = UDim2.new(1, 0, 0, 22), LayoutOrder = 0, Parent = P._container },
+		{ List(6, Enum.FillDirection.Horizontal, Enum.HorizontalAlignment.Right, Enum.VerticalAlignment.Center) })
+	local function BarButton(text, order, fn)
+		local b = New("TextButton", { Size = UDim2.fromOffset(0, 22), AutomaticSize = Enum.AutomaticSize.X, Text = text, TextSize = 11, LayoutOrder = order,
+			BackgroundTransparency = 0, Parent = bar, Theme = { BackgroundColor3 = "Control", TextColor3 = "TextDim" } }, { Corner(6), Pad(9, 0, 9, 0), Stroke("Outline") })
+		Connect(b.MouseEnter, function() Tween(b, 0.1, { TextColor3 = TingUI.Theme.Text }) end)
+		Connect(b.MouseLeave, function() Tween(b, 0.1, { TextColor3 = TingUI.Theme.TextDim }) end)
+		Connect(b.MouseButton1Click, fn)
+		return b
+	end
+	BarButton("Clear history", 1, function()
+		table.clear(TingUI.NotificationHistory)
+		TingUI._unread = 0
+		TingUI._RefreshCenter()
+	end)
+	BarButton("Close", 2, function() P:SetVisible(false) end)
 	local list = New("ScrollingFrame", { Size = UDim2.new(1, 0, 0, 60), BackgroundTransparency = 1, ScrollBarThickness = 2, CanvasSize = UDim2.new(),
 		AutomaticCanvasSize = Enum.AutomaticSize.Y, LayoutOrder = 2, Parent = P._container, Theme = { ScrollBarImageColor3 = "AccentBorder" } }, { List(6) })
 	local empty = New("TextLabel", { Size = UDim2.new(1, 0, 0, 40), Text = "Nothing yet. Notifications you get show up here.", TextWrapped = true,
@@ -4152,6 +5740,7 @@ function Elements:AddDropdown(o)
 		Visible = false, Size = UDim2.fromOffset(200, 100), Parent = Overlay, Theme = { BackgroundColor3 = "Background" },
 	}, { Corner(7), Stroke("Border") })
 	pcall(function() Connect(row.Destroying, function() pop:Destroy() end) end)
+	pop:SetAttribute("Shrinkable", true)
 	local scroll = New("ScrollingFrame", {
 		Size = UDim2.fromScale(1, 1), BackgroundTransparency = 1, ScrollBarThickness = 2, CanvasSize = UDim2.new(),
 		AutomaticCanvasSize = Enum.AutomaticSize.Y, Parent = pop, Theme = { ScrollBarImageColor3 = "Accent" },
@@ -5799,34 +7388,169 @@ KINDS.Bubbles = {
 		return 0
 	end,
 }
+-- rose petals: rounded ovals, slender blades, notched hearts and the odd whole blossom. Each one tumbles (turning
+-- edge-on and back, showing its paler underside), rocks like a falling leaf, rides the breeze when a gust comes
+-- through, and drifts aside around the pointer.
+local PETAL_TYPES = { "Oval", "Oval", "Oval", "Slender", "Slender", "Heart", "Heart", "Blossom" }
+local PetalWind = { V = 0, Next = 0, Peak = 0, T = 0 }
+local function PointerPush(f, radius, strength, dt)
+	local par = f.Frame.Parent
+	if not par then return end
+	local m = Pointer.Gui()
+	local ap, as = f.Frame.AbsolutePosition, f.Frame.AbsoluteSize
+	local dx, dy = ap.X + as.X / 2 - m.X, ap.Y + as.Y / 2 - m.Y
+	local d = math.sqrt(dx * dx + dy * dy)
+	if d < radius and d > 0.5 then
+		local ps = par.AbsoluteSize
+		local k = (1 - d / radius) * strength * dt
+		f.PX = (f.PX or 0) + dx / d * k / math.max(ps.X, 1)
+		f.PY = (f.PY or 0) + dy / d * k / math.max(ps.Y, 1)
+	end
+end
 KINDS.Petals = {
 	Build = function(f, c, p)
-		local size = math.random(6, 12)
-		f.Speed = 0.025 + math.random() * 0.03
-		f.Spin, f.Rot = (math.random() - 0.5) * 160, math.random() * 360
-		f.Base = 0.15 + math.random() * 0.4
-		f.Frame = New("Frame", { Size = UDim2.fromOffset(math.floor(size * 1.5), size), BackgroundColor3 = c:Lerp(Color3.new(1, 1, 1), math.random() * 0.3),
-			BackgroundTransparency = f.Base, Parent = p }, { CornerFixed(size) })
+		f.Type = PETAL_TYPES[math.random(#PETAL_TYPES)]
+		local white = Color3.new(1, 1, 1)
+		local tint = c:Lerp(white, math.random() * 0.3)
+		f.Front, f.Back = tint, tint:Lerp(white, 0.35)
+		local size = f.Type == "Blossom" and math.random(9, 12) or math.random(6, 12)
+		f.Speed = (f.Type == "Blossom" and 0.018 or 0.024) + math.random() * 0.026
+		f.Spin, f.Rot = (math.random() - 0.5) * (f.Type == "Blossom" and 70 or 150), math.random() * 360
+		f.Flip, f.FlipSp = math.random() * 6.28, 1 + math.random() * 2.4
+		f.Weight = 0.6 + math.random() * 0.8
+		f.W, f.H = (f.Type == "Slender" and size * 2 or (f.Type == "Blossom" and size or size * 1.45)), (f.Type == "Slender" and size * 0.55 or size)
+		f.PX, f.PY = 0, 0
+		if f.Type == "Oval" or f.Type == "Slender" then
+			f.Base = 0.15 + math.random() * 0.4
+			f.Frame = New("Frame", { AnchorPoint = Vector2.new(0.5, 0.5), Size = UDim2.fromOffset(f.W, f.H), BackgroundColor3 = tint,
+				BackgroundTransparency = f.Base, Parent = p }, { CornerFixed(999),
+				New("UIGradient", { Transparency = NumberSequence.new({ NumberSequenceKeypoint.new(0, 0.25), NumberSequenceKeypoint.new(0.5, 0), NumberSequenceKeypoint.new(1, 0.15) }) }) })
+			f.Faces = { f.Frame }
+		else
+			-- built from parts in a see-through holder; the parts scale with it
+			f.Container, f.Base, f.Extra = true, 0, {}
+			local rest = 0.15 + math.random() * 0.35
+			f.Frame = New("Frame", { AnchorPoint = Vector2.new(0.5, 0.5), Size = UDim2.fromOffset(f.W, f.H), BackgroundTransparency = 1, Parent = p })
+			f.Faces = {}
+			local function Part(px, py, sx, sy, rot, col, tr)
+				local o = New("Frame", { AnchorPoint = Vector2.new(0.5, 0.5), Position = UDim2.fromScale(px, py), Size = UDim2.fromScale(sx, sy), Rotation = rot,
+					BackgroundColor3 = col, Parent = f.Frame }, { CornerFixed(999) })
+				table.insert(f.Extra, { o, "BackgroundTransparency", tr })
+				return o
+			end
+			if f.Type == "Heart" then
+				table.insert(f.Faces, Part(0.36, 0.5, 0.62, 0.92, -20, tint, rest))
+				table.insert(f.Faces, Part(0.64, 0.5, 0.62, 0.92, 20, tint, rest))
+			else
+				for k = 0, 4 do
+					local a = k * math.pi * 2 / 5
+					table.insert(f.Faces, Part(0.5 + math.cos(a) * 0.24, 0.5 + math.sin(a) * 0.24, 0.42, 0.42, 0, tint, rest))
+				end
+				Part(0.5, 0.5, 0.22, 0.22, 0, Color3.fromRGB(255, 226, 160), rest * 0.6)
+			end
+		end
 	end,
 	Update = function(f, dt, t, sp)
-		Fall(f, dt, sp)
-		f.Rot = f.Rot + f.Spin * sp * dt
-		f.Frame.Position = UDim2.fromScale(f.X + math.sin(t * f.Sway + f.Phase) * 0.035, f.Y)
-		f.Frame.Rotation = f.Rot
+		local g = PetalWind.V
+		f.Y = f.Y + f.Speed * sp * dt * (1 - g * 0.3) * (0.8 + 0.4 * f.Weight)
+		f.X = f.X + (0.004 + g * 0.11 / f.Weight) * sp * dt
+		if f.Y > 1.05 then f.Y, f.X = -0.05, math.random() end
+		if f.X > 1.06 then f.X = -0.06 end
+		PointerPush(f, 70, 220, dt)
+		f.PX, f.PY = f.PX * (1 - math.min(1, dt * 1.6)), f.PY * (1 - math.min(1, dt * 1.6))
+		local rock = math.sin(t * f.Sway * 1.5 + f.Phase)
+		f.Rot = f.Rot + f.Spin * sp * dt * (1 + g * 2)
+		f.Flip = f.Flip + f.FlipSp * sp * dt * (1 + g * 1.5)
+		local c = math.cos(f.Flip)
+		local turn = 0.2 + 0.8 * math.abs(c)
+		f.Frame.Position = UDim2.fromScale(f.X + rock * 0.03 + f.PX, f.Y + f.PY)
+		f.Frame.Rotation = f.Rot + rock * 28
+		f.Frame.Size = UDim2.fromOffset(f.W * (f.Type == "Blossom" and (0.45 + 0.55 * math.abs(c)) or turn), f.H)
+		-- the underside is paler; it shows while the petal is turned over
+		local face = c >= 0 and f.Front or f.Back
+		for _, o in ipairs(f.Faces) do o.BackgroundColor3 = face end
+	end,
+	Layer = function(layer, dt, t)
+		-- gusts: every so often the breeze picks up for a couple of seconds and dies away
+		if PetalWind.Next == 0 then PetalWind.Next = t + 6 + math.random() * 6 end
+		if t >= PetalWind.Next then
+			PetalWind.Next, PetalWind.T, PetalWind.Peak = t + 9 + math.random() * 9, t, 0.6 + math.random() * 0.4
+		end
+		local k = t - PetalWind.T
+		PetalWind.V = (k >= 0 and k < 3.2) and PetalWind.Peak * math.sin(math.min(1, k / 3.2) * math.pi) ^ 2 or 0
 	end,
 }
+-- sunset embers: sparks that flicker hard and race up, glowing embers with a halo, slow tumbling flakes of ash and
+-- thin streaks that stretch along their path. They ride a little turbulence, cool from white-gold through the theme
+-- colour to deep red as they climb, and swirl around the pointer as if it were warm.
+local EMBER_TYPES = { "Spark", "Spark", "Spark", "Ember", "Ember", "Ember", "Ash", "Ash", "Streak" }
+local HOT, DEEP = Color3.fromRGB(255, 240, 190), Color3.fromRGB(170, 46, 30)
 KINDS.Embers = {
 	Build = function(f, c, p)
-		local size = math.random(2, 5)
-		f.Speed = 0.05 + math.random() * 0.07
-		f.Base = 0.2
-		f.Frame = New("Frame", { Size = UDim2.fromOffset(size, size), BackgroundColor3 = c:Lerp(Color3.fromRGB(255, 230, 150), math.random() * 0.5),
-			BackgroundTransparency = 0.2, Parent = p }, { CornerFixed(1) })
+		f.Type = EMBER_TYPES[math.random(#EMBER_TYPES)]
+		f.Color = c
+		f.PX, f.PY = 0, 0
+		local size
+		if f.Type == "Spark" then
+			size, f.Speed, f.Base = math.random(2, 3), 0.09 + math.random() * 0.08, 0.1
+		elseif f.Type == "Ember" then
+			size, f.Speed, f.Base = math.random(3, 5), 0.045 + math.random() * 0.04, 0.15
+		elseif f.Type == "Ash" then
+			size, f.Speed, f.Base = math.random(3, 5), 0.018 + math.random() * 0.02, 0.45
+		else
+			size, f.Speed, f.Base = 2, 0.14 + math.random() * 0.08, 0.25
+		end
+		f.Size = size
+		f.Frame = New("Frame", { AnchorPoint = Vector2.new(0.5, 0.5), Size = UDim2.fromOffset(f.Type == "Streak" and 2 or size, f.Type == "Streak" and 9 or size),
+			BackgroundColor3 = c, BackgroundTransparency = f.Base, BorderSizePixel = 0, Parent = p }, { CornerFixed(f.Type == "Ash" and 1 or 999) })
+		if f.Type == "Ember" then
+			-- a soft halo around the glowing core
+			local halo = New("Frame", { AnchorPoint = Vector2.new(0.5, 0.5), Position = UDim2.fromScale(0.5, 0.5), Size = UDim2.fromOffset(size * 3, size * 3),
+				BackgroundColor3 = c, Parent = f.Frame }, { CornerFixed(999) })
+			f.Extra = { { halo, "BackgroundTransparency", 0.86 } }
+			f.Halo = halo
+		end
+		f.Spin = (math.random() - 0.5) * 300
 	end,
 	Update = function(f, dt, t, sp)
-		Fall(f, dt, sp, -1)
-		f.Frame.Position = UDim2.fromScale(f.X + math.sin(t * f.Sway * 2 + f.Phase) * 0.018, f.Y)
-		return math.clamp(0.1 + (1 - f.Y) * 0.75 + 0.15 * math.sin(t * 13 + f.Phase), 0, 1)
+		f.Y = f.Y - f.Speed * sp * dt
+		if f.Y < -0.05 then f.Y, f.X = 1.05, math.random() end
+		-- turbulence: two slow waves and one quick one, different for every ember
+		local turb = math.sin(t * 1.1 + f.Phase + f.Y * 7) * 0.6 + math.sin(t * 0.37 + f.Phase * 2) * 0.4
+		local vx = turb * (f.Type == "Ash" and 0.03 or 0.018) + (f.Type == "Spark" and math.sin(t * 9 + f.Phase) * 0.01 or 0)
+		f.X = f.X + vx * sp * dt
+		-- swirl around the pointer
+		local par = f.Frame.Parent
+		if par then
+			local m = Pointer.Gui()
+			local ap = f.Frame.AbsolutePosition
+			local dx, dy = ap.X - m.X, ap.Y - m.Y
+			local d = math.sqrt(dx * dx + dy * dy)
+			if d < 90 and d > 0.5 then
+				local k = (1 - d / 90) * 160 * dt
+				local ps = par.AbsoluteSize
+				f.PX = f.PX + (-dy / d * k + dx / d * k * 0.4) / math.max(ps.X, 1)
+				f.PY = f.PY + (dx / d * k * 0.6 - k * 0.5) / math.max(ps.Y, 1)
+			end
+			f.PX, f.PY = f.PX * (1 - math.min(1, dt * 1.2)), f.PY * (1 - math.min(1, dt * 1.2))
+		end
+		f.Frame.Position = UDim2.fromScale(f.X + f.PX, f.Y + f.PY)
+		local climb = math.clamp(1 - f.Y, 0, 1)
+		if f.Type == "Ash" then
+			f.Frame.Rotation = f.Frame.Rotation + f.Spin * dt * sp
+			f.Frame.BackgroundColor3 = f.Color:Lerp(Color3.fromRGB(110, 100, 96), 0.75)
+			return math.clamp(0.4 + climb * 0.5, 0, 1)
+		end
+		-- cool as they climb: white-gold, then the theme colour, then deep red
+		local col = climb < 0.4 and HOT:Lerp(f.Color, climb / 0.4) or f.Color:Lerp(DEEP, (climb - 0.4) / 0.6)
+		f.Frame.BackgroundColor3 = col
+		if f.Halo then f.Halo.BackgroundColor3 = col end
+		if f.Type == "Streak" then
+			f.Frame.Rotation = math.deg(math.atan2 and math.atan2(vx, f.Speed) or math.atan(vx, f.Speed)) * 4
+			return math.clamp(0.25 + climb * 0.7, 0, 1)
+		end
+		local flick = f.Type == "Spark" and (math.sin(t * 23 + f.Phase) > 0.2 and 0 or 0.5) or 0.12 * math.sin(t * 13 + f.Phase)
+		return math.clamp(0.08 + climb * 0.78 + flick, 0, 1)
 	end,
 }
 KINDS.Fireflies = {
@@ -5882,18 +7606,66 @@ KINDS.Glyphs = {
 	end,
 }
 -- rain streaks falling at a slant (the Storm theme adds distant lightning)
+-- storm rain: fine drops, heavy streaks and faint mist, all slanting with a wind that shifts and gusts. Heavy drops
+-- splash where they land; drops part around the pointer.
+local RAIN_TYPES = { "Drop", "Drop", "Drop", "Drop", "Heavy", "Mist", "Mist" }
+local RainWind = { A = 14 }
+local RainSplashes = { N = 0 }
+local function RainSplash(parent, pos, color, alpha)
+	if RainSplashes.N > 14 then return end
+	RainSplashes.N = RainSplashes.N + 1
+	for i = 1, 2 do
+		local dir = i == 1 and -1 or 1
+		local d = New("Frame", { AnchorPoint = Vector2.new(0.5, 0.5), Position = pos, Size = UDim2.fromOffset(2, 2), BackgroundColor3 = color,
+			BackgroundTransparency = 1 - 0.6 * alpha, BorderSizePixel = 0, Parent = parent }, { CornerFixed(999) })
+		TweenService:Create(d, TweenInfo.new(0.18, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), { Position = pos + UDim2.fromOffset(dir * (4 + math.random() * 4), -6 - math.random() * 4) }):Play()
+		task.delay(0.18, function()
+			TweenService:Create(d, TweenInfo.new(0.16, Enum.EasingStyle.Quad, Enum.EasingDirection.In), { Position = pos + UDim2.fromOffset(dir * 9, 1), BackgroundTransparency = 1 }):Play()
+			task.delay(0.17, function() d:Destroy() end)
+		end)
+	end
+	local ring = New("Frame", { AnchorPoint = Vector2.new(0.5, 0.5), Position = pos, Size = UDim2.fromOffset(3, 1), BackgroundTransparency = 1, Parent = parent }, { CornerFixed(999) })
+	local st = New("UIStroke", { Color = color, Thickness = 1, Transparency = 1 - 0.5 * alpha, Parent = ring })
+	TweenService:Create(ring, TweenInfo.new(0.35, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), { Size = UDim2.fromOffset(14, 3) }):Play()
+	TweenService:Create(st, TweenInfo.new(0.35), { Transparency = 1 }):Play()
+	task.delay(0.36, function() ring:Destroy() RainSplashes.N = RainSplashes.N - 1 end)
+end
 KINDS.Rain = {
 	Build = function(f, c, p)
-		local len = math.random(14, 30)
-		f.Speed = 0.55 + math.random() * 0.45
-		f.Base = 0.45 + math.random() * 0.35
-		f.Frame = New("Frame", { Size = UDim2.fromOffset(1, len), Rotation = 14, BackgroundColor3 = c, BackgroundTransparency = f.Base, Parent = p })
+		f.Type = RAIN_TYPES[math.random(#RAIN_TYPES)]
+		local w, len
+		if f.Type == "Heavy" then
+			w, len, f.Speed, f.Base = 2, math.random(28, 42), 1.05 + math.random() * 0.3, 0.35 + math.random() * 0.2
+		elseif f.Type == "Mist" then
+			w, len, f.Speed, f.Base = 1, math.random(6, 11), 0.3 + math.random() * 0.15, 0.8
+		else
+			w, len, f.Speed, f.Base = 1, math.random(14, 28), 0.6 + math.random() * 0.4, 0.45 + math.random() * 0.3
+		end
+		f.Floor = 0.86 + math.random() * 0.16
+		f.PX = 0
+		f.Frame = New("Frame", { AnchorPoint = Vector2.new(0.5, 1), Size = UDim2.fromOffset(w, len), Rotation = 14, BackgroundColor3 = c,
+			BackgroundTransparency = f.Base, BorderSizePixel = 0, Parent = p }, { New("UIGradient", { Rotation = 90, Transparency = NumberSequence.new(0.85, 0) }) })
 	end,
 	Update = function(f, dt, t, sp)
-		Fall(f, dt, sp)
-		f.X = f.X - f.Speed * sp * dt * 0.25
-		if f.X < -0.02 then f.X = f.X + 1.04 end
-		f.Frame.Position = UDim2.fromScale(f.X, f.Y)
+		local slant = math.tan(math.rad(RainWind.A))
+		f.Y = f.Y + f.Speed * sp * dt
+		f.X = f.X - f.Speed * sp * dt * slant * 0.55
+		if f.Y >= f.Floor then
+			if f.Type == "Heavy" and sp > 0 and f.LastAlpha and f.LastAlpha > 0.3 then
+				RainSplash(f.Frame.Parent, UDim2.fromScale(f.X + f.PX, f.Floor), f.Frame.BackgroundColor3, f.LastAlpha)
+			end
+			f.Y, f.X, f.Floor = -0.06 - math.random() * 0.05, math.random() * 1.15, 0.86 + math.random() * 0.16
+		end
+		if f.X < -0.03 then f.X = f.X + 1.06 end
+		if f.Type ~= "Mist" then PointerPush(f, 46, 260, dt) end
+		f.PX = (f.PX or 0) * (1 - math.min(1, dt * 3))
+		f.Frame.Position = UDim2.fromScale(f.X + f.PX, f.Y)
+		f.Frame.Rotation = RainWind.A
+	end,
+	Layer = function(layer, dt, t)
+		-- the wind veers slowly and gusts now and then
+		local gust = math.max(0, math.sin(t * 0.21) ^ 9) * 14
+		RainWind.A = 12 + math.sin(t * 0.13) * 5 + gust
 	end,
 }
 -- tumbling multicolour confetti (ignores the particle colour)
@@ -6518,7 +8290,8 @@ function TingUI:SetBackdrop(opts)
 end
 
 local function Lightning()
-	-- a distant flash: quick rise, slow fade, sometimes a second flicker
+	-- a distant flash: quick rise, slow fade, sometimes a second flicker (the Storm scene hears it through Scenes.Bolt)
+	Scenes.Bolt = os.clock()
 	FlashFrame.BackgroundTransparency = 1
 	TweenService:Create(FlashFrame, TweenInfo.new(0.06, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), { BackgroundTransparency = 0.8 }):Play()
 	task.delay(0.07, function()
@@ -6583,7 +8356,7 @@ end)
 --   Grid + GridColor, Vignette, SurfaceTransparency, Blur, AccentCycle + CycleSpeed, AuraHard, AuraRotation,
 --   Texture = { {Image, Transparency, Drift, Zoom, Pulse, Color, Mode = "Fill" | "Lamp", Flicker}, ... } (art inside windows),
 --   BackdropTexture = {Image, Transparency, Drift, Zoom} (art across the screen), Glitch (bool: title + screen glitches),
---   Scene = "Hologram" | "Circuit" | "Ocean" | your own (animated artwork around windows that reacts to clicks; see Scenes),
+--   Scene = "Hologram" | "Circuit" | "Ocean" | "Frost" | "Rose" | "Sunset" | "Storm" | your own (animated artwork around windows that reacts to clicks; see Scenes),
 --   scene colours: TraceColor + EnergyColor (Circuit), WaterColor + FoamColor (Ocean)
 -- fade (seconds): corners, glow, fonts, surfaces and particles all blend instead of switching.
 ------------------------------------------------------------------------------
@@ -8059,7 +9832,22 @@ function TingUI:CreateWindow(o)
 		else
 			Finish()
 			t.Page.Position = UDim2.new()
+			-- a switch that interrupted another one (or happened while hidden) must still lift the veil
+			if veil.Visible then
+				TweenService:Create(veil, TweenInfo.new(0.18, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), { BackgroundTransparency = 1 }):Play()
+				task.delay(0.2, function() if mine == TabToken then veil.Visible = false end end)
+			end
 		end
+		-- whatever happens in between, half a second later the page is fully in place and the veil is gone
+		task.delay(0.5, function()
+			if mine ~= TabToken or not veil.Parent then return end
+			veil.BackgroundTransparency = 1
+			veil.Visible = false
+			if t.Page.Parent and not t.Hidden then
+				t.Page.Visible = true
+				t.Page.Position = UDim2.new()
+			end
+		end)
 		if t.OnSelect then SafeCall("tab '" .. tostring(t.Name) .. "' OnSelect", t.OnSelect) end
 		TingUI.Events.TabChanged:Fire(t.Name, W)
 	end
@@ -8620,14 +10408,14 @@ function TingUI:CreateWindow(o)
 		end)
 		local DESCRIPTIONS = {
 			Lavender = "The reference look: soft lilac, snow.",
-			Ocean = "The window floats in water: rolling waves that rise toward your cursor, caustic light, a tide that washes over on switching, click ripples, and bubbles that pop at depth, at the surface or when you touch them.",
-			Rose = "Extra round and glowy, drifting petals.",
-			Sunset = "Warm glow from below, rising embers.",
+			Ocean = "The window floats in water: rolling waves that rise toward your cursor, caustic light, a tide that washes over on switching, small soft bubbles where you click, and bubbles that pop at depth, at the surface or when you touch them.",
+			Rose = "Extra round and glowy. Climbing roses grow in from the corners and open toward your cursor, a breeze carries tumbling petals of every shape across, and clicks open a bloom that sheds its petals.",
+			Sunset = "Warm light from below: a low banded sun with slow rays, flocks of birds that climb away from your cursor, and embers that cool from gold to red as they rise and swirl around it.",
 			Mono = "Sharp corners, no glow, monospace, scanlines, glyph rain.",
-			Frost = "Pale ice, thin rounded type, a frosted double border, spinning ice crystals.",
+			Frost = "Pale ice, thin rounded type, a frosted double border, spinning ice crystals. A short snowfall settles into a thin drift along the bottom and a dusting on top, and stays; brush it with your cursor.",
 			Royal = "Midnight navy and gold, serif type, a gilded double border, glinting sparkles.",
 			Cosmos = "Deep space: drifting nebula clouds over a parallax star layer, a turning aurora border, twinkling stars, shooting stars and comets.",
-			Storm = "Slate and steel, condensed type, slanted rain and distant lightning.",
+			Storm = "Slate and steel, condensed type, rain in a shifting wind, clouds that light up, drops that bead and run down the glass (wipe them with your cursor) and bolts that fork through.",
 			Blueprint = "Drafting paper: navy blue, a white grid, a ruled double border, handwritten labels, drafting marks.",
 			Hazard = "Industrial yellow and black, a striped warning-tape border, square corners.",
 			Serotonin = "A crisp classic cheat-menu look: square corners, a hairline teal outline in a dark teal frame, teal light from the top, plain type. No particles.",
@@ -8726,6 +10514,64 @@ function TingUI:CreateWindow(o)
 		end }):AddSubButton({ Text = "History", Description = "Every notification so far, newest first.", Callback = function()
 			TingUI:OpenNotificationCenter()
 		end })
+		-- game events: twenty types, each with an animation of its own
+		local function Progress(n, title, content, finish)
+			task.spawn(function()
+				for i = 1, 10 do
+					task.wait(0.18)
+					if n.Closed then return end
+					n:SetProgress(i / 10)
+				end
+				n:Update(finish)
+			end)
+		end
+		local EVENTS = {
+			{ "Teleport", "The pin drops onto its spot and pings it.", function() TingUI:Notify({ Title = "Teleported", Content = "Moved to Spawn (124, 8, -37).", Type = "Teleport",
+				Actions = { { Text = "Go back" } } }) end },
+			{ "Server hop", "The globe spins up and a dot hops round it while it searches.", function()
+				local n = TingUI:Notify({ Title = "Server hop", Content = "Looking for a server with free slots...", Type = "ServerHop", Value = 0 })
+				Progress(n, nil, nil, { Title = "Server found", Content = "18 / 24 players, 42 ms. Joining...", Type = "ServerHop", Value = 1, Duration = 4 })
+			end },
+			{ "Reward", "The box shakes, pops open and throws confetti.", function() TingUI:Notify({ Title = "Daily reward", Content = "You got 3 crates.", Type = "Reward",
+				Actions = { { Text = "Open", Style = "Primary" } } }) end },
+			{ "Currency", "The coin flips three times and glints.", function() TingUI:Notify({ Title = "+250 coins", Content = "Balance: 4,180.", Type = "Currency" }) end },
+			{ "Level up", "The trophy rises while chevrons climb past it.", function() TingUI:Notify({ Title = "Level 24", Content = "1,450 / 12,000 XP to the next one.", Type = "LevelUp", Value = 0.12, Duration = 5 }) end },
+			{ "Timer", "A stopwatch hand sweeps and it ticks every second.", function() TingUI:Notify({ Title = "Boss in 30 seconds", Content = "Head to the arena.", Type = "Timer", Duration = 8 }) end },
+			{ "Connection", "The signal bars light one by one, then hold.", function()
+				local n = TingUI:Notify({ Title = "Reconnecting", Content = "The connection dropped. Trying again...", Type = "Connection", Value = 0 })
+				Progress(n, nil, nil, { Title = "Connected", Content = "Ping 48 ms.", Type = "Connection", Value = 1, Duration = 4 })
+			end },
+			{ "Target", "Brackets close in and lock on.", function() TingUI:Notify({ Title = "Target locked", Content = "builderman, 42 studs away.", Type = "Target" }) end },
+			{ "Invite", "The envelope slides in and an unread dot pops on.", function() TingUI:Notify({ Title = "Party invite", Content = "builderman invited you to their party.", Type = "Invite", Duration = 10,
+				Actions = { { Text = "Join", Style = "Primary" }, { Text = "Decline" } } }) end },
+			{ "Streak", "The flame flickers and throws off embers.", function() TingUI:Notify({ Title = "5-day streak", Content = "Come back tomorrow to keep it going.", Type = "Streak", Duration = 6 }) end },
+			{ "Boost", "The rocket rumbles, launches and comes back round.", function() TingUI:Notify({ Title = "Speed boost", Content = "x2 walk speed for 60 seconds.", Type = "Boost" }) end },
+			{ "Protected", "The shield slams in and a dome hums round it.", function() TingUI:Notify({ Title = "Spawn protection", Content = "You can't be damaged for 10 seconds.", Type = "Protected" }) end },
+			{ "Key", "The key turns in the lock and clicks.", function() TingUI:Notify({ Title = "Key accepted", Content = "Premium features unlocked.", Type = "Key" }) end },
+			{ "Party", "The group hops and members pop in around it.", function() TingUI:Notify({ Title = "Party ready", Content = "4 / 4 players joined.", Type = "Party" }) end },
+			{ "MVP", "The crown drops on with a bounce and glints.", function() TingUI:Notify({ Title = "MVP", Content = "Most eliminations this round.", Type = "MVP", Duration = 6 }) end },
+			{ "Combat", "The sword swings, a slash crosses the badge, the card jolts.", function() TingUI:Notify({ Title = "Under attack", Content = "You took 35 damage from behind.", Type = "Combat" }) end },
+			{ "Copied", "A second copy peels off and settles beside it.", function() TingUI:Notify({ Title = "Copied", Content = "Job ID copied to the clipboard.", Type = "Copied" }) end },
+			{ "Deleted", "Something drops into the bin, which tips and settles.", function() TingUI:Notify({ Title = "Config deleted", Content = "\"pvp\" was removed.", Type = "Deleted",
+				Undo = function() TingUI:Notify({ Content = "Restored \"pvp\".", Type = "Success" }) end }) end },
+			{ "Sync", "Spins while it works, then eases to a stop.", function()
+				local n = TingUI:Notify({ Title = "Syncing", Content = "Saving your config to the cloud...", Type = "Sync", Value = 0 })
+				Progress(n, nil, nil, { Title = "Synced", Content = "Everything is saved.", Type = "Sync", Value = 1, Duration = 4 })
+			end },
+			{ "AFK", "The moon rocks and little z's drift up.", function() TingUI:Notify({ Title = "AFK detected", Content = "You'll be kicked in 2 minutes. Move to stay.", Type = "AFK", Duration = 8,
+				Actions = { { Text = "I'm here", Style = "Primary" } } }) end },
+		}
+		tests:AddDivider()
+		tests:AddLabel("Game events", { Dim = true })
+		for i = 1, #EVENTS, 2 do
+			local a, b = EVENTS[i], EVENTS[i + 1]
+			local btn = tests:AddButton({ Text = a[1], Description = a[2], Callback = a[3] })
+			if b then btn:AddSubButton({ Text = b[1], Description = b[2], Callback = b[3] }) end
+		end
+		tests:AddButton({ Text = "Play every event", Description = "All twenty, one after another.", Callback = function()
+			for i, e in ipairs(EVENTS) do task.delay((i - 1) * 0.7, e[3]) end
+		end })
+		tests:AddDivider()
 		tests:AddButton({ Text = "With actions", Description = "A notification with buttons inside it.", Callback = function()
 			TingUI:Notify({ Title = "Config changed", Content = "You switched to a new theme.", Type = "Info", Duration = 8,
 				Actions = {
@@ -8999,7 +10845,7 @@ do
 			or (type(http) == "table" and has(http.request)) or (type(fluxus) == "table" and has(fluxus.request)),
 		HiddenGui = has(gethui),
 		Studio = RunService:IsStudio(),
-		Version = "0.0.8",
+		Version = "0.0.9",
 	}
 end
 
@@ -9141,6 +10987,9 @@ do local function Setup()
 		CycleSpeed = { NUM, 0, 3 }, Lightning = { BOOL }, Grid = { BOOL }, GridColor = { COLOR }, Vignette = { BOOL },
 		SurfaceTransparency = { NUM, 0, 0.9 }, Blur = { NUM, 0, 40 }, Glitch = { BOOL }, Texture = { LAYERS, 4 },
 		BackdropTexture = { LAYER }, Scene = { SCENE },
+		-- scene colours (v0.0.9)
+		SnowColor = { COLOR }, BloomColor = { COLOR }, VineColor = { COLOR }, SunColor = { COLOR }, BirdColor = { COLOR },
+		CloudColor = { COLOR }, BoltColor = { COLOR },
 	}
 	local LAYER_KEYS = {
 		Transparency = { NUM, 0, 1 }, Drift = { NUM, -1, 1 }, Zoom = { NUM, 0.05, 10 }, Pulse = { NUM, 0, 1 },
@@ -9814,7 +11663,7 @@ do local function Setup()
 		end
 
 		local scene = motionTab:AddGroup({ Title = "Scene", Side = "Right" })
-		local sceneRows = { Circuit = {}, Ocean = {}, Hologram = {}, Other = {} }
+		local sceneRows = { Circuit = {}, Ocean = {}, Hologram = {}, Frost = {}, Rose = {}, Sunset = {}, Storm = {}, Other = {} }
 		local function ShowSceneRows()
 			local cur = St.Draft.Style.Scene
 			local which = cur == nil and "" or (sceneRows[cur] and cur or "Other")
@@ -9842,6 +11691,13 @@ do local function Setup()
 		table.insert(sceneRows.Ocean, ColorFlag(scene, "WaterColor", "Water", "The waves along the bottom and the tide that sweeps over on a theme switch. Off uses the accent.", Draft("Accent")))
 		table.insert(sceneRows.Ocean, ColorFlag(scene, "FoamColor", "Foam", "The bright crest on each wave, the ripples and the caustic light. Off uses the text colour.", Draft("Text")))
 		table.insert(sceneRows.Hologram, scene:AddLabel("Hologram draws in the accent colour.", { Dim = true }))
+		table.insert(sceneRows.Frost, ColorFlag(scene, "SnowColor", "Snow", "The snowfall and the drift it leaves. Off uses the particle colour.", Draft("Text")))
+		table.insert(sceneRows.Rose, ColorFlag(scene, "BloomColor", "Blooms", "The roses and the petals on the breeze. Off uses the particle colour.", Draft("Accent")))
+		table.insert(sceneRows.Rose, ColorFlag(scene, "VineColor", "Stems", "The climbing stems and leaves.", function() return Color3.fromRGB(120, 150, 112) end))
+		table.insert(sceneRows.Sunset, ColorFlag(scene, "SunColor", "Sun", "The top of the sun; it shades into the second top-line colour. Off uses the top line.", Draft("Accent")))
+		table.insert(sceneRows.Sunset, ColorFlag(scene, "BirdColor", "Birds", "The flocks crossing the sky. Off uses the text colour.", Draft("Text")))
+		table.insert(sceneRows.Storm, ColorFlag(scene, "CloudColor", "Clouds", "The cloud bank along the top. Off uses the panel colour.", Draft("Group")))
+		table.insert(sceneRows.Storm, ColorFlag(scene, "BoltColor", "Lightning", "Bolts and the light inside the clouds.", function() return Color3.fromRGB(225, 236, 255) end))
 		table.insert(sceneRows.Other, scene:AddLabel("This scene reads its own style keys. Set them in code; share codes carry their colours and numbers.", { Dim = true }))
 		ShowSceneRows()
 

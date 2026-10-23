@@ -1060,5 +1060,84 @@ Test("themes: Ocean and Serotonin, Hazard without particles, retired names, poin
 	NoErrors(M)
 end)
 
+Test("scenes: Frost snowfall settles, Rose, Sunset and Storm run with clicks, tabs and opening; new particle kinds", function()
+	local M, env = Fresh(false)
+	local TingUI = Load(M, env, Sources.TingUI, "TingUI", ModuleScript(M, { Theme = "Frost" }))
+	local V2, Enum = M.globals.Vector2, M.globals.Enum
+	local W = BuildUI(TingUI, M)
+	W.Frame._props.AbsolutePosition = V2.new(100, 50)
+	W.Frame._props.AbsoluteSize = V2.new(560, 452)
+	TingUI:SetSnow(true)
+	local function Click()
+		M.Services.UserInputService.InputBegan:Fire({ UserInputType = Enum.UserInputType.MouseButton1, KeyCode = Enum.KeyCode.Unknown,
+			Position = M.globals.Vector3.new(400, 300, 0) }, false)
+	end
+	for _, theme in ipairs({ "Frost", "Rose", "Sunset", "Storm", "Ocean" }) do
+		TingUI:ApplyPreset(theme)
+		assert(TingUI.Presets[theme].Style.Scene == theme, theme .. " should have its own scene")
+		M.Step(1 / 60, 90)
+		Click()
+		M.Step(1 / 60, 20)
+		if #W.Tabs > 1 then W:SelectTab(W.Tabs[2]) M.Step(1 / 60, 30) W:SelectTab(W.Tabs[1]) end
+		W:SetVisible(false) M.Step(1 / 60, 5) W:SetVisible(true)
+		M.Step(1 / 60, 240)
+	end
+	-- the Frost drift: after its first snowfall some snow is left along the bottom edge, and it stays small
+	TingUI:ApplyPreset("Frost")
+	M.Step(1 / 60, 60 * 14)
+	local found, tallest = false, 0
+	for _, d in ipairs(W.Frame:GetDescendants()) do
+		if d.Name == "TingUISceneTop" then
+			for _, c in ipairs(d:GetChildren()) do
+				if c.ClassName == "Frame" and c.AnchorPoint == V2.new(0, 1) and c.BackgroundTransparency < 1 then
+					found = true
+					tallest = math.max(tallest, c.Size.Y.Offset)
+				end
+			end
+		end
+	end
+	assert(found, "the Frost snowfall should leave a drift along the bottom")
+	assert(tallest <= 6, "the drift should stay small, got " .. tallest)
+	for _, kind in ipairs({ "Petals", "Embers", "Rain" }) do
+		TingUI:SetParticles(kind)
+		M.Step(1 / 60, 300)
+	end
+	-- every icon name builds its fallback without errors
+	assert(#TingUI.IconNames >= 57, "the new icons should be listed")
+	for _, name in ipairs(TingUI.IconNames) do W.Tabs[1]:AddGroup({ Title = name, Side = "Left", Icon = name }) end
+	NoErrors(M)
+end)
+
+Test("notifications: twenty game-event types animate cleanly, living card backgrounds move", function()
+	local M, env = Fresh(false)
+	local TingUI = Load(M, env, Sources.TingUI, "TingUI", ModuleScript(M))
+	local W = BuildUI(TingUI, M)
+	local types = { "Teleport", "ServerHop", "Reward", "Currency", "LevelUp", "Timer", "Connection", "Target", "Invite", "Streak",
+		"Boost", "Protected", "Key", "Party", "MVP", "Combat", "Copied", "Deleted", "Sync", "AFK" }
+	for _, ty in ipairs(types) do assert(table.find(TingUI.NotifyTypes, ty), ty .. " should be a notification type") end
+	local handles = {}
+	for i, ty in ipairs(types) do
+		handles[i] = TingUI:Notify({ Title = ty, Content = "test " .. i, Type = ty, Duration = 30, Value = (ty == "Sync" or ty == "Connection") and 0.3 or nil })
+		M.Step(1 / 60, 12)
+	end
+	M.Step(1 / 60, 240)
+	-- the background gradient should drift (not a flat colour)
+	local h = handles[#handles]
+	local grads = {}
+	for _, d in ipairs(h.Frame:GetChildren()) do
+		local g = d:FindFirstChildOfClass("UIGradient")
+		if g and d.ZIndex == 2 then table.insert(grads, { g, g.Rotation, g.Offset }) end
+	end
+	M.Step(1 / 60, 30)
+	local moved = false
+	for _, e in ipairs(grads) do if e[1].Rotation ~= e[2] or e[1].Offset ~= e[3] then moved = true end end
+	assert(moved, "the card background should drift, not sit as one flat colour")
+	for _, n in ipairs(handles) do n:Update({ Title = "done", Type = "Success" }) end
+	M.Step(1 / 60, 60)
+	for _, n in ipairs(handles) do n:Dismiss() end
+	M.Step(1 / 60, 60)
+	NoErrors(M)
+end)
+
 print(("\n%d passed, %d failed"):format(passed, failed))
 if failed > 0 then error("tests failed", 0) end

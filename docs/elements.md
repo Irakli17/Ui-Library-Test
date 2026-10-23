@@ -49,7 +49,7 @@ Group:AddDropdown({ Text = "Parts", Values = { "Head", "Torso", "Arms" }, Multi 
 
 Single mode stores a string, and multi mode stores `{[name] = true}`. Use `:Set(v)` and `:SetValues(list, keepSelection?)`. Lists longer than 8 entries get a **search box**; force it with `Search = true` or hide it with `Search = false`.
 
-Opening a dropdown unfolds the list and cascades the rows in. Hovering a row gives it a soft wash, grows a short accent bar on its edge and nudges the label in. Pressing squeezes the row slightly. Picking it flashes the accent, settles into the selected fill with a full-height bar, pops a check mark in and slides the new value up into the field. The chevron turns as the list opens and closes.
+Opening a dropdown unfolds the list and cascades the rows in. Hovering a row gives it a soft wash, grows a short accent bar on its edge and nudges the label in. Pressing squeezes the row slightly. Picking it flashes the accent, settles into the selected fill with a full-height bar, pops a check mark in and slides the new value up into the field. The chevron turns as the list opens and closes. The list opens below its box when it fits and above it when that fits better; when neither side has room it takes the larger one and shrinks to fit (it scrolls), so it never slides over the box you clicked. It stays attached to the box while the window is dragged or the page scrolls, and closes by itself if the box scrolls out of view.
 
 ## AddPlayerDropdown
 
@@ -251,6 +251,39 @@ Each type has its own badge **shape**, colour and motion, so it reads at a glanc
 | `Update` | | `Accent` | The gear spins up and coasts to a stop |
 | `Heart` | | `Error` | Two heartbeats |
 
+Game events (v0.0.9):
+
+| Type | Colour key | Motion |
+|---|---|---|
+| `Teleport` | `Info` | The pin drops onto its spot with a bounce and pings it twice |
+| `ServerHop` | `Info` | The globe spins up while a small dot orbits it, passing behind and in front |
+| `Reward` | `Caution` | The box shakes, pops open with a bump and throws confetti |
+| `Currency` | `Caution` | The coin flips three times, slowing down, then glints |
+| `LevelUp` | `Success` | The trophy rises into place while chevrons climb past it |
+| `Timer` | `Accent` | A stopwatch hand sweeps round and the watch ticks every second |
+| `Connection` | `Success` | Signal bars light one after another while `Value` is below 1, then all hold |
+| `Target` | `Error` | Four brackets close in, lock on and pulse, then let go |
+| `Invite` | `Accent` | The envelope slides in and an unread dot pops on its corner and breathes |
+| `Streak` | `Caution` | The flame flickers and sways and throws off small embers |
+| `Boost` | `Accent` | The rocket rumbles, launches out of the badge on a trail of smoke and comes back from below |
+| `Protected` | `Success` | The shield slams in with a shockwave and a dome of light hums around it |
+| `Key` | `Caution` | The key turns in the lock and clicks |
+| `Party` | `Accent` | The group hops and members pop in around the badge |
+| `MVP` | `Caution` | The crown drops on with a bounce and glints |
+| `Combat` | `Error` | The sword swings down, a slash crosses the badge and the card jolts |
+| `Copied` | `Info` | A second copy peels off the first and settles beside it |
+| `Deleted` | `Error` | Something drops into the bin, which tips and settles. Pair it with `Undo` |
+| `Sync` | `Info` | Spins while `Value` is below 1 (or while `Persistent`), then eases to a stop |
+| `AFK` | `Accent` | The moon rocks and little z's drift up |
+
+```lua
+TingUI:Notify({ Title = "Server found", Content = "18 / 24 players. Joining...", Type = "ServerHop" })
+local n = TingUI:Notify({ Title = "Syncing", Content = "Saving your config...", Type = "Sync", Value = 0 })
+n:SetProgress(1)  -- the spinner eases to a stop
+```
+
+Every card's background moves: two tints of its type's colour drift slowly across it and brighten a little under the cursor.
+
 `TingUI.NotifyTypes` lists them all.
 
 ### Handling a stack
@@ -269,7 +302,7 @@ TingUI.NotificationHistory       -- the last 60, newest first: {Title, Content, 
 TingUI:OpenNotificationCenter()  -- a panel listing that history; also the bell in the dock
 ```
 
-The **notification center** lists every notification this script showed, with its type, source and age, and a button to clear the history. Add the bell to the dock with `CreateWindow({ Dock = { "menu", "hotkeys", "notifications", "palette" } })`, or switch it on in the config tab's Layout group. Turn all notifications off with `TingUI.ShowNotifications = false`.
+The **notification center** lists every notification this script showed, with its type, source and age, and buttons to clear the history and to close it (the cross in its header and Esc close it too). Add the bell to the dock with `CreateWindow({ Dock = { "menu", "hotkeys", "notifications", "palette" } })`, or switch it on in the config tab's Layout group. Turn all notifications off with `TingUI.ShowNotifications = false`.
 
 ---
 

@@ -71,7 +71,7 @@ The new kind shows up in the config tab's particle dropdown straight away. Under
 
 ## Scenes
 
-A scene is living artwork drawn in and around every window that uses it. Hologram, Circuit and Ocean are built this way. Register one, then name it in a theme's `Style.Scene`.
+A scene is living artwork drawn in and around every window that uses it. Hologram, Circuit, Ocean, Frost, Rose, Sunset and Storm are built this way. Register one, then name it in a theme's `Style.Scene`.
 
 ```lua
 TingUI:RegisterScene("Fireflies", {
@@ -140,7 +140,7 @@ TingUI handles the rest. A scene pauses while its window is hidden, is destroyed
 
 ## Icons
 
-The built-in icons are `window, scan, keyboard, command, user, bell, check, cross, warn, info, discord, gear, snow, list, heart, chevron, search, eye, sparkle, lock, palette`. They're 96 px white PNGs tinted to the theme. On load TingUI draws crisp vector versions immediately, downloads the PNGs in the background (`AssetBase`, then GitHub, then jsDelivr), caches them in `<CacheFolder>/icons/v1/` and fades each icon over to its image. Without `writefile` and `getcustomasset`, or with `NoImages = true`, the vector icons stay.
+The built-in icons are `window, scan, keyboard, command, user, bell, check, cross, warn, info, discord, gear, snow, list, heart, chevron, search, eye, sparkle, lock, palette`, and since v0.0.9 `home, star, bolt, shield, trophy, crown, target, pin, globe, clock, calendar, download, upload, trash, copy, edit, folder, flag, fire, code, link, refresh, play, key, coin, gift, rocket, mail, wifi, chart, sword, users, moon, sun, bug, plus` (`TingUI.IconNames` lists them). They're 96 px white PNGs tinted to the theme. On load TingUI draws crisp vector versions immediately, downloads the PNGs in the background (`AssetBase`, then GitHub, then jsDelivr), caches them in `<CacheFolder>/icons/v1/` and fades each icon over to its image. Without `writefile` and `getcustomasset`, or with `NoImages = true`, the vector icons stay.
 
 To use your own, pass `Icons = {gear = "rbxassetid://..."}` in the load options, set `TingUI.IconAssets.gear = "..."` before building the UI, or draw one:
 

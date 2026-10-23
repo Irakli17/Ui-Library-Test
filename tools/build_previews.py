@@ -379,13 +379,70 @@ def particles(img, size, kind, color, rng, count=70, t=0.0):
             else:
                 r = rng.uniform(10, 17) if kindb == 'Big' else rng.uniform(4, 8.5)
                 bubble(x, y, r)
-        elif kind in ('Petals', 'Leaves'):
+        elif kind == 'Petals':
+            # ovals, slender blades, notched hearts and the odd blossom, caught mid-tumble (some edge-on, some pale side up)
+            pk = rng.choice(['Oval', 'Oval', 'Oval', 'Slender', 'Slender', 'Heart', 'Heart', 'Blossom'])
+            turn = 0.22 + 0.78 * abs(math.cos(rng.uniform(0, 6.28)))
+            c = lerp(color, (255, 255, 255), rng.random() * 0.3 + (0.3 if rng.random() < 0.3 else 0))
+            a = rng.uniform(0.45, 0.85)
+            ang = rng.uniform(0, 360)
+            sz = rng.uniform(6, 12)
+            if pk == 'Blossom':
+                for k in range(5):
+                    u = k * 1.2566 + math.radians(ang)
+                    d.ellipse(box(x + math.cos(u) * sz * 0.24 * turn - sz * 0.2, y + math.sin(u) * sz * 0.24 - sz * 0.2,
+                                  x + math.cos(u) * sz * 0.24 * turn + sz * 0.2, y + math.sin(u) * sz * 0.24 + sz * 0.2), fill=rgba(c, a))
+                d.ellipse(box(x - 1.3, y - 1.3, x + 1.3, y + 1.3), fill=rgba((255, 226, 160), a))
+            elif pk == 'Heart':
+                for sx in (-1, 1):
+                    d.polygon(ellipse_pts(x + sx * sz * 0.2 * turn, y, sz * 0.32 * turn, sz * 0.46, ang + sx * 20), fill=rgba(c, a))
+            else:
+                ww = sz * (2 if pk == 'Slender' else 1.45)
+                hh = sz * (0.55 if pk == 'Slender' else 1) * 0.5
+                d.polygon(ellipse_pts(x, y, ww / 2 * turn, hh, ang), fill=rgba(c, a))
+        elif kind == 'Embers':
+            # sparks, glowing embers with a halo, tumbling ash and thin streaks; cooling from white-gold to red as they climb
+            ek = rng.choice(['Spark', 'Spark', 'Spark', 'Ember', 'Ember', 'Ember', 'Ash', 'Ash', 'Streak'])
+            climb = 1 - y / H
+            hot, deep = (255, 240, 190), (170, 46, 30)
+            c = lerp(hot, color, climb / 0.4) if climb < 0.4 else lerp(color, deep, (climb - 0.4) / 0.6)
+            a = max(0.1, 1 - climb * 0.8)
+            if ek == 'Ash':
+                g = lerp(color, (110, 100, 96), 0.75)
+                r = rng.uniform(1.4, 2.4)
+                d.polygon(ellipse_pts(x, y, r, r * 0.6, rng.uniform(0, 180), 6), fill=rgba(g, 0.4))
+            elif ek == 'Streak':
+                seg(d, (x, y), (x + rng.uniform(-1.5, 1.5), y + 8), c, a * 0.7, 1.4)
+            elif ek == 'Ember':
+                r = rng.uniform(1.6, 2.4)
+                glow(img, lambda g, x=x, y=y, r=r, c=c, a=a: g.ellipse(box(x - r * 3, y - r * 3, x + r * 3, y + r * 3), fill=rgba(c, 0.35 * a)), 3)
+                d.ellipse(box(x - r, y - r, x + r, y + r), fill=rgba(c, a))
+            else:
+                r = rng.uniform(0.7, 1.3)
+                d.ellipse(box(x - r, y - r, x + r, y + r), fill=rgba(lerp(c, hot, 0.4), min(1, a + 0.2)))
+        elif kind == 'Rain':
+            # fine drops, heavy streaks and faint mist on one wind; heavy drops splash where they land
+            rk = rng.choice(['Drop', 'Drop', 'Drop', 'Drop', 'Heavy', 'Mist', 'Mist'])
+            slant = math.tan(math.radians(16))
+            ln = {'Drop': rng.uniform(14, 28), 'Heavy': rng.uniform(28, 42), 'Mist': rng.uniform(6, 11)}[rk]
+            a = {'Drop': rng.uniform(0.25, 0.5), 'Heavy': rng.uniform(0.45, 0.6), 'Mist': 0.15}[rk]
+            wd = 2 if rk == 'Heavy' else 1
+            for k in range(4):
+                u0, u1 = k / 4, (k + 1) / 4
+                seg(d, (x + slant * ln * u0, y + ln * u0), (x + slant * ln * u1, y + ln * u1), color, a * (0.25 + 0.75 * u1), wd)
+            if rk == 'Heavy' and rng.random() < 0.6:
+                sy = y + ln + rng.uniform(20, 60)
+                sx = x + slant * (sy - y)
+                d.ellipse(box(sx - 6, sy - 1.2, sx + 6, sy + 1.2), outline=rgba(color, 0.3), width=S(0.8))
+                for s_ in (-1, 1):
+                    d.ellipse(box(sx + s_ * 5 - 0.9, sy - 5 - 0.9, sx + s_ * 5 + 0.9, sy - 5 + 0.9), fill=rgba(color, 0.45))
+        elif kind == 'Leaves':
             w, h = rng.uniform(6, 11), rng.uniform(4, 7)
             p = Image.new('RGBA', (S(w + 4), S(w + 4)), (0, 0, 0, 0))
             ImageDraw.Draw(p).ellipse(box(2, (w - h) / 2 + 2, w + 2, (w + h) / 2 + 2), fill=rgba(lerp(color, (255, 255, 255), rng.random() * 0.3), rng.uniform(0.45, 0.85)))
             p = p.rotate(rng.uniform(0, 360), resample=Image.BICUBIC)
             img.alpha_composite(p, (S(x), S(y)))
-        elif kind in ('Embers', 'Sparks'):
+        elif kind == 'Sparks':
             r = rng.uniform(0.8, 2.2)
             c = lerp(color, (255, 235, 170), rng.random() * 0.6)
             if kind == 'Sparks':
@@ -398,8 +455,6 @@ def particles(img, size, kind, color, rng, count=70, t=0.0):
             d.ellipse(box(x - 1.6, y - 1.6, x + 1.6, y + 1.6), fill=rgba(color, 0.9))
         elif kind == 'Glyphs':
             text(d, (x, y), rng.choice('0101AF73#*'), font('Mono', 11), color, rng.uniform(0.2, 0.6))
-        elif kind == 'Rain':
-            seg(d, (x, y), (x - 4, y + 16), color, rng.uniform(0.2, 0.45), 1)
         elif kind == 'Confetti':
             c = rng.choice([(255, 128, 190), (130, 255, 210), (255, 220, 120), (150, 170, 255), (255, 160, 110)])
             p = Image.new('RGBA', (S(10), S(10)), (0, 0, 0, 0))
@@ -637,13 +692,275 @@ def scene_ocean(img, front, T, st, win, t):
     m = rrect_mask(img.size, win, 10 * st['Radius'])
     wv.putalpha(ImageChops.multiply(wv.getchannel('A'), m))
     front.alpha_composite(wv)
-    # a click ripple, frozen mid-spread
+    # a click: one faint round ring, and a few small soft bubbles wobbling up beside the pointer
     rx, ry = x0 + w * 0.62, y0 + h * 0.58
-    for i, (rw, rh, a) in enumerate(((70, 36, 0.35), (48, 25, 0.5), (26, 13, 0.6))):
-        ImageDraw.Draw(front).ellipse(box(rx - rw / 2, ry - rh / 2, rx + rw / 2, ry + rh / 2), outline=rgba(foam, a * 0.6), width=S(1.3))
+    fd = ImageDraw.Draw(front)
+    fd.ellipse(box(rx - 8, ry - 8, rx + 8, ry + 8), outline=rgba(foam, 0.3), width=S(1))
+    for i, (ox, oy, r) in enumerate(((-9, -12, 3.2), (8, -20, 2.4), (-6, -30, 1.8), (11, -36, 3.6), (-2, -46, 2))):
+        bx, by = rx + ox + math.sin(t * 7 + i) * 1.5, ry + oy - (t * 14 % 6)
+        fd.ellipse(box(bx - r, by - r, bx + r, by + r), fill=rgba(foam, 0.12), outline=rgba(foam, 0.5), width=S(0.9))
+        fd.ellipse(box(bx - r * 0.55, by - r * 0.62, bx - r * 0.1, by - r * 0.28), fill=rgba((255, 255, 255), 0.6))
 
 
 SCENES = {'Hologram': scene_hologram, 'Circuit': scene_circuit, 'Ocean': scene_ocean}
+
+
+def ellipse_pts(cx, cy, rx, ry, ang_deg, n=28):
+    a = math.radians(ang_deg)
+    ca, sa = math.cos(a), math.sin(a)
+    pts = []
+    for k in range(n):
+        u = k / n * 6.2832
+        ex, ey = math.cos(u) * rx, math.sin(u) * ry
+        pts.append((S(cx + ex * ca - ey * sa), S(cy + ex * sa + ey * ca)))
+    return pts
+
+
+def smooth01(x):
+    x = max(0.0, min(1.0, x))
+    return x * x * (3 - 2 * x)
+
+
+def clip_to(front_layer, size, win, radius):
+    m = rrect_mask(size, win, radius)
+    front_layer.putalpha(ImageChops.multiply(front_layer.getchannel('A'), m))
+    return front_layer
+
+
+def frost_max(x, w, top):
+    edge = 22 if top else 12
+    taper = smooth01(min(x - edge, w - edge - x) / 30)
+    bumps = 0.72 + 0.16 * math.sin(x * 0.045 + 1.3) + 0.12 * math.sin(x * 0.13 + 0.4)
+    return (3.2 if top else 5.5) * taper * bumps
+
+
+def scene_frost(img, front, T, st, win, t):
+    """The snow that settled after the first snowfall: a thin drift along the bottom, a dusting on top, a few flakes."""
+    x0, y0, x1, y1 = win
+    w, h = x1 - x0, y1 - y0
+    snow = lerp(st.get('SnowColor', st.get('ParticleColor', T['Text'])), (255, 255, 255), 0.35)
+    lay = layer(img.size)
+    d = ImageDraw.Draw(lay)
+    pts = [(x0 + k, y1 - frost_max(k, w, False) * 0.92) for k in range(0, int(w) + 1, 2)]
+    d.polygon([(S(px), S(py)) for px, py in pts] + [(S(x1), S(y1 + 1)), (S(x0), S(y1 + 1))], fill=rgba(snow, 0.5))
+    for k in range(len(pts) - 1):
+        if y1 - pts[k][1] > 0.6:
+            d.line([S(pts[k][0]), S(pts[k][1]), S(pts[k + 1][0]), S(pts[k + 1][1])], fill=rgba(snow, 0.85), width=S(1))
+    rng = random.Random(5)
+    for i in range(7):
+        gx = x0 + 16 + rng.random() * (w - 32)
+        hh = frost_max(gx - x0, w, False) * 0.92
+        tw = max(0.0, math.sin(t * (0.6 + rng.random() * 1.2) + rng.random() * 6.28)) ** 6
+        if hh > 1.5 and tw > 0.05:
+            d.ellipse(box(gx - 1.2, y1 - hh - 0.2, gx + 1.2, y1 - hh + 2.2), fill=rgba((255, 255, 255), tw))
+    # a few flakes still drifting down
+    for i in range(14):
+        fx = x0 + (rng.random() * w + math.sin(t * 1.3 + i) * 8)
+        fy = y0 + ((rng.random() * h + t * (30 + i * 3)) % h)
+        r = rng.choice([1, 1.2, 1.6, 2.2])
+        d.ellipse(box(fx - r, fy - r, fx + r, fy + r), fill=rgba(snow, 0.55))
+    front.alpha_composite(clip_to(lay, img.size, win, 10 * st['Radius']))
+    # the dusting on top of the window (outside it, so not clipped)
+    cap = [(x0 + k, y0 + 1 - frost_max(k, w, True) * 0.9) for k in range(0, int(w) + 1, 2)]
+    ImageDraw.Draw(img).polygon([(S(px), S(py)) for px, py in cap] + [(S(x1), S(y0 + 2)), (S(x0), S(y0 + 2))], fill=rgba(snow, 0.7))
+
+
+def bezier(p0, p1, p2, p3, u):
+    v = 1 - u
+    return tuple(p0[i] * v ** 3 + p1[i] * 3 * v * v * u + p2[i] * 3 * v * u * u + p3[i] * u ** 3 for i in range(2))
+
+
+def scene_rose(img, front, T, st, win, t):
+    """Climbing roses in both lower corners, blooms turned toward the pointer, a few petals on the breeze."""
+    x0, y0, x1, y1 = win
+    w, h = x1 - x0, y1 - y0
+    bloom = st.get('BloomColor', st.get('ParticleColor', T['Accent']))
+    stem = lerp(st.get('VineColor', (120, 150, 112)), T['Background'], 0.25)
+    leafc = lerp(stem, (150, 196, 120), 0.35)
+    lay = layer(img.size)
+    d = ImageDraw.Draw(lay)
+    ln = min(w * 0.36, 230)
+    for side in (1, 2):
+        m = 1 if side == 1 else -1
+        ox = x0 if side == 1 else x1
+        P = lambda x, y: (ox + x * m, y0 + y)
+        p0, p1, p2, p3 = P(3, h - (70 if side == 1 else 50)), P(2, h - 6), P(30, h - 2), P(ln if side == 1 else ln * 0.72, h - 4)
+        N = 30
+        pts = []
+        for i in range(N + 1):
+            u = i / N
+            px, py = bezier(p0, p1, p2, p3, u)
+            pts.append((px, py - abs(math.sin(u * 13 + side) * 1.6 * smooth01(u * 4))))
+        for i in range(1, N + 1):
+            a, b = pts[i - 1], pts[i]
+            d.line([S(a[0]), S(a[1]), S(b[0]), S(b[1])], fill=rgba(stem, 0.5), width=max(1, S(1.8 - i / N * 0.8)))
+            if i % 4 == 2 and i < N - 1:
+                ang = math.degrees(math.atan2(b[1] - a[1], b[0] - a[0])) + (-48 if i % 8 == 2 else 48) + math.sin(t * 1.6 + i * 0.7) * 5
+                L = 8 + (i % 3) * 1.5
+                cx, cy = b[0] + math.cos(math.radians(ang)) * L / 2, b[1] + math.sin(math.radians(ang)) * L / 2
+                d.polygon(ellipse_pts(cx, cy, L / 2, 2.1, ang), fill=rgba(leafc, 0.55))
+        for at in ((0.42, 0.74, 1) if side == 1 else (0.55, 1)):
+            bx, by = pts[int(at * N + 0.5)]
+            by -= 1
+            sz = 1.1 if at == 1 else 0.9
+            o = 0.55 + (0.4 if (side == 2 and at == 1) else 0)  # the one by the pointer is wide open
+            for k in range(5):
+                ang = k * 72 - 90 + (1 - o) * 26 + math.sin(t * 1.3 + k) * 3
+                L = 7.5 * sz * (0.55 + 0.45 * o)
+                cx, cy = bx + math.cos(math.radians(ang)) * L / 2, by + math.sin(math.radians(ang)) * L / 2
+                d.polygon(ellipse_pts(cx, cy, L / 2, 2.7 * sz * (0.45 + 0.55 * o), ang), fill=rgba(lerp(bloom, (255, 255, 255), (k % 2) * 0.18), 0.6 + o * 0.15))
+            r = 1.5 * sz * (0.4 + 0.6 * o)
+            d.ellipse(box(bx - r, by - r, bx + r, by + r), fill=rgba(lerp(bloom, (255, 220, 160), 0.6), 0.8))
+    # a breeze: petals of different shapes tumbling across
+    rng = random.Random(11)
+    for i in range(6):
+        px = x0 + ((rng.random() * w * 0.9 + t * 70) % (w + 40)) - 20
+        py = y0 + 30 + rng.random() * h * 0.55 + math.sin(t * 2 + i) * 8
+        flip = abs(math.cos(t * (2 + i * 0.4) + i))
+        turn = 0.22 + 0.78 * flip
+        ang = rng.uniform(0, 360) + t * 60
+        c = lerp(bloom, (255, 255, 255), 0.2 + (0.25 if math.cos(t * 2 + i) < 0 else 0))
+        kind = ('Oval', 'Slender', 'Heart', 'Oval', 'Heart', 'Slender')[i]
+        size = rng.uniform(6, 9)
+        if kind == 'Heart':
+            for sx in (-1, 1):
+                d.polygon(ellipse_pts(px + sx * size * 0.2 * turn, py, size * 0.36 * turn, size * 0.46, ang + sx * 20), fill=rgba(c, 0.62))
+        else:
+            ww = size * (1.6 if kind == 'Slender' else 1.25)
+            hh = size * (0.45 if kind == 'Slender' else 0.72)
+            d.polygon(ellipse_pts(px, py, ww / 2 * turn, hh / 2, ang), fill=rgba(c, 0.62))
+    front.alpha_composite(clip_to(lay, img.size, win, 10 * st['Radius']))
+
+
+def scene_sunset(img, front, T, st, win, t):
+    """A low banded sun with slow rays on the lower edge, and a small flock crossing."""
+    x0, y0, x1, y1 = win
+    w, h = x1 - x0, y1 - y0
+    tl = st.get('TopLine') or [T['Accent'], T['Accent']]
+    c1 = st.get('SunColor', tl[0])
+    hot = lerp(c1, (255, 236, 170), 0.45)
+    low = tl[-1]
+    lay = layer(img.size)
+    d = ImageDraw.Draw(lay)
+    D = max(90, min(140, w * 0.24))
+    cx, cy = x0 + w * 0.76, y1 - D * 0.18 + math.sin(t * 0.4) * 1.5
+    for i, k in enumerate((2.3, 1.75, 1.32)):
+        r = D * k / 2
+        glow(lay, lambda g, r=r, i=i: g.ellipse(box(cx - r, cy - r, cx + r, cy + r), fill=rgba(c1, 0.05 + i * 0.03)), 10)
+    rays = layer(img.size)
+    rd = ImageDraw.Draw(rays)
+    for i in range(7):
+        ang = math.radians(196 + i * 24 + math.sin(t * 0.12 + i) * 4)
+        L = w * 1.1
+        th = 2 + (i % 3) * 2
+        ca, sa = math.cos(ang), math.sin(ang)
+        nx, ny = -sa * th / 2, ca * th / 2
+        steps = 14
+        for k in range(steps):
+            u0, u1 = k / steps, (k + 1) / steps
+            a_ = 0.09 * (1 - u0) ** 1.6
+            q = [(cx + ca * L * u0 + nx, cy + sa * L * u0 + ny), (cx + ca * L * u1 + nx, cy + sa * L * u1 + ny),
+                 (cx + ca * L * u1 - nx, cy + sa * L * u1 - ny), (cx + ca * L * u0 - nx, cy + sa * L * u0 - ny)]
+            rd.polygon([(S(px), S(py)) for px, py in q], fill=rgba(hot, a_))
+    lay.alpha_composite(rays)
+    r = D / 2
+    yy = 0.0
+    while yy < D:
+        v = yy / D
+        gap = max(0.0, min(1.0, (v - 0.42) / 0.58)) * 0.55
+        phase = (v * 9 - t * 0.35) % 1
+        if not (gap > 0 and phase < gap):
+            dy = yy + 1 - r
+            half = math.sqrt(max(0.0, r * r - dy * dy))
+            d.rectangle(box(cx - half, cy - r + yy, cx + half, cy - r + yy + 2), fill=rgba(lerp(hot, low, v), 0.24 - v * 0.05))
+        yy += 2
+    bird = st.get('BirdColor', lerp(T['Text'], low, 0.35))
+    for i in range(4):
+        row = (i + 1) // 2
+        bx = x0 + ((w * 0.55 + t * 48) % (w + 60)) - 30 - row * 16
+        by = y0 + 112 + ((-1) ** i) * row * 9 + math.sin(t * 1.3 + i) * 2
+        a = math.radians(math.sin(t * 8 + i * 1.7) * 32)
+        for s_ in (-1, 1):
+            ex, ey = bx + s_ * math.cos(a) * 6, by - math.sin(a) * 6
+            d.line([S(bx), S(by), S(ex), S(ey)], fill=rgba(bird, 0.55), width=S(1.4))
+    front.alpha_composite(clip_to(lay, img.size, win, 10 * st['Radius']))
+
+
+def bolt_path(a, b, depth, rough, rng):
+    pts = [a, b]
+    for _ in range(depth):
+        out = [pts[0]]
+        for i in range(1, len(pts)):
+            p, q = pts[i - 1], pts[i]
+            mx, my = (p[0] + q[0]) / 2, (p[1] + q[1]) / 2
+            dx, dy = q[0] - p[0], q[1] - p[1]
+            L = math.hypot(dx, dy) or 1
+            off = (rng.random() - 0.5) * L * rough
+            out += [(mx - dy / L * off, my + dx / L * off), q]
+        pts = out
+    return pts
+
+
+def scene_storm(img, front, T, st, win, t):
+    """Clouds along the top, drops beading and running on the glass, splashes at the bottom, a bolt now and then."""
+    x0, y0, x1, y1 = win
+    w, h = x1 - x0, y1 - y0
+    rain = lerp(st.get('ParticleColor', T['Text']), (255, 255, 255), 0.25)
+    boltc = st.get('BoltColor', (225, 236, 255))
+    cloud = st.get('CloudColor', lerp(T['Group'], T['TextDim'], 0.28))
+    phase = t % 3
+    strike = 1.05 < phase < 1.4
+    lay = layer(img.size)
+    d = ImageDraw.Draw(lay)
+    rng = random.Random(3)
+    for i in range(8):
+        cw = rng.uniform(110, 210)
+        u = ((i / 8 + rng.random() * 0.08 + t * 0.01) % 1.3) - 0.15
+        ccx, ccy = x0 + u * w, y0 - 4 + rng.random() * 12
+        g = gradient((cw, cw * 0.32), [(0, rgba(lerp(cloud, boltc, 0.5) if strike else cloud, 0.34 if strike else 0.22)), (1, rgba(cloud, 0))], 90)
+        m = Image.new('L', g.size, 0)
+        ImageDraw.Draw(m).ellipse([0, 0, g.width - 1, g.height - 1], fill=255)
+        g.putalpha(ImageChops.multiply(g.getchannel('A'), m))
+        lay.alpha_composite(g, (S(ccx - cw / 2), S(ccy - cw * 0.16)))
+    if strike:
+        k = 1 - (phase - 1.05) / 0.35
+        rb = random.Random(int(t / 3) + 8)
+        a = (x0 + w * (0.3 + rb.random() * 0.4), y0 - 4)
+        b = (a[0] + (rb.random() - 0.5) * w * 0.3, y0 + h * 0.6)
+        main = bolt_path(a, b, 4, 0.55, rb)
+        fork = bolt_path(main[len(main) // 2], (main[len(main) // 2][0] + 50, main[len(main) // 2][1] + 40), 3, 0.6, rb)
+        for path, th in ((main, 2.0), (fork, 1.1)):
+            glow(lay, lambda g, path=path, th=th: g.line([v for p in path for v in (S(p[0]), S(p[1]))], fill=rgba(boltc, 0.5 * k), width=S(th * 3)), 6)
+            d.line([v for p in path for v in (S(p[0]), S(p[1]))], fill=rgba(boltc, 0.95 * k), width=S(th))
+        d.rectangle(box(x0, y0, x1, y1), fill=rgba((215, 228, 255), 0.06 * k))
+    # drops on the glass: beading, and a few running with a trail
+    for i in range(9):
+        dx, dy0 = x0 + 14 + rng.random() * (w - 28), y0 + 44 + rng.random() * (h - 90)
+        r = rng.uniform(1.8, 3.6)
+        run = i % 3 == 0
+        dy = dy0 + ((t * 40 + i * 13) % 90 if run else 0)
+        if run and dy - dy0 > 2:
+            tr = gradient((max(1.2, r * 0.8), dy - dy0), [(0, rgba(rain, 0)), (1, rgba(rain, 0.16))], 90)
+            lay.alpha_composite(tr, (S(dx - r * 0.4), S(dy0)))
+        g = gradient((r * 2, r * 2), [(0, rgba(rain, 0.06)), (1, rgba(rain, 0.24))], 90)
+        m = Image.new('L', g.size, 0)
+        ImageDraw.Draw(m).ellipse([0, 0, g.width - 1, g.height - 1], fill=255)
+        g.putalpha(ImageChops.multiply(g.getchannel('A'), m))
+        lay.alpha_composite(g, (S(dx - r), S(dy - r)))
+        d.ellipse(box(dx - r, dy - r, dx + r, dy + r), outline=rgba(rain, 0.4), width=S(0.7))
+        d.ellipse(box(dx - r * 0.55, dy - r * 0.6, dx - r * 0.05, dy - r * 0.15), fill=rgba((255, 255, 255), 0.7))
+        d.ellipse(box(dx - r * 0.2, dy + r * 0.45, dx + r * 0.6, dy + r * 0.8), fill=rgba((255, 255, 255), 0.4))
+    for i in range(9):
+        sx = x0 + 10 + rng.random() * (w - 20)
+        k = ((t * 3 + i * 0.37) % 1)
+        for s_ in (-1, 1):
+            px, py = sx + s_ * k * 7, y1 - 1 - math.sin(k * math.pi) * 7
+            d.ellipse(box(px - 0.9, py - 0.9, px + 0.9, py + 0.9), fill=rgba(rain, 0.5 * (1 - k)))
+    front.alpha_composite(clip_to(lay, img.size, win, 10 * st['Radius']))
+
+
+SCENES.update({'Frost': scene_frost, 'Rose': scene_rose, 'Sunset': scene_sunset, 'Storm': scene_storm})
+
 
 
 # --------------------------------------------------------------------------------------------------------------
@@ -737,7 +1054,7 @@ def window(T, st, size, win, t=0.0, title='TingUI', compact=False, tabs=None, su
     hy = y0 + 25
     text(d, (x0 + 18, hy), title, f_title, T['Text'])
     px = x0 + 18 + text_w(title, f_title) + 10
-    for label, c in (pills if pills is not None else (('Pro', T['Success']), ('v0.0.8', T['Danger']))):
+    for label, c in (pills if pills is not None else (('Pro', T['Success']), ('v0.0.9', T['Danger']))):
         pw = text_w(label, f_pill) + 14
         d.rounded_rectangle(box(px, hy - 9, px + pw, hy + 9), radius=S(5 * st['Radius']), fill=rgba(lerp(c, T['Background'], 0.78)), outline=rgba(lerp(c, T['Background'], 0.4)), width=S(1))
         text(d, (px + pw / 2, hy), label, f_pill, lerp(c, (255, 255, 255), 0.25), anchor='mm')
@@ -908,7 +1225,7 @@ def backdrop(T, st, size, t=0.0, seed=1, motes=True):
     return img
 
 
-def render(T, st, size=(960, 600), t=0.0, seed=1):
+def render(T, st, size=(960, 600), t=0.0, seed=1, caption=None):
     W, H = size
     win = (W / 2 - 250, 58, W / 2 + 250, H - 98)
     img = backdrop(T, st, size, t, seed)
@@ -918,6 +1235,8 @@ def render(T, st, size=(960, 600), t=0.0, seed=1):
         m = rrect_mask(size, win, 10 * st['Radius'])
         img.paste(blurred, (0, 0), m)
     img.alpha_composite(window(T, st, size, win, t))
+    if caption:
+        theme_caption(img, caption[0], caption[1], T)
     return img.resize((W, H), Image.LANCZOS)
 
 
@@ -936,53 +1255,350 @@ def save_gif(frames, path, fps=12):
     print('%-40s %4d KB' % (os.path.relpath(path, ROOT), os.path.getsize(path) // 1024))
 
 
-def banner(defaults, presets):
-    W, H = 1600, 560
-    img = layer((W, H))
-    base = gradient((W, H), [(0, (10, 9, 18, 255)), (1, (5, 5, 10, 255))], 90)
-    img.alpha_composite(base)
-    neb = tex_fill((W, H), 'nebula', 0.7, 0.35)
-    if neb is not None:
-        img.alpha_composite(neb)
-    stars = tex_fill((W, H), 'stars', 1.2, 0.5)
-    if stars is not None:
-        img.alpha_composite(stars)
-    for cx, cy, c, r in ((260, 120, (160, 130, 255), 260), (1300, 420, (90, 225, 255), 300), (900, 80, (255, 96, 196), 200)):
-        glow(img, lambda g, cx=cx, cy=cy, c=c, r=r: g.ellipse(box(cx - r, cy - r, cx + r, cy + r), fill=rgba(c, 0.18)), 80)
-    # three windows fanned out on the right
-    for i, (name, ox, oy, rot) in enumerate((('Circuit', 850, 70, 5), ('Hologram', 1380, 60, -5), ('Ocean', 1115, 165, 0))):
-        T, st = full_theme(defaults, presets[name])
-        size = (560, 420)
-        win = (90, 60, 470, 360)
-        card = window(T, st, size, win, t=1.4 + i * 0.7, compact=True)
-        card = card.rotate(rot, resample=Image.BICUBIC, expand=True)
-        img.alpha_composite(card, (S(ox - 280), S(oy - 60)))
+# --------------------------------------------------------------------------------------------------------------
+# editorial showcase pieces: split dark panels, a plain bold headline, a plain subtitle, one pill. No gradient text.
+# --------------------------------------------------------------------------------------------------------------
+
+INTER = '/usr/share/fonts/opentype/inter/'
+
+
+def ifont(weight, size, display=False):
+    key = ('inter', weight, size, display)
+    if key not in _fonts:
+        name = ('InterDisplay-' if display else 'Inter-') + weight + '.otf'
+        path = INTER + name if os.path.exists(INTER + name) else first(SYSTEM_BOLD if weight in ('Bold', 'SemiBold') else SYSTEM)
+        _fonts[key] = ImageFont.truetype(path, int(size * SS))
+    return _fonts[key]
+
+
+def mono(size, weight=500):
+    key = ('jbm', size, weight)
+    if key not in _fonts:
+        path = os.path.join(CACHE, 'JetBrainsMono.ttf')
+        if not os.path.exists(path):
+            try:
+                os.makedirs(CACHE, exist_ok=True)
+                urllib.request.urlretrieve(GF + 'ofl/jetbrainsmono/JetBrainsMono%5Bwght%5D.ttf', path)
+            except Exception:
+                path = first(SYSTEM_MONO)
+        f = ImageFont.truetype(path, int(size * SS))
+        try:
+            f.set_variation_by_axes([weight])
+        except Exception:
+            pass
+        _fonts[key] = f
+    return _fonts[key]
+
+
+INK = (8, 8, 10)
+PANEL_L = (13, 13, 15)
+PANEL_R = (19, 19, 23)
+
+
+def grain(img, amount=5, seed=1):
+    """Fine monochrome grain, so large dark areas don't band or look flat."""
+    rng = np.random.default_rng(seed)
+    n = rng.normal(0, amount, (img.height, img.width)).astype(np.float32)
+    a = np.asarray(img, dtype=np.float32)
+    a[..., :3] = np.clip(a[..., :3] + n[..., None], 0, 255)
+    return Image.fromarray(a.astype(np.uint8), 'RGBA')
+
+
+def panel(img, b, fill, radius=20, edge=0.05):
     d = ImageDraw.Draw(img)
-    # wordmark
-    fw = font(None, 132, True)
-    word = 'TingUI'
-    tw = text_w(word, fw)
-    grad = gradient((tw + 20, 170), [(0, (235, 228, 255, 255)), (0.55, (190, 160, 255, 255)), (1, (90, 225, 255, 255))], 20)
-    m = Image.new('L', grad.size, 0)
-    ImageDraw.Draw(m).text((S(4), S(85)), word, font=fw, fill=255, anchor='lm')
-    grad.putalpha(m)
-    glow(img, lambda g: g.text((S(84), S(215)), word, font=fw, fill=(160, 130, 255, 120), anchor='lm'), 14)
-    img.alpha_composite(grad, (S(80), S(130)))
-    f1 = font(None, 27)
-    text(d, (86, 330), 'Animated, themeable UI for Roblox.', f1, (225, 222, 240))
-    text(d, (86, 366), 'One file. loadstring or require. Drop it into anything.', font(None, 20), (150, 146, 175))
-    px = 86
-    chips = layer((W, H))
-    cd = ImageDraw.Draw(chips)
-    for chip in ('15 themes', 'living scenes', 'live reload', 'Theme Studio'):
-        fc = font(None, 15)
-        cw = text_w(chip, fc) + 26
-        cd.rounded_rectangle(box(px, 410, px + cw, 442), radius=S(16), fill=(255, 255, 255, 16), outline=(255, 255, 255, 46), width=S(1))
-        text(cd, (px + cw / 2, 426), chip, fc, (220, 216, 240), anchor='mm')
-        px += cw + 10
-    img.alpha_composite(chips)
-    out = img.resize((W, H), Image.LANCZOS)
+    d.rounded_rectangle(box(*b), radius=S(radius), fill=rgba(fill), outline=rgba((255, 255, 255), edge), width=S(1))
+
+
+def pill(d, x, y, label, f, dark=False):
+    w_ = text_w(label, f) + 40
+    if dark:
+        d.rounded_rectangle(box(x, y, x + w_, y + 44), radius=S(22), fill=(255, 255, 255, 18), outline=(255, 255, 255, 40), width=S(1))
+        text(d, (x + w_ / 2, y + 22), label, f, (236, 236, 240), anchor='mm')
+    else:
+        d.rounded_rectangle(box(x, y, x + w_, y + 44), radius=S(22), fill=(246, 246, 248, 255))
+        text(d, (x + w_ / 2, y + 22.5), label, f, (14, 14, 16), anchor='mm')
+    return w_
+
+
+def check_mark(d, cx, cy, r, color):
+    d.ellipse(box(cx - r, cy - r, cx + r, cy + r), fill=rgba(color))
+    seg(d, (cx - r * 0.42, cy + r * 0.02), (cx - r * 0.1, cy + r * 0.34), (10, 10, 12), 1, r * 0.2)
+    seg(d, (cx - r * 0.1, cy + r * 0.34), (cx + r * 0.45, cy - r * 0.3), (10, 10, 12), 1, r * 0.2)
+
+
+def headline(d, x, y, lines, size=64, lh=1.08, color=(246, 246, 248)):
+    f = ifont('Bold', size, True)
+    for i, ln in enumerate(lines):
+        text(d, (x, y + i * size * lh), ln, f, color, anchor='ls')
+    return y + (len(lines) - 1) * size * lh
+
+
+def subtitle(d, x, y, lines, size=20, color=(150, 150, 160), lh=1.5):
+    f = ifont('Regular', size)
+    for i, ln in enumerate(lines):
+        text(d, (x, y + i * size * lh), ln, f, color, anchor='ls')
+    return y + (len(lines) - 1) * size * lh
+
+
+LUAU_KW = {'local', 'function', 'end', 'return', 'if', 'then', 'else', 'for', 'in', 'do', 'not', 'and', 'or', 'true', 'false', 'nil'}
+SYN = {'kw': (199, 146, 255), 'str': (163, 214, 140), 'num': (247, 168, 108), 'call': (125, 178, 255), 'key': (226, 226, 234),
+       'cls': (240, 200, 122), 'pun': (132, 132, 146), 'com': (96, 96, 108), 'id': (206, 206, 216)}
+
+
+def luau_tokens(line):
+    out = []
+    i = 0
+    while i < len(line):
+        c = line[i]
+        if line.startswith('--', i):
+            out.append((line[i:], 'com'))
+            break
+        if c == '"':
+            j = line.find('"', i + 1)
+            j = len(line) - 1 if j < 0 else j
+            out.append((line[i:j + 1], 'str'))
+            i = j + 1
+        elif c.isdigit():
+            j = i
+            while j < len(line) and (line[j].isdigit() or line[j] == '.'):
+                j += 1
+            out.append((line[i:j], 'num'))
+            i = j
+        elif c.isalpha() or c == '_':
+            j = i
+            while j < len(line) and (line[j].isalnum() or line[j] == '_'):
+                j += 1
+            word = line[i:j]
+            rest = line[j:].lstrip()
+            prev = line[:i].rstrip()[-1:] if line[:i].rstrip() else ''
+            if word in LUAU_KW:
+                kind = 'kw'
+            elif rest.startswith('(') or (prev in (':',) and rest[:1] in ('(', '{', '"')):
+                kind = 'call'
+            elif rest.startswith('=') and not rest.startswith('=='):
+                kind = 'key' if prev in ('{', ',', '') and line[:i].strip() == '' or prev in ('{', ',') else 'id'
+            elif word[0].isupper():
+                kind = 'cls'
+            else:
+                kind = 'id'
+            out.append((word, kind))
+            i = j
+        else:
+            out.append((c, 'pun' if not c.isspace() else 'id'))
+            i += 1
+    return out
+
+
+def code_image(lines, size=21, lh=1.62, active=None, accent=(159, 150, 193)):
+    """Syntax-highlighted Luau with line numbers, on a transparent layer."""
+    f = mono(size)
+    fn = mono(size * 0.86, 400)
+    cw = text_w('M', f)
+    gutter = cw * 3.6
+    W = gutter + cw * (max(len(l) for l in lines) + 2)
+    H = size * lh * (len(lines) + 1)
+    img = layer((W, H))
+    d = ImageDraw.Draw(img)
+    for n, ln in enumerate(lines):
+        y = size * lh * (n + 0.9)
+        if active is not None and n == active:
+            d.rectangle(box(0, y - size * 1.05, W, y + size * 0.55), fill=rgba(accent, 0.09))
+            d.rectangle(box(0, y - size * 1.05, 2.5, y + size * 0.55), fill=rgba(accent, 0.9))
+        text(d, (gutter - cw * 1.2, y), str(n + 1), fn, (84, 84, 96), anchor='rs')
+        x = gutter
+        for tok, kind in luau_tokens(ln):
+            text(d, (x, y), tok, f, SYN[kind], anchor='ls')
+            x += text_w(tok, f)
+        if active is not None and n == active:
+            d.rectangle(box(x + 2, y - size * 0.92, x + 4, y + size * 0.3), fill=rgba((236, 236, 244), 0.9))
+    return img
+
+
+def fade_edges(img, left=0.0, right=0.0, top=0.0, bottom=0.0):
+    w, h = img.size
+    xx = np.linspace(0, 1, w, dtype=np.float32)[None, :]
+    yy = np.linspace(0, 1, h, dtype=np.float32)[:, None]
+    m = np.ones((h, w), np.float32)
+    if left:
+        m *= np.clip(xx / left, 0, 1) ** 1.5
+    if right:
+        m *= np.clip((1 - xx) / right, 0, 1) ** 1.5
+    if top:
+        m *= np.clip(yy / top, 0, 1) ** 1.5
+    if bottom:
+        m *= np.clip((1 - yy) / bottom, 0, 1) ** 1.5
+    a = np.asarray(img.getchannel('A'), dtype=np.float32) * m
+    img.putalpha(Image.fromarray(a.astype(np.uint8), 'L'))
+    return img
+
+
+def slant(img, angle=-8, shear=0.16):
+    """Lean a flat layer back a little: a horizontal shear, then a small turn."""
+    w, h = img.size
+    sheared = img.transform((int(w + abs(shear) * h), h), Image.AFFINE, (1, shear, -abs(shear) * h if shear > 0 else 0, 0, 1, 0), resample=Image.BICUBIC)
+    return sheared.rotate(angle, resample=Image.BICUBIC, expand=True)
+
+
+def paste_clipped(dst, src, pos, clip_box, radius):
+    """alpha_composite src at pos (logical px), only inside the rounded clip_box."""
+    tmp = layer((dst.width / SS, dst.height / SS))
+    tmp.alpha_composite(src, (S(pos[0]), S(pos[1])))
+    m = rrect_mask((dst.width / SS, dst.height / SS), clip_box, radius)
+    tmp.putalpha(ImageChops.multiply(tmp.getchannel('A'), m))
+    dst.alpha_composite(tmp)
+
+
+def mini_toggle_card(img, T, st, x, y, w):
+    """A small TingUI group with one toggle switched on: what the code on the banner makes."""
+    d = ImageDraw.Draw(img)
+    R = 10 * st.get('Radius', 1)
+    h = 106
+    glow(img, lambda g: g.rounded_rectangle(box(x, y + 12, x + w, y + h + 14), radius=S(R), fill=(0, 0, 0, 190)), 18)
+    d.rounded_rectangle(box(x, y, x + w, y + h), radius=S(R), fill=rgba(T['Group']), outline=rgba(T['GroupBorder']), width=S(1))
+    ft, fl, fs = ifont('SemiBold', 14), ifont('Medium', 14), ifont('Regular', 12)
+    text(d, (x + 16, y + 22), 'Combat', ft, T['Text'])
+    seg(d, (x + 16, y + 38), (x + w - 16, y + 38), T['Outline'], 1)
+    acc = T['Accent']
+    cy = y + 64
+    d.rounded_rectangle(box(x + 16, cy - 9, x + 34, cy + 9), radius=S(5), fill=rgba(acc))
+    seg(d, (x + 20.5, cy), (x + 24, cy + 3.6), T['Background'], 1, 2)
+    seg(d, (x + 24, cy + 3.6), (x + 30, cy - 3.8), T['Background'], 1, 2)
+    text(d, (x + 44, cy), 'Auto farm', fl, T['Text'])
+    text(d, (x + 44, cy + 22), 'Farm.Enabled = true', mono(11.5, 400), T['TextMuted'])
+    # a keybind chip on the right, the way :AddKeybind shows it
+    kw = 34
+    d.rounded_rectangle(box(x + w - 16 - kw, cy - 10, x + w - 16, cy + 10), radius=S(5), fill=rgba(T['Control']), outline=rgba(T['Outline']), width=S(1))
+    text(d, (x + w - 16 - kw / 2, cy), 'F', ifont('Medium', 11), T['TextDim'], anchor='mm')
+    return h
+
+
+def banner(defaults, presets):
+    """docs/images/banner.png: what TingUI is, plainly. Left: the claim. Right: the code, and what it makes."""
+    W, H = 1600, 560
+    T, st = full_theme(defaults, presets['Lavender'])
+    img = layer((W, H))
+    img.alpha_composite(Image.new('RGBA', img.size, rgba(INK)))
+    L = (16, 16, 700, H - 16)
+    R = (712, 16, W - 16, H - 16)
+    panel(img, L, PANEL_L)
+    panel(img, R, PANEL_R)
+    d = ImageDraw.Draw(img)
+    # left: status line, headline, subtitle, one button
+    check_mark(d, 76, 84, 10, T['Success'])
+    text(d, (96, 84), 'TingUI v0.0.9 loaded', ifont('Medium', 16), (210, 210, 218))
+    headline(d, 64, 214, ['Interfaces for', 'Roblox scripts.', 'One file.'], size=62)
+    subtitle(d, 66, 398, ['Windows, themes, notifications and living scenes.', 'Load it with loadstring or require.'], size=19)
+    bw = pill(d, 64, 452, 'Read the docs', ifont('SemiBold', 16))
+    text(d, (64 + bw + 22, 474), 'github.com/Irakli17/Ui-Library-Test', mono(13, 400), (108, 108, 120))
+    # right: the code that builds a window, leaning back
+    code = [
+        'local TingUI = loadstring(game:HttpGet(URL))()',
+        '',
+        'local Window = TingUI:CreateWindow({',
+        '    Title = "Example Hub",',
+        '})',
+        'local Main = Window:AddTab("Main")',
+        'local Combat = Main:AddGroup("Combat", "Left")',
+        '',
+        'Combat:AddToggle({',
+        '    Text = "Auto farm",',
+        '    Callback = function(on)',
+        '        Farm.Enabled = on',
+        '    end,',
+        '})',
+        '',
+        'TingUI:Notify({ Title = "Ready", Type = "Success" })',
+    ]
+    ci = slant(code_image(code, 19, active=9, accent=T['Accent']), -7, 0.04)
+    ci = fade_edges(ci, left=0.02, right=0.2, top=0.04, bottom=0.26)
+    glow(img, lambda g: g.ellipse(box(900, 60, 1500, 520), fill=rgba(T['Accent'], 0.06)), 90)
+    paste_clipped(img, ci, (R[0] + 18, R[1] + 2), R, 20)
+    # what it makes, sitting over the code
+    mini_toggle_card(img, T, st, 1236, 300, 300)
+    notify_card2(img, T, 1236, 424, 300, 'Success', 'Ready', 'Auto farm is on.', progress=0.64)
+    out = grain(img, 3.2, 7).resize((W, H), Image.LANCZOS)
     save_png(out, os.path.join(OUT, 'banner.png'))
+
+
+def editorial(size, left_w, eyebrow, head, sub, stage_fn, head_size=48, seed=3, accent=None):
+    """The shared showcase layout: a narrow text panel on the left, the product on a dark stage on the right."""
+    W, H = size
+    img = layer((W, H))
+    img.alpha_composite(Image.new('RGBA', img.size, rgba(INK)))
+    L = (16, 16, 16 + left_w, H - 16)
+    R = (28 + left_w, 16, W - 16, H - 16)
+    panel(img, L, PANEL_L)
+    panel(img, R, PANEL_R)
+    d = ImageDraw.Draw(img)
+    ex, ey = L[0] + 40, L[1] + 62
+    if accent:
+        d.rounded_rectangle(box(ex, ey - 7, ex + 14, ey + 7), radius=S(4), fill=rgba(accent))
+        text(d, (ex + 24, ey), eyebrow, ifont('Medium', 15), (196, 196, 206))
+    else:
+        text(d, (ex, ey), eyebrow, ifont('Medium', 15), (196, 196, 206))
+    y = headline(d, ex - 2, ey + 92, head, size=head_size)
+    subtitle(d, ex, y + 52, sub, size=17)
+    stage = layer((R[2] - R[0], R[3] - R[1]))
+    stage_fn(stage, (R[2] - R[0], R[3] - R[1]))
+    paste_clipped(img, stage, (R[0], R[1]), R, 20)
+    return grain(img, 3, seed).resize((W, H), Image.LANCZOS)
+
+
+def stage_light(img, size, color, cx=0.5, cy=0.45, k=0.42, a=0.08):
+    W, H = size
+    glow(img, lambda g: g.ellipse(box(W * (cx - k), H * (cy - k * 1.1), W * (cx + k), H * (cy + k * 1.1)), fill=rgba(color, a)), 80)
+
+
+def stage_base(T, size, light=0.07):
+    """A clean dark stage for a showcase: no particles, one soft light in the theme's accent."""
+    img = layer(size)
+    img.alpha_composite(Image.new('RGBA', img.size, rgba(PANEL_R)))
+    stage_light(img, size, T['Accent'], a=light)
+    return img
+
+
+def framed(stage_img, size, left_w, eyebrow, head, sub, path, accent=None, head_size=46):
+    """Put a finished stage (exactly the stage size) into the editorial frame and save it."""
+    W, H = size
+    out = editorial((W + left_w + 44, H + 32), left_w, eyebrow, head, sub, lambda st_, sz: st_.alpha_composite(stage_img),
+                    head_size=head_size, accent=accent)
+    save_png(out, path)
+
+
+TAGLINES = {
+    'Lavender': 'The reference look. Soft lilac, snow.',
+    'Ocean': 'Waves along the bottom, a tide on switching, bubbles that pop.',
+    'Rose': 'Climbing roses that open toward the cursor, petals on the breeze.',
+    'Sunset': 'A low banded sun, birds crossing, embers cooling as they rise.',
+    'Mono': 'Sharp, flat, monospace. Scanlines and glyph rain.',
+    'Frost': 'Pale ice and crystals. The first snowfall settles and stays.',
+    'Royal': 'Midnight navy and gold, serif type, a gilded border.',
+    'Cosmos': 'Nebula, parallax stars, comets and a turning aurora.',
+    'Storm': 'Rain on the glass, clouds that light up, bolts that fork through.',
+    'Blueprint': 'Drafting paper, a ruled border and handwritten labels.',
+    'Hazard': 'Yellow and black warning tape, square corners.',
+    'Glass': 'Frosted, see-through surfaces over a blurred world.',
+    'Hologram': 'A cyan projection that locks on, scans and tears.',
+    'Circuit': 'A chip on a board, current racing down its traces.',
+    'Serotonin': 'A crisp classic menu. Hairline teal, square corners.',
+}
+
+
+def theme_caption(img, name, desc, T):
+    """A quiet caption under a theme preview: the name, one line about it, and the theme's main colours."""
+    W, H = img.width / SS, img.height / SS
+    d = ImageDraw.Draw(img)
+    shade = gradient((W, 120), [(0, rgba((0, 0, 0), 0)), (1, rgba((0, 0, 0), 0.55))], 90)
+    img.alpha_composite(shade, (0, S(H - 120)))
+    text(d, (32, H - 52), name, ifont('Bold', 20, True), (246, 246, 248), anchor='ls')
+    line = TAGLINES.get(name, desc.split('. ')[0])
+    f = ifont('Regular', 13.5)
+    text(d, (32, H - 28), line, f, (176, 176, 188), anchor='ls')
+    x = W - 32
+    for key in ('Text', 'Accent', 'Control', 'Background'):
+        c = T[key]
+        d.ellipse(box(x - 16, H - 52, x, H - 36), fill=rgba(c), outline=(255, 255, 255, 60), width=S(1))
+        x -= 22
 
 
 def anatomy(defaults, presets):
@@ -992,7 +1608,7 @@ def anatomy(defaults, presets):
     st = dict(st, Particles='Snow')
     win = (390, 96, 890, 540)
     x0, y0, x1, y1 = win
-    img = backdrop(T, st, (W, H), 0.6, 4, motes=False)
+    img = stage_base(T, (W, H))
     img.alpha_composite(window(T, st, (W, H), win, 0.6))
     gw = (500 - 34 - 8) / 2
     gy0 = y0 + 88
@@ -1035,7 +1651,8 @@ def anatomy(defaults, presets):
         text(d, (tx, ly - 9), title, fl, (232, 230, 244), anchor=anchor + 'm')
         text(d, (tx, ly + 13), sub, fs, (160, 156, 182), anchor=anchor + 'm')
     img.alpha_composite(lay)
-    save_png(img.resize((W, H), Image.LANCZOS), os.path.join(OUT, 'anatomy.png'))
+    framed(img, (W, H), 400, 'Anatomy', ['Every part,', 'named.'],
+           ['What each piece of a window is called,', 'and the call that makes it.'], os.path.join(OUT, 'anatomy.png'), accent=T['Accent'])
 
 
 
@@ -1092,11 +1709,7 @@ def notify_card(img, T, st, x, y, w, kind, source, title, body, actions=()):
     h = 20 + (13 if source else 0) + 17 + 15 * len(lines) + (28 if actions else 0) + 6
     glow(img, lambda g: g.rounded_rectangle(box(x, y + 6, x + w, y + h + 6), radius=S(9), fill=(0, 0, 0, 120)), 10)
     d.rounded_rectangle(box(x, y, x + w, y + h), radius=S(9), fill=rgba(T['Background']), outline=rgba(T['Outline']), width=S(1))
-    wash = gradient((w * 0.5, h - 2), [(0, rgba(col, 0.16)), (1, rgba(col, 0))], 0)
-    m = Image.new('L', wash.size, 0)
-    ImageDraw.Draw(m).rounded_rectangle([0, 0, wash.width + S(20), wash.height - 1], radius=S(8), fill=255)
-    wash.putalpha(ImageChops.multiply(wash.getchannel('A'), m))
-    img.alpha_composite(wash, (S(x + 1), S(y + 1)))
+    living_card(img, T, x, y, w, h, col)
     d.rounded_rectangle(box(x, y + 6, x + 3, y + h - 6), radius=S(2), fill=rgba(col))
     # badge: circle for success and info, diamond for warnings
     bx, by = x + 26, y + 10 + (13 if source else 0) + 16
@@ -1133,7 +1746,43 @@ def notify_card(img, T, st, x, y, w, kind, source, title, body, actions=()):
 
 NOTE_KINDS = {'Success': ('Success', 'circle'), 'Warning': ('Caution', 'diamond'), 'Error': ('Error', 'square'), 'Info': ('Info', 'circle'),
               'Download': ('Info', 'circle'), 'Upload': ('Info', 'circle'), 'Message': ('Accent', 'square'), 'Friend': ('Success', 'circle'),
-              'Achievement': ('Caution', 'diamond'), 'Security': ('Error', 'square'), 'Update': ('Accent', 'circle'), 'Heart': ('Error', 'circle')}
+              'Achievement': ('Caution', 'diamond'), 'Security': ('Error', 'square'), 'Update': ('Accent', 'circle'), 'Heart': ('Error', 'circle'),
+              'Teleport': ('Info', 'circle'), 'ServerHop': ('Info', 'circle'), 'Reward': ('Caution', 'square'), 'Currency': ('Caution', 'circle'),
+              'LevelUp': ('Success', 'diamond'), 'Timer': ('Accent', 'circle'), 'Connection': ('Success', 'circle'), 'Target': ('Error', 'circle'),
+              'Invite': ('Accent', 'square'), 'Streak': ('Caution', 'diamond'), 'Boost': ('Accent', 'circle'), 'Protected': ('Success', 'square'),
+              'Key': ('Caution', 'circle'), 'Party': ('Accent', 'circle'), 'MVP': ('Caution', 'diamond'), 'Combat': ('Error', 'square'),
+              'Copied': ('Info', 'square'), 'Deleted': ('Error', 'square'), 'Sync': ('Info', 'circle'), 'AFK': ('Accent', 'circle')}
+# the high-res icon each newer type uses (assets/icons); the older ones are drawn by note_glyph
+NOTE_ICONS = {'Teleport': 'pin', 'ServerHop': 'globe', 'Reward': 'gift', 'Currency': 'coin', 'LevelUp': 'trophy', 'Timer': 'clock',
+              'Connection': 'wifi', 'Target': 'target', 'Invite': 'mail', 'Streak': 'fire', 'Boost': 'rocket', 'Protected': 'shield',
+              'Key': 'key', 'Party': 'users', 'MVP': 'crown', 'Combat': 'sword', 'Copied': 'copy', 'Deleted': 'trash', 'Sync': 'refresh',
+              'AFK': 'moon', 'Security': 'lock', 'Update': 'gear', 'Heart': 'heart', 'Info': 'info'}
+_icons = {}
+
+
+def icon_glyph(img, name, cx, cy, size, col, alpha=1.0):
+    """One of TingUI's 96px icons (white on clear), tinted and placed centred on (cx, cy)."""
+    path = os.path.join(ROOT, 'assets', 'icons', name + '.png')
+    if not os.path.exists(path):
+        return False
+    key = (name, size)
+    if key not in _icons:
+        _icons[key] = Image.open(path).convert('RGBA').resize((S(size), S(size)), Image.LANCZOS)
+    ic = _icons[key]
+    solid = Image.new('RGBA', ic.size, rgba(col))
+    solid.putalpha(ic.getchannel('A').point(lambda v: int(v * alpha)))
+    img.alpha_composite(solid, (S(cx - size / 2), S(cy - size / 2)))
+    return True
+
+
+def living_card(img, T, x, y, w, h, col):
+    """The card background: two tints of its colour on a slow diagonal, never one flat fill (matches the game)."""
+    twin = lerp(lerp(col, T['Accent'], 0.5), T['Text'], 0.15)
+    g = gradient((w - 2, h - 2), [(0, rgba(col, 0.15)), (0.5, rgba(T['Background'], 0)), (1, rgba(twin, 0.09))], 22)
+    m = Image.new('L', g.size, 0)
+    ImageDraw.Draw(m).rounded_rectangle([0, 0, g.width - 1, g.height - 1], radius=S(8), fill=255)
+    g.putalpha(ImageChops.multiply(g.getchannel('A'), m))
+    img.alpha_composite(g, (S(x + 1), S(y + 1)))
 
 
 def note_glyph(d, kind, bx, by, col):
@@ -1192,11 +1841,7 @@ def notify_card2(img, T, x, y, w, kind, title, body, source=None, actions=(), va
     h += 8
     glow(img, lambda g: g.rounded_rectangle(box(x, y + 6, x + w, y + h + 6), radius=S(9), fill=(0, 0, 0, 120)), 10)
     d.rounded_rectangle(box(x, y, x + w, y + h), radius=S(9), fill=rgba(T['Background']), outline=rgba(lerp(col, T['Background'], 0.55)), width=S(1))
-    wash = gradient((w * 0.5, h - 2), [(0, rgba(col, 0.16)), (1, rgba(col, 0))], 0)
-    m = Image.new('L', wash.size, 0)
-    ImageDraw.Draw(m).rounded_rectangle([0, 0, wash.width + S(20), wash.height - 1], radius=S(8), fill=255)
-    wash.putalpha(ImageChops.multiply(wash.getchannel('A'), m))
-    img.alpha_composite(wash, (S(x + 1), S(y + 1)))
+    living_card(img, T, x, y, w, h, col)
     d.rounded_rectangle(box(x, y + 6, x + 3, y + h - 6), radius=S(2), fill=rgba(col))
     bx, by = x + 25, y + 22 + (13 if source else 0)
     glow(img, lambda g: g.ellipse(box(bx - 13, by - 13, bx + 13, by + 13), fill=rgba(col, 0.4)), 6)
@@ -1215,7 +1860,8 @@ def notify_card2(img, T, x, y, w, kind, title, body, source=None, actions=(), va
     else:
         d.ellipse(box(bx - 12, by - 12, bx + 12, by + 12), fill=plate, outline=edge, width=S(1))
     if not image:
-        note_glyph(d, kind, bx, by, col)
+        if kind not in NOTE_ICONS or not icon_glyph(img, NOTE_ICONS[kind], bx, by, 14, col):
+            note_glyph(d, kind, bx, by, col)
     if kind == 'Achievement':
         for k in range(10):
             a = k / 10 * 6.283
@@ -1289,38 +1935,43 @@ def notify_card2(img, T, x, y, w, kind, title, body, source=None, actions=(), va
 
 
 def notifications_image(defaults, presets):
-    W, H = 1180, 760
+    """docs/images/notifications.png: the cards, old and new types, tightly arranged on a clean stage."""
+    W, H = 1020, 540
     T, st = full_theme(defaults, presets['Lavender'])
-    img = backdrop(T, dict(st, Particles='Snow'), (W, H), 0.8, 4, motes=True)
+    img = stage_base(T, (W, H))
     cw = 300
-    cols = [40, 40 + cw + 40, 40 + (cw + 40) * 2]
-    ys = [40, 40, 40]
+    cols = [36, 36 + cw + 24, 36 + (cw + 24) * 2]
+    ys = [36, 64, 28]
 
     def put(ci, **kw):
         h = notify_card2(img, T, cols[ci], ys[ci], cw, **kw)
-        ys[ci] += h + 14
+        ys[ci] += h + 12
 
     put(0, kind='Download', title='Downloading', body='assets.pak  14 / 24 MB', value=0.58, progress=None)
+    put(0, kind='Teleport', title='Teleported', body='Moved to Spawn (124, 8, -37).', actions=('Go back',), progress=0.7)
     put(0, kind='Message', title='builderman', body='gg, want to run it back?', reply='Reply...', progress=None)
-    put(0, kind='Friend', title='Friend request', body='Telamon wants to be friends.', image=(70, 120, 170),
-        actions=(('Accept', 'Primary'), 'Ignore'), progress=0.7)
+    put(0, kind='Currency', title='+250 coins', body='Balance: 4,180.', progress=0.45)
+    put(0, kind='Streak', title='5-day streak', body='Come back tomorrow to keep it going.', progress=0.8)
     put(1, kind='Error', title='Request failed', body='The server answered 503.', actions=('Hide details', ('Copied', 'Copied')),
-        details=['POST /api/v1/sync', 'status: 503 Service Unavailable', 'retry-after: 30', 'request-id: 7f3c-91aa-02de'], tools=True, progress=None)
-    put(1, kind='Warning', title='Config deleted', body='"pvp" was removed.', undo=4, progress=0.66)
-    put(2, kind='Achievement', title='Achievement unlocked', body='Opened every tab.', progress=0.8)
+        details=['POST /api/v1/sync', 'status: 503 Service Unavailable', 'request-id: 7f3c-91aa-02de'], tools=True, progress=None)
+    put(1, kind='Invite', title='Party invite', body='builderman invited you to their party.', actions=(('Join', 'Primary'), 'Decline'), progress=0.55)
+    put(1, kind='Deleted', title='Config deleted', body='"pvp" was removed.', undo=4, progress=0.66)
+    put(1, kind='Sync', title='Syncing', body='Saving your config to the cloud...', value=0.4, progress=None)
+    put(2, kind='LevelUp', title='Level 24', body='1,450 / 12,000 XP to the next one.', value=0.12, progress=None)
+    put(2, kind='Reward', title='Daily reward', body='You got 3 crates.', actions=(('Open', 'Primary'),), progress=0.72)
     put(2, kind='Friend', title='Player joined', body='The server is filling up.', count=3, tools=True, progress=0.9)
-    put(2, kind='Security', title='New login', body='Your account was used on a new device.', actions=(('It was me', 'Primary'), ('Secure it', 'Danger')), progress=0.5)
-    put(2, kind='Upload', title='Uploading', body='Saving your config to the cloud...', value=0.4, progress=None)
-    # the Clear all pill under the stack
+    put(2, kind='Protected', title='Spawn protection', body="You can't be damaged for 10 seconds.", progress=0.35)
+    put(2, kind='AFK', title='AFK detected', body="You'll be kicked in 2 minutes.", actions=(("I'm here", 'Primary'),), progress=0.5)
     d = ImageDraw.Draw(img)
     fc = font(None, 11)
-    label = 'Clear all (6)'
+    label = 'Clear all (14)'
     pw = text_w(label, fc) + 22
     px, py = cols[2] + cw - pw, ys[2]
     d.rounded_rectangle(box(px, py, px + pw, py + 22), radius=S(11), fill=rgba(T['Control']), outline=rgba(T['Outline']), width=S(1))
     text(d, (px + pw / 2, py + 11), label, fc, T['TextDim'], anchor='mm')
-    out = img.resize((W, H), Image.LANCZOS)
-    save_png(out, os.path.join(OUT, 'notifications.png'))
+    framed(img, (W, H), 400, 'Notifications', ['Say what', 'happened.'],
+           ['Over thirty types, each with its own', 'animated badge. Progress, replies, undo,', 'details, buttons, merging and a history.', 'The cards never sit still.'],
+           os.path.join(OUT, 'notifications.png'), accent=T['Accent'])
 
 
 def shell_image(defaults, presets):
@@ -1328,7 +1979,7 @@ def shell_image(defaults, presets):
     T, st = full_theme(defaults, presets['Lavender'])
     st = dict(st, Particles='Snow')
     T2, st2 = full_theme(defaults, presets['Ocean'])
-    img = backdrop(T, st, (W, H), 0.8, 9, motes=True)
+    img = stage_base(T, (W, H))
     host = (64, 150, 524, 662)
     member = (556, 176, 956, 662)
     img.alpha_composite(window(T2, st2, (W, H), member, 0.9, title='Second Hub', compact=True,
@@ -1393,13 +2044,15 @@ def shell_image(defaults, presets):
     text(d2, (cx0, dy0 + 12), 'One dock for every script', fc, (232, 230, 244), anchor='rm')
     text(d2, (cx0, dy0 + 30), 'a button per script, lit while it is open', fcs, (160, 156, 182), anchor='rm')
     img.alpha_composite(lay)
-    save_png(img.resize((W, H), Image.LANCZOS), os.path.join(OUT, 'shell.png'))
+    framed(img, (W, H), 400, 'Shell', ['Many scripts.', 'One dock.'],
+           ['Every TingUI script shares one dock,', 'one notification stack and one', 'set of hotkeys, and they sort out', 'clashes between them.'],
+           os.path.join(OUT, 'shell.png'), accent=T['Accent'])
 
 
 def studio_image(defaults, presets):
     W, H = 1240, 700
     T, st = full_theme(defaults, presets['Frost'])
-    img = backdrop(T, st, (W, H), 0.5, 5, motes=True)
+    img = stage_base(T, (W, H))
     main = (60, 78, 520, 652)
     studio = (548, 52, 1180, 668)
     img.alpha_composite(window(T, st, (W, H), main, 0.6, title='My Hub'))
@@ -1455,7 +2108,9 @@ def studio_image(defaults, presets):
 
     img.alpha_composite(window(T, st, (W, H), studio, 0.6, title='Theme Studio', tabs=('Colours', 'Shape', 'Light', 'Motion', 'Share'),
                                subtitle='edits show live', footer=('Save or share it from the Share tab', None), content=page, pills=(), close=True))
-    save_png(img.resize((W, H), Image.LANCZOS), os.path.join(OUT, 'studio.png'))
+    framed(img, (W, H), 400, 'Theme Studio', ['Make it yours,', 'live.'],
+           ['Edit every colour, corner, light and', 'motion while the window updates.', 'Readability is checked as you go;', 'save it or share it as a code.'],
+           os.path.join(OUT, 'studio.png'), accent=T['Accent'])
 
 
 def main():
@@ -1468,7 +2123,7 @@ def main():
         T, st = full_theme(defaults, presets[name])
         if only in extras:
             break
-        save_png(render(T, st, t=1.2, seed=hash(name) % 1000), os.path.join(OUT, 'themes', name.lower() + '.png'))
+        save_png(render(T, st, t=1.2, seed=sum(map(ord, name)) % 1000, caption=(name, descs.get(name, ''))), os.path.join(OUT, 'themes', name.lower() + '.png'))
         if st.get('Scene'):
             frames = [render(T, st, size=(720, 450), t=0.05 + i / 12, seed=7) for i in range(36)]
             save_gif(frames, os.path.join(OUT, 'themes', name.lower() + '.gif'))
