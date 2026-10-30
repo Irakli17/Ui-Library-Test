@@ -77,7 +77,7 @@ They're also careful with performance and safety. A scene pauses while its windo
 
 ### Flames scene
 
-Fire crowns the top of the window and licks up its sides, drawn from a simulated flame sheet so every tongue rises, flickers and breaks apart on its own. A slow lava band runs along the bottom and glowing cracks open in the lower corners, pulsing with heat. Fire flares when the cursor comes near the top edge, a click throws sparks, a tab switch makes it surge and opening the window ignites it.
+Fire crowns the top of the window and burns outward from its upper sides, drawn from a simulated flame sheet so every tongue rises, flickers and breaks apart on its own. Glowing fissures open in the lower corners, pulsing with heat. Fire flares when the cursor comes near the top edge, a click throws sparks, a tab switch makes it surge and opening the window ignites it.
 
 ```lua
 TingUI:SetFlames({
@@ -86,12 +86,11 @@ TingUI:SetFlames({
 	Height = 64,          -- px above the window
 	Intensity = 1,        -- 0 to 2
 	Sides = true,         -- flames up the sides
-	Lava = true,          -- lava band along the bottom
-	Cracks = true,        -- lava cracks in the corners
+	Cracks = true,        -- glowing fissures in the lower corners
 })
 ```
 
-The same settings are in Theme Studio. Try blue (`Color = Color3.fromRGB(40, 150, 255)`, `Core = Color3.fromRGB(200, 240, 255)`) for spirit fire. The flame and lava art is a set of textures in `assets/textures` that download on first use; until they arrive simple frame flames stand in.
+The same settings are in Theme Studio. Try blue (`Color = Color3.fromRGB(40, 150, 255)`, `Core = Color3.fromRGB(200, 240, 255)`) for spirit fire. The flame and fissure art is a set of textures in `assets/textures` that download on first use; until they arrive simple frame flames stand in.
 
 ### Hologram scene
 
@@ -283,7 +282,7 @@ The window is a chip on a circuit board, with current racing down its traces. It
 ### Flames
 <img src="images/themes/flames.png" alt="Flames">
 
-Charcoal and ember orange. Real fire crowns the window and licks up its sides, embers drift up, lava flows along the bottom and cracks glow in the corners. It has a live [scene](#flames-scene). <sub>(Screenshot from the game.)</sub>
+Charcoal and ember orange. Real fire crowns the window and burns outward from its sides, embers drift up and fissures glow in the lower corners. It has a live [scene](#flames-scene). <sub>(Screenshot from the game.)</sub>
 
 </td>
   </tr>
@@ -329,7 +328,7 @@ Every key is optional.
 | `Scene` | A [scene](#scenes) name: `"Hologram"`, `"Circuit"`, `"Ocean"`, `"Flames"` or one you registered. |
 | `TraceColor`, `EnergyColor` | Circuit's copper traces and current. They default to `Border` and `Accent`. |
 | `WaterColor`, `FoamColor` | Ocean's waves and tide, and its foam, ripples and caustic light. They default to `Accent` and `Text`. |
-| `FlameColor`, `FlameCore`, `FlameHeight`, `FlameIntensity`, `FlameSides`, `Lava`, `LavaCracks` | The Flames scene: outer and core fire colours, height above the window, intensity (0 to 2), side flames, the lava band and the corner cracks. |
+| `FlameColor`, `FlameCore`, `FlameHeight`, `FlameIntensity`, `FlameSides`, `LavaCracks` | The Flames scene: outer and core fire colours, height above the window, intensity (0 to 2), side flames and the corner fissures. |
 | `SnowColor` | Frost's snowfall and the drift it leaves. Defaults to `ParticleColor`. |
 | `BloomColor`, `VineColor` | Rose's blooms and breeze petals (default `ParticleColor`), and its stems and leaves. |
 | `SunColor`, `BirdColor` | The top of Sunset's sun (it shades into the second `TopLine` colour) and its birds (default `Text`). |

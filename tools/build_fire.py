@@ -1,12 +1,11 @@
-"""Flames theme textures: a looping flame flipbook and a tileable lava flow, generated from noise (no stock art).
+"""Flames theme textures: a looping flame flipbook and glowing corner fissures, generated from noise (no stock art).
 
-    python tools/build_fire.py        writes assets/textures/flames.png, flames-core.png, lava.png and cracks.png
+    python tools/build_fire.py        writes assets/textures/flames.png, flames-core.png and fissures.png
 
 flames.png: 20 frames of a 512 x 96 flame strip in a 2 x 10 grid (1024 x 960). Every frame tiles left to right and the
 frames loop, so a strip of any width burns forever. Brightness is heat and alpha is flame plus a soft glow; the theme
 tints it with ImageColor3. flames-core.png holds the white-hot middle of the same frames, drawn on top in the core colour.
 Needs numpy, scipy and Pillow.
-lava.png: 512 x 128, tiles horizontally: glowing molten channels under a darker cooling crust.
 """
 import os
 import numpy as np
@@ -159,27 +158,6 @@ def flames():
     Image.fromarray((inner * 255).astype(np.uint8), 'RGBA').save(os.path.join(ROOT, 'flames-core.png'), optimize=True)
 
 
-def lava():
-    """Molten rock flowing along: bright liquid veins wound through slowly turning darker crust (warped noise)."""
-    W, H = 512, 128
-    yy, xx = np.mgrid[0:H, 0:W].astype(np.float32)
-    a = periodic_noise(W, H, 2.0, 11)
-    b = periodic_noise(W, H, 2.6, 12)
-    c = periodic_noise(W, H, 1.4, 16)
-    w1 = (sample(b, xx, yy) - 0.5) * 50
-    w2 = (sample(c, xx * 2, yy * 2) - 0.5) * 16
-    n = sample(a, xx * 2 + w1 + w2, yy * 2 + w1 * 0.4)
-    ridge = 1 - np.abs(n - 0.5) * 2                     # 1 along the veins
-    molten = np.clip((ridge - 0.78) / 0.22, 0, 1) ** 1.3
-    hot = np.clip((ridge - 0.45) / 0.55, 0, 1) ** 2.5
-    crust = 0.06 + 0.07 * sample(c, xx * 3, yy * 3)
-    rr = np.clip(crust + hot * 0.65 + molten * 0.9, 0, 1)
-    gg = np.clip(crust * 0.7 + hot * 0.2 + molten * 0.78, 0, 1)
-    bb = np.clip(crust * 0.6 + molten * 0.45, 0, 1)
-    img = np.stack([rr, gg, bb, np.ones_like(rr)], -1)
-    Image.fromarray((img * 255).astype(np.uint8), 'RGBA').save(os.path.join(ROOT, 'lava.png'), optimize=True)
-
-
 def cracks():
     """Glowing fissures for the window's lower corners: cracks that wander and fork like split rock (random walks
     steered by noise, tapering as they go), each with a white-hot middle, a soft glow and a dark charred border for
@@ -197,13 +175,13 @@ def cracks():
         corner_x = 0 if half == 0 else W
         stack = []
         for _ in range(4):
-            x0 = abs(r.normal(0, 70)) if half == 0 else W - abs(r.normal(0, 70))
+            x0 = abs(r.normal(0, 90)) if half == 0 else W - abs(r.normal(0, 90))
             ang = -np.pi / 2 + (0.55 if half == 0 else -0.55) * r.uniform(0.2, 1.0)
-            stack.append([x0, H - 1, ang, r.uniform(3.2, 4.4), r.uniform(150, 230)])
+            stack.append([x0, H - 1, ang, r.uniform(8, 11), r.uniform(70, 120)])
         # a couple running up the side edge too
-        for _ in range(2):
-            y0 = r.uniform(H * 0.35, H * 0.85)
-            stack.append([1 if half == 0 else W - 1, y0, (-0.25 if half == 0 else -np.pi + 0.25) + r.normal(0, 0.15), r.uniform(2.4, 3.2), r.uniform(90, 150)])
+        for _ in range(0):
+            y0 = r.uniform(H * 0.55, H * 0.85)
+            stack.append([1 if half == 0 else W - 1, y0, (-0.25 if half == 0 else -np.pi + 0.25) + r.normal(0, 0.15), r.uniform(3.6, 4.6), r.uniform(60, 100)])
         while stack:
             x, y, a, w, length = stack.pop()
             travelled = 0
@@ -220,11 +198,11 @@ def cracks():
                 step = 2.2
                 nx, ny = x + np.cos(a) * step, y + np.sin(a) * step
                 dl.line([x * SS, y * SS, nx * SS, ny * SS], fill=255, width=max(1, int(w * SS)))
-                dc.line([x * SS, y * SS, nx * SS, ny * SS], fill=255, width=max(1, int(w * 0.38 * SS)))
+                dc.line([x * SS, y * SS, nx * SS, ny * SS], fill=255, width=max(1, int(w * 0.45 * SS)))
                 x, y = nx, ny
                 travelled += step
-                w *= 0.994
-                if r.uniform() < 0.022 and w > 1.0:
+                w *= 0.978
+                if r.uniform() < 0.02 and w > 2.5:
                     stack.append([x, y, a + r.choice([-1, 1]) * r.uniform(0.45, 1.0), w * 0.62, (length - travelled) * r.uniform(0.4, 0.8)])
         L = np.asarray(line.resize((W, H), Image.LANCZOS), np.float32) / 255
         C = np.asarray(core.resize((W, H), Image.LANCZOS), np.float32) / 255
@@ -239,12 +217,13 @@ def cracks():
         for ch in range(3):
             out[:, sl, ch] = lum
         out[:, sl, 3] = alpha
-    Image.fromarray((out * 255).astype(np.uint8), 'RGBA').save(os.path.join(ROOT, 'cracks.png'), optimize=True)
+    Image.fromarray((out * 255).astype(np.uint8), 'RGBA').save(os.path.join(ROOT, 'fissures.png'), optimize=True)
 
 
 if __name__ == '__main__':
+    import sys
     os.makedirs(ROOT, exist_ok=True)
-    flames()
-    lava()
-    cracks()
-    print('wrote flames.png, flames-core.png, lava.png and cracks.png')
+    only = sys.argv[1:] or ['flames', 'cracks']
+    if 'flames' in only: flames()
+    if 'cracks' in only: cracks()
+    print('wrote flames.png, flames-core.png and fissures.png')

@@ -210,7 +210,7 @@ local TingUI = {
 		-- flames: the window burns. A crown of real-looking fire (a simulated flipbook, crossfaded so it moves smoothly)
 		-- along the top edge and down the upper sides, sparks, a heat glow, lava creeping along the bottom and glowing
 		-- fissures in the lower corners. Everything stays outside or along the edges of the content. Customise it with
-		-- FlameColor, FlameCore, FlameHeight, FlameIntensity, FlameSides, Lava and LavaCracks (or TingUI:SetFlames).
+		-- FlameColor, FlameCore, FlameHeight, FlameIntensity, FlameSides and LavaCracks (or TingUI:SetFlames).
 		Flames = { Accent = Color3.fromRGB(255, 122, 44), Background = Color3.fromRGB(16, 11, 10), Group = Color3.fromRGB(22, 15, 13), GroupBorder = Color3.fromRGB(46, 27, 21),
 			Control = Color3.fromRGB(33, 21, 18), ControlHover = Color3.fromRGB(47, 29, 23), Border = Color3.fromRGB(98, 50, 31), Outline = Color3.fromRGB(62, 35, 26),
 			Text = Color3.fromRGB(255, 240, 228), Label = Color3.fromRGB(238, 216, 202), TextDim = Color3.fromRGB(180, 142, 124), TextMuted = Color3.fromRGB(136, 104, 90),
@@ -1272,7 +1272,8 @@ TingUI.Events.TabChanged:Connect(function(_, W) if W and W.Frame then Feedback(W
 TingUI.Events.VisibilityChanged:Connect(function(v, W) if v and W and W.Frame then Feedback(W.Frame, "Open") end end)
 
 -- Tune the Flames theme live: TingUI:SetFlames({ Color = Color3, Core = Color3, Height = 64, Intensity = 1,
--- Sides = true, Lava = true, Cracks = true }). Any key left out keeps its value. Works on any theme using the scene.
+-- Sides = true, Cracks = true }). Any key left out keeps its value. Works on any theme using the scene.
+-- (Lava is still accepted from v0.1.0 scripts and does nothing: the lava flow was removed.)
 function TingUI:SetFlames(o)
 	o = o or {}
 	local st = table.clone(self.Style)
@@ -2766,7 +2767,7 @@ Kinds.Storm = {
 -- flame and a hotter, shorter core), a heat glow behind them and sparks drifting up. Inside, a thin flow of lava runs
 -- along the bottom edge and glowing fissures climb from the lower corners, with heat pulsing up through them. The pointer near the top
 -- makes the fire flare, a click throws a burst of sparks, a tab switch sends a surge across, and arriving lights it.
--- Style keys: FlameColor, FlameCore, FlameHeight (px), FlameIntensity (0-2), FlameSides, Lava, LavaCracks.
+-- Style keys: FlameColor, FlameCore, FlameHeight (px), FlameIntensity (0-2), FlameSides, LavaCracks.
 --------------------------------------------------------------------------
 local FLAME = { Frames = 20, W = 512, H = 96, Cols = 2 }
 function FX.FlameRect(fr) return Vector2.new((fr % FLAME.Cols) * FLAME.W, math.floor(fr / FLAME.Cols) * FLAME.H) end
@@ -2832,13 +2833,12 @@ function FX.FlameBuild(S)
 		local x = (i - 1) * tw - 30
 		FX.FlameFade(tile, x, tw, function(px)
 			local W = S.W
-			if px < 34 then return 1 - (px + 14) / 48 end
-			if px > W - 34 then return 1 - (W + 14 - px) / 48 end
+			if px < 26 then return 1 - (px + 2) / 28 end
+			if px > W - 26 then return 1 - (W + 2 - px) / 28 end
 			return 0
 		end)
 	end
-	-- the sides: upright tongues climbing the upper part of each side edge, half hidden behind the window, smaller
-	-- further down. Their own edges are faded so no cut line shows.
+	-- the sides: tongues rooted along each upper side edge, turned 90 degrees so they burn outward from the window. Their own edges are faded so no cut line shows.
 	if st.FlameSides ~= false then
 		for side = 1, 2 do
 			for k = 1, 3 do
@@ -2873,21 +2873,10 @@ end
 function FX.LavaBuild(S)
 	for _, o in ipairs(S.LavaParts or {}) do o:Destroy() end
 	S.LavaParts, S.CrackImgs, S.CrackHeat = {}, {}, {}
-	S.LavaFrame = nil
 	local st = TingUI.Style
-	if st.Lava ~= false then
-		local band = New("Frame", { AnchorPoint = Vector2.new(0, 1), Position = UDim2.fromScale(0, 1), Size = UDim2.new(1, 0, 0, 8),
-			BackgroundTransparency = 1, ClipsDescendants = true, ZIndex = 2, Parent = S.Top })
-		S.LavaFrame = band
-		S.LavaImg = New("ImageLabel", { Size = UDim2.new(1, 512, 1, 0), BackgroundTransparency = 1, ImageTransparency = 1, ScaleType = Enum.ScaleType.Tile,
-			TileSize = UDim2.fromOffset(256, 48), ZIndex = 2, Parent = band }, {
-			New("UIGradient", { Rotation = 90, Transparency = NumberSequence.new({ NumberSequenceKeypoint.new(0, 0.9), NumberSequenceKeypoint.new(0.5, 0.25),
-				NumberSequenceKeypoint.new(1, 0) }) }) })
-		S.LavaRim = New("Frame", { Size = UDim2.new(1, 0, 0, 1), BackgroundTransparency = 1, BorderSizePixel = 0, ZIndex = 3, Parent = band })
-		table.insert(S.LavaParts, band)
-	end
 	if st.LavaCracks ~= false then
-		local w = math.min(S.W * 0.42, 250)
+		-- short glowing fissures in the lower corners, as if molten rock is seeping up through split stone
+		local w = math.min(S.W * 0.3, 170)
 		for side = 0, 1 do
 			local base = New("ImageLabel", { AnchorPoint = Vector2.new(side, 1), Position = UDim2.fromScale(side, 1), Size = UDim2.fromOffset(w, w / 2),
 				BackgroundTransparency = 1, ImageTransparency = 1, ImageRectOffset = Vector2.new(side * 512, 0), ImageRectSize = Vector2.new(512, 256),
@@ -2904,7 +2893,7 @@ function FX.LavaBuild(S)
 			table.insert(S.LavaParts, hot)
 		end
 	end
-	S.LavaFor = Vector3.new(S.W, S.H, (st.Lava ~= false and 1 or 0) + (st.LavaCracks ~= false and 2 or 0))
+	S.LavaFor = Vector3.new(S.W, S.H, st.LavaCracks ~= false and 2 or 0)
 end
 Kinds.Flames = {
 	Build = function(S)
@@ -2921,8 +2910,6 @@ Kinds.Flames = {
 		S.CoreColor = st.FlameCore or Color3.fromRGB(255, 226, 150)
 		for i, f in ipairs(S.Tongues or {}) do f.BackgroundColor3 = (i % 3 == 0) and S.CoreColor or S.Hot end
 		if S.Glow then S.Glow.BackgroundColor3 = S.Hot end
-		if S.LavaImg then S.LavaImg.ImageColor3 = S.Hot:Lerp(Color3.new(1, 1, 1), 0.5) end
-		if S.LavaRim then S.LavaRim.BackgroundColor3 = S.CoreColor end
 		for _, img in ipairs(S.CrackImgs or {}) do img.ImageColor3 = S.Hot end
 		for _, h in ipairs(S.CrackHeat or {}) do h.Img.ImageColor3 = S.CoreColor end
 		for _, sp in ipairs(S.Sparks or {}) do sp.Frame.BackgroundColor3 = S.CoreColor end
@@ -2932,7 +2919,7 @@ Kinds.Flames = {
 		local st = TingUI.Style
 		local W, H = S.W, S.H
 		if not S.BuiltFor or S.BuiltFor.X ~= W or S.BuiltFor.Z ~= (st.FlameHeight or 64) or ((st.FlameSides ~= false) ~= (#S.Sides > 0)) then FX.FlameBuild(S) end
-		local lavaKey = (st.Lava ~= false and 1 or 0) + (st.LavaCracks ~= false and 2 or 0)
+		local lavaKey = st.LavaCracks ~= false and 2 or 0
 		if not S.LavaFor or S.LavaFor.X ~= W or S.LavaFor.Y ~= H or S.LavaFor.Z ~= lavaKey then FX.LavaBuild(S) Kinds.Flames.Paint(S) end
 		local power = math.clamp(st.FlameIntensity or 1, 0, 2)
 		-- the pointer near the top edge feeds the fire
@@ -2954,17 +2941,27 @@ Kinds.Flames = {
 			local ig = math.clamp(S.Ignite * 2.2 - math.abs(cx - W / 2) / math.max(W, 1) * 1.6, 0, 1)
 			local surge = S.SurgeT and math.max(0, 1 - math.abs(cx / math.max(W, 1) - (S.SurgeT / 0.95 - 0.1)) * 2.5) * 0.4 or 0
 			local th = h * (0.92 + 0.12 * math.min(heat, 1.5) + surge) * ig
-			-- the base sits 14px down, behind the window, so the dense bed of the fire never shows as a band
-			FX.FlameDraw(S, tile, UDim2.fromOffset(x, 14), UDim2.fromOffset(tw, th), S.Phase, heat * ig, F)
+			-- the base sits just under the top edge, behind the window: the fire rises straight off the edge and its
+			-- dense bed never shows as a band
+			FX.FlameDraw(S, tile, UDim2.fromOffset(x, 9), UDim2.fromOffset(tw, th), S.Phase, heat * ig, F)
 		end
 		for _, tile in ipairs(S.Sides) do
 			local s, k = tile.Side, tile.K
-			local sz = h * (0.78 - k * 0.14) * S.Ignite * (0.9 + 0.1 * math.min(heat, 1.5))
-			local y = 18 + (k - 1) * h * 0.42
+			local full = h * (0.8 - k * 0.14)
+			local sz = full * S.Ignite * (0.9 + 0.1 * math.min(heat, 1.5))
+			-- turned a quarter: rooted along the side edge and burning straight out sideways, in a column running
+			-- down from the corner, each piece a little smaller than the one above
+			local step = 0
+			for j = 1, k - 1 do step = step + h * (0.8 - j * 0.14) * 120 / FLAME.H * 0.82 end
+			local by = 6 + full * 120 / FLAME.H * 0.5 + step
+			local lean = 90 * (s == 1 and -1 or 1)
+			local r = math.rad(lean)
+			local bx = s == 1 and 2 or W - 2
 			local wide = sz * 120 / FLAME.H
-			-- centred on the edge: the inner half is behind the window, the outer half licks up along the side
-			FX.FlameDraw(S, tile, UDim2.fromOffset((s == 1 and 0 or W) - wide / 2, y), UDim2.fromOffset(wide, sz),
-				S.Phase + k * 7 + s * 3, heat * (1 - k * 0.18), F)
+			-- a frame turns about its centre, so the centre is placed half a flame up the lean from the root
+			local cx, cy = bx + math.sin(r) * sz * 0.5, by - math.cos(r) * sz * 0.5
+			FX.FlameDraw(S, tile, UDim2.fromOffset(cx, cy), UDim2.fromOffset(wide, sz), S.Phase + k * 7 + s * 3, heat * (1 - k * 0.16), F, lean,
+				Vector2.new(0.5, 0.5))
 		end
 		for i, f in ipairs(S.Tongues) do
 			if not have then
@@ -3000,18 +2997,9 @@ Kinds.Flames = {
 				table.remove(S.Sparks, i)
 			end
 		end
-		-- lava creeping along the bottom, cracks breathing, and every few seconds a pulse of heat climbing them
-		if S.LavaImg then
-			local ltex = TextureImage("lava")
-			S.LavaImg.Image = ltex
-			S.LavaImg.Position = UDim2.fromOffset(-((t * 8) % 256), 0)
-			S.LavaImg.ImageTransparency = ltex ~= "" and F(0.1 - 0.06 * math.sin(t * 1.3)) or 1
-			S.LavaFrame.BackgroundTransparency = ltex ~= "" and 1 or F(0.45)
-			S.LavaFrame.BackgroundColor3 = S.Hot
-			S.LavaRim.BackgroundTransparency = F(0.5 + 0.25 * math.sin(t * 2.1))
-		end
+		-- the cracks breathe, and every few seconds a pulse of heat climbs them
 		if #S.CrackImgs > 0 then
-			local ctex = TextureImage("cracks")
+			local ctex = TextureImage("fissures")
 			S.PulseT = S.PulseT - dt
 			if S.PulseT <= 0 then S.PulseT, S.PulseStart = 2 + math.random() * 2.5, t end
 			for i, img in ipairs(S.CrackImgs) do
@@ -12173,7 +12161,7 @@ function TingUI:CreateWindow(o)
 			Storm = "Slate and steel, clean readable type, rain in a shifting wind, clouds that light up, drops that bead and run down the glass (wipe them with your cursor) and bolts that fork through.",
 			Blueprint = "Drafting paper: navy blue, a white grid, a ruled double border, handwritten labels.",
 			Hazard = "Industrial yellow and black, a striped warning-tape border, square corners.",
-			Flames = "The window burns: real-looking fire along the top and down the sides, sparks, a heat glow, lava creeping along the bottom and glowing fissures in the corners. Hover the top edge to feed it, click for sparks. Recolour it for blue or green fire.",
+			Flames = "The window burns: real-looking fire along the top and burning outward from the sides, sparks, a heat glow and glowing fissures in the lower corners. Hover the top edge to feed it, click for sparks. Recolour it for blue or green fire.",
 			Serotonin = "A crisp classic cheat-menu look: square corners, a hairline teal outline in a dark teal frame, teal light from the top, plain type. No particles.",
 			Glass = "See-through frosted surfaces over a blurred world, soft rounded type, real lens bokeh drifting at different depths with a glint now and then.",
 			Hologram = "A cyan light projection: brackets lock on as it opens, a scan line sweeps each page, the image tears now and then, clicks ripple out as hexagons, a projector beam glows underneath.",
@@ -13462,7 +13450,7 @@ do local function Setup()
 		table.insert(sceneRows.Sunset, ColorFlag(scene, "BirdColor", "Birds", "The flocks crossing the sky. Off uses the text colour.", Draft("Text")))
 		table.insert(sceneRows.Storm, ColorFlag(scene, "CloudColor", "Clouds", "The cloud bank along the top. Off uses the panel colour.", Draft("Group")))
 		table.insert(sceneRows.Storm, ColorFlag(scene, "BoltColor", "Lightning", "Bolts and the light inside the clouds.", function() return Color3.fromRGB(225, 236, 255) end))
-		table.insert(sceneRows.Flames, ColorFlag(scene, "FlameColor", "Flame", "The outer flame, the heat glow, the lava and the cracks. Try a blue or green for magic fire.", function() return Color3.fromRGB(255, 96, 22) end))
+		table.insert(sceneRows.Flames, ColorFlag(scene, "FlameColor", "Flame", "The outer flame, the heat glow and the cracks. Try a blue or green for magic fire.", function() return Color3.fromRGB(255, 96, 22) end))
 		table.insert(sceneRows.Flames, ColorFlag(scene, "FlameCore", "Core", "The white-hot middle of the flames and the sparks.", function() return Color3.fromRGB(255, 226, 150) end))
 		table.insert(sceneRows.Flames, scene:AddSlider({ Text = "Flame height", Min = 20, Max = 140, Default = St.Draft.Style.FlameHeight or 64, Suffix = " px",
 			Callback = Quiet(function(v) St.Draft.Style.FlameHeight = v Push(false, true) end) }))
@@ -13470,8 +13458,6 @@ do local function Setup()
 			Callback = Quiet(function(v) St.Draft.Style.FlameIntensity = v Push(false, true) end) }))
 		table.insert(sceneRows.Flames, scene:AddToggle({ Text = "Flames down the sides", Default = St.Draft.Style.FlameSides ~= false,
 			Callback = Quiet(function(v) St.Draft.Style.FlameSides = v Push(false, true) end) }))
-		table.insert(sceneRows.Flames, scene:AddToggle({ Text = "Lava along the bottom", Default = St.Draft.Style.Lava ~= false,
-			Callback = Quiet(function(v) St.Draft.Style.Lava = v Push(false, true) end) }))
 		table.insert(sceneRows.Flames, scene:AddToggle({ Text = "Glowing cracks", Default = St.Draft.Style.LavaCracks ~= false,
 			Callback = Quiet(function(v) St.Draft.Style.LavaCracks = v Push(false, true) end) }))
 		table.insert(sceneRows.Other, scene:AddLabel("This scene reads its own style keys. Set them in code; share codes carry their colours and numbers.", { Dim = true }))

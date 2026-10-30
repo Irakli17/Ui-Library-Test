@@ -15,7 +15,7 @@
 - Panels brought to the front can no longer climb above open dropdowns and popups.
 
 **New**
-- **Flames theme**: realistic animated fire crowning the window and licking up its sides, glowing embers, a slow lava band along the bottom and lava cracks in the corners. Fire flares near the cursor and on clicks. Colour, core colour, height, intensity, side flames, lava and cracks are all adjustable in Theme Studio or with `TingUI:SetFlames({...})`.
+- **Flames theme**: realistic animated fire crowning the window, flames burning outward from its upper sides, glowing embers and fissures glowing in the lower corners. Fire flares near the cursor and on clicks. Colour, core colour, height, intensity, side flames and fissures are all adjustable in Theme Studio or with `TingUI:SetFlames({...})`.
 - **Elements**: `AddSwitch`, `AddProgressRing`, `AddSpinner` (Ring, Dots, Bars, Pulse), `AddSkeleton`, `AddAccordion`, `AddTabBox` (tabs with a sliding indicator), `AddChips` (tag input), `AddStepper`, `AddSegmented`, `AddRangeSlider`, `AddVerticalSlider` and `TingUI:Toast`. Every element that holds a value saves to configs.
 - **Buttons**: `Style = "Primary" | "Secondary" | "Outline" | "Ghost" | "Danger" | "Pill"`, `Icon`, `IconOnly`, `Loading` (spinner, locked while the callback runs) and `Hold = seconds` (hold to activate, with a fill). Each style has hover, press and disabled states, and clicks ripple out from the cursor.
 - **Sliders**: `Ticks`, `ValueTooltip` (a bubble that follows the handle) and `Input` (type an exact value). Decimals, min, max and step work in every slider, with mouse and touch.

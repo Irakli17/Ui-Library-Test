@@ -88,7 +88,7 @@ if not TingUI then return warn(err) end
 
 ## New in v0.1.0
 
-**Flames**, a sixteenth theme: realistic animated fire around the window, embers, a lava flow and glowing cracks, all adjustable. [Read more](docs/themes.md#flames-scene)
+**Flames**, a sixteenth theme: realistic animated fire around the window, embers and glowing corner fissures, all adjustable. [Read more](docs/themes.md#flames-scene)
 
 <img src="docs/images/themes/flames.png" alt="Flames theme" width="60%">
 
