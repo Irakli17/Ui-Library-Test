@@ -2,6 +2,36 @@
 
 <sub>[Docs](README.md) › Changelog</sub>
 
+## v0.1.0-stable
+
+> [!NOTE]
+> Nothing in your script has to change. Every link, option, config, theme name and call from v0.0.9 works as before. The new elements and options are additions. Two looks change on purpose: Storm now uses Builder Sans, and Blueprint no longer has pencil particles.
+
+**Fixes**
+- Dropdowns: a pick updates the box at once and fires the callback exactly once. Single and multi select both save to configs and restore on load, including values that arrive later through `SetValues`. Opening and closing quickly, or picking while the list is still animating, is safe. Lists inside scrolled pages line up with their box, sit above everything else and close on an outside click. Search matches accented and non-Latin letters regardless of case.
+- Icons: Discord is now the official Clyde mark. It ships inside the library, so it shows at once and an old cached copy can't replace it.
+- Icons on buttons with text are spaced correctly instead of overlapping the first letter.
+- A disabled button with sub-buttons stays in place and is greyed out, instead of being pushed out of its row.
+- Panels brought to the front can no longer climb above open dropdowns and popups.
+
+**New**
+- **Flames theme**: realistic animated fire crowning the window and licking up its sides, glowing embers, a slow lava band along the bottom and lava cracks in the corners. Fire flares near the cursor and on clicks. Colour, core colour, height, intensity, side flames, lava and cracks are all adjustable in Theme Studio or with `TingUI:SetFlames({...})`.
+- **Elements**: `AddSwitch`, `AddProgressRing`, `AddSpinner` (Ring, Dots, Bars, Pulse), `AddSkeleton`, `AddAccordion`, `AddTabBox` (tabs with a sliding indicator), `AddChips` (tag input), `AddStepper`, `AddSegmented`, `AddRangeSlider`, `AddVerticalSlider` and `TingUI:Toast`. Every element that holds a value saves to configs.
+- **Buttons**: `Style = "Primary" | "Secondary" | "Outline" | "Ghost" | "Danger" | "Pill"`, `Icon`, `IconOnly`, `Loading` (spinner, locked while the callback runs) and `Hold = seconds` (hold to activate, with a fill). Each style has hover, press and disabled states, and clicks ripple out from the cursor.
+- **Sliders**: `Ticks`, `ValueTooltip` (a bubble that follows the handle) and `Input` (type an exact value). Decimals, min, max and step work in every slider, with mouse and touch.
+- **Icons**: about 240 named icons from Lucide and Simple Icons, available as `TingUI.Icons.settings`, `TingUI.Icons.mapPin`, `TingUI.Icons["brand-github"]` and so on. `TingUI:GetIconNames()` lists them.
+- **Watermark images**: `TingUI:SetWatermarkImage(image, {Width, Height, Only, Transparency, Round})`, `CreateWindow({ WatermarkImage = ... })`, and `SetScreenWatermark({ Image, Transparency, Size, Place })`. Images can be asset ids, links or files.
+- **Every language**: lengths, clipping, `MaxLength`, initials and search count characters, not bytes, so accented Latin, Cyrillic, Greek, Georgian, Arabic, Hebrew and CJK text are never cut mid-letter. Arabic and Hebrew labels line up on the right by themselves (`RTL = true/false` to force it). `TingUI.Utf8` exposes the helpers.
+- `TingUI.Motion` exposes the shared tween presets (Quick, Smooth, Spring, Bounce).
+
+**Changed**
+- Storm uses Builder Sans with a clear weight hierarchy instead of the condensed Oswald.
+- Blueprint's pencil-mark particles are gone, along with their loop.
+
+**Faster**
+- Looping effects (spinners, skeleton shimmer, progress sheen, viewport rotation, watermark text) pause while they're hidden.
+- Every new element disconnects its own connections when destroyed, and `Unload` clears options, flags, theme bindings, keybinds and the command palette catalogue.
+
 ## v0.0.9-stable
 
 > [!NOTE]

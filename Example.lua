@@ -22,7 +22,7 @@ local LocalPlayer = Players.LocalPlayer
 local Window = TingUI:CreateWindow({
 	Title = "TingUI Interface Suite",
 	Tag = "Pro",                         -- green pill
-	Version = "v0.0.9",                  -- red pill
+	Version = "v0.1.0",                  -- red pill
 	Subtitle = "Example Game",
 	Footer = "discord.gg/yourserver",
 	WatermarkTitle = "TingUI V2",
@@ -121,7 +121,7 @@ Tests:AddButton({ Text = "Loading -> Done", Callback = function()
 	local n = TingUI:Notify({ Title = "Injecting", Content = "Preparing features...", Type = "Loading" })
 	task.delay(2, function() n:Update({ Title = "Ready", Content = "Everything loaded.", Type = "Success" }) end)
 end }):AddSubButton({ Text = "With buttons", Callback = function()
-	TingUI:Notify({ Title = "Update available", Content = "Version 0.0.9 is out.", Type = "Info", Duration = 8,
+	TingUI:Notify({ Title = "Update available", Content = "Version 0.1.0 is out.", Type = "Info", Duration = 8,
 		Actions = { { Text = "Changelog", Callback = function() TingUI:Notify("Opening changelog...") end }, { Text = "Later" } } })
 end })
 -- richer notifications: progress, replies, undo, details, merging, and a type for each kind of event
@@ -453,6 +453,111 @@ HookGroup:AddButton({ Text = "Send test message", Callback = function()
 		end
 	end)
 end })
+
+------------------------------------------------------------------ v0.1.0: new elements, buttons, sliders
+local Kit = Window:AddTab("Elements")
+
+local Motion = Kit:AddGroup({ Title = "Switches, steppers, chips", Icon = TingUI.Icons.slidersHorizontal, Side = "Left" })
+Motion:AddSwitch({ Text = "Spring switch", Flag = "DemoSwitch", Default = true, Description = "The knob springs across and stretches while you hold it." })
+Motion:AddSwitch({ Text = "Risky switch", Risky = true })
+Motion:AddStepper({ Text = "Bullets", Min = 0, Max = 30, Step = 1, Default = 12, Flag = "DemoStepper",
+	Description = "Hold - or + and it repeats, speeding up. Click the number to type one." })
+Motion:AddStepper({ Text = "Multiplier", Min = 0.5, Max = 4, Step = 0.25, Default = 1.5, Suffix = "x" })
+Motion:AddSegmented({ Text = "Target part", Values = { "Head", "Torso", "Closest" }, Default = "Head", Flag = "DemoSegment" })
+Motion:AddChips({ Text = "Whitelist", Placeholder = "Type a name, press Enter", Default = { "builderman", "Roblox" }, Max = 8, MaxLength = 20, Flag = "DemoChips",
+	Callback = function(list) print("whitelist:", table.concat(list, ", ")) end })
+local acc = Motion:AddAccordion({ Title = "Advanced", Icon = "settings", Open = false })
+acc:AddToggle({ Text = "Hidden away until you open it" })
+acc:AddSlider({ Text = "Smoothing", Min = 0, Max = 1, Increment = 0.01, Default = 0.35 })
+acc:AddDropdown({ Text = "Hitbox", Values = { "Default", "Expanded", "Precise" }, Default = "Default" })
+
+local Loading = Kit:AddGroup({ Title = "Progress and loading", Icon = TingUI.Icons.loader, Side = "Left" })
+local ring = Loading:AddProgressRing({ Text = "Download", Default = 0.25, Size = 46 })
+Loading:AddProgressRing({ Text = "Waiting for server", Indeterminate = true, Size = 34, Thickness = 3 })
+Loading:AddSpinner({ Text = "Ring spinner" })
+Loading:AddSpinner({ Text = "Dots", Style = "Dots" })
+Loading:AddSpinner({ Text = "Bars", Style = "Bars" })
+Loading:AddSpinner({ Text = "Pulse", Style = "Pulse" })
+local skel = Loading:AddSkeleton({ Lines = 3, Avatar = true })
+Loading:AddButton({ Text = "Run the ring", Style = "Secondary", Icon = TingUI.Icons.play, Callback = function()
+	task.spawn(function()
+		for i = 0, 20 do ring:Set(i / 20) task.wait(0.06) end
+	end)
+end }):AddSubButton({ Text = "Toggle skeleton", Style = "Ghost", Callback = function() skel:SetLoading(not skel.Loading) end })
+
+local Buttons = Kit:AddGroup({ Title = "Buttons", Icon = TingUI.Icons.mousePointerClick, Side = "Right" })
+Buttons:AddButton({ Text = "Primary", Style = "Primary", Callback = function() TingUI:Toast({ Text = "Primary pressed", Type = "Success" }) end })
+	:AddSubButton({ Text = "Secondary", Style = "Secondary", Callback = function() TingUI:Toast("Secondary pressed") end })
+Buttons:AddButton({ Text = "Outline", Style = "Outline", Callback = function() TingUI:Toast("Outline pressed") end })
+	:AddSubButton({ Text = "Ghost", Style = "Ghost", Callback = function() TingUI:Toast("Ghost pressed") end })
+Buttons:AddButton({ Text = "Delete", Style = "Danger", Icon = TingUI.Icons.trash2, Callback = function() TingUI:Toast({ Text = "Deleted", Type = "Error" }) end })
+	:AddSubButton({ Text = "Pill", Style = "Pill", Callback = function() TingUI:Toast("Pill pressed") end })
+Buttons:AddButton({ Text = "Save", Style = "Primary", Icon = TingUI.Icons.save, Callback = function() TingUI:Toast({ Text = "Saved", Type = "Success" }) end })
+	:AddSubButton({ Text = "Settings", IconOnly = true, Icon = TingUI.Icons.settings, Callback = function() TingUI:Toast("Settings") end })
+	:AddSubButton({ Text = "Share", IconOnly = true, Icon = TingUI.Icons.share2, Callback = function() TingUI:Toast("Shared") end })
+	:AddSubButton({ Text = "Discord", IconOnly = true, Icon = "discord", Callback = function() TingUI:Toast("Discord") end })
+Buttons:AddButton({ Text = "Fetch data", Style = "Outline", Loading = true, Description = "Shows a spinner and ignores clicks until the callback returns.",
+	Callback = function() task.wait(1.5) TingUI:Toast({ Text = "Data fetched", Type = "Success" }) end })
+	:AddSubButton({ Text = "Hold to reset", Style = "Danger", Hold = 1.2, Callback = function() TingUI:Toast({ Text = "Reset!", Type = "Warning" }) end })
+local disabled = Buttons:AddButton({ Text = "Disabled", Style = "Primary" })
+disabled:SetDisabled(true)
+-- an image as the watermark: your avatar beside the text, or the image alone
+local avatar = "rbxthumb://type=AvatarHeadShot&id=" .. tostring(LocalPlayer and LocalPlayer.UserId or 1) .. "&w=150&h=150"
+Buttons:AddButton({ Text = "Avatar mark", Style = "Secondary", Callback = function()
+	TingUI:SetWatermarkImage(avatar, { Width = 22, Height = 22, Round = 11 })
+end }):AddSubButton({ Text = "Image only", Style = "Secondary", Callback = function()
+	TingUI:SetWatermarkImage(avatar, { Width = 34, Height = 34, Round = 17, Only = true })
+end }):AddSubButton({ Text = "Reset", Style = "Ghost", Callback = function() TingUI:SetWatermarkImage(nil) end })
+
+local Sliders = Kit:AddGroup({ Title = "Sliders", Icon = TingUI.Icons.slidersHorizontal, Side = "Right" })
+Sliders:AddRangeSlider({ Text = "Distance range", Min = 0, Max = 1000, Increment = 10, Default = { 150, 600 }, Suffix = " st", Flag = "DemoRange",
+	Callback = function(lo, hi) print("range", lo, hi) end })
+Sliders:AddSlider({ Text = "Stepped with ticks", Min = 0, Max = 10, Increment = 1, Default = 4, Ticks = true, Flag = "DemoTicks" })
+Sliders:AddSlider({ Text = "Value tooltip", Min = 0, Max = 1, Increment = 0.01, Default = 0.42, ValueTooltip = true })
+Sliders:AddSlider({ Text = "Type a value", Min = -50, Max = 50, Increment = 0.5, Default = 12.5, Input = true, Suffix = "°" })
+local tb = Sliders:AddTabBox({ Tabs = { "Audio", "Video" } })
+tb.Tabs.Audio:AddVerticalSlider({ Text = "Master volume", Min = 0, Max = 100, Default = 70, Suffix = "%", Height = 96,
+	Description = "Upright sliders work with mouse and touch." })
+tb.Tabs.Video:AddSlider({ Text = "Field of view", Min = 50, Max = 120, Default = 70, Ticks = 10, ValueTooltip = true })
+tb.Tabs.Video:AddSegmented({ Values = { "Low", "Medium", "High", "Ultra" }, Default = "High" })
+
+------------------------------------------------------------------ v0.1.0: icons
+local IconsTab = Window:AddTab("Icons")
+local IconGroup = IconsTab:AddGroup({ Title = "Named icons", Icon = TingUI.Icons.layoutGrid, Side = "Left" })
+IconGroup:AddParagraph({ Title = "TingUI.Icons", Content = "Over 290 icons by name: the originals plus Lucide (lucide.dev) and brand marks from Simple Icons. "
+	.. "Use TingUI.Icons.settings, TingUI.Icons.mapPin or TingUI.Icons[\"map-pin\"] anywhere an Icon is taken." })
+for _, name in ipairs({ "settings", "crosshair", "swords", "skull", "ghost", "zap", "flame", "snowflake", "compass", "gamepad2", "trophy", "gem" }) do
+	IconGroup:AddAccordion({ Title = name, Icon = TingUI.Icons[name], Open = false })
+end
+local Brands = IconsTab:AddGroup({ Title = "Brands", Icon = TingUI.Icons.youtube, Side = "Right" })
+for _, b in ipairs({ "discord", "youtube", "roblox", "github", "twitch", "x", "tiktok", "telegram", "steam", "spotify" }) do
+	-- "brand-" picks the logo where a plain name means something else (x is also the close cross)
+	local icon = TingUI.Icons["brand-" .. b]
+	Brands:AddButton({ Text = b:sub(1, 1):upper() .. b:sub(2), Style = "Ghost", Icon = icon, Callback = function() TingUI:Toast({ Text = b, Icon = icon }) end })
+end
+
+------------------------------------------------------------------ v0.1.0: any language
+local Lang = Window:AddTab("Languages")
+local Scripts = Lang:AddGroup({ Title = "Every script", Icon = TingUI.Icons.languages, Side = "Left" })
+Scripts:AddToggle({ Text = "Français : activer l'option" })
+Scripts:AddToggle({ Text = "Русский: включить функцию" })
+Scripts:AddToggle({ Text = "Ελληνικά: ενεργοποίηση" })
+Scripts:AddToggle({ Text = "ქართული: ჩართვა" })
+Scripts:AddToggle({ Text = "日本語：機能を有効にする" })
+Scripts:AddToggle({ Text = "中文：启用功能" })
+Scripts:AddToggle({ Text = "한국어: 기능 켜기" })
+Scripts:AddSlider({ Text = "Español: velocidad", Min = 0, Max = 100, Default = 40 })
+Scripts:AddDropdown({ Text = "Язык / Language / ენა", Values = { "English", "Русский", "ქართული", "日本語", "العربية", "עברית", "Ελληνικά" }, Default = "ქართული",
+	Search = true, Description = "Search works in any script: try typing рус or ქარ." })
+Scripts:AddChips({ Text = "Tags (character-safe limits)", MaxLength = 6, Default = { "Ποδόσφαιρο", "東京都庁" },
+	Description = "MaxLength counts characters, not bytes, so nothing is cut in half." })
+local RTL = Lang:AddGroup({ Title = "Right to left", Icon = TingUI.Icons.languages, Side = "Right" })
+RTL:AddLabel("مرحبا بك في الواجهة")
+RTL:AddToggle({ Text = "تفعيل الخاصية" })
+RTL:AddLabel("ברוכים הבאים לממשק")
+RTL:AddSwitch({ Text = "הפעל את התכונה" })
+RTL:AddParagraph({ Title = "How it works", Content = "Labels in Arabic or Hebrew line up on the right by themselves. Force either way with RTL = true or RTL = false." })
+RTL:AddButton({ Text = "Toast: Привет 👋", Style = "Primary", Callback = function() TingUI:Toast({ Text = "Привет, мир! გამარჯობა! こんにちは", Type = "Success" }) end })
 
 ------------------------------------------------------------------ About + Config
 local About = Window:AddTab("About")

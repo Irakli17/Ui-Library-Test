@@ -467,13 +467,6 @@ def particles(img, size, kind, color, rng, count=70, t=0.0):
             for k in range(arms):
                 ang = math.pi * k / arms + (0.3 if kind == 'Crystals' else 0)
                 seg(d, (x - math.cos(ang) * r, y - math.sin(ang) * r), (x + math.cos(ang) * r, y + math.sin(ang) * r), color, a, 1)
-        elif kind == 'Drafting':
-            if rng.random() < 0.5:
-                seg(d, (x - 4, y), (x + 4, y), color, 0.4)
-                seg(d, (x, y - 4), (x, y + 4), color, 0.4)
-            else:
-                r = rng.uniform(6, 16)
-                d.arc(box(x - r, y - r, x + r, y + r), rng.uniform(0, 180), rng.uniform(200, 340), fill=rgba(color, 0.3), width=S(1))
         elif kind == 'Bokeh':
             depth = rng.random()
             r = 8 + depth ** 1.4 * 46

@@ -60,19 +60,38 @@ Add your own mapping with `TingUI.PresetAliases.OldName = "NewName"`.
 | [Frost](#frost) | round | Jura | icy top light, frosted inner border | white-to-ice gradient | Spinning ice crystals | **Frost** |
 | [Royal](#royal) | sharp-ish | Merriweather (serif) | gold top light, gilded double border | gold gradient | Glinting sparkles | |
 | [Cosmos](#cosmos) | round | Titillium Web | drifting nebula and parallax stars in the window, nebula across the screen, turning aurora border | violet-to-cyan gradient | Galaxy: stars, shooting stars, comets | |
-| [Storm](#storm) | reference | Oswald (condensed) | steel top light | solid | Rain: fine, heavy and mist in a shifting wind, heavy drops splash; distant lightning | **Storm** |
-| [Blueprint](#blueprint) | sharp | Patrick Hand | drafting grid, white inner line | solid | Pencil marks | |
+| [Storm](#storm) | reference | Builder Sans | steel top light | solid | Rain: fine, heavy and mist in a shifting wind, heavy drops splash; distant lightning | **Storm** |
+| [Blueprint](#blueprint) | sharp | Patrick Hand | drafting grid, white inner line | solid | none | |
 | [Hazard](#hazard) | square | Sarpanch | static yellow and black striped border at 45° | solid | none | |
 | [Glass](#glass) | very round | Nunito | translucent, blurred surfaces, white inner line | gradient | Lens bokeh at different depths, glints | |
 | [Hologram](#hologram) | crisp | Michroma | cyan projection: scanlines, see-through surface, slow scanning aura | ice-to-cyan gradient | Holo: data motes | **Hologram** |
 | [Circuit](#circuit) | sharp | Ubuntu | graphite board, copper inner line, amber top light | amber gradient | Static: electric arcs | **Circuit** |
 | [Serotonin](#serotonin) | square | Arial | hairline teal outline in a dark teal frame, teal light from the top, flat slate panels | teal | none | |
+| [Flames](#flames) | round | Builder Sans | charcoal, warm light from below | ember orange | Embers | **Flames** |
 
 ## Scenes
 
 A scene is living artwork a theme draws in and around each window. It reacts to the player: a **click** on the window, a **tab switch** and the window **opening** each get their own response. Scenes are built entirely from plain frames, so they need no uploaded images and work in every executor and every game.
 
 They're also careful with performance and safety. A scene pauses while its window is hidden, crossfades in and out with theme blends and is destroyed once no theme uses it. **Reduced motion** holds it still. If a scene ever errors, it's switched off with one warning and the rest of the UI carries on.
+
+### Flames scene
+
+Fire crowns the top of the window and licks up its sides, drawn from a simulated flame sheet so every tongue rises, flickers and breaks apart on its own. A slow lava band runs along the bottom and glowing cracks open in the lower corners, pulsing with heat. Fire flares when the cursor comes near the top edge, a click throws sparks, a tab switch makes it surge and opening the window ignites it.
+
+```lua
+TingUI:SetFlames({
+	Color = Color3.fromRGB(255, 96, 22),   -- outer flame
+	Core = Color3.fromRGB(255, 226, 150),  -- hot core
+	Height = 64,          -- px above the window
+	Intensity = 1,        -- 0 to 2
+	Sides = true,         -- flames up the sides
+	Lava = true,          -- lava band along the bottom
+	Cracks = true,        -- lava cracks in the corners
+})
+```
+
+The same settings are in Theme Studio. Try blue (`Color = Color3.fromRGB(40, 150, 255)`, `Core = Color3.fromRGB(200, 240, 255)`) for spirit fire. The flame and lava art is a set of textures in `assets/textures` that download on first use; until they arrive simple frame flames stand in.
 
 ### Hologram scene
 
@@ -210,7 +229,7 @@ Deep space: drifting nebula clouds over a parallax star layer, a turning aurora 
 ### Storm
 <img src="images/themes/storm.png" alt="Storm">
 
-Slate and steel, condensed type, rain in a shifting wind and distant lightning. Clouds light up, drops bead and run down the glass, and bolts fork through. It has a live [scene](#scenes).
+Slate and steel, clean Builder Sans type, rain in a shifting wind and distant lightning. Clouds light up, drops bead and run down the glass, and bolts fork through. It has a live [scene](#scenes).
 
 </td>
   </tr>
@@ -220,7 +239,7 @@ Slate and steel, condensed type, rain in a shifting wind and distant lightning. 
 ### Blueprint
 <img src="images/themes/blueprint.png" alt="Blueprint">
 
-Drafting paper: navy blue, a white grid, a ruled double border, handwritten labels and drafting marks.
+Drafting paper: navy blue, a white grid, a ruled double border and handwritten labels.
 
 </td>
     <td valign="top">
@@ -260,6 +279,11 @@ The window is a chip on a circuit board, with current racing down its traces. It
 
 </td>
     <td valign="top">
+
+### Flames
+<img src="images/themes/flames.png" alt="Flames">
+
+Charcoal and ember orange. Real fire crowns the window and licks up its sides, embers drift up, lava flows along the bottom and cracks glow in the corners. It has a live [scene](#flames-scene). <sub>(Screenshot from the game.)</sub>
 
 </td>
   </tr>
@@ -302,9 +326,10 @@ Every key is optional.
 | `SurfaceTransparency` | See-through surfaces (`0-1`). |
 | `Blur` | World blur behind the UI. |
 | `Texture`, `BackdropTexture`, `Glitch` | Painted art and glitches (see [Theme textures](#theme-textures)). |
-| `Scene` | A [scene](#scenes) name: `"Hologram"`, `"Circuit"`, `"Ocean"` or one you registered. |
+| `Scene` | A [scene](#scenes) name: `"Hologram"`, `"Circuit"`, `"Ocean"`, `"Flames"` or one you registered. |
 | `TraceColor`, `EnergyColor` | Circuit's copper traces and current. They default to `Border` and `Accent`. |
 | `WaterColor`, `FoamColor` | Ocean's waves and tide, and its foam, ripples and caustic light. They default to `Accent` and `Text`. |
+| `FlameColor`, `FlameCore`, `FlameHeight`, `FlameIntensity`, `FlameSides`, `Lava`, `LavaCracks` | The Flames scene: outer and core fire colours, height above the window, intensity (0 to 2), side flames, the lava band and the corner cracks. |
 | `SnowColor` | Frost's snowfall and the drift it leaves. Defaults to `ParticleColor`. |
 | `BloomColor`, `VineColor` | Rose's blooms and breeze petals (default `ParticleColor`), and its stems and leaves. |
 | `SunColor`, `BirdColor` | The top of Sunset's sun (it shades into the second `TopLine` colour) and its birds (default `Text`). |
@@ -379,7 +404,7 @@ Switching kind, amount or theme **crossfades** the old particles out and the new
 
 ## Fonts
 
-Inter is downloaded once from GitHub into `<CacheFolder>/fonts`, which needs `writefile` and `getcustomasset`. Until it's ready, or if your executor can't do it, Gotham is used. `"Mono"` means RobotoMono. Any other name is looked up as a built-in Roblox font, for example `Michroma`, `Jura`, `Merriweather`, `FredokaOne`, `JosefinSans`, `TitilliumWeb`, `Oswald`, `Ubuntu`, `Nunito`, `Arial` or `SourceSans`.
+Inter is downloaded once from GitHub into `<CacheFolder>/fonts`, which needs `writefile` and `getcustomasset`. Until it's ready, or if your executor can't do it, Gotham is used. `"Mono"` means RobotoMono. Any other name is looked up as a built-in Roblox font, for example `BuilderSans` (Roblox's own clean sans, used by Storm and Flames), `Michroma`, `Jura`, `Merriweather`, `FredokaOne`, `JosefinSans`, `TitilliumWeb`, `Oswald`, `Ubuntu`, `Nunito`, `Arial` or `SourceSans`.
 
 The tab bar always fits, whatever the font. When a wide font (or a narrow window, or many tabs) would push tabs past the edge, the spacing tightens first, then the labels shrink slightly (never below 84%). Only if that still isn't enough does the bar scroll, sliding the active tab into view, with soft fades marking the hidden side. Unknown names fall back to Gotham.
 

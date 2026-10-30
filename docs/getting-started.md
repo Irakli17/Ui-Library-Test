@@ -28,7 +28,7 @@ The sturdiest way is `Loader.lua`. It tries GitHub, then the jsDelivr mirror, th
 ```lua
 local TingUI, err = loadstring(game:HttpGet("https://raw.githubusercontent.com/Irakli17/Ui-Library-Test/main/Loader.lua"))()({
 	Id = "MyHub",
-	Version = "main",   -- or a tag like "v0.0.9-stable" to pin a release
+	Version = "main",   -- or a tag like "v0.1.0-stable" to pin a release
 })
 if not TingUI then return warn(err) end
 ```

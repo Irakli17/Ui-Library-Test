@@ -142,6 +142,17 @@ TingUI handles the rest. A scene pauses while its window is hidden, is destroyed
 
 The built-in icons are `window, scan, keyboard, command, user, bell, check, cross, warn, info, discord, gear, snow, list, heart, chevron, search, eye, sparkle, lock, palette`, and since v0.0.9 `home, star, bolt, shield, trophy, crown, target, pin, globe, clock, calendar, download, upload, trash, copy, edit, folder, flag, fire, code, link, refresh, play, key, coin, gift, rocket, mail, wifi, chart, sword, users, moon, sun, bug, plus` (`TingUI.IconNames` lists them). They're 96 px white PNGs tinted to the theme. On load TingUI draws crisp vector versions immediately, downloads the PNGs in the background (`AssetBase`, then GitHub, then jsDelivr), caches them in `<CacheFolder>/icons/v1/` and fades each icon over to its image. Without `writefile` and `getcustomasset`, or with `NoImages = true`, the vector icons stay.
 
+Since v0.1.0 there are about 240 more, from [Lucide](https://lucide.dev) (ISC) and brand marks from [Simple Icons](https://simpleicons.org) (CC0), packed into one atlas image (`assets/icons/atlas-v1.png`) that downloads and caches like the rest. Look them up by name in any spelling:
+
+```lua
+Group:AddButton({ Text = "Settings", Icon = TingUI.Icons.settings })
+TingUI.Icons.mapPin, TingUI.Icons["map-pin"], TingUI.Icons.map_pin   -- all "map-pin"
+TingUI.Icons["brand-github"]                                          -- brand marks start with brand-
+print(#TingUI:GetIconNames())
+```
+
+A name that doesn't exist gives `nil`. To rebuild the atlas from newer icon sets, run `python tools/build_icon_atlas.py <lucide icons dir> <simple-icons dir>`. The Discord mark is carried inside the library itself, so it never waits on a download.
+
 To use your own, pass `Icons = {gear = "rbxassetid://..."}` in the load options, set `TingUI.IconAssets.gear = "..."` before building the UI, or draw one:
 
 ```lua

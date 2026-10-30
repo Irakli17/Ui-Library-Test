@@ -1,7 +1,7 @@
 --!nocheck
 --!nolint
 --[[
-	TingUI Library  v0.0.9-stable
+	TingUI Library  v0.1.0-stable
 	Single file, no dependencies. Loads with loadstring, or as a ModuleScript (require) in any Roblox game.
 
 	local TingUI = loadstring(game:HttpGet("https://raw.githubusercontent.com/Irakli17/Ui-Library-Test/main/TingUI.lua"))()
@@ -67,7 +67,7 @@ local Lighting = Service("Lighting")
 local TextService = Service("TextService")
 
 local TingUI = {
-	Version = "v0.0.9-stable",
+	Version = "v0.1.0-stable",
 	ConfirmsConfigDelete = true,                        -- the config tab asks before it deletes a config
 	ConfigProgressNotices = true,                       -- saving, loading and autoloading show Loading -> result
 	Id = InstanceId,
@@ -166,13 +166,13 @@ local TingUI = {
 				AccentGradient = { Color3.fromRGB(180, 140, 255), Color3.fromRGB(90, 210, 255) },
 				Texture = { { Image = "nebula", Transparency = 0.5, Drift = 0.03, Zoom = 0.9 }, { Image = "stars", Transparency = 0.15, Drift = 0.055, Zoom = 1.15, Pulse = 0.25 } },
 				BackdropTexture = { Image = "nebula", Transparency = 0.84, Drift = 0.012, Zoom = 0.6 } } },
-		-- slate and steel, condensed type and rain in shifting wind (fine, heavy and mist; heavy drops splash). Clouds roll
+		-- slate and steel, clean Builder Sans type and rain in shifting wind (fine, heavy and mist; heavy drops splash). Clouds roll
 		-- along the top and light up, drops bead and run on the glass (the pointer wipes them), bolts fork through
 		Storm = { Accent = Color3.fromRGB(120, 180, 255), Background = Color3.fromRGB(13, 15, 19), Group = Color3.fromRGB(18, 21, 26), GroupBorder = Color3.fromRGB(28, 32, 40), Control = Color3.fromRGB(24, 28, 35), ControlHover = Color3.fromRGB(34, 39, 48), Border = Color3.fromRGB(62, 72, 88), Outline = Color3.fromRGB(42, 48, 60), Text = Color3.fromRGB(226, 232, 242), Label = Color3.fromRGB(200, 208, 222), TextDim = Color3.fromRGB(140, 150, 168), TextMuted = Color3.fromRGB(104, 112, 128),
-			Style = { Radius = 0.9, Glow = 1.25, Font = "Oswald", TextScale = 1.05, Particles = "Rain", ParticleColor = Color3.fromRGB(170, 200, 240), Scene = "Storm", Tint = Color3.fromRGB(90, 120, 170), TintPlace = "Top", TintAmount = 0.16, TopLine = { Color3.fromRGB(200, 225, 255), Color3.fromRGB(120, 180, 255) }, Lightning = true } },
-		-- drafting paper: navy blue, a white grid, a ruled double border, handwritten labels and drafting marks
+			Style = { Radius = 0.9, Glow = 1.25, Font = "BuilderSans", TextScale = 1.02, Particles = "Rain", ParticleColor = Color3.fromRGB(170, 200, 240), Scene = "Storm", Tint = Color3.fromRGB(90, 120, 170), TintPlace = "Top", TintAmount = 0.16, TopLine = { Color3.fromRGB(200, 225, 255), Color3.fromRGB(120, 180, 255) }, Lightning = true } },
+		-- drafting paper: navy blue, a white grid, a ruled double border and handwritten labels (no particles)
 		Blueprint = { Accent = Color3.fromRGB(225, 238, 255), Background = Color3.fromRGB(18, 48, 92), Group = Color3.fromRGB(22, 56, 104), GroupBorder = Color3.fromRGB(52, 90, 140), Control = Color3.fromRGB(28, 64, 116), ControlHover = Color3.fromRGB(40, 80, 136), Border = Color3.fromRGB(120, 160, 210), Outline = Color3.fromRGB(70, 110, 165), Text = Color3.fromRGB(240, 246, 255), Label = Color3.fromRGB(214, 228, 248), TextDim = Color3.fromRGB(150, 180, 220), TextMuted = Color3.fromRGB(115, 145, 190),
-			Style = { Radius = 0.3, Glow = 0.35, Font = "PatrickHand", TextScale = 1.15, Particles = "Drafting", ParticleColor = Color3.fromRGB(210, 230, 255), Grid = true, GridColor = Color3.fromRGB(220, 235, 255), InnerLine = Color3.fromRGB(200, 225, 255) } },
+			Style = { Radius = 0.3, Glow = 0.35, Font = "PatrickHand", TextScale = 1.15, Particles = "None", Grid = true, GridColor = Color3.fromRGB(220, 235, 255), InnerLine = Color3.fromRGB(200, 225, 255) } },
 		-- hazard: industrial yellow and black, a striped warning-tape border, square corners and welding sparks
 		Hazard = { Accent = Color3.fromRGB(255, 200, 0), Background = Color3.fromRGB(16, 15, 10), Group = Color3.fromRGB(22, 21, 14), GroupBorder = Color3.fromRGB(40, 38, 24), Control = Color3.fromRGB(30, 28, 18), ControlHover = Color3.fromRGB(42, 40, 26), Border = Color3.fromRGB(90, 84, 40), Outline = Color3.fromRGB(56, 52, 30), Text = Color3.fromRGB(250, 246, 230), Label = Color3.fromRGB(228, 222, 200), TextDim = Color3.fromRGB(165, 158, 130), TextMuted = Color3.fromRGB(125, 118, 95),
 			Style = { Radius = 0.2, Glow = 0.9, Font = "Sarpanch", TextScale = 1.05, Particles = "None", Tint = Color3.fromRGB(255, 140, 0), TintPlace = "Bottom", TintAmount = 0.12,
@@ -207,6 +207,19 @@ local TingUI = {
 				Aura = { Color3.fromRGB(94, 213, 213), Color3.fromRGB(94, 213, 213) }, AuraSpeed = 0, AuraThickness = 1,
 				InnerLine = Color3.fromRGB(0, 52, 56),
 				AccentGradient = { Color3.fromRGB(150, 240, 240), Color3.fromRGB(70, 180, 186) } } },
+		-- flames: the window burns. A crown of real-looking fire (a simulated flipbook, crossfaded so it moves smoothly)
+		-- along the top edge and down the upper sides, sparks, a heat glow, lava creeping along the bottom and glowing
+		-- fissures in the lower corners. Everything stays outside or along the edges of the content. Customise it with
+		-- FlameColor, FlameCore, FlameHeight, FlameIntensity, FlameSides, Lava and LavaCracks (or TingUI:SetFlames).
+		Flames = { Accent = Color3.fromRGB(255, 122, 44), Background = Color3.fromRGB(16, 11, 10), Group = Color3.fromRGB(22, 15, 13), GroupBorder = Color3.fromRGB(46, 27, 21),
+			Control = Color3.fromRGB(33, 21, 18), ControlHover = Color3.fromRGB(47, 29, 23), Border = Color3.fromRGB(98, 50, 31), Outline = Color3.fromRGB(62, 35, 26),
+			Text = Color3.fromRGB(255, 240, 228), Label = Color3.fromRGB(238, 216, 202), TextDim = Color3.fromRGB(180, 142, 124), TextMuted = Color3.fromRGB(136, 104, 90),
+			AccentText = Color3.fromRGB(255, 156, 86), TabActive = Color3.fromRGB(52, 29, 21), Toggle = Color3.fromRGB(70, 38, 27),
+			Style = { Radius = 1, Glow = 1.4, Font = "BuilderSans", TextScale = 1.02, Particles = "Embers", ParticleColor = Color3.fromRGB(255, 130, 50), Scene = "Flames",
+				Tint = Color3.fromRGB(255, 90, 20), TintPlace = "Bottom", TintAmount = 0.12,
+				TopLine = { Color3.fromRGB(255, 205, 130), Color3.fromRGB(255, 80, 24) }, InnerLine = Color3.fromRGB(110, 46, 22),
+				AccentGradient = { Color3.fromRGB(255, 196, 96), Color3.fromRGB(255, 72, 30) },
+				FlameColor = Color3.fromRGB(255, 96, 22), FlameCore = Color3.fromRGB(255, 226, 150), FlameHeight = 64, FlameIntensity = 1 } },
 	},
 }
 env.TingUIInstances[InstanceId] = TingUI
@@ -265,7 +278,71 @@ TingUI.Events = {
 
 -- Runs a user callback in its own thread. Errors are caught, printed with a traceback and (optionally) shown as a notification,
 -- so one broken feature never takes the whole script down.
-local function FirstLine(s) return (tostring(s):match("^[^\n]*") or tostring(s)):sub(1, 140) end
+-- Text in any script: lengths, cuts and case-folding by character, not by byte, so an accented letter, a Cyrillic,
+-- Greek, Arabic, Hebrew, Georgian or CJK character is never split in half (a split one shows as an empty box).
+local Utf8 = {}
+function Utf8.Len(s)
+	s = tostring(s)
+	return utf8.len(s) or #s
+end
+-- the first n characters (whole characters only, even if the string has a broken byte in it)
+function Utf8.Clip(s, n)
+	s = tostring(s)
+	if n <= 0 then return "" end
+	local len = utf8.len(s)
+	if len then
+		if len <= n then return s end
+		return s:sub(1, utf8.offset(s, n + 1) - 1)
+	end
+	local out = s:sub(1, n)
+	-- drop a trailing partial character
+	return (out:gsub("[\192-\255][\128-\191]*$", ""))
+end
+-- lower case for Latin (with accents), Greek, Cyrillic and Armenian as well as plain ASCII (string.lower only does A-Z)
+function Utf8.Lower(s)
+	s = tostring(s)
+	if not utf8.len(s) then return s:lower() end
+	local out = {}
+	for _, c in utf8.codes(s) do
+		if c >= 65 and c <= 90 then c = c + 32
+		elseif (c >= 0xC0 and c <= 0xDE and c ~= 0xD7) then c = c + 32
+		elseif c >= 0x100 and c <= 0x17F and c % 2 == 0 then c = c + 1
+		elseif c >= 0x391 and c <= 0x3A9 and c ~= 0x3A2 then c = c + 32
+		elseif c >= 0x410 and c <= 0x42F then c = c + 32
+		elseif c >= 0x400 and c <= 0x40F then c = c + 80
+		elseif c >= 0x531 and c <= 0x556 then c = c + 48
+		elseif c >= 0x10A0 and c <= 0x10C5 then c = c + 0x1C60 -- Georgian Asomtavruli -> Nuskhuri
+		end
+		out[#out + 1] = utf8.char(c)
+	end
+	return table.concat(out)
+end
+-- true when the text's first strong letter is from a right-to-left script (Hebrew, Arabic, Syriac, Thaana, N'Ko)
+function Utf8.IsRTL(s)
+	if type(s) ~= "string" or not utf8.len(s) then return false end
+	for _, c in utf8.codes(s) do
+		if (c >= 0x0590 and c <= 0x08FF) or (c >= 0xFB1D and c <= 0xFDFF) or (c >= 0xFE70 and c <= 0xFEFF) then return true end
+		if (c >= 65 and c <= 90) or (c >= 97 and c <= 122) or c >= 0xC0 then return false end
+	end
+	return false
+end
+-- the first n characters, uppercased where that applies (initials for dock buttons)
+function Utf8.Initials(s, n)
+	return Utf8.Clip(s, n or 1):upper()
+end
+-- whether a GUI object is actually on screen: it and every parent up to its ScreenGui are visible. Per-frame work
+-- (sheens, spinning previews) checks this and skips anything in a closed tab, a hidden window or a folded section.
+function Utf8.Shown(g)
+	local depth = 0
+	while g and depth < 40 do
+		if g:IsA("LayerCollector") then return g.Enabled ~= false end
+		if g:IsA("GuiObject") and not g.Visible then return false end
+		g = g.Parent
+		depth = depth + 1
+	end
+	return g ~= nil
+end
+local function FirstLine(s) return Utf8.Clip(tostring(s):match("^[^\n]*") or tostring(s), 140) end
 local function SafeCall(label, fn, ...)
 	if type(fn) ~= "function" then return end
 	local args = table.pack(...)
@@ -342,6 +419,8 @@ local function FamilyFor(name)
 	if name == "Inter" then return TingUI._interAsset end
 	if name == nil or name == "Gotham" then return nil end
 	if name == "Mono" then name = "RobotoMono" end
+	-- Builder Sans (Roblox's own UI face): clean, very readable, every weight, wide script coverage
+	if name == "BuilderSans" then return "rbxasset://fonts/families/BuilderSans.json" end
 	if FamilyCache[name] ~= nil then return FamilyCache[name] or nil end
 	local fam = false
 	pcall(function() fam = Font.fromEnum(Enum.Font[name]).Family end)
@@ -1191,6 +1270,20 @@ Connect(UIS.InputBegan, function(input)
 end)
 TingUI.Events.TabChanged:Connect(function(_, W) if W and W.Frame then Feedback(W.Frame, "Tab") end end)
 TingUI.Events.VisibilityChanged:Connect(function(v, W) if v and W and W.Frame then Feedback(W.Frame, "Open") end end)
+
+-- Tune the Flames theme live: TingUI:SetFlames({ Color = Color3, Core = Color3, Height = 64, Intensity = 1,
+-- Sides = true, Lava = true, Cracks = true }). Any key left out keeps its value. Works on any theme using the scene.
+function TingUI:SetFlames(o)
+	o = o or {}
+	local st = table.clone(self.Style)
+	local map = { Color = "FlameColor", Core = "FlameCore", Height = "FlameHeight", Intensity = "FlameIntensity", Sides = "FlameSides",
+		Lava = "Lava", Cracks = "LavaCracks" }
+	for k, key in pairs(map) do if o[k] ~= nil then st[key] = o[k] end end
+	self:SetStyle(st)
+	for _, e in ipairs(Surfaces) do
+		for name, S in pairs(e.Scenes or {}) do if name == "Flames" then pcall(Kinds.Flames.Paint, S) end end
+	end
+end
 
 function TingUI:RegisterScene(name, def)
 	assert(type(name) == "string" and type(def) == "table" and type(def.Build) == "function",
@@ -2667,6 +2760,294 @@ Kinds.Storm = {
 	end,
 }
 
+--------------------------------------------------------------------------
+-- Flames: the window is on fire without the fire getting in the way. A crown of flames burns along its top edge and
+-- licks down the upper sides, all outside the content: a simulated, looping flipbook in two layers (a deep outer
+-- flame and a hotter, shorter core), a heat glow behind them and sparks drifting up. Inside, a thin flow of lava runs
+-- along the bottom edge and glowing fissures climb from the lower corners, with heat pulsing up through them. The pointer near the top
+-- makes the fire flare, a click throws a burst of sparks, a tab switch sends a surge across, and arriving lights it.
+-- Style keys: FlameColor, FlameCore, FlameHeight (px), FlameIntensity (0-2), FlameSides, Lava, LavaCracks.
+--------------------------------------------------------------------------
+local FLAME = { Frames = 20, W = 512, H = 96, Cols = 2 }
+function FX.FlameRect(fr) return Vector2.new((fr % FLAME.Cols) * FLAME.W, math.floor(fr / FLAME.Cols) * FLAME.H) end
+-- one burning strip: an outer flame and its white-hot core, each drawn twice (this frame and the next) and
+-- crossfaded, so the fire moves smoothly at any frame rate instead of stepping through the flipbook
+function FX.FlameTile(S, parent, z, rect)
+	local t = { Layers = {}, Grads = {} }
+	for i, name in ipairs({ "OuterA", "OuterB", "CoreA", "CoreB" }) do
+		t.Layers[name] = New("ImageLabel", { AnchorPoint = Vector2.new(0, 1), BackgroundTransparency = 1, ImageTransparency = 1,
+			ImageRectSize = rect or Vector2.new(FLAME.W, FLAME.H), ScaleType = Enum.ScaleType.Stretch, ZIndex = (z or 1) + (i > 2 and 1 or 0), Parent = parent })
+		-- a horizontal fade, so a tile never shows the straight edge where it was cut from the sheet
+		t.Grads[i] = New("UIGradient", { Parent = t.Layers[name] })
+	end
+	t.Rect = rect
+	return t
+end
+-- fade(px) gives 0 (fully shown) to 1 (hidden) for a point px across the tile, sampled into the tile's gradients
+function FX.FlameFade(tile, x0, width, fade)
+	local kps = {}
+	for i = 0, 10 do
+		local u = i / 10
+		kps[#kps + 1] = NumberSequenceKeypoint.new(u, math.clamp(fade(x0 + u * width), 0, 1))
+	end
+	local seq = NumberSequence.new(kps)
+	for _, g in ipairs(tile.Grads) do g.Transparency = seq end
+end
+function FX.FlameDraw(S, tile, pos, size, phase, power, F, rot, anchor)
+	local outer, core = TextureImage("flames"), TextureImage("flames-core")
+	local fr = (phase % FLAME.Frames)
+	local a = math.floor(fr)
+	local b = (a + 1) % FLAME.Frames
+	local frac = fr - a
+	local sub = tile.Rect and Vector2.new(tile.SubX or 0, 0) or Vector2.new(0, 0)
+	for name, img in pairs(tile.Layers) do
+		local isCore = name:sub(1, 4) == "Core"
+		local useB = name:sub(-1) == "B"
+		img.Image = isCore and core or outer
+		img.ImageRectOffset = FX.FlameRect(useB and b or a) + sub
+		img.Position = pos
+		img.Size = size
+		img.Rotation = rot or 0
+		if anchor then img.AnchorPoint = anchor end
+		img.ImageColor3 = isCore and S.CoreColor or S.Hot
+		local w = useB and frac or (1 - frac)
+		local strength = math.min(1, power) * w * (isCore and 0.9 or 1)
+		img.ImageTransparency = (img.Image ~= "") and F(1 - strength) or 1
+	end
+end
+function FX.FlameBuild(S)
+	for _, list in ipairs({ S.Strip or {}, S.Sides or {} }) do
+		for _, t in ipairs(list) do for _, img in pairs(t.Layers) do img:Destroy() end end
+	end
+	for _, f in ipairs(S.Tongues or {}) do f:Destroy() end
+	S.Strip, S.Sides, S.Tongues = {}, {}, {}
+	local st = TingUI.Style
+	local h = st.FlameHeight or 64
+	S.FH = h
+	local tw = h * FLAME.W / FLAME.H
+	S.TW = tw
+	for i = 1, math.ceil((S.W + 60) / tw) + 1 do S.Strip[i] = FX.FlameTile(S, S.Root, 1) end
+	-- the strip fades out just past each corner, so it never ends in a straight cut
+	for i, tile in ipairs(S.Strip) do
+		local x = (i - 1) * tw - 30
+		FX.FlameFade(tile, x, tw, function(px)
+			local W = S.W
+			if px < 34 then return 1 - (px + 14) / 48 end
+			if px > W - 34 then return 1 - (W + 14 - px) / 48 end
+			return 0
+		end)
+	end
+	-- the sides: upright tongues climbing the upper part of each side edge, half hidden behind the window, smaller
+	-- further down. Their own edges are faded so no cut line shows.
+	if st.FlameSides ~= false then
+		for side = 1, 2 do
+			for k = 1, 3 do
+				local t = FX.FlameTile(S, S.Root, 1, Vector2.new(120, FLAME.H))
+				t.Side, t.K, t.SubX = side, k, ((side * 3 + k * 5) % 7) * 54
+				FX.FlameFade(t, 0, 1, function(u) return 1 - math.clamp(math.min(u, 1 - u) / 0.32, 0, 1) end)
+				S.Sides[#S.Sides + 1] = t
+			end
+		end
+	end
+	-- frame-drawn tongues, shown only until the flipbook has loaded (or where images can't load at all)
+	for i = 1, math.ceil(S.W / 22) + 2 do
+		S.Tongues[i] = New("Frame", { AnchorPoint = Vector2.new(0.5, 1), BackgroundTransparency = 1, ZIndex = 1, Parent = S.Root }, { CornerFixed(999),
+			New("UIGradient", { Rotation = 90, Transparency = NumberSequence.new({ NumberSequenceKeypoint.new(0, 1), NumberSequenceKeypoint.new(0.35, 0.3),
+				NumberSequenceKeypoint.new(1, 0) }) }) })
+	end
+	S.BuiltFor = Vector3.new(S.W, S.H, h)
+	if S.Hot then Kinds.Flames.Paint(S) end
+end
+function FX.Spark(S, x, y, vx, vy, life, big)
+	S.Sparks = S.Sparks or {}
+	if #S.Sparks > 70 then return end
+	local size = big and math.random(3, 4) or math.random(1, 3)
+	local f = New("Frame", { AnchorPoint = Vector2.new(0.5, 0.5), Position = UDim2.fromOffset(x, y), Size = UDim2.fromOffset(size, size),
+		BackgroundColor3 = S.CoreColor or Color3.fromRGB(255, 220, 140), BackgroundTransparency = 1, BorderSizePixel = 0, ZIndex = 3, Parent = S.Root },
+		{ CornerFixed(2) })
+	table.insert(S.Sparks, { Frame = f, X = x, Y = y, Vx = vx or (math.random() - 0.5) * 20, Vy = vy or -(30 + math.random() * 50), Age = 0,
+		Life = life or (0.8 + math.random() * 1.2), Ph = math.random() * 6.28 })
+end
+-- inside the window: a thin flow of lava along the bottom edge, and fissures glowing up from the lower corners
+-- (charred edges, a hot middle, heat pulsing up through them)
+function FX.LavaBuild(S)
+	for _, o in ipairs(S.LavaParts or {}) do o:Destroy() end
+	S.LavaParts, S.CrackImgs, S.CrackHeat = {}, {}, {}
+	S.LavaFrame = nil
+	local st = TingUI.Style
+	if st.Lava ~= false then
+		local band = New("Frame", { AnchorPoint = Vector2.new(0, 1), Position = UDim2.fromScale(0, 1), Size = UDim2.new(1, 0, 0, 8),
+			BackgroundTransparency = 1, ClipsDescendants = true, ZIndex = 2, Parent = S.Top })
+		S.LavaFrame = band
+		S.LavaImg = New("ImageLabel", { Size = UDim2.new(1, 512, 1, 0), BackgroundTransparency = 1, ImageTransparency = 1, ScaleType = Enum.ScaleType.Tile,
+			TileSize = UDim2.fromOffset(256, 48), ZIndex = 2, Parent = band }, {
+			New("UIGradient", { Rotation = 90, Transparency = NumberSequence.new({ NumberSequenceKeypoint.new(0, 0.9), NumberSequenceKeypoint.new(0.5, 0.25),
+				NumberSequenceKeypoint.new(1, 0) }) }) })
+		S.LavaRim = New("Frame", { Size = UDim2.new(1, 0, 0, 1), BackgroundTransparency = 1, BorderSizePixel = 0, ZIndex = 3, Parent = band })
+		table.insert(S.LavaParts, band)
+	end
+	if st.LavaCracks ~= false then
+		local w = math.min(S.W * 0.42, 250)
+		for side = 0, 1 do
+			local base = New("ImageLabel", { AnchorPoint = Vector2.new(side, 1), Position = UDim2.fromScale(side, 1), Size = UDim2.fromOffset(w, w / 2),
+				BackgroundTransparency = 1, ImageTransparency = 1, ImageRectOffset = Vector2.new(side * 512, 0), ImageRectSize = Vector2.new(512, 256),
+				ZIndex = 1, Parent = S.Top })
+			-- the hot core copy, masked by a gradient that sweeps upward: heat climbing through the cracks
+			local hot = New("ImageLabel", { AnchorPoint = Vector2.new(side, 1), Position = UDim2.fromScale(side, 1), Size = UDim2.fromOffset(w, w / 2),
+				BackgroundTransparency = 1, ImageTransparency = 1, ImageRectOffset = Vector2.new(side * 512, 0), ImageRectSize = Vector2.new(512, 256),
+				ZIndex = 1, Parent = S.Top })
+			local g = New("UIGradient", { Rotation = 90, Offset = Vector2.new(0, 1), Transparency = NumberSequence.new({ NumberSequenceKeypoint.new(0, 1),
+				NumberSequenceKeypoint.new(0.4, 1), NumberSequenceKeypoint.new(0.5, 0.1), NumberSequenceKeypoint.new(0.6, 1), NumberSequenceKeypoint.new(1, 1) }), Parent = hot })
+			table.insert(S.CrackImgs, base)
+			table.insert(S.CrackHeat, { Img = hot, Grad = g })
+			table.insert(S.LavaParts, base)
+			table.insert(S.LavaParts, hot)
+		end
+	end
+	S.LavaFor = Vector3.new(S.W, S.H, (st.Lava ~= false and 1 or 0) + (st.LavaCracks ~= false and 2 or 0))
+end
+Kinds.Flames = {
+	Build = function(S)
+		S.Flare, S.Ignite, S.SurgeT, S.Sparks, S.SparkT, S.PulseT, S.Phase = 0, 1, nil, {}, 0, 0, 0
+		S.Glow = New("Frame", { AnchorPoint = Vector2.new(0.5, 1), Position = UDim2.new(0.5, 0, 0, 4), BackgroundTransparency = 1, ZIndex = 0, Parent = S.Root },
+			{ CornerFixed(40), New("UIGradient", { Rotation = 90, Transparency = NumberSequence.new({ NumberSequenceKeypoint.new(0, 1),
+				NumberSequenceKeypoint.new(0.7, 0.55), NumberSequenceKeypoint.new(1, 0.35) }) }) })
+		FX.FlameBuild(S)
+		FX.LavaBuild(S)
+	end,
+	Paint = function(S)
+		local st = TingUI.Style
+		S.Hot = st.FlameColor or Color3.fromRGB(255, 96, 22)
+		S.CoreColor = st.FlameCore or Color3.fromRGB(255, 226, 150)
+		for i, f in ipairs(S.Tongues or {}) do f.BackgroundColor3 = (i % 3 == 0) and S.CoreColor or S.Hot end
+		if S.Glow then S.Glow.BackgroundColor3 = S.Hot end
+		if S.LavaImg then S.LavaImg.ImageColor3 = S.Hot:Lerp(Color3.new(1, 1, 1), 0.5) end
+		if S.LavaRim then S.LavaRim.BackgroundColor3 = S.CoreColor end
+		for _, img in ipairs(S.CrackImgs or {}) do img.ImageColor3 = S.Hot end
+		for _, h in ipairs(S.CrackHeat or {}) do h.Img.ImageColor3 = S.CoreColor end
+		for _, sp in ipairs(S.Sparks or {}) do sp.Frame.BackgroundColor3 = S.CoreColor end
+	end,
+	Update = function(S, dt, t)
+		local F = S.Fade
+		local st = TingUI.Style
+		local W, H = S.W, S.H
+		if not S.BuiltFor or S.BuiltFor.X ~= W or S.BuiltFor.Z ~= (st.FlameHeight or 64) or ((st.FlameSides ~= false) ~= (#S.Sides > 0)) then FX.FlameBuild(S) end
+		local lavaKey = (st.Lava ~= false and 1 or 0) + (st.LavaCracks ~= false and 2 or 0)
+		if not S.LavaFor or S.LavaFor.X ~= W or S.LavaFor.Y ~= H or S.LavaFor.Z ~= lavaKey then FX.LavaBuild(S) Kinds.Flames.Paint(S) end
+		local power = math.clamp(st.FlameIntensity or 1, 0, 2)
+		-- the pointer near the top edge feeds the fire
+		local near = 0
+		if S.Mouse and S.Mouse.X > -40 and S.Mouse.X < W + 40 then near = math.clamp(1 - math.abs(S.Mouse.Y - 10) / 90, 0, 1) end
+		S.Near = (S.Near or 0) + (near - (S.Near or 0)) * math.min(1, dt * 4)
+		S.Flare = math.max(S.Flare - dt * 1.1, 0)
+		S.Ignite = math.min(1, S.Ignite + dt / 1.5)
+		local breathe = 0.9 + 0.1 * math.sin(t * 2.3) * math.sin(t * 0.9 + 1)
+		local heat = power * breathe * (1 + S.Near * 0.3 + S.Flare * 0.5)
+		-- playback speed follows the heat a little: a flared fire roars
+		S.Phase = S.Phase + dt * 12.5 * (0.85 + 0.25 * math.min(heat, 1.6))
+		if S.SurgeT then S.SurgeT = S.SurgeT + dt if S.SurgeT > 1.3 then S.SurgeT = nil end end
+		local h, tw = S.FH, S.TW
+		local have = TextureImage("flames") ~= ""
+		for i, tile in ipairs(S.Strip) do
+			local x = (i - 1) * tw - 30
+			local cx = x + tw / 2
+			local ig = math.clamp(S.Ignite * 2.2 - math.abs(cx - W / 2) / math.max(W, 1) * 1.6, 0, 1)
+			local surge = S.SurgeT and math.max(0, 1 - math.abs(cx / math.max(W, 1) - (S.SurgeT / 0.95 - 0.1)) * 2.5) * 0.4 or 0
+			local th = h * (0.92 + 0.12 * math.min(heat, 1.5) + surge) * ig
+			-- the base sits 14px down, behind the window, so the dense bed of the fire never shows as a band
+			FX.FlameDraw(S, tile, UDim2.fromOffset(x, 14), UDim2.fromOffset(tw, th), S.Phase, heat * ig, F)
+		end
+		for _, tile in ipairs(S.Sides) do
+			local s, k = tile.Side, tile.K
+			local sz = h * (0.78 - k * 0.14) * S.Ignite * (0.9 + 0.1 * math.min(heat, 1.5))
+			local y = 18 + (k - 1) * h * 0.42
+			local wide = sz * 120 / FLAME.H
+			-- centred on the edge: the inner half is behind the window, the outer half licks up along the side
+			FX.FlameDraw(S, tile, UDim2.fromOffset((s == 1 and 0 or W) - wide / 2, y), UDim2.fromOffset(wide, sz),
+				S.Phase + k * 7 + s * 3, heat * (1 - k * 0.18), F)
+		end
+		for i, f in ipairs(S.Tongues) do
+			if not have then
+				local fl = 0.55 + 0.45 * math.abs(math.sin(t * (3 + (i % 5) * 0.7) + i * 1.9))
+				local th = h * 0.55 * fl * (0.6 + 0.4 * ((i * 37) % 7) / 6) * S.Ignite * math.min(heat, 1.3)
+				f.Position = UDim2.fromOffset((i - 1) * 22 - 4 + math.sin(t * 2 + i) * 3, 6)
+				f.Size = UDim2.fromOffset(14 + (i % 3) * 4, th)
+				f.BackgroundTransparency = F(0.15)
+			else
+				f.BackgroundTransparency = 1
+			end
+		end
+		S.Glow.Size = UDim2.new(1, 50, 0, h * 1.3)
+		S.Glow.BackgroundTransparency = F(1 - 0.22 * math.min(heat, 1.4) * S.Ignite)
+		-- sparks drift up out of the fire, more when it's hotter
+		S.SparkT = S.SparkT - dt
+		if S.SparkT <= 0 and power > 0 then
+			S.SparkT = (0.1 + math.random() * 0.14) / math.max(power * (1 + S.Near + S.Flare), 0.2)
+			FX.Spark(S, math.random() * W, -h * (0.15 + math.random() * 0.35))
+		end
+		for i = #S.Sparks, 1, -1 do
+			local sp = S.Sparks[i]
+			sp.Age = sp.Age + dt
+			sp.Vx = sp.Vx + math.sin(sp.Age * 5 + sp.Ph) * 40 * dt
+			sp.Vy = sp.Vy - 10 * dt
+			sp.X, sp.Y = sp.X + sp.Vx * dt, sp.Y + sp.Vy * dt
+			local k = sp.Age / sp.Life
+			sp.Frame.Position = UDim2.fromOffset(sp.X, sp.Y)
+			sp.Frame.BackgroundColor3 = S.CoreColor:Lerp(S.Hot, math.min(1, k * 1.5))
+			sp.Frame.BackgroundTransparency = F(math.clamp(k * 1.1, 0, 1) * 0.9 + 0.1 * math.abs(math.sin(sp.Age * 30)))
+			if k >= 1 then
+				sp.Frame:Destroy()
+				table.remove(S.Sparks, i)
+			end
+		end
+		-- lava creeping along the bottom, cracks breathing, and every few seconds a pulse of heat climbing them
+		if S.LavaImg then
+			local ltex = TextureImage("lava")
+			S.LavaImg.Image = ltex
+			S.LavaImg.Position = UDim2.fromOffset(-((t * 8) % 256), 0)
+			S.LavaImg.ImageTransparency = ltex ~= "" and F(0.1 - 0.06 * math.sin(t * 1.3)) or 1
+			S.LavaFrame.BackgroundTransparency = ltex ~= "" and 1 or F(0.45)
+			S.LavaFrame.BackgroundColor3 = S.Hot
+			S.LavaRim.BackgroundTransparency = F(0.5 + 0.25 * math.sin(t * 2.1))
+		end
+		if #S.CrackImgs > 0 then
+			local ctex = TextureImage("cracks")
+			S.PulseT = S.PulseT - dt
+			if S.PulseT <= 0 then S.PulseT, S.PulseStart = 2 + math.random() * 2.5, t end
+			for i, img in ipairs(S.CrackImgs) do
+				img.Image = ctex
+				img.ImageTransparency = ctex ~= "" and F(0.42 - 0.1 * math.sin(t * 1.1 + i * 2)) or 1
+				local hot = S.CrackHeat[i]
+				hot.Img.Image = ctex
+				local p = S.PulseStart and (t - S.PulseStart) / 1.6 or 2
+				hot.Grad.Offset = Vector2.new(0, 0.9 - p * 1.6)
+				hot.Img.ImageTransparency = (ctex ~= "" and p < 1.2) and F(0.25) or 1
+			end
+		end
+	end,
+	Feedback = function(S, kind, x, y)
+		if kind == "Open" then
+			S.Ignite = 0
+			for i = 1, 22 do FX.Spark(S, math.random() * S.W, -math.random() * 20, (math.random() - 0.5) * 50, -(60 + math.random() * 80), nil, i % 4 == 0) end
+		elseif kind == "Tab" then
+			S.SurgeT = 0
+		elseif kind == "Click" then
+			S.Flare = math.min(1.2, S.Flare + 0.5)
+			for i = 1, 9 do
+				local a = -math.pi / 2 + (math.random() - 0.5) * 2.2
+				local sp = 50 + math.random() * 70
+				FX.Spark(S, x, y, math.cos(a) * sp, math.sin(a) * sp, 0.5 + math.random() * 0.5, i % 3 == 0)
+			end
+			local r = New("Frame", { AnchorPoint = Vector2.new(0.5, 0.5), Position = UDim2.fromOffset(x, y), Size = UDim2.fromOffset(6, 6),
+				BackgroundTransparency = 1, ZIndex = 5, Parent = S.Top }, { CornerFixed(999) })
+			local rs = New("UIStroke", { Thickness = 1.5, Color = S.CoreColor or Color3.new(1, 1, 1), Transparency = S.Fade(0.35), Parent = r })
+			TweenService:Create(r, TweenInfo.new(0.4, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), { Size = UDim2.fromOffset(28, 28) }):Play()
+			TweenService:Create(rs, TweenInfo.new(0.4, Enum.EasingStyle.Quad, Enum.EasingDirection.In), { Transparency = 1, Color = S.Hot }):Play()
+			task.delay(0.42, function() r:Destroy() end)
+		end
+	end,
+}
+
 
 end
 
@@ -2719,6 +3100,82 @@ local function IconImage(f, kind, colorKey, fadeIn)
 	return img
 end
 
+-- The large icon set (v0.1.0): Lucide interface icons and Simple Icons brand marks, packed into one image
+-- (assets/icons/atlas-v1.png, built by tools/build_icon_atlas.py) so 243 icons cost a single download. Each is a 64 px
+-- cell picked out with ImageRectOffset and tinted by the theme like every other icon.
+local IconAtlas = { Image = nil, Live = setmetatable({}, { __mode = "k" }), Cell = 64, Cols = 16 }
+IconAtlas.Names = {
+	["settings"] = 0, ["sliders-horizontal"] = 1, ["toggle-left"] = 2, ["toggle-right"] = 3, ["crosshair"] = 4,
+	["swords"] = 5, ["skull"] = 6, ["ghost"] = 7, ["zap"] = 8, ["flame"] = 9, ["droplet"] = 10, ["snowflake"] = 11,
+	["cloud"] = 12, ["cloud-rain"] = 13, ["cloud-lightning"] = 14, ["wind"] = 15, ["tree-pine"] = 16, ["mountain"] = 17,
+	["map"] = 18, ["map-pin"] = 19, ["navigation"] = 20, ["compass"] = 21, ["footprints"] = 22, ["car"] = 23,
+	["bike"] = 24, ["plane"] = 25, ["anchor"] = 26, ["ship"] = 27, ["train-front"] = 28, ["bus"] = 29, ["gamepad-2"] = 30,
+	["joystick"] = 31, ["dice-5"] = 32, ["puzzle"] = 33, ["medal"] = 34, ["award"] = 35, ["bomb"] = 36,
+	["shield-check"] = 37, ["shield-alert"] = 38, ["shield-off"] = 39, ["lock-open"] = 40, ["key-round"] = 41,
+	["fingerprint"] = 42, ["scan-face"] = 43, ["eye-off"] = 44, ["bell-ring"] = 45, ["bell-off"] = 46,
+	["message-circle"] = 47, ["message-square"] = 48, ["send"] = 49, ["at-sign"] = 50, ["phone"] = 51, ["video"] = 52,
+	["camera"] = 53, ["image"] = 54, ["film"] = 55, ["music"] = 56, ["headphones"] = 57, ["mic"] = 58, ["mic-off"] = 59,
+	["volume-2"] = 60, ["volume-x"] = 61, ["radio"] = 62, ["tv"] = 63, ["monitor"] = 64, ["laptop"] = 65,
+	["smartphone"] = 66, ["cpu"] = 67, ["hard-drive"] = 68, ["server"] = 69, ["database"] = 70, ["wifi-off"] = 71,
+	["bluetooth"] = 72, ["battery"] = 73, ["battery-charging"] = 74, ["plug"] = 75, ["power"] = 76, ["refresh-cw"] = 77,
+	["rotate-ccw"] = 78, ["undo-2"] = 79, ["redo-2"] = 80, ["history"] = 81, ["timer"] = 82, ["hourglass"] = 83,
+	["alarm-clock"] = 84, ["calendar-days"] = 85, ["watch"] = 86, ["sunrise"] = 87, ["sunset"] = 88, ["cloud-sun"] = 89,
+	["thermometer"] = 90, ["activity"] = 91, ["heart-pulse"] = 92, ["brain"] = 93, ["bot"] = 94, ["sparkles"] = 95,
+	["wand-sparkles"] = 96, ["brush"] = 97, ["pen-tool"] = 98, ["pencil"] = 99, ["eraser"] = 100, ["scissors"] = 101,
+	["paperclip"] = 102, ["clipboard"] = 103, ["clipboard-check"] = 104, ["file"] = 105, ["file-text"] = 106,
+	["file-code"] = 107, ["folder-open"] = 108, ["archive"] = 109, ["package"] = 110, ["box"] = 111, ["boxes"] = 112,
+	["layers"] = 113, ["layout-grid"] = 114, ["layout-dashboard"] = 115, ["columns-2"] = 116, ["rows-2"] = 117,
+	["table"] = 118, ["list-checks"] = 119, ["list-ordered"] = 120, ["filter"] = 121, ["arrow-up"] = 122,
+	["arrow-down"] = 123, ["arrow-left"] = 124, ["arrow-right"] = 125, ["arrow-up-right"] = 126, ["move"] = 127,
+	["maximize-2"] = 128, ["minimize-2"] = 129, ["expand"] = 130, ["shrink"] = 131, ["chevrons-up-down"] = 132,
+	["external-link"] = 133, ["link-2"] = 134, ["unlink"] = 135, ["share-2"] = 136, ["save"] = 137, ["trash-2"] = 138,
+	["x"] = 139, ["circle-x"] = 140, ["circle-check"] = 141, ["circle-alert"] = 142, ["circle-help"] = 143,
+	["badge-check"] = 144, ["badge-alert"] = 145, ["ban"] = 146, ["check-check"] = 147, ["circle-plus"] = 148,
+	["circle-minus"] = 149, ["minus"] = 150, ["hash"] = 151, ["percent"] = 152, ["dollar-sign"] = 153, ["coins"] = 154,
+	["wallet"] = 155, ["credit-card"] = 156, ["shopping-cart"] = 157, ["shopping-bag"] = 158, ["store"] = 159,
+	["tag"] = 160, ["tags"] = 161, ["ticket"] = 162, ["gem"] = 163, ["diamond"] = 164, ["star-half"] = 165,
+	["thumbs-up"] = 166, ["thumbs-down"] = 167, ["smile"] = 168, ["frown"] = 169, ["laugh"] = 170, ["angry"] = 171,
+	["user-plus"] = 172, ["user-minus"] = 173, ["user-check"] = 174, ["user-x"] = 175, ["users-round"] = 176,
+	["contact"] = 177, ["id-card"] = 178, ["handshake"] = 179, ["hand"] = 180, ["earth"] = 181, ["languages"] = 182,
+	["book"] = 183, ["book-open"] = 184, ["graduation-cap"] = 185, ["lightbulb"] = 186, ["terminal"] = 187,
+	["code-xml"] = 188, ["braces"] = 189, ["bug-off"] = 190, ["git-branch"] = 191, ["mouse"] = 192,
+	["mouse-pointer-click"] = 193, ["pointer"] = 194, ["hand-metal"] = 195, ["eye-closed"] = 196, ["house"] = 197,
+	["door-open"] = 198, ["log-in"] = 199, ["log-out"] = 200, ["menu"] = 201, ["ellipsis"] = 202,
+	["ellipsis-vertical"] = 203, ["grip-vertical"] = 204, ["sun-moon"] = 205, ["moon-star"] = 206, ["cookie"] = 207,
+	["coffee"] = 208, ["pizza"] = 209, ["apple"] = 210, ["fish"] = 211, ["feather"] = 212, ["leaf"] = 213,
+	["flower"] = 214, ["sprout"] = 215, ["paw-print"] = 216, ["bird"] = 217, ["cat"] = 218, ["dog"] = 219,
+	["rabbit"] = 220, ["lucide-sword"] = 221, ["lucide-shield"] = 222, ["lucide-heart"] = 223, ["lucide-star"] = 224,
+	["lucide-search"] = 225, ["filter-x"] = 226, ["refresh-ccw"] = 227, ["loader"] = 228, ["loader-circle"] = 229,
+	["brand-discord"] = 230, ["brand-github"] = 231, ["brand-youtube"] = 232, ["brand-roblox"] = 233,
+	["brand-twitch"] = 234, ["brand-x"] = 235, ["brand-tiktok"] = 236, ["brand-telegram"] = 237, ["brand-reddit"] = 238,
+	["brand-steam"] = 239, ["brand-spotify"] = 240, ["brand-instagram"] = 241, ["brand-kick"] = 242,
+}
+if type(LoadOptions.Icons) == "table" and type(LoadOptions.Icons.atlas) == "string" then IconAtlas.Image = LoadOptions.Icons.atlas end
+function IconAtlas.Paint(img, kind)
+	local i = IconAtlas.Names[kind]
+	img.Image = IconAtlas.Image or ""
+	img.ImageRectOffset = Vector2.new((i % IconAtlas.Cols) * IconAtlas.Cell, math.floor(i / IconAtlas.Cols) * IconAtlas.Cell)
+	img.ImageRectSize = Vector2.new(IconAtlas.Cell, IconAtlas.Cell)
+end
+-- TingUI.Icons.settings, TingUI.Icons["map-pin"], TingUI.Icons.mapPin, TingUI.Icons.map_pin: the icon's name if it
+-- exists (core or atlas), else nil. Pass it anywhere an Icon is taken.
+TingUI.Icons = setmetatable({}, { __index = function(_, k)
+	if type(k) ~= "string" then return nil end
+	-- the Discord mark ships inside the library (always crisp, never waits on a download), so its brand name points there
+	if k == "brand-discord" or k == "brandDiscord" then return "discord" end
+	local n = k:gsub("(%l)(%u)", "%1-%2"):gsub("(%a)(%d)", "%1-%2"):gsub("_", "-"):lower()
+	for _, cand in ipairs({ k, n, k:lower(), "brand-" .. n }) do
+		if table.find(ICON_NAMES, cand) or IconAtlas.Names[cand] then return cand end
+	end
+	return nil
+end })
+function TingUI:GetIconNames()
+	local out = table.clone(ICON_NAMES)
+	for n in pairs(IconAtlas.Names) do table.insert(out, n) end
+	table.sort(out)
+	return out
+end
+
 -- Vector icons drawn from frames: window, keyboard, command, scan, bell, user, gear, snow, list, discord
 local CustomIcons = {}
 local atan2 = math.atan2 or function(y, x) return math.atan(y, x) end
@@ -2752,6 +3209,13 @@ local function Icon(kind, parent, size, colorKey)
 	end
 	if IconImages[kind] then
 		IconImage(f, kind, colorKey)
+		return f
+	end
+	if IconAtlas.Names[kind] then
+		local img = New("ImageLabel", { Name = "IconImage", BackgroundTransparency = 1, Size = UDim2.fromScale(1, 1),
+			ScaleType = Enum.ScaleType.Fit, ZIndex = f.ZIndex, Parent = f, Theme = { ImageColor3 = colorKey } })
+		IconAtlas.Paint(img, kind)
+		if not IconAtlas.Image then IconAtlas.Live[img] = kind end
 		return f
 	end
 	-- vector fallback; swapped for the image as soon as the high-res set has loaded
@@ -3640,12 +4104,30 @@ function OptBase:SetDisabled(v)
 	if self._onDisabled then self._onDisabled(self.Disabled) end
 	if self.Row then
 		if not self._blocker then
-			self._blocker = New("TextButton", {
-				Size = UDim2.fromScale(1, 1), BackgroundTransparency = self._blockerAlpha or 0.45, ZIndex = 30,
-				Active = true, Visible = false, Parent = self.Row, Theme = { BackgroundColor3 = "Group" },
-			})
+			local function Block(parent)
+				local b = New("TextButton", {
+					Name = "DisabledBlocker", Text = "", AutoButtonColor = false,
+					Size = UDim2.fromScale(1, 1), BackgroundTransparency = self._blockerAlpha or 0.45, ZIndex = 30,
+					Active = true, Visible = false, Parent = parent, Theme = { BackgroundColor3 = "Group" },
+				})
+				local corner = parent ~= self.Row and parent:FindFirstChildOfClass("UICorner")
+				if corner then corner:Clone().Parent = b end
+				return b
+			end
+			-- a row that lays its children out in a line (a button with sub-buttons) would treat a row-wide cover as one
+			-- more item and push the real buttons aside, so each item gets its own cover instead
+			if self.Row:FindFirstChildWhichIsA("UIGridStyleLayout") then
+				self._blockers = {}
+				for _, c in ipairs(self.Row:GetChildren()) do
+					if c:IsA("GuiObject") then table.insert(self._blockers, Block(c)) end
+				end
+				self._blocker = self._blockers[1] or Block(self.Row)
+			else
+				self._blocker = Block(self.Row)
+			end
 		end
 		self._blocker.Visible = self.Disabled
+		for _, b in ipairs(self._blockers or {}) do b.Visible = self.Disabled end
 	end
 end
 
@@ -5223,13 +5705,68 @@ function TingUI:SetWatermarkTitle(text)
 	WatermarkTitle = text
 end
 
+-- Any image source into something an ImageLabel shows: rbxassetid:// and rbxthumb:// pass through, a bare number
+-- becomes an asset id, an http(s) link is downloaded once into <CacheFolder>/images and a workspace file is loaded,
+-- both through getcustomasset. Anything that can't be loaded comes back as "" (an empty image, never an error).
+function TingUI:_ResolveImage(src)
+	if type(src) == "number" then return "rbxassetid://" .. src end
+	if type(src) ~= "string" or src == "" then return "" end
+	if src:match("^%d+$") then return "rbxassetid://" .. src end
+	if src:match("^rbx") then return src end
+	if not getcustomasset then return "" end
+	local ok, res = pcall(function()
+		if src:match("^https?://") then
+			local dir = self.CacheFolder .. "/images"
+			if not isfolder(self.CacheFolder) then makefolder(self.CacheFolder) end
+			if not isfolder(dir) then makefolder(dir) end
+			local name = src:gsub("[^%w%.]", "_"):sub(-80)
+			if not name:match("%.%a+$") then name = name .. ".png" end
+			local path = dir .. "/" .. name
+			if not isfile(path) then writefile(path, game:HttpGet(src)) end
+			return getcustomasset(path)
+		end
+		return getcustomasset(src)
+	end)
+	return ok and res or ""
+end
+
 -- custom logo for the watermark, e.g. "rbxassetid://123"; pass nil for the default logo
 function TingUI:SetIcon(id)
 	local has = id ~= nil and id ~= ""
 	self._iconId = has and id or nil
-	WatermarkImage.Image = has and id or ""
+	WatermarkImage.Image = has and TingUI:_ResolveImage(id) or ""
 	WatermarkImage.Visible = has
 	WatermarkLogo.Visible = not has
+	if not has then
+		WatermarkImage.Size = UDim2.fromOffset(18, 18)
+		WatermarkLabel.Visible = true
+	end
+end
+
+-- An image as the watermark (v0.1.0). image: "rbxassetid://...", an http(s) link or a file in the executor's
+-- workspace (both are cached and loaded with getcustomasset). opts (all optional):
+--   Width, Height (pixels, default 18 x 18 beside the text), Only = true (the image alone, no text),
+--   Transparency (0-1), Round (corner radius in pixels)
+-- Pass nil to go back to the default logo.
+function TingUI:SetWatermarkImage(image, opts)
+	opts = opts or {}
+	if image == nil or image == "" then
+		self:SetIcon(nil)
+		return
+	end
+	self:SetIcon(image)
+	WatermarkImage.Size = UDim2.fromOffset(opts.Width or opts.Height or 18, opts.Height or 18)
+	WatermarkImage.ScaleType = Enum.ScaleType.Fit
+	WatermarkImage.ImageTransparency = opts.Transparency or 0
+	local corner = WatermarkImage:FindFirstChildOfClass("UICorner")
+	if opts.Round then
+		corner = corner or New("UICorner", { Parent = WatermarkImage })
+		corner.CornerRadius = UDim.new(0, opts.Round)
+	elseif corner then
+		corner:Destroy()
+	end
+	WatermarkLabel.Visible = not opts.Only
+	Watermark.Size = UDim2.fromOffset(0, math.max(32, (opts.Height or 18) + 14))
 end
 
 task.spawn(function()
@@ -5238,7 +5775,9 @@ task.spawn(function()
 		local ping = 0
 		pcall(function() ping = math.floor(Stats.Network.ServerStatsItem["Data Ping"]:GetValue()) end)
 		local function col(c, s) return string.format('<font color="#%s">%s</font>', c:ToHex(), s) end
-		if WatermarkOverride then
+		if not Watermark.Visible or not WatermarkLabel.Visible then
+			-- nothing to update while it's hidden
+		elseif WatermarkOverride then
 			WatermarkLabel.Text = Esc(WatermarkOverride)
 		else
 			local title = WatermarkTitle or (TingUI.Windows[1] and TingUI.Windows[1].Title) or "TingUI"
@@ -5504,7 +6043,13 @@ function Elements:AddLabel(text, o)
 		Font = o.Bold and Enum.Font.GothamBold or Enum.Font.GothamSemibold,
 		TextColor3 = o.Dim and TingUI.Theme.TextDim or TingUI.Theme.Label, Parent = holder,
 	})
-	function L:SetText(t) lbl.Text = t; self._text = t end
+	-- right-to-left text (Arabic, Hebrew) lines up on the right, by itself or with RTL = true
+	local function Dir(t)
+		local rtl = o.RTL == true or (o.RTL == nil and Utf8.IsRTL(t))
+		lbl.TextXAlignment = rtl and Enum.TextXAlignment.Right or Enum.TextXAlignment.Left
+	end
+	Dir(text)
+	function L:SetText(t) lbl.Text = t; self._text = t Dir(t) end
 	function L:SetColor(c) lbl.TextColor3 = c end
 	if o.Description then L:SetDescription(o.Description) end
 	return L
@@ -5556,6 +6101,7 @@ function Elements:AddToggle(o)
 		Text = T._text, Position = UDim2.fromOffset(26, 0), Size = UDim2.new(1, -26, 1, 0),
 		TextXAlignment = Enum.TextXAlignment.Left, ZIndex = 2, Parent = row,
 	})
+	if o.RTL == true or (o.RTL == nil and Utf8.IsRTL(T._text)) then lbl.TextXAlignment = Enum.TextXAlignment.Right end
 
 	local function Colors()
 		local TH = TingUI.Theme
@@ -5721,7 +6267,8 @@ function Elements:AddDropdown(o)
 	local row = Row(self._container, h)
 	D.Row = row
 	if hasLabel then
-		New("TextLabel", { Text = o.Text, Size = UDim2.new(1, 0, 0, 16), TextXAlignment = Enum.TextXAlignment.Left, Parent = row })
+		local l = New("TextLabel", { Text = o.Text, Size = UDim2.new(1, 0, 0, 16), TextXAlignment = Enum.TextXAlignment.Left, Parent = row })
+		if o.RTL == true or (o.RTL == nil and Utf8.IsRTL(o.Text)) then l.TextXAlignment = Enum.TextXAlignment.Right end
 	end
 	local stroke = Stroke("Outline")
 	local box = New("TextButton", {
@@ -5823,9 +6370,9 @@ function Elements:AddDropdown(o)
 		pop.Size = UDim2.fromOffset(math.max(box.AbsoluteSize.X / TingUI.Scale, 120), math.min(#D.Values * 26 + 8, 184) + (s2 and 32 or 0))
 	end
 	local function Filter()
-		local q = search.Text:lower()
+		local q = Utf8.Lower(search.Text)
 		for v, it in pairs(items) do
-			it.Button.Visible = q == "" or tostring(v):lower():find(q, 1, true) ~= nil
+			it.Button.Visible = q == "" or Utf8.Lower(tostring(v)):find(q, 1, true) ~= nil
 		end
 	end
 	Connect(search:GetPropertyChangedSignal("Text"), Filter)
@@ -5870,7 +6417,11 @@ function Elements:AddDropdown(o)
 					D:Set(nv)
 				else
 					D:Set(v)
-					task.delay(0.14, function() if OpenPopup and OpenPopup.Frame == pop then ClosePopup() end end)
+					-- close after the flash, unless the list was closed and reopened in the meantime
+					local tok = (pop:GetAttribute("PopTok") or 0)
+					task.delay(0.14, function()
+						if OpenPopup and OpenPopup.Frame == pop and pop:GetAttribute("PopTok") == tok then ClosePopup() end
+					end)
 				end
 			end)
 		end
@@ -5895,27 +6446,67 @@ function Elements:AddDropdown(o)
 		end
 	end
 
+	-- the entry in Values that v stands for: the value itself, or one that only differs in type ("5" for 5, which is
+	-- what a config saved as JSON can hand back), or an index into Values
+	local function Resolve(v)
+		if v == nil then return nil end
+		if table.find(D.Values, v) then return v end
+		for _, x in ipairs(D.Values) do if tostring(x) == tostring(v) then return x end end
+		if type(v) == "number" and D.Values[v] ~= nil then return D.Values[v] end
+		return nil
+	end
 	function D:Set(v, silent)
+		local pending = nil
 		if self.Multi then
 			local nv = {}
 			if type(v) == "table" then
 				for k, val in pairs(v) do
-					if type(k) == "number" then nv[val] = true elseif val then nv[k] = true end
+					local want = (type(k) == "number") and val or (val and k or nil)
+					if want ~= nil then
+						local r = Resolve(want)
+						if r ~= nil then nv[r] = true else pending = pending or {} table.insert(pending, want) end
+					end
 				end
 			end
 			self.Value = nv
 		else
-			if type(v) == "number" and self.Values[v] ~= nil and not table.find(self.Values, v) then v = self.Values[v] end
-			if v ~= nil and not table.find(self.Values, v) then v = nil end
-			self.Value = v
+			local r = Resolve(v)
+			-- a value that isn't in the list yet (a config loaded before the list was filled, a player not in the
+			-- server yet) is remembered and picked as soon as SetValues brings it in
+			if v ~= nil and r == nil then pending = v end
+			self.Value = r
 		end
+		self._pending = pending
 		Render()
 		if not silent then Fire(self, self.Value) end
 	end
 	function D:SetValues(vals, keep)
 		self.Values = vals or {}
-		if not keep then self.Value = self.Multi and {} or nil end
+		if keep then
+			-- drop picks that are no longer in the list
+			if self.Multi then
+				for k in pairs(self.Value) do if not table.find(self.Values, k) then self.Value[k] = nil end end
+			elseif self.Value ~= nil and not table.find(self.Values, self.Value) then
+				self.Value = nil
+			end
+		else
+			self.Value = self.Multi and {} or nil
+		end
 		Build()
+		local p = self._pending
+		if p ~= nil then
+			if self.Multi then
+				local nv = table.clone(self.Value)
+				local any = false
+				for _, want in ipairs(p) do
+					local r = Resolve(want)
+					if r ~= nil then nv[r] = true any = true end
+				end
+				if any then self:Set(nv) end
+			elseif Resolve(p) ~= nil then
+				self:Set(p)
+			end
+		end
 	end
 	function D:Get() return self.Value end
 
@@ -5989,7 +6580,7 @@ function Elements:AddInput(o)
 			local f = box.Text:gsub("[^%d%.%-]", "")
 			if f ~= box.Text then box.Text = f return end
 		end
-		if o.MaxLength and #box.Text > o.MaxLength then box.Text = box.Text:sub(1, o.MaxLength) return end
+		if o.MaxLength and Utf8.Len(box.Text) > o.MaxLength then box.Text = Utf8.Clip(box.Text, o.MaxLength) return end
 		I.Value = box.Text
 		if o.Realtime then Fire(I, I.Value) end
 	end)
@@ -6188,7 +6779,8 @@ Connect(RunService.RenderStepped, function()
 	local t = os.clock()
 	for i = #ProgressBars, 1, -1 do
 		local p = ProgressBars[i]
-		if not p.Row.Parent then table.remove(ProgressBars, i) else p.Grad.Offset = Vector2.new(((t * 0.6) % 2) - 1, 0) end
+		if not p.Row.Parent then table.remove(ProgressBars, i)
+		elseif Utf8.Shown(p.Row) then p.Grad.Offset = Vector2.new(((t * 0.6) % 2) - 1, 0) end
 	end
 end)
 
@@ -6487,7 +7079,7 @@ function Elements:AddViewport(o)
 		end
 	end)
 	Connect(RunService.RenderStepped, function(dt)
-		if not model or dragging or not vf:IsDescendantOf(Gui) then return end
+		if not model or dragging or not vf:IsDescendantOf(Gui) or not Utf8.Shown(vf) then return end
 		if o.Rotate ~= false then yaw = yaw + dt * 0.9 end
 		pitch = pitch + (0.12 - pitch) * math.min(1, dt * 3)   -- ease back to the default tilt
 		Place()
@@ -6668,9 +7260,15 @@ function TingUI:CreatePanel(o)
 	RegisterScale(frame)
 	RegisterSurface(frame, "Panel", 10)
 
+	-- bring to front without ever climbing past the overlay (dropdown lists, pickers) or the notification stack: the
+	-- panels are restacked from 10 up, so ZIndex stays small however often you click between them
 	local function Front()
 		ZCounter = ZCounter + 1
-		frame.ZIndex = ZCounter
+		TingUI._ZStack = TingUI._ZStack or {}
+		local stack = TingUI._ZStack
+		for i = #stack, 1, -1 do if stack[i] == frame or not stack[i].Parent then table.remove(stack, i) end end
+		table.insert(stack, frame)
+		for i, f in ipairs(stack) do f.ZIndex = 10 + math.min(i, 30) end
 	end
 	MakeDraggable(header, frame, Front)
 	Front()
@@ -6750,6 +7348,1159 @@ function Elements:AddCredits(entries)
 	for _, e in ipairs(entries or {}) do table.insert(cards, BuildCreditCard(self._container, e)) end
 	return { Cards = cards, Add = function(_, e) local c = BuildCreditCard(self._container, e) table.insert(cards, c) return c end }
 end
+
+------------------------------------------------------------------------------
+-- v0.1.0 elements: Switch, ProgressRing, Spinner, Skeleton, Accordion, TabBox, Chips, Stepper, Segmented,
+-- RangeSlider, VerticalSlider, plus button styles, slider options and toasts. They share one motion language
+-- (Motion below), follow the theme live, and the ones that hold a value save and load with configs like any other.
+------------------------------------------------------------------------------
+do
+local Motion = {
+	Quick = TweenInfo.new(0.16, Enum.EasingStyle.Quad, Enum.EasingDirection.Out),
+	Smooth = TweenInfo.new(0.32, Enum.EasingStyle.Quint, Enum.EasingDirection.Out),
+	Spring = TweenInfo.new(0.45, Enum.EasingStyle.Back, Enum.EasingDirection.Out),
+	Bounce = TweenInfo.new(0.6, Enum.EasingStyle.Elastic, Enum.EasingDirection.Out, 0, false, 0),
+	Linear = function(t) return TweenInfo.new(t, Enum.EasingStyle.Linear) end,
+}
+TingUI.Motion = Motion
+local function Play(obj, info, goals) local tw = TweenService:Create(obj, info, goals) tw:Play() return tw end
+-- a connection that lives as long as `owner`: disconnected the moment the element is destroyed, so removed
+-- elements never leave listeners behind
+local function Bind(owner, signal, fn)
+	local c = signal:Connect(fn)
+	table.insert(Connections, c)
+	pcall(function() owner.Destroying:Connect(function() c:Disconnect() end) end)
+	return c
+end
+TingUI._Bind = Bind
+-- right-to-left scripts (Arabic, Hebrew, Syriac, Thaana, N'Ko): such labels align right on their own
+local function AlignFor(lbl, text, o)
+	if (o and o.RTL) or (o and o.RTL == nil and Utf8.IsRTL(text)) then
+		lbl.TextXAlignment = Enum.TextXAlignment.Right
+		return true
+	end
+	return false
+end
+TingUI._AlignFor = AlignFor
+local function Label(row, text, props)
+	local l = New("TextLabel", { Text = text, Size = UDim2.new(1, 0, 0, 16), TextXAlignment = Enum.TextXAlignment.Left, Parent = row })
+	for k, v in pairs(props or {}) do l[k] = v end
+	return l
+end
+local function Finish(group, opt, o, name)
+	Register(opt, o.Flag)
+	CatalogAdd(group, opt, name)
+	if o.Disabled then opt:SetDisabled(true) end
+	if o.Description or o.Tooltip then opt:SetDescription(o.Description or o.Tooltip) end
+	return opt
+end
+
+-- Switch: a pill switch whose knob springs across, stretching while you hold it. Saves like a toggle.
+-- Options: Text, Default, Flag, Callback, Description, Disabled, RTL. Methods as AddToggle.
+function Elements:AddSwitch(o)
+	o = type(o) == "string" and { Text = o } or o or {}
+	local Sw = NewOpt("Toggle", o)
+	Sw.Value = o.Default == true
+	Sw._text = o.Text or "Switch"
+	Sw._blockerAlpha = 1
+	local row = Row(self._container, 22)
+	Sw.Row = row
+	Sw._addons = MakeAddonHolder(row)
+	local rtl = (o.RTL == true) or (o.RTL == nil and Utf8.IsRTL(Sw._text))
+	local track = New("Frame", { AnchorPoint = Vector2.new(rtl and 1 or 0, 0.5), Position = UDim2.new(rtl and 1 or 0, 0, 0.5, 0),
+		Size = UDim2.fromOffset(34, 18), ZIndex = 2, Parent = row, Theme = { BackgroundColor3 = "Toggle" } },
+		{ CornerFixed(9), Stroke("Outline") })
+	local on = AccentOverlay(track, 9, true, false)
+	local knob = New("Frame", { AnchorPoint = Vector2.new(0, 0.5), Position = UDim2.new(0, 3, 0.5, 0), Size = UDim2.fromOffset(12, 12),
+		BackgroundColor3 = Color3.new(1, 1, 1), ZIndex = 4, Parent = track }, { CornerFixed(6) })
+	local shadow = New("Frame", { AnchorPoint = Vector2.new(0.5, 0.5), Position = UDim2.new(0.5, 0, 0.5, 1), Size = UDim2.new(1, 2, 1, 2),
+		BackgroundColor3 = Color3.new(0, 0, 0), BackgroundTransparency = 0.75, ZIndex = 3, Parent = knob }, { CornerFixed(7) })
+	local lbl = New("TextLabel", { Text = Sw._text, Position = UDim2.fromOffset(rtl and 0 or 44, 0), Size = UDim2.new(1, -44, 1, 0),
+		TextXAlignment = rtl and Enum.TextXAlignment.Right or Enum.TextXAlignment.Left, ZIndex = 2, Parent = row })
+	local btn = New("TextButton", { Size = UDim2.fromScale(1, 1), ZIndex = 5, Parent = row })
+	local held = false
+	local function Render(instant)
+		local w = held and 16 or 12
+		local x = Sw.Value and (34 - 3 - w) or 3
+		local goals = { Position = UDim2.new(0, x, 0.5, 0), Size = UDim2.fromOffset(w, 12) }
+		if instant then
+			knob.Position, knob.Size = goals.Position, goals.Size
+			on.BackgroundTransparency = Sw.Value and 0 or 1
+		else
+			Play(knob, held and Motion.Quick or Motion.Spring, goals)
+			Play(on, Motion.Quick, { BackgroundTransparency = Sw.Value and 0 or 1 })
+		end
+		lbl.TextColor3 = Sw.Disabled and TingUI.Theme.TextMuted or (o.Risky and TingUI.Theme.Error or TingUI.Theme.Label)
+	end
+	function Sw:Set(v, silent)
+		v = v and true or false
+		if self.Value == v then return end
+		self.Value = v
+		Render()
+		if not silent then Fire(self, v) end
+		if self._kb then TingUI:_UpdateHotkeys() end
+	end
+	function Sw:SetText(t) self._text = t lbl.Text = t end
+	Bind(row, btn.MouseButton1Down, function() held = true Render() end)
+	Bind(row, btn.MouseButton1Up, function() held = false end)
+	Bind(row, btn.MouseLeave, function() if held then held = false Render() end end)
+	Bind(row, btn.MouseButton1Click, function() held = false Sw:Set(not Sw.Value) end)
+	Bind(row, btn.MouseEnter, function() Play(shadow, Motion.Quick, { BackgroundTransparency = 0.6 }) end)
+	Bind(row, btn.MouseLeave, function() Play(shadow, Motion.Quick, { BackgroundTransparency = 0.75 }) end)
+	Sw._onDisabled = function() Render() end
+	table.insert(Refreshers, function() Render(true) end)
+	Render(true)
+	return Finish(self, Sw, o, Sw._text)
+end
+
+-- ProgressRing: a circular progress ring with the value in the middle and a bright head on the arc.
+-- Options: Text (a label beside it), Default (0-1 or 0-Max), Max (default 1), Size (default 44), Thickness,
+-- Indeterminate (spins until :Set is called), Suffix ("%" by default). Methods: :Set(v), :SetIndeterminate(bool).
+function Elements:AddProgressRing(o)
+	o = o or {}
+	local R = NewOpt("ProgressRing", o)
+	R._text = o.Text or "Progress"
+	R.Max = o.Max or 1
+	R.Value = math.clamp(o.Default or 0, 0, R.Max)
+	local size, th = o.Size or 44, o.Thickness or 4
+	local row = Row(self._container, size + 6)
+	R.Row = row
+	local holder = New("Frame", { AnchorPoint = Vector2.new(0, 0.5), Position = UDim2.new(0, 2, 0.5, 0), Size = UDim2.fromOffset(size, size),
+		BackgroundTransparency = 1, Parent = row })
+	-- the arc sits above the track (ZIndex 2), so the coloured part is never covered by the grey ring
+	local spin = New("Frame", { Size = UDim2.fromScale(1, 1), BackgroundTransparency = 1, ZIndex = 2, Parent = holder })
+	-- strokes are drawn outside a frame's edge, so every ring is inset by its thickness to stay inside the box
+	New("Frame", { Position = UDim2.fromOffset(th, th), Size = UDim2.new(1, -2 * th, 1, -2 * th), BackgroundTransparency = 1, Parent = holder },
+		{ CornerFixed(size), New("UIStroke", { Thickness = th, Transparency = 0.2, Theme = { Color = "Outline" } }) })
+	-- two half rings; a hard-edged gradient on each sweeps round like the hand of a clock
+	local halves = {}
+	for i, side in ipairs({ "Right", "Left" }) do
+		local clip = New("Frame", { Position = UDim2.fromScale(side == "Right" and 0.5 or 0, 0), Size = UDim2.fromScale(0.5, 1),
+			BackgroundTransparency = 1, ClipsDescendants = true, Parent = spin })
+		local ring = New("Frame", { Position = UDim2.new(side == "Right" and -1 or 0, th, 0, th), Size = UDim2.new(2, -2 * th, 1, -2 * th),
+			BackgroundTransparency = 1, Parent = clip }, { CornerFixed(size) })
+		local st = New("UIStroke", { Thickness = th, Parent = ring, Theme = { Color = "Accent" } })
+		halves[i] = New("UIGradient", { Transparency = NumberSequence.new({ NumberSequenceKeypoint.new(0, 0), NumberSequenceKeypoint.new(0.499, 0),
+			NumberSequenceKeypoint.new(0.5, 1), NumberSequenceKeypoint.new(1, 1) }), Parent = st })
+	end
+	local head = New("Frame", { AnchorPoint = Vector2.new(0.5, 0.5), Size = UDim2.fromOffset(th + 3, th + 3), BackgroundColor3 = Color3.new(1, 1, 1),
+		ZIndex = 3, Parent = spin }, { CornerFixed(99) })
+	local pct = New("TextLabel", { Size = UDim2.fromScale(1, 1), Text = "", TextSize = math.max(9, math.floor(size / 4)), Font = Enum.Font.GothamBold,
+		Parent = holder, Theme = { TextColor3 = "Text" } })
+	if o.Text then
+		local l = Label(row, o.Text, { AnchorPoint = Vector2.new(0, 0.5), Position = UDim2.new(0, size + 12, 0.5, 0), Size = UDim2.new(1, -size - 12, 0, 16) })
+		AlignFor(l, o.Text, o)
+	end
+	local shown = Instance.new("NumberValue")
+	shown.Value = R.Value / R.Max
+	local function Draw(p)
+		p = math.clamp(p, 0, 1)
+		local deg = p * 360
+		halves[1].Rotation = math.min(deg, 180)
+		halves[2].Rotation = 180 + math.max(0, deg - 180)
+		local a = math.rad(deg - 90)
+		head.Position = UDim2.new(0.5, math.cos(a) * (size / 2 - th / 2), 0.5, math.sin(a) * (size / 2 - th / 2))
+		head.BackgroundTransparency = (p <= 0.001 or p >= 0.999) and 1 or 0.15
+		if not R.Indeterminate then
+			pct.Text = o.Suffix and (string.format("%d", math.floor(p * R.Max + 0.5)) .. o.Suffix) or (math.floor(p * 100 + 0.5) .. "%")
+		end
+	end
+	Bind(row, shown:GetPropertyChangedSignal("Value"), function() Draw(shown.Value) end)
+	local spinTween
+	function R:SetIndeterminate(v)
+		self.Indeterminate = v and true or false
+		if spinTween then spinTween:Cancel() spinTween = nil end
+		if v then
+			pct.Text = ""
+			Draw(0.28)
+			spin.Rotation = 0
+			spinTween = Play(spin, TweenInfo.new(0.9, Enum.EasingStyle.Linear, Enum.EasingDirection.Out, -1), { Rotation = 360 })
+		else
+			spin.Rotation = 0
+			Draw(shown.Value)
+		end
+	end
+	function R:Set(v, silent)
+		v = math.clamp(tonumber(v) or 0, 0, self.Max)
+		if self.Indeterminate then self:SetIndeterminate(false) end
+		self.Value = v
+		Play(shown, Motion.Smooth, { Value = v / self.Max })
+		if v >= self.Max then
+			-- complete: the ring gives a small pop
+			local sc = holder:FindFirstChildOfClass("UIScale") or New("UIScale", { Parent = holder })
+			sc.Scale = 1.12
+			Play(sc, Motion.Spring, { Scale = 1 })
+		end
+		if not silent then Fire(self, v) end
+	end
+	function R:SetText(t) self._text = t end
+	Bind(row, row.Destroying, function() if spinTween then spinTween:Cancel() end shown:Destroy() end)
+	Draw(shown.Value)
+	if o.Indeterminate then R:SetIndeterminate(true) end
+	return Finish(self, R, o, R._text)
+end
+
+-- Spinner: a loading indicator. Style = "Ring" (default), "Dots", "Bars" or "Pulse"; Text beside it.
+-- All motion is done by looping tweens, so a spinner costs nothing per frame. Methods: :SetText, :SetSpinning(bool).
+function Elements:AddSpinner(o)
+	o = type(o) == "string" and { Text = o } or o or {}
+	local Sp = NewOpt("Spinner", o)
+	Sp._text = o.Text or "Loading"
+	local row = Row(self._container, 24)
+	Sp.Row = row
+	local box = New("Frame", { AnchorPoint = Vector2.new(0, 0.5), Position = UDim2.new(0, 2, 0.5, 0), Size = UDim2.fromOffset(18, 18),
+		BackgroundTransparency = 1, Parent = row })
+	local loops = {}
+	local style = o.Style or "Ring"
+	local function Loop(obj, info, goals) table.insert(loops, { obj, info, goals }) end
+	if style == "Dots" then
+		for i = 1, 3 do
+			local d = New("Frame", { AnchorPoint = Vector2.new(0.5, 0.5), Position = UDim2.new((i - 1) * 0.4 + 0.1, 0, 0.5, 3), Size = UDim2.fromOffset(4, 4),
+				Parent = box, Theme = { BackgroundColor3 = "Accent" } }, { CornerFixed(2) })
+			Loop(d, TweenInfo.new(0.38, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut, -1, true, (i - 1) * 0.12), { Position = UDim2.new((i - 1) * 0.4 + 0.1, 0, 0.5, -3) })
+		end
+	elseif style == "Bars" then
+		for i = 1, 4 do
+			local b = New("Frame", { AnchorPoint = Vector2.new(0.5, 1), Position = UDim2.new((i - 0.5) / 4, 0, 1, 0), Size = UDim2.new(0, 3, 0.35, 0),
+				Parent = box, Theme = { BackgroundColor3 = "Accent" } }, { CornerFixed(1) })
+			Loop(b, TweenInfo.new(0.32, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut, -1, true, (i - 1) * 0.09), { Size = UDim2.new(0, 3, 1, 0) })
+		end
+	elseif style == "Pulse" then
+		local core = New("Frame", { AnchorPoint = Vector2.new(0.5, 0.5), Position = UDim2.fromScale(0.5, 0.5), Size = UDim2.fromOffset(7, 7),
+			Parent = box, Theme = { BackgroundColor3 = "Accent" } }, { CornerFixed(4) })
+		local ringP = New("Frame", { AnchorPoint = Vector2.new(0.5, 0.5), Position = UDim2.fromScale(0.5, 0.5), Size = UDim2.fromOffset(7, 7),
+			BackgroundTransparency = 1, Parent = box }, { CornerFixed(99) })
+		local st = New("UIStroke", { Thickness = 1.5, Parent = ringP, Theme = { Color = "Accent" } })
+		Loop(ringP, TweenInfo.new(1, Enum.EasingStyle.Quad, Enum.EasingDirection.Out, -1), { Size = UDim2.fromOffset(20, 20) })
+		Loop(st, TweenInfo.new(1, Enum.EasingStyle.Quad, Enum.EasingDirection.Out, -1), { Transparency = 1 })
+		Loop(core, TweenInfo.new(0.5, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut, -1, true), { Size = UDim2.fromOffset(9, 9) })
+	else
+		local ring = New("Frame", { Size = UDim2.fromScale(1, 1), BackgroundTransparency = 1, Parent = box }, { CornerFixed(9) })
+		New("UIStroke", { Thickness = 2.2, Parent = ring, Theme = { Color = "Accent" } }, {
+			New("UIGradient", { Transparency = NumberSequence.new({ NumberSequenceKeypoint.new(0, 0), NumberSequenceKeypoint.new(0.55, 0.15),
+				NumberSequenceKeypoint.new(0.56, 1), NumberSequenceKeypoint.new(1, 1) }) }) })
+		Loop(ring, TweenInfo.new(0.8, Enum.EasingStyle.Linear, Enum.EasingDirection.Out, -1), { Rotation = 360 })
+	end
+	local lbl = Label(row, Sp._text, { AnchorPoint = Vector2.new(0, 0.5), Position = UDim2.new(0, 28, 0.5, 0), Size = UDim2.new(1, -28, 0, 16),
+		TextColor3 = TingUI.Theme.TextDim })
+	AlignFor(lbl, Sp._text, o)
+	local running = {}
+	function Sp:SetSpinning(v)
+		for _, tw in ipairs(running) do tw:Cancel() end
+		running = {}
+		box.Visible = v ~= false
+		if v ~= false then for _, l in ipairs(loops) do table.insert(running, Play(l[1], l[2], l[3])) end end
+	end
+	function Sp:SetText(t) self._text = t lbl.Text = t end
+	-- loops pause while the spinner is hidden (a closed tab, a hidden window) and pick up again when it shows
+	Bind(row, row:GetPropertyChangedSignal("Visible"), function() Sp:SetSpinning(row.Visible) end)
+	Bind(row, row.Destroying, function() for _, tw in ipairs(running) do tw:Cancel() end end)
+	Sp:SetSpinning(o.Spinning ~= false)
+	CatalogAdd(self, Sp, Sp._text)
+	return Sp
+end
+
+-- Skeleton: placeholder bars with a moving shimmer while something loads. Lines (default 3), Avatar (a round
+-- placeholder on the left). :SetLoading(false) fades it away (and collapses the row); :SetLoading(true) brings it back.
+function Elements:AddSkeleton(o)
+	o = o or {}
+	local Sk = NewOpt("Skeleton", o)
+	local lines = o.Lines or 3
+	local h = math.max(lines * 14 + 2, o.Avatar and 36 or 0)
+	local row = Row(self._container, h)
+	Sk.Row = row
+	local parts = {}
+	local x = 0
+	if o.Avatar then
+		parts[#parts + 1] = New("Frame", { Size = UDim2.fromOffset(34, 34), Parent = row, Theme = { BackgroundColor3 = "Control" } }, { CornerFixed(17) })
+		x = 44
+	end
+	for i = 1, lines do
+		local w = (i == lines and lines > 1) and 0.55 or (i == 1 and 0.9 or 0.78)
+		parts[#parts + 1] = New("Frame", { Position = UDim2.new(0, x, 0, (i - 1) * 14 + 2), Size = UDim2.new(w, -x * w, 0, 9),
+			Parent = row, Theme = { BackgroundColor3 = "Control" } }, { CornerFixed(4) })
+	end
+	local shimmers = {}
+	for _, p in ipairs(parts) do
+		local sh = New("Frame", { Size = UDim2.fromScale(1, 1), BackgroundColor3 = Color3.new(1, 1, 1), ZIndex = p.ZIndex + 1, Parent = p },
+			{ (p.Size.X.Offset == 34) and CornerFixed(17) or CornerFixed(4) })
+		local g = New("UIGradient", { Rotation = 15, Offset = Vector2.new(-1, 0), Transparency = NumberSequence.new({ NumberSequenceKeypoint.new(0, 1),
+			NumberSequenceKeypoint.new(0.4, 1), NumberSequenceKeypoint.new(0.5, 0.9), NumberSequenceKeypoint.new(0.6, 1), NumberSequenceKeypoint.new(1, 1) }), Parent = sh })
+		table.insert(shimmers, g)
+	end
+	local tweens = {}
+	local function Run(v)
+		for _, tw in ipairs(tweens) do tw:Cancel() end
+		tweens = {}
+		if v then
+			for _, g in ipairs(shimmers) do
+				g.Offset = Vector2.new(-1, 0)
+				table.insert(tweens, Play(g, TweenInfo.new(1.25, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut, -1, false, 0.15), { Offset = Vector2.new(1, 0) }))
+			end
+		end
+	end
+	Sk.Loading = true
+	function Sk:SetLoading(v)
+		v = v ~= false
+		self.Loading = v
+		if v then
+			row.Visible = true
+			Play(row, Motion.Smooth, { Size = UDim2.new(1, 0, 0, h) })
+			for _, p in ipairs(parts) do Play(p, Motion.Smooth, { BackgroundTransparency = 0 }) end
+		else
+			for _, p in ipairs(parts) do Play(p, Motion.Quick, { BackgroundTransparency = 1 }) end
+			for _, g in ipairs(shimmers) do g.Parent.BackgroundTransparency = 1 end
+			Play(row, Motion.Smooth, { Size = UDim2.new(1, 0, 0, 0) })
+			task.delay(0.33, function() if not Sk.Loading and row.Parent then row.Visible = false end end)
+		end
+		Run(v and row.Visible)
+	end
+	Bind(row, row:GetPropertyChangedSignal("Visible"), function() Run(Sk.Loading and row.Visible) end)
+	Bind(row, row.Destroying, function() Run(false) end)
+	Run(true)
+	return Sk
+end
+
+-- Accordion: a collapsible section inside a group. It takes elements like a group does
+-- (acc:AddToggle(...)) and folds open and shut with the content clipped as it moves.
+-- Options: Title, Open (default true), Icon. Methods: :SetOpen(bool), :Toggle(), plus every Add* element.
+function Elements:AddAccordion(o)
+	o = type(o) == "string" and { Title = o } or o or {}
+	local order = (self._container:GetAttribute("Order") or 0) + 1
+	self._container:SetAttribute("Order", order)
+	local shell = New("Frame", { Size = UDim2.new(1, 0, 0, 30), BackgroundTransparency = 0, ClipsDescendants = true, LayoutOrder = order,
+		Parent = self._container, Theme = { BackgroundColor3 = "Background" } }, { Corner(6), Stroke("Outline") })
+	local header = New("TextButton", { Size = UDim2.new(1, 0, 0, 30), Parent = shell })
+	local hx = 10
+	if o.Icon then
+		local ic = Icon(o.Icon, header, 14, "AccentText")
+		ic.AnchorPoint = Vector2.new(0, 0.5)
+		ic.Position = UDim2.new(0, 10, 0.5, 0)
+		hx = 30
+	end
+	local title = New("TextLabel", { Text = o.Title or "Section", Position = UDim2.fromOffset(hx, 0), Size = UDim2.new(1, -hx - 30, 1, 0),
+		TextXAlignment = Enum.TextXAlignment.Left, Font = Enum.Font.GothamBold, Parent = header, Theme = { TextColor3 = "Text" } })
+	AlignFor(title, title.Text, o)
+	local chev = Chevron(header)
+	local body = New("Frame", { Position = UDim2.fromOffset(0, 30), Size = UDim2.new(1, 0, 0, 0), AutomaticSize = Enum.AutomaticSize.Y,
+		BackgroundTransparency = 1, Parent = shell }, { Pad(10, 2, 10, 10), List(6) })
+	local A = setmetatable({ _container = body, _path = (self._path or "") .. " / " .. (o.Title or "Section"), _tab = self._tab, Row = shell }, { __index = Elements })
+	A.Open = o.Open ~= false
+	local function Height() return 30 + (A.Open and body.AbsoluteSize.Y / math.max(TingUI.Scale, 0.01) or 0) end
+	local function Render(instant)
+		local goal = UDim2.new(1, 0, 0, Height())
+		if instant then shell.Size = goal else Play(shell, Motion.Smooth, { Size = goal }) end
+		Play(chev, Motion.Spring, { Rotation = A.Open and 180 or 0 })
+		Play(title, Motion.Quick, { TextColor3 = A.Open and TingUI.Theme.Text or TingUI.Theme.Label })
+	end
+	function A:SetOpen(v) self.Open = v and true or false Render() end
+	function A:Toggle() self:SetOpen(not self.Open) end
+	function A:SetTitle(t) title.Text = t end
+	function A:SetVisible(v) shell.Visible = v end
+	function A:Destroy() shell:Destroy() end
+	Bind(shell, header.MouseButton1Click, function() A:Toggle() end)
+	Bind(shell, header.MouseEnter, function() Play(shell, Motion.Quick, { BackgroundColor3 = TingUI.Theme.Group }) end)
+	Bind(shell, header.MouseLeave, function() Play(shell, Motion.Quick, { BackgroundColor3 = TingUI.Theme.Background }) end)
+	-- content added or resized later keeps the section the right height
+	Bind(shell, body:GetPropertyChangedSignal("AbsoluteSize"), function() if A.Open then shell.Size = UDim2.new(1, 0, 0, Height()) end end)
+	Render(true)
+	return A
+end
+
+-- TabBox: a small set of tabs inside a group, with an indicator that slides between them and pages that slide in.
+-- tb = Group:AddTabBox({ Tabs = { "Aim", "Visuals" } }); tb.Tabs.Aim:AddToggle(...). Methods: :Select(name).
+function Elements:AddTabBox(o)
+	o = o or {}
+	local order = (self._container:GetAttribute("Order") or 0) + 1
+	self._container:SetAttribute("Order", order)
+	local shell = New("Frame", { Size = UDim2.new(1, 0, 0, 0), AutomaticSize = Enum.AutomaticSize.Y, BackgroundTransparency = 1, LayoutOrder = order,
+		Parent = self._container }, { List(8) })
+	local bar = New("Frame", { Size = UDim2.new(1, 0, 0, 26), LayoutOrder = 1, Parent = shell, Theme = { BackgroundColor3 = "Background" } },
+		{ Corner(6), Stroke("Outline") })
+	local pill = New("Frame", { Position = UDim2.fromOffset(2, 2), Size = UDim2.new(0, 0, 1, -4), ZIndex = 1, Parent = bar,
+		Theme = { BackgroundColor3 = "TabActive" } }, { Corner(5) })
+	local line = New("Frame", { AnchorPoint = Vector2.new(0.5, 1), Position = UDim2.new(0.5, 0, 1, -2), Size = UDim2.fromOffset(12, 2),
+		ZIndex = 3, Parent = pill, Theme = { BackgroundColor3 = "Accent" } }, { CornerFixed(1) })
+	local pagesHolder = New("Frame", { Size = UDim2.new(1, 0, 0, 0), AutomaticSize = Enum.AutomaticSize.Y, BackgroundTransparency = 1,
+		ClipsDescendants = true, LayoutOrder = 2, Parent = shell })
+	local TB = { Tabs = {}, Row = shell, Current = nil }
+	local names = o.Tabs or { "One", "Two" }
+	local buttons, pages = {}, {}
+	for i, name in ipairs(names) do
+		local b = New("TextButton", { Position = UDim2.new((i - 1) / #names, 0, 0, 0), Size = UDim2.new(1 / #names, 0, 1, 0), Text = tostring(name),
+			ZIndex = 2, Parent = bar, Theme = { TextColor3 = "TextDim" } })
+		local page = New("Frame", { Size = UDim2.new(1, 0, 0, 0), AutomaticSize = Enum.AutomaticSize.Y, BackgroundTransparency = 1, Visible = i == 1,
+			Parent = pagesHolder }, { List(6) })
+		buttons[name], pages[name] = b, page
+		TB.Tabs[name] = setmetatable({ _container = page, _path = (self._path or "") .. " / " .. tostring(name), _tab = self._tab }, { __index = Elements })
+		Bind(shell, b.MouseButton1Click, function() TB:Select(name) end)
+	end
+	local index = {}
+	for i, n in ipairs(names) do index[n] = i end
+	function TB:Select(name, instant)
+		if not pages[name] or self.Current == name then return end
+		local from = self.Current and index[self.Current] or 0
+		local prev = self.Current
+		self.Current = name
+		local i = index[name]
+		local goal = { Position = UDim2.new((i - 1) / #names, 2, 0, 2), Size = UDim2.new(1 / #names, -4, 1, -4) }
+		if instant then pill.Position, pill.Size = goal.Position, goal.Size else Play(pill, Motion.Spring, goal) end
+		for n, b in pairs(buttons) do Play(b, Motion.Quick, { TextColor3 = n == name and TingUI.Theme.Text or TingUI.Theme.TextDim }) end
+		if prev then pages[prev].Visible = false end
+		local page = pages[name]
+		page.Visible = true
+		if not instant then
+			-- the new page slides in from the side you moved toward
+			page.Position = UDim2.fromOffset((i > from) and 18 or -18, 0)
+			Play(page, Motion.Smooth, { Position = UDim2.fromOffset(0, 0) })
+		end
+		if o.Callback then SafeCall("TabBox", o.Callback, name) end
+	end
+	function TB:SetVisible(v) shell.Visible = v end
+	TB:Select(o.Default or names[1], true)
+	return TB
+end
+
+-- Chips: type a word and press Enter (or comma) to add it as a tag; click a tag's x to remove it. Saves the list.
+-- Options: Text, Default (list), Placeholder, Max (tags), MaxLength (characters per tag, counted properly for any
+-- script), Unique (default true), Callback(list). Methods: :Set(list), :Add(text), :Remove(text), :Get().
+function Elements:AddChips(o)
+	o = o or {}
+	local C = NewOpt("Chips", o)
+	C._text = o.Text or "Tags"
+	C.Value = {}
+	local row = New("Frame", { Size = UDim2.new(1, 0, 0, 0), AutomaticSize = Enum.AutomaticSize.Y, BackgroundTransparency = 1,
+		LayoutOrder = (self._container:GetAttribute("Order") or 0) + 1, Parent = self._container }, { List(5) })
+	self._container:SetAttribute("Order", row.LayoutOrder)
+	C.Row = row
+	if o.Text then AlignFor(Label(row, o.Text, { LayoutOrder = 1 }), o.Text, o) end
+	local field = New("Frame", { Size = UDim2.new(1, 0, 0, 0), AutomaticSize = Enum.AutomaticSize.Y, LayoutOrder = 2, Parent = row,
+		Theme = { BackgroundColor3 = "Background" } }, { Corner(6), Pad(6, 5, 6, 5) })
+	local fieldStroke = Stroke("Outline")
+	fieldStroke.Parent = field
+	local flow = New("Frame", { Size = UDim2.new(1, 0, 0, 0), AutomaticSize = Enum.AutomaticSize.Y, BackgroundTransparency = 1, Parent = field })
+	New("UIListLayout", { FillDirection = Enum.FillDirection.Horizontal, Wraps = true, Padding = UDim.new(0, 5),
+		SortOrder = Enum.SortOrder.LayoutOrder, VerticalAlignment = Enum.VerticalAlignment.Center, Parent = flow })
+	local input = New("TextBox", { Size = UDim2.fromOffset(110, 22), BackgroundTransparency = 1, Text = "", ClearTextOnFocus = false,
+		PlaceholderText = o.Placeholder or "Add a tag...", TextXAlignment = Enum.TextXAlignment.Left, Font = Enum.Font.GothamMedium,
+		LayoutOrder = 1e6, Parent = flow, Theme = { PlaceholderColor3 = "TextMuted", TextColor3 = "Text" } })
+	local chips, n = {}, 0
+	local function MakeChip(text)
+		n = n + 1
+		local chip = New("Frame", { Size = UDim2.fromOffset(0, 22), AutomaticSize = Enum.AutomaticSize.X, LayoutOrder = n, Parent = flow,
+			Theme = { BackgroundColor3 = "TabActive" } }, { CornerFixed(11), Pad(9, 0, 4, 0),
+			List(4, Enum.FillDirection.Horizontal, Enum.HorizontalAlignment.Left, Enum.VerticalAlignment.Center) })
+		New("UIStroke", { Thickness = 1, Transparency = 0.4, Parent = chip, Theme = { Color = "AccentBorder" } })
+		New("TextLabel", { Size = UDim2.fromOffset(0, 22), AutomaticSize = Enum.AutomaticSize.X, Text = text, TextSize = 11, LayoutOrder = 1,
+			Parent = chip, Theme = { TextColor3 = "Text" } })
+		local x = New("TextButton", { Size = UDim2.fromOffset(16, 16), LayoutOrder = 2, Parent = chip, Theme = { BackgroundColor3 = "ControlHover" } },
+			{ CornerFixed(8) })
+		x.BackgroundTransparency = 1
+		for _, r in ipairs({ 45, -45 }) do
+			New("Frame", { AnchorPoint = Vector2.new(0.5, 0.5), Position = UDim2.fromScale(0.5, 0.5), Size = UDim2.fromOffset(7, 1.4), Rotation = r,
+				Parent = x, Theme = { BackgroundColor3 = "TextDim" } }, { CornerFixed(1) })
+		end
+		local sc = New("UIScale", { Scale = 0.5, Parent = chip })
+		Play(sc, Motion.Spring, { Scale = 1 })
+		Bind(chip, x.MouseEnter, function() Play(x, Motion.Quick, { BackgroundTransparency = 0 }) end)
+		Bind(chip, x.MouseLeave, function() Play(x, Motion.Quick, { BackgroundTransparency = 1 }) end)
+		Bind(chip, x.MouseButton1Click, function() C:Remove(text) end)
+		chips[text] = { Frame = chip, Scale = sc }
+	end
+	local function Has(t) return table.find(C.Value, t) ~= nil end
+	function C:Add(text, silent)
+		text = tostring(text or ""):gsub("^%s+", ""):gsub("%s+$", "")
+		if text == "" then return false end
+		if o.MaxLength then text = Utf8.Clip(text, o.MaxLength) end
+		if o.Unique ~= false and Has(text) then
+			-- already there: its chip gives a little shake
+			local c = chips[text]
+			if c then c.Scale.Scale = 1.15 Play(c.Scale, Motion.Spring, { Scale = 1 }) end
+			return false
+		end
+		if o.Max and #self.Value >= o.Max then
+			fieldStroke.Color = TingUI.Theme.Error
+			Play(fieldStroke, TweenInfo.new(0.6), { Color = TingUI.Theme.Outline })
+			return false
+		end
+		table.insert(self.Value, text)
+		if not chips[text] then MakeChip(text) end
+		if not silent then Fire(self, table.clone(self.Value)) end
+		return true
+	end
+	function C:Remove(text, silent)
+		local i = table.find(self.Value, text)
+		if not i then return end
+		table.remove(self.Value, i)
+		local c = chips[text]
+		chips[text] = nil
+		if c then
+			Play(c.Scale, Motion.Quick, { Scale = 0 })
+			task.delay(0.17, function() c.Frame:Destroy() end)
+		end
+		if not silent then Fire(self, table.clone(self.Value)) end
+	end
+	function C:Set(list, silent)
+		for _, c in pairs(chips) do c.Frame:Destroy() end
+		chips, self.Value = {}, {}
+		for _, t in ipairs(type(list) == "table" and list or {}) do self:Add(t, true) end
+		if not silent then Fire(self, table.clone(self.Value)) end
+	end
+	function C:Get() return table.clone(self.Value) end
+	function C:SetText(t) self._text = t end
+	C._serialize = function() return table.clone(C.Value) end
+	local function Commit()
+		for part in input.Text:gmatch("[^,]+") do C:Add(part) end
+		input.Text = ""
+	end
+	Bind(row, input.FocusLost, function(enter) if enter then Commit() end end)
+	Bind(row, input.Focused, function() Play(fieldStroke, Motion.Quick, { Color = TingUI.Theme.AccentBorder }) end)
+	Bind(row, input.FocusLost, function() Play(fieldStroke, Motion.Quick, { Color = TingUI.Theme.Outline }) end)
+	Bind(row, input:GetPropertyChangedSignal("Text"), function()
+		if input.Text:find(",", 1, true) then Commit() input:CaptureFocus() end
+	end)
+	C:Set(o.Default or {}, true)
+	return Finish(self, C, o, C._text)
+end
+
+-- Stepper: a number with - and + buttons. Hold a button and it repeats, speeding up; click the number to type one.
+-- Options: Text, Min, Max, Step (default 1), Default, Decimals (from Step), Suffix, Flag, Callback.
+function Elements:AddStepper(o)
+	o = o or {}
+	local St = NewOpt("Stepper", o)
+	St._text = o.Text or "Amount"
+	St.Min, St.Max, St.Step = o.Min or -math.huge, o.Max or math.huge, o.Step or 1
+	local dec = o.Decimals or #((tostring(St.Step):match("%.(%d+)")) or "")
+	St.Value = math.clamp(o.Default or (St.Min > -math.huge and St.Min or 0), St.Min, St.Max)
+	local row = Row(self._container, 28)
+	St.Row = row
+	AlignFor(Label(row, St._text, { AnchorPoint = Vector2.new(0, 0.5), Position = UDim2.new(0, 0, 0.5, 0), Size = UDim2.new(1, -120, 0, 16) }), St._text, o)
+	local box = New("Frame", { AnchorPoint = Vector2.new(1, 0.5), Position = UDim2.new(1, 0, 0.5, 0), Size = UDim2.fromOffset(112, 26), ClipsDescendants = true,
+		Parent = row, Theme = { BackgroundColor3 = "Background" } }, { Corner(6), Stroke("Outline") })
+	local function Btn(x, sign)
+		local b = New("TextButton", { Position = UDim2.fromOffset(x, 0), Size = UDim2.fromOffset(28, 26), Parent = box, Theme = { BackgroundColor3 = "Control" } })
+		New("Frame", { AnchorPoint = Vector2.new(0.5, 0.5), Position = UDim2.fromScale(0.5, 0.5), Size = UDim2.fromOffset(10, 2), Parent = b,
+			Theme = { BackgroundColor3 = "Label" } }, { CornerFixed(1) })
+		if sign > 0 then
+			New("Frame", { AnchorPoint = Vector2.new(0.5, 0.5), Position = UDim2.fromScale(0.5, 0.5), Size = UDim2.fromOffset(2, 10), Parent = b,
+				Theme = { BackgroundColor3 = "Label" } }, { CornerFixed(1) })
+		end
+		return b
+	end
+	local minus, plus = Btn(0, -1), Btn(84, 1)
+	local value = New("TextBox", { Position = UDim2.fromOffset(28, 0), Size = UDim2.fromOffset(56, 26), BackgroundTransparency = 1, ClearTextOnFocus = false,
+		Text = "", Font = Enum.Font.GothamBold, Parent = box, Theme = { TextColor3 = "Text" } })
+	local function Fmt(v) return string.format("%." .. dec .. "f", v) .. (o.Suffix or "") end
+	local function Render(dir)
+		if value:IsFocused() then return end
+		value.Text = Fmt(St.Value)
+		if dir and dir ~= 0 then
+			-- the new number rolls in from the direction it moved
+			value.Position = UDim2.fromOffset(28, dir > 0 and 10 or -10)
+			value.TextTransparency = 0.6
+			Play(value, Motion.Smooth, { Position = UDim2.fromOffset(28, 0), TextTransparency = 0 })
+		end
+		minus.AutoButtonColor = false
+		Play(minus, Motion.Quick, { BackgroundTransparency = St.Value <= St.Min and 0.6 or 0 })
+		Play(plus, Motion.Quick, { BackgroundTransparency = St.Value >= St.Max and 0.6 or 0 })
+	end
+	function St:Set(v, silent)
+		v = tonumber(v)
+		if not v then Render() return end
+		v = math.clamp(v, self.Min, self.Max)
+		v = tonumber(string.format("%." .. dec .. "f", v))
+		local dir = (v > self.Value and 1) or (v < self.Value and -1) or 0
+		if dir == 0 then Render() return end
+		self.Value = v
+		Render(dir)
+		if not silent then Fire(self, v) end
+	end
+	function St:SetText(t) self._text = t end
+	St._serialize = function() return St.Value end
+	local function Hold(b, sign)
+		local token = 0
+		Bind(row, b.MouseButton1Down, function()
+			token = token + 1
+			local mine = token
+			St:Set(St.Value + sign * St.Step)
+			local sc = b:FindFirstChildOfClass("UIScale") or New("UIScale", { Parent = b })
+			Play(sc, Motion.Quick, { Scale = 0.88 })
+			task.spawn(function()
+				task.wait(0.4)
+				local wait = 0.12
+				while token == mine do
+					St:Set(St.Value + sign * St.Step)
+					task.wait(wait)
+					wait = math.max(0.03, wait * 0.88)
+				end
+			end)
+		end)
+		local function Up()
+			token = token + 1
+			local sc = b:FindFirstChildOfClass("UIScale")
+			if sc then Play(sc, Motion.Spring, { Scale = 1 }) end
+		end
+		Bind(row, b.MouseButton1Up, Up)
+		Bind(row, b.MouseLeave, Up)
+		Bind(row, b.MouseEnter, function() Play(b, Motion.Quick, { BackgroundColor3 = TingUI.Theme.ControlHover }) end)
+		Bind(row, b.MouseLeave, function() Play(b, Motion.Quick, { BackgroundColor3 = TingUI.Theme.Control }) end)
+	end
+	Hold(minus, -1)
+	Hold(plus, 1)
+	Bind(row, value.Focused, function() value.Text = string.format("%." .. dec .. "f", St.Value) end)
+	Bind(row, value.FocusLost, function()
+		local n = tonumber((value.Text:gsub("[^%d%.%-]", "")))
+		if n then St:Set(n) end
+		value.Text = Fmt(St.Value)
+	end)
+	table.insert(Refreshers, function() Render() end)
+	Render()
+	return Finish(self, St, o, St._text)
+end
+
+-- Segmented: a row of choices with a pill that springs to the picked one. Saves like a dropdown value.
+-- Options: Text, Values, Default, Flag, Callback. Methods: :Set(value), :Get().
+function Elements:AddSegmented(o)
+	o = o or {}
+	local Sg = NewOpt("Segmented", o)
+	Sg._text = o.Text or "Mode"
+	Sg.Values = o.Values or { "One", "Two" }
+	local hasText = o.Text ~= nil
+	local row = Row(self._container, hasText and 48 or 28)
+	Sg.Row = row
+	if hasText then AlignFor(Label(row, o.Text), o.Text, o) end
+	local bar = New("Frame", { Position = UDim2.fromOffset(0, hasText and 20 or 0), Size = UDim2.new(1, 0, 0, 28), Parent = row,
+		Theme = { BackgroundColor3 = "Background" } }, { Corner(6), Stroke("Outline") })
+	local pill = New("Frame", { Size = UDim2.new(0, 0, 1, -4), Position = UDim2.fromOffset(2, 2), Parent = bar,
+		Theme = { BackgroundColor3 = "TabActive" } }, { Corner(5) })
+	New("UIStroke", { Thickness = 1, Transparency = 0.5, Parent = pill, Theme = { Color = "AccentBorder" } })
+	local btns = {}
+	for i, v in ipairs(Sg.Values) do
+		local b = New("TextButton", { Position = UDim2.new((i - 1) / #Sg.Values, 0, 0, 0), Size = UDim2.new(1 / #Sg.Values, 0, 1, 0),
+			Text = tostring(v), ZIndex = 2, Parent = bar, Theme = { TextColor3 = "TextDim" } })
+		btns[i] = b
+		Bind(row, b.MouseButton1Click, function() Sg:Set(v) end)
+	end
+	local function Render(instant)
+		local i = table.find(Sg.Values, Sg.Value)
+		if not i then pill.Size = UDim2.new(0, 0, 1, -4) return end
+		local goal = { Position = UDim2.new((i - 1) / #Sg.Values, 2, 0, 2), Size = UDim2.new(1 / #Sg.Values, -4, 1, -4) }
+		if instant then pill.Position, pill.Size = goal.Position, goal.Size else Play(pill, Motion.Spring, goal) end
+		for j, b in ipairs(btns) do
+			Play(b, Motion.Quick, { TextColor3 = j == i and TingUI.Theme.Text or TingUI.Theme.TextDim })
+		end
+	end
+	function Sg:Set(v, silent)
+		if not table.find(self.Values, v) then
+			for _, x in ipairs(self.Values) do if tostring(x) == tostring(v) then v = x end end
+		end
+		if not table.find(self.Values, v) or v == self.Value then return end
+		self.Value = v
+		Render()
+		if not silent then Fire(self, v) end
+	end
+	function Sg:SetText(t) self._text = t end
+	Sg._serialize = function() return Sg.Value end
+	table.insert(Refreshers, function() Render(true) end)
+	Sg.Value = o.Default ~= nil and o.Default or Sg.Values[1]
+	Render(true)
+	return Finish(self, Sg, o, Sg._text)
+end
+
+-- RangeSlider: two handles that pick a low and a high value. Value is { lo, hi }.
+-- Options: Text, Min, Max, Increment (decimals work), Default = { lo, hi }, Suffix, MinGap, Flag, Callback(lo, hi).
+function Elements:AddRangeSlider(o)
+	o = o or {}
+	local Rs = NewOpt("RangeSlider", o)
+	Rs._text = o.Text or "Range"
+	Rs.Min, Rs.Max, Rs.Inc = o.Min or 0, o.Max or 100, o.Increment or 1
+	local dec = #((tostring(Rs.Inc):match("%.(%d+)")) or "")
+	local d = o.Default or { Rs.Min, Rs.Max }
+	Rs.Value = { math.clamp(d[1], Rs.Min, Rs.Max), math.clamp(d[2], Rs.Min, Rs.Max) }
+	local row = Row(self._container, 36)
+	Rs.Row = row
+	AlignFor(Label(row, Rs._text, { Size = UDim2.new(0.55, 0, 0, 16) }), Rs._text, o)
+	local valueLbl = New("TextLabel", { AnchorPoint = Vector2.new(1, 0), Position = UDim2.new(1, 0, 0, 0), Size = UDim2.new(0.45, 0, 0, 16),
+		TextXAlignment = Enum.TextXAlignment.Right, Font = Enum.Font.GothamMedium, Parent = row, Theme = { TextColor3 = "TextDim" } })
+	local track = New("Frame", { Position = UDim2.fromOffset(6, 25), Size = UDim2.new(1, -12, 0, 4), Parent = row, Theme = { BackgroundColor3 = "Group" } },
+		{ Corner(3), Stroke("Outline") })
+	local fill = New("Frame", { Size = UDim2.fromScale(0, 1), Parent = track, Theme = { BackgroundColor3 = "Accent" } }, { Corner(3) })
+	AccentOverlay(fill, 3)
+	local knobs = {}
+	for i = 1, 2 do
+		local k = New("Frame", { AnchorPoint = Vector2.new(0.5, 0.5), Size = UDim2.fromOffset(12, 12), BackgroundColor3 = Color3.new(1, 1, 1), ZIndex = 4,
+			Parent = track }, { CornerFixed(6) })
+		New("UIStroke", { Thickness = 2, Parent = k, Theme = { Color = "Accent" } })
+		knobs[i] = { Frame = k, Scale = New("UIScale", { Parent = k }) }
+	end
+	local function A(v) return (v - Rs.Min) / math.max(Rs.Max - Rs.Min, 1e-9) end
+	local function Fmt(v) return string.format("%." .. dec .. "f", v) .. (o.Suffix or "") end
+	local function Render(animate)
+		local a, b = A(Rs.Value[1]), A(Rs.Value[2])
+		local goals = { { knobs[1].Frame, { Position = UDim2.new(a, 0, 0.5, 0) } }, { knobs[2].Frame, { Position = UDim2.new(b, 0, 0.5, 0) } },
+			{ fill, { Position = UDim2.fromScale(a, 0), Size = UDim2.fromScale(b - a, 1) } } }
+		for _, g in ipairs(goals) do
+			if animate then Play(g[1], Motion.Smooth, g[2]) else for k, v in pairs(g[2]) do g[1][k] = v end end
+		end
+		valueLbl.Text = Fmt(Rs.Value[1]) .. "  -  " .. Fmt(Rs.Value[2])
+	end
+	local function Snap(v) return tonumber(string.format("%." .. dec .. "f", math.clamp(Rs.Min + math.floor((v - Rs.Min) / Rs.Inc + 0.5) * Rs.Inc, Rs.Min, Rs.Max))) end
+	function Rs:Set(v, silent, animate)
+		if type(v) ~= "table" then return end
+		local lo, hi = Snap(tonumber(v[1]) or self.Min), Snap(tonumber(v[2]) or self.Max)
+		if lo > hi then lo, hi = hi, lo end
+		local gap = o.MinGap or 0
+		if hi - lo < gap then hi = math.min(self.Max, lo + gap) lo = hi - gap end
+		if lo == self.Value[1] and hi == self.Value[2] then return end
+		self.Value = { lo, hi }
+		Render(animate ~= false)
+		if not silent then Fire(self, lo, hi) end
+	end
+	function Rs:SetText(t) self._text = t end
+	Rs._serialize = function() return { Rs.Value[1], Rs.Value[2] } end
+	local hit = New("TextButton", { Position = UDim2.fromOffset(0, 16), Size = UDim2.new(1, 0, 0, 20), ZIndex = 5, Parent = row })
+	local which
+	Dragger(hit, function(x)
+		local a = math.clamp((x - track.AbsolutePosition.X) / math.max(track.AbsoluteSize.X, 1), 0, 1)
+		local v = Rs.Min + a * (Rs.Max - Rs.Min)
+		if not which then
+			-- the handle nearer the press moves
+			which = (math.abs(v - Rs.Value[1]) <= math.abs(v - Rs.Value[2])) and 1 or 2
+			Play(knobs[which].Scale, Motion.Spring, { Scale = 1.3 })
+		end
+		local nv = { Rs.Value[1], Rs.Value[2] }
+		nv[which] = v
+		if which == 1 then nv[1] = math.min(nv[1], nv[2]) else nv[2] = math.max(nv[1], nv[2]) end
+		Rs:Set(nv, false, false)
+	end)
+	Bind(row, UIS.InputEnded, function(i)
+		if IsPress(i) and which then
+			Play(knobs[which].Scale, Motion.Spring, { Scale = 1 })
+			which = nil
+		end
+	end)
+	Render()
+	return Finish(self, Rs, o, Rs._text)
+end
+
+-- VerticalSlider: an upright slider, for volume-style controls. Options as AddSlider plus Height (default 110).
+-- It saves like a slider.
+function Elements:AddVerticalSlider(o)
+	o = o or {}
+	local V = NewOpt("Slider", o)
+	V._text = o.Text or "Level"
+	V.Min, V.Max, V.Inc = o.Min or 0, o.Max or 100, o.Increment or 1
+	local dec = #((tostring(V.Inc):match("%.(%d+)")) or "")
+	V.Value = math.clamp(o.Default or V.Min, V.Min, V.Max)
+	local hgt = o.Height or 110
+	local row = Row(self._container, hgt + 22)
+	V.Row = row
+	local col = New("Frame", { Size = UDim2.new(0, 46, 1, 0), BackgroundTransparency = 1, Parent = row })
+	local valueLbl = New("TextLabel", { Size = UDim2.new(1, 0, 0, 14), Font = Enum.Font.GothamBold, TextSize = 11, Parent = col, Theme = { TextColor3 = "Text" } })
+	local track = New("Frame", { AnchorPoint = Vector2.new(0.5, 0), Position = UDim2.new(0.5, 0, 0, 20), Size = UDim2.fromOffset(6, hgt - 4),
+		Parent = col, Theme = { BackgroundColor3 = "Group" } }, { CornerFixed(3), Stroke("Outline") })
+	local fill = New("Frame", { AnchorPoint = Vector2.new(0, 1), Position = UDim2.fromScale(0, 1), Size = UDim2.fromScale(1, 0), Parent = track,
+		Theme = { BackgroundColor3 = "Accent" } }, { CornerFixed(3) })
+	AccentOverlay(fill, 3, true)
+	local knob = New("Frame", { AnchorPoint = Vector2.new(0.5, 0.5), Position = UDim2.new(0.5, 0, 0, 0), Size = UDim2.fromOffset(14, 14),
+		BackgroundColor3 = Color3.new(1, 1, 1), ZIndex = 4, Parent = fill }, { CornerFixed(7) })
+	local ks = New("UIScale", { Parent = knob })
+	local lbl = Label(row, V._text, { Position = UDim2.fromOffset(56, 0), Size = UDim2.new(1, -56, 0, 16) })
+	if o.Description then
+		New("TextLabel", { Position = UDim2.fromOffset(56, 18), Size = UDim2.new(1, -56, 0, 40), TextWrapped = true, TextYAlignment = Enum.TextYAlignment.Top,
+			TextXAlignment = Enum.TextXAlignment.Left, Text = o.Description, TextSize = 11, Font = Enum.Font.Gotham, Parent = row, Theme = { TextColor3 = "TextDim" } })
+	end
+	AlignFor(lbl, V._text, o)
+	local function Render(animate)
+		local a = (V.Value - V.Min) / math.max(V.Max - V.Min, 1e-9)
+		if animate then Play(fill, Motion.Smooth, { Size = UDim2.fromScale(1, a) }) else fill.Size = UDim2.fromScale(1, a) end
+		valueLbl.Text = string.format("%." .. dec .. "f", V.Value) .. (o.Suffix or "")
+	end
+	local dragging = false
+	function V:Set(v, silent)
+		v = tonumber(v)
+		if not v then return end
+		v = tonumber(string.format("%." .. dec .. "f", math.clamp(V.Min + math.floor((v - V.Min) / V.Inc + 0.5) * V.Inc, V.Min, V.Max)))
+		if v == V.Value then return end
+		V.Value = v
+		Render(not dragging)
+		if not silent then Fire(V, v) end
+	end
+	function V:SetText(t) self._text = t lbl.Text = t end
+	local hit = New("TextButton", { AnchorPoint = Vector2.new(0.5, 0), Position = UDim2.new(0.5, 0, 0, 14), Size = UDim2.fromOffset(30, hgt + 6), ZIndex = 5, Parent = col })
+	Dragger(hit, function(_, y)
+		if not dragging then dragging = true Play(ks, Motion.Spring, { Scale = 1.25 }) end
+		local a = 1 - math.clamp((y - track.AbsolutePosition.Y) / math.max(track.AbsoluteSize.Y, 1), 0, 1)
+		V:Set(V.Min + a * (V.Max - V.Min))
+	end)
+	Bind(row, UIS.InputEnded, function(i) if IsPress(i) and dragging then dragging = false Play(ks, Motion.Spring, { Scale = 1 }) end end)
+	Render()
+	Register(V, o.Flag)
+	CatalogAdd(self, V, V._text)
+	if o.Disabled then V:SetDisabled(true) end
+	return V
+end
+
+-- Slider extras (options on AddSlider, all off by default so existing sliders look exactly as before):
+--   Ticks = true      tick marks at each step (or every n-th: Ticks = 5), the knob snaps between them with a spring
+--   ValueTooltip = true   a bubble above the knob shows the value while you hover or drag
+--   Input = true      the value sits in a bordered box you can type into
+local BaseSlider = Elements.AddSlider
+function Elements:AddSlider(o)
+	local S = BaseSlider(self, o)
+	o = o or {}
+	if not (o.Ticks or o.ValueTooltip or o.Input) then return S end
+	local row = S.Row
+	local track, valueBox, fill
+	for _, c in ipairs(row:GetChildren()) do
+		if c:IsA("Frame") and c.Size.Y.Offset == 4 then track = c end
+		if c:IsA("TextBox") then valueBox = c end
+	end
+	if not track then return S end
+	fill = track:FindFirstChildWhichIsA("Frame")
+	local dec = #((tostring(S.Inc):match("%.(%d+)")) or "")
+	if o.Input and valueBox then
+		valueBox.Size = UDim2.new(0, 58, 0, 18)
+		valueBox.Position = UDim2.new(1, 0, 0, -1)
+		valueBox.TextXAlignment = Enum.TextXAlignment.Center
+		valueBox.BackgroundTransparency = 0
+		valueBox.BackgroundColor3 = TingUI.Theme.Background
+		table.insert(Themed, { valueBox, "BackgroundColor3", "Background" })
+		New("UICorner", { CornerRadius = UDim.new(0, 5), Parent = valueBox })
+		local st = Stroke("Outline")
+		st.Parent = valueBox
+		Bind(row, valueBox.Focused, function() Play(st, Motion.Quick, { Color = TingUI.Theme.AccentBorder }) end)
+		Bind(row, valueBox.FocusLost, function() Play(st, Motion.Quick, { Color = TingUI.Theme.Outline }) end)
+	end
+	if o.Ticks then
+		local steps = math.floor((S.Max - S.Min) / S.Inc + 0.5)
+		local every = type(o.Ticks) == "number" and o.Ticks or math.max(1, math.ceil(steps / 20))
+		for i = 0, steps, every do
+			New("Frame", { AnchorPoint = Vector2.new(0.5, 0), Position = UDim2.new(i / math.max(steps, 1), 0, 1, 3), Size = UDim2.fromOffset(1, (i % (every * 5) == 0) and 5 or 3),
+				Parent = track, Theme = { BackgroundColor3 = "TextMuted" } })
+		end
+		row.Size = UDim2.new(1, 0, 0, 38)
+		-- snapping: the fill springs to each step instead of gliding
+		S:OnChanged(function()
+			local a = (S.Value - S.Min) / math.max(S.Max - S.Min, 1e-9)
+			if fill then Play(fill, TweenInfo.new(0.22, Enum.EasingStyle.Back, Enum.EasingDirection.Out), { Size = UDim2.new(a, 0, 1, 0) }) end
+		end)
+	end
+	if o.ValueTooltip and fill then
+		local knob
+		for _, c in ipairs(fill:GetChildren()) do if c:IsA("Frame") and c.Size.X.Offset == 8 then knob = c end end
+		local bubble = New("TextLabel", { AnchorPoint = Vector2.new(0.5, 1), Position = UDim2.new(1, 0, 0, -8), Size = UDim2.fromOffset(0, 18),
+			AutomaticSize = Enum.AutomaticSize.X, Text = "", TextSize = 11, Font = Enum.Font.GothamBold, ZIndex = 20, Visible = false, Parent = fill,
+			BackgroundTransparency = 0, Theme = { BackgroundColor3 = "Accent", TextColor3 = "Background" } }, { CornerFixed(5), Pad(6, 0, 6, 0) })
+		local bs = New("UIScale", { Scale = 0, Parent = bubble })
+		local showing = false
+		local function Show(v)
+			if v == showing then return end
+			showing = v
+			if v then bubble.Visible = true end
+			Play(bs, v and Motion.Spring or Motion.Quick, { Scale = v and 1 or 0 })
+			if not v then task.delay(0.17, function() if not showing then bubble.Visible = false end end) end
+		end
+		local function Txt() bubble.Text = string.format("%." .. dec .. "f", S.Value) .. (S.Suffix or "") end
+		Txt()
+		S:OnChanged(Txt)
+		local hovering, pressing = false, false
+		for _, c in ipairs(row:GetChildren()) do
+			if c:IsA("TextButton") then
+				Bind(row, c.MouseEnter, function() hovering = true Show(true) end)
+				Bind(row, c.MouseLeave, function() hovering = false if not pressing then Show(false) end end)
+				Bind(row, c.InputBegan, function(i) if IsPress(i) then pressing = true Show(true) if knob then Play(knob, Motion.Spring, { Size = UDim2.fromOffset(12, 12) }) end end end)
+			end
+		end
+		Bind(row, UIS.InputEnded, function(i)
+			if IsPress(i) and pressing then
+				pressing = false
+				if knob then Play(knob, Motion.Spring, { Size = UDim2.fromOffset(8, 8) }) end
+				if not hovering then Show(false) end
+			end
+		end)
+	end
+	return S
+end
+
+-- Button styles (options on AddButton and AddSubButton; leave Style out for the classic look):
+--   Style = "Primary" | "Secondary" | "Outline" | "Ghost" | "Danger" | "Pill"
+--   Icon = "name" (icon and text), IconOnly = true (a square icon button; Text becomes its tooltip)
+--   Loading = true    the callback runs in the background; the button shows a spinner and ignores clicks until it returns
+--   Hold = seconds    hold to activate: a fill sweeps across while held and drains if you let go early
+-- Every styled button has hover, press and disabled looks, and a ripple that starts where you clicked.
+local BaseButton = Elements.AddButton
+local STYLE = {
+	Primary = function(T) return T.Accent, T.Background, nil end,
+	Secondary = function(T) return T.Control, T.Text, T.Outline end,
+	Outline = function(T) return nil, T.AccentText, T.AccentBorder end,
+	Ghost = function(T) return nil, T.Label, nil end,
+	Danger = function(T) return T.Error, Color3.new(1, 1, 1), nil end,
+	Pill = function(T) return T.TabActive, T.Text, T.AccentBorder end,
+}
+local function Styled(b, opts)
+	local style = opts.Style
+	if not (style or opts.Icon or opts.IconOnly or opts.Loading or opts.Hold) then return end
+	style = STYLE[style] and style or nil
+	local stroke = b:FindFirstChildOfClass("UIStroke")
+	local sheen = b:FindFirstChildWhichIsA("Frame")
+	local corner = b:FindFirstChildOfClass("UICorner")
+	local function Paint()
+		if not style then return end
+		local T = TingUI.Theme
+		local bg, fg, edge = STYLE[style](T)
+		b.BackgroundTransparency = bg and 0 or 1
+		if bg then b.BackgroundColor3 = bg end
+		b.TextColor3 = fg
+		if stroke then stroke.Transparency = edge and 0 or 1 if edge then stroke.Color = edge end end
+		if sheen then sheen.Visible = style == "Secondary" end
+		if style == "Pill" and corner then corner.CornerRadius = UDim.new(0.5, 0) end
+		b:SetAttribute("RestColor", bg and bg or T.Background)
+	end
+	if style then
+		-- a styled button paints itself: take it (and its border) off the theme's automatic list, which would
+		-- otherwise put the classic colours back on every theme change
+		for i = #Themed, 1, -1 do
+			local o = Themed[i][1]
+			if o == b or o == stroke then table.remove(Themed, i) end
+		end
+	end
+	Paint()
+	table.insert(Refreshers, Paint)
+	local sc = New("UIScale", { Parent = b })
+	b.ClipsDescendants = true
+	if opts.Icon or opts.IconOnly then
+		local name = opts.Icon or "plus"
+		local ic = Icon(name, b, 14, style == "Primary" and "Background" or "Label")
+		ic.AnchorPoint = Vector2.new(0.5, 0.5)
+		ic.ZIndex = b.ZIndex + 1
+		if opts.IconOnly then
+			ic.Position = UDim2.fromScale(0.5, 0.5)
+			b:SetAttribute("Square", true)
+			b.Text = ""
+			AttachTooltip(b, opts.Text or name)
+		else
+			-- the text moves right to make room and the icon sits just before it, measured from the text's real
+			-- rendered width (TextBounds), so it stays put for any font, size or script
+			-- the padding moves the text centre 11px right. Children are laid out inside the same padded box, so the
+			-- icon's 0.5 already shares that centre: its centre sits 13px before where the text starts
+			New("UIPadding", { PaddingLeft = UDim.new(0, 22), Parent = b })
+			local function Place()
+				local w = b.TextBounds.X / math.max(TingUI.Scale, 0.01)
+				ic.Position = UDim2.new(0.5, -w / 2 - 13, 0.5, 0)
+			end
+			Place()
+			Bind(b, b:GetPropertyChangedSignal("TextBounds"), Place)
+		end
+	end
+	-- hover lifts the colour a little, press squeezes the button. The classic button's own hover and click colours
+	-- run first; these are deferred one step so they land after them and win.
+	local function Look(hover)
+		if not style then return end
+		local rest = b:GetAttribute("RestColor")
+		if style == "Ghost" or style == "Outline" then
+			b.BackgroundColor3 = TingUI.Theme.ControlHover
+			Play(b, Motion.Quick, { BackgroundTransparency = hover and 0.2 or 1 })
+		else
+			Play(b, Motion.Quick, { BackgroundColor3 = hover and rest:Lerp(Color3.new(1, 1, 1), 0.1) or rest })
+		end
+	end
+	Bind(b, b.MouseEnter, function() if not b:GetAttribute("Busy") then task.defer(Look, true) end end)
+	Bind(b, b.MouseLeave, function()
+		Play(sc, Motion.Spring, { Scale = 1 })
+		task.defer(Look, false)
+	end)
+	Bind(b, b.MouseButton1Click, function() task.defer(Look, true) end)
+	Bind(b, b.MouseButton1Down, function() if not b:GetAttribute("Busy") then Play(sc, Motion.Quick, { Scale = 0.96 }) end end)
+	Bind(b, b.MouseButton1Up, function() Play(sc, Motion.Spring, { Scale = 1 }) end)
+	return true
+end
+local function Ripple(b, input)
+	local p = input and Vector2.new(input.Position.X, input.Position.Y) or (b.AbsolutePosition + b.AbsoluteSize / 2)
+	local rel = p - b.AbsolutePosition
+	local sc = TingUI.Scale
+	local rip = New("Frame", { AnchorPoint = Vector2.new(0.5, 0.5), Position = UDim2.fromOffset(rel.X / sc, rel.Y / sc), Size = UDim2.fromOffset(4, 4),
+		BackgroundColor3 = Color3.new(1, 1, 1), BackgroundTransparency = 0.75, ZIndex = b.ZIndex + 2, Parent = b }, { CornerFixed(999) })
+	local r = math.max(b.AbsoluteSize.X, b.AbsoluteSize.Y) * 2.2 / sc
+	Play(rip, TweenInfo.new(0.55, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), { Size = UDim2.fromOffset(r, r), BackgroundTransparency = 1 })
+	task.delay(0.56, function() rip:Destroy() end)
+end
+TingUI._Ripple = Ripple
+function Elements:AddButton(o)
+	o = type(o) == "string" and { Text = o } or o or {}
+	local fancy = o.Style or o.Icon or o.IconOnly or o.Loading or o.Hold
+	-- a styled button wraps the callback so Loading and Hold can take over the click
+	local function Wrap(opts)
+		if not (opts.Loading or opts.Hold) then return opts end
+		local w = table.clone(opts)
+		w.Callback = nil
+		w._real = opts.Callback
+		return w
+	end
+	local B = BaseButton(self, Wrap(o))
+	local row = B.Row
+	local function Enhance(b, opts)
+		Styled(b, opts)
+		if opts.Style or opts.Icon or opts.IconOnly or opts.Loading or opts.Hold then
+			Bind(b, b.InputBegan, function(i) if IsPress(i) and not b:GetAttribute("Busy") then Ripple(b, i) end end)
+		end
+		if opts.Loading then
+			local spin = New("Frame", { AnchorPoint = Vector2.new(0.5, 0.5), Position = UDim2.fromScale(0.5, 0.5), Size = UDim2.fromOffset(14, 14),
+				BackgroundTransparency = 1, Visible = false, ZIndex = b.ZIndex + 3, Parent = b }, { CornerFixed(7) })
+			New("UIStroke", { Thickness = 2, Color = b.TextColor3, Parent = spin }, { New("UIGradient", { Transparency = NumberSequence.new({
+				NumberSequenceKeypoint.new(0, 0), NumberSequenceKeypoint.new(0.6, 0.2), NumberSequenceKeypoint.new(0.61, 1), NumberSequenceKeypoint.new(1, 1) }) }) })
+			Bind(b, b.MouseButton1Click, function()
+				if b:GetAttribute("Busy") then return end
+				b:SetAttribute("Busy", true)
+				local text = b.Text
+				local tt = b.TextTransparency
+				Play(b, Motion.Quick, { TextTransparency = 1 })
+				spin.Visible = true
+				local tw = Play(spin, TweenInfo.new(0.7, Enum.EasingStyle.Linear, Enum.EasingDirection.Out, -1), { Rotation = 360 })
+				task.spawn(function()
+					if opts.Callback then SafeCall("Button '" .. tostring(text) .. "'", opts.Callback) end
+					tw:Cancel()
+					spin.Visible = false
+					spin.Rotation = 0
+					Play(b, Motion.Quick, { TextTransparency = tt })
+					b:SetAttribute("Busy", false)
+				end)
+			end)
+		elseif opts.Hold then
+			local secs = type(opts.Hold) == "number" and opts.Hold or 1
+			local bar = New("Frame", { Size = UDim2.fromScale(0, 1), BackgroundColor3 = TingUI.Theme.Accent, BackgroundTransparency = 0.55, ZIndex = b.ZIndex,
+				Parent = b })
+			local holdTw, token = nil, 0
+			Bind(b, b.InputBegan, function(i)
+				if not IsPress(i) or b:GetAttribute("Busy") then return end
+				token = token + 1
+				local mine = token
+				bar.BackgroundColor3 = opts.Style == "Danger" and Color3.new(1, 1, 1) or TingUI.Theme.Accent
+				holdTw = Play(bar, TweenInfo.new(secs * (1 - bar.Size.X.Scale), Enum.EasingStyle.Linear), { Size = UDim2.fromScale(1, 1) })
+				task.delay(secs * (1 - bar.Size.X.Scale) + 0.02, function()
+					if token ~= mine or bar.Size.X.Scale < 0.99 then return end
+					token = token + 1
+					Ripple(b)
+					bar.BackgroundTransparency = 0.25
+					Play(bar, Motion.Smooth, { BackgroundTransparency = 0.55 })
+					if opts.Callback then SafeCall("Button '" .. tostring(opts.Text) .. "'", opts.Callback) end
+					task.delay(0.35, function() Play(bar, Motion.Smooth, { Size = UDim2.fromScale(0, 1) }) end)
+				end)
+			end)
+			local function Release()
+				if bar.Size.X.Scale >= 0.99 then return end
+				token = token + 1
+				if holdTw then holdTw:Cancel() end
+				Play(bar, TweenInfo.new(0.35, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), { Size = UDim2.fromScale(0, 1) })
+			end
+			Bind(b, b.InputEnded, function(i) if IsPress(i) then Release() end end)
+			Bind(b, b.MouseLeave, Release)
+		end
+	end
+	if fancy then Enhance(B.Button, o) end
+	local baseSub = B.AddSubButton
+	function B:AddSubButton(o2)
+		if type(o2) == "string" then o2 = { Text = o2 } end
+		o2 = o2 or {}
+		baseSub(self, Wrap(o2))
+		local btns = {}
+		for _, c in ipairs(row:GetChildren()) do if c:IsA("TextButton") then table.insert(btns, c) end end
+		table.sort(btns, function(a, b2) return a.LayoutOrder < b2.LayoutOrder end)
+		local nb = btns[#btns]
+		if nb and (o2.Style or o2.Icon or o2.IconOnly or o2.Loading or o2.Hold) then Enhance(nb, o2) end
+		-- square icon buttons keep their size; the rest share what's left
+		local square, rest = 0, {}
+		for _, c in ipairs(btns) do if c:GetAttribute("Square") then square = square + 1 else table.insert(rest, c) end end
+		if square > 0 then
+			for _, c in ipairs(btns) do
+				if c:GetAttribute("Square") then c.Size = UDim2.fromOffset(30, 30)
+				else c.Size = UDim2.new(1 / #rest, -(square * 35 + 5 * (#rest - 1)) / #rest, 0, 30) end
+			end
+		end
+		return self
+	end
+	if o.IconOnly then B.Button.Size = UDim2.fromOffset(30, 30) end
+	function B:SetLoading(v)
+		B.Button:SetAttribute("Busy", v and true or false)
+		B.Button.Active = not v
+	end
+	return B
+end
+
+-- Toast: a small message at the bottom of the screen. Several stack, the oldest leaves first, each fades on its own
+-- timer (shown as a thin line), and hovering one pauses it. TingUI:Toast("Saved") or
+-- TingUI:Toast({ Text = "Copied", Type = "Success" | "Error" | "Info" | "Warning", Duration = 2.5, Icon = "check" })
+local ToastHolder = New("Frame", { AnchorPoint = Vector2.new(0.5, 1), Position = UDim2.new(0.5, 0, 1, -28), Size = UDim2.fromOffset(360, 0),
+	AutomaticSize = Enum.AutomaticSize.Y, BackgroundTransparency = 1, ZIndex = 95, Parent = Gui },
+	{ List(6, Enum.FillDirection.Vertical, Enum.HorizontalAlignment.Center, Enum.VerticalAlignment.Bottom) })
+local Toasts = {}
+local TOAST_ICON = { Success = "check", Error = "cross", Warning = "warn", Info = "info" }
+function TingUI:Toast(o, duration)
+	if type(o) == "string" then o = { Text = o, Duration = duration } end
+	o = o or {}
+	if self.Unloaded then return end
+	local T = self.Theme
+	local key = (o.Type == "Warning" and "Caution") or o.Type
+	local col = (key and T[key]) or T.Accent
+	local holder = New("Frame", { Size = UDim2.fromOffset(0, 34), AutomaticSize = Enum.AutomaticSize.X, BackgroundTransparency = 1,
+		LayoutOrder = math.floor(os.clock() * 1000) % 2000000000, Parent = ToastHolder })
+	local pill = New("Frame", { Size = UDim2.fromOffset(0, 34), AutomaticSize = Enum.AutomaticSize.X, BackgroundColor3 = T.Background, Parent = holder },
+		{ CornerFixed(17) })
+	New("UIStroke", { Thickness = 1, Color = col:Lerp(T.Background, 0.45), Parent = pill })
+	-- icon and text sit in their own row; the timer line stays outside it so the row's layout never picks it up
+	local content = New("Frame", { Size = UDim2.fromOffset(0, 34), AutomaticSize = Enum.AutomaticSize.X, BackgroundTransparency = 1, Parent = pill },
+		{ Pad(12, 0, 16, 0), List(8, Enum.FillDirection.Horizontal, Enum.HorizontalAlignment.Left, Enum.VerticalAlignment.Center) })
+	local iconName = o.Icon or TOAST_ICON[o.Type or ""] or "bell"
+	local ic = Icon(iconName, content, 14, key or "Accent")
+	ic.LayoutOrder = 1
+	local txt = New("TextLabel", { Size = UDim2.fromOffset(0, 34), AutomaticSize = Enum.AutomaticSize.X, Text = Utf8.Clip(tostring(o.Text or ""), 120),
+		TextColor3 = T.Text, LayoutOrder = 2, Parent = content })
+	local line = New("Frame", { AnchorPoint = Vector2.new(0.5, 1), Position = UDim2.new(0.5, 0, 1, -2), Size = UDim2.new(1, -30, 0, 2),
+		BackgroundColor3 = col, BackgroundTransparency = 0.3, Parent = pill }, { CornerFixed(1) })
+	local sc = New("UIScale", { Scale = 0.6, Parent = pill })
+	pill.BackgroundTransparency = 1
+	txt.TextTransparency = 1
+	Play(sc, Motion.Spring, { Scale = 1 })
+	Play(pill, Motion.Quick, { BackgroundTransparency = 0.04 })
+	Play(txt, Motion.Quick, { TextTransparency = 0 })
+	local dur = o.Duration or 2.6
+	local lineTw = Play(line, TweenInfo.new(dur, Enum.EasingStyle.Linear), { Size = UDim2.new(0, 0, 0, 2) })
+	local entry = { Holder = holder, Closed = false }
+	local function Close()
+		if entry.Closed then return end
+		entry.Closed = true
+		lineTw:Cancel()
+		Play(sc, Motion.Quick, { Scale = 0.8 })
+		Play(pill, Motion.Quick, { BackgroundTransparency = 1 })
+		Play(txt, Motion.Quick, { TextTransparency = 1 })
+		task.delay(0.18, function()
+			Play(holder, Motion.Quick, { Size = UDim2.fromOffset(0, 0) })
+			task.delay(0.17, function() holder:Destroy() end)
+		end)
+		for i, t in ipairs(Toasts) do if t == entry then table.remove(Toasts, i) break end end
+	end
+	entry.Close = Close
+	local remaining, paused = dur, false
+	local hit = New("TextButton", { Size = UDim2.fromScale(1, 1), ZIndex = 5, Parent = holder })
+	Bind(holder, hit.MouseEnter, function() paused = true lineTw:Pause() end)
+	Bind(holder, hit.MouseLeave, function() paused = false lineTw:Play() end)
+	Bind(holder, hit.MouseButton1Click, Close)
+	task.spawn(function()
+		while not entry.Closed and remaining > 0 do
+			local dt = task.wait(0.1)
+			if not paused then remaining = remaining - dt end
+		end
+		Close()
+	end)
+	table.insert(Toasts, entry)
+	if #Toasts > 4 then Toasts[1].Close() end
+	return entry
+end
+
+-- utf8-aware helpers for scripts that format their own text
+TingUI.Utf8 = Utf8
+end
+
 
 function TingUI:CreateCredits(o)
 	o = o or {}
@@ -7033,6 +8784,10 @@ function TingUI:_Serialize()
 			end
 		elseif t == "ColorPicker" then
 			data[flag] = { t = t, v = { o.Value.R, o.Value.G, o.Value.B } }
+		elseif type(o._serialize) == "function" then
+			-- newer elements (chips, steppers, segmented controls, range sliders) say what to save themselves
+			local ok, v = pcall(o._serialize)
+			if ok then data[flag] = { t = t, v = v } end
 		elseif t == "Keybind" then
 			data[flag] = {
 				t = t, mode = o.Mode,
@@ -7843,47 +9598,6 @@ KINDS.Neon = {
 	end,
 }
 
--- blueprint: drafting marks (crosshairs, circles, dimension lines) drifting slowly and fading in and out
-KINDS.Drafting = {
-	Build = function(f, c, p)
-		f.Speed = 0.006 + math.random() * 0.01
-		f.Pulse = 0.3 + math.random() * 0.8
-		f.Base = 0.4
-		f.NoSelf = true
-		local size = math.random(8, 15)
-		f.Frame = New("Frame", { BackgroundTransparency = 1, Size = UDim2.fromOffset(size, size), Parent = p })
-		local function Line(pos, sz, anchor)
-			return New("Frame", { AnchorPoint = anchor or Vector2.new(0.5, 0.5), Position = pos, Size = sz, BackgroundColor3 = c, Parent = f.Frame })
-		end
-		local r = math.random()
-		if r < 0.45 then
-			-- crosshair
-			local a = Line(UDim2.fromScale(0.5, 0.5), UDim2.new(1, 0, 0, 1))
-			local b = Line(UDim2.fromScale(0.5, 0.5), UDim2.new(0, 1, 1, 0))
-			f.Extra = { { a, "BackgroundTransparency" }, { b, "BackgroundTransparency" } }
-		elseif r < 0.75 then
-			-- circle with a centre mark
-			local ring = New("Frame", { BackgroundTransparency = 1, Size = UDim2.fromScale(1, 1), Parent = f.Frame }, { CornerFixed(size) })
-			local st = New("UIStroke", { Color = c, Thickness = 1, Parent = ring })
-			local dot = Line(UDim2.fromScale(0.5, 0.5), UDim2.fromOffset(2, 2))
-			f.Extra = { { st, "Transparency" }, { dot, "BackgroundTransparency" } }
-		else
-			-- dimension line: a span with end ticks
-			f.Frame.Size = UDim2.fromOffset(size * 2, 7)
-			local a = Line(UDim2.fromScale(0.5, 0.5), UDim2.new(1, 0, 0, 1))
-			local b = Line(UDim2.fromScale(0, 0.5), UDim2.new(0, 1, 1, 0), Vector2.new(0, 0.5))
-			local d = Line(UDim2.fromScale(1, 0.5), UDim2.new(0, 1, 1, 0), Vector2.new(1, 0.5))
-			f.Extra = { { a, "BackgroundTransparency" }, { b, "BackgroundTransparency" }, { d, "BackgroundTransparency" } }
-		end
-	end,
-	Update = function(f, dt, t, sp)
-		f.X = (f.X + f.Speed * 0.5 * sp * dt) % 1
-		f.Y = f.Y - f.Speed * sp * dt
-		if f.Y < -0.04 then f.Y = 1.04 end
-		f.Frame.Position = UDim2.fromScale(f.X, f.Y)
-		return 0.35 + 0.55 * (0.5 + 0.5 * math.sin(t * f.Pulse + f.Phase))
-	end,
-}
 -- noir: film grain that jumps every few frames, and the odd vertical scratch flickering across the screen
 KINDS.FilmGrain = {
 	Build = function(f, c, p)
@@ -8174,7 +9888,7 @@ end
 end
 
 local BUILTIN_KINDS = { "Snow", "Bubbles", "Petals", "Embers", "Fireflies", "Stars", "Glyphs", "Rain", "Confetti", "Sparkles", "Starfield", "Crystals", "Neon",
-	"Drafting", "FilmGrain", "Sparks", "Bokeh", "Bats", "Leaves", "Galaxy", "Holo", "Static" }
+	"FilmGrain", "Sparks", "Bokeh", "Bats", "Leaves", "Galaxy", "Holo", "Static" }
 TingUI.ParticleKinds = { "Theme" }
 for _, k in ipairs(BUILTIN_KINDS) do table.insert(TingUI.ParticleKinds, k) end
 TingUI._particleDropdowns = {}
@@ -8223,7 +9937,7 @@ local function BuildFlakes()
 		color = ({ Bubbles = Color3.fromRGB(140, 205, 255), Petals = Color3.fromRGB(242, 150, 186), Embers = Color3.fromRGB(255, 150, 70),
 			Fireflies = Color3.fromRGB(180, 255, 150), Glyphs = Color3.fromRGB(205, 205, 205), Rain = Color3.fromRGB(170, 200, 240),
 			Sparkles = Color3.fromRGB(255, 214, 120), Crystals = Color3.fromRGB(215, 240, 255),
-			Neon = Color3.fromRGB(0, 229, 255), Drafting = Color3.fromRGB(210, 230, 255), FilmGrain = Color3.fromRGB(230, 230, 230),
+			Neon = Color3.fromRGB(0, 229, 255), FilmGrain = Color3.fromRGB(230, 230, 230),
 			Sparks = Color3.fromRGB(255, 210, 90), Bokeh = Color3.fromRGB(180, 210, 255), Bats = Color3.fromRGB(130, 90, 170),
 			Leaves = Color3.fromRGB(200, 110, 50), Galaxy = Color3.fromRGB(225, 228, 255),
 			Holo = Color3.fromRGB(120, 230, 255), Static = Color3.fromRGB(255, 200, 120) })[kind] or color
@@ -8362,7 +10076,7 @@ end)
 --   Grid + GridColor, Vignette, SurfaceTransparency, Blur, AccentCycle + CycleSpeed, AuraHard, AuraRotation,
 --   Texture = { {Image, Transparency, Drift, Zoom, Pulse, Color, Mode = "Fill" | "Lamp", Flicker}, ... } (art inside windows),
 --   BackdropTexture = {Image, Transparency, Drift, Zoom} (art across the screen), Glitch (bool: title + screen glitches),
---   Scene = "Hologram" | "Circuit" | "Ocean" | "Frost" | "Rose" | "Sunset" | "Storm" | your own (animated artwork around windows that reacts to clicks; see Scenes),
+--   Scene = "Hologram" | "Circuit" | "Ocean" | "Frost" | "Rose" | "Sunset" | "Storm" | "Flames" | your own (animated artwork around windows that reacts to clicks; see Scenes),
 --   scene colours: TraceColor + EnergyColor (Circuit), WaterColor + FoamColor (Ocean)
 -- fade (seconds): corners, glow, fonts, surfaces and particles all blend instead of switching.
 ------------------------------------------------------------------------------
@@ -8431,12 +10145,40 @@ end
 
 -- faint diagonal text tiled over the whole screen (anti-leak watermark). Pass nil to remove.
 local ScreenWM
+-- An image works too (v0.1.0): SetScreenWatermark({ Image = "rbxassetid://...", Transparency = 0.9, Size = 96,
+-- Place = "BottomRight" | "BottomLeft" | "TopRight" | "TopLeft" | "Center" | "Tile" }). Image takes the same sources
+-- as SetWatermarkImage. It never blocks clicks.
 function TingUI:SetScreenWatermark(text)
 	if ScreenWM then ScreenWM:Destroy() ScreenWM = nil end
 	if not text or text == "" then return end
 	ScreenWM = New("Frame", {
 		BackgroundTransparency = 1, Size = UDim2.fromScale(1, 1), ClipsDescendants = true, ZIndex = 90, Parent = Gui,
 	})
+	if type(text) == "table" then
+		local img = TingUI:_ResolveImage(text.Image)
+		local size = text.Size or 96
+		local tr = text.Transparency or 0.88
+		local place = text.Place or "BottomRight"
+		local spots = {
+			BottomRight = { Vector2.new(1, 1), UDim2.new(1, -24, 1, -24) }, BottomLeft = { Vector2.new(0, 1), UDim2.new(0, 24, 1, -24) },
+			TopRight = { Vector2.new(1, 0), UDim2.new(1, -24, 0, 24) }, TopLeft = { Vector2.new(0, 0), UDim2.new(0, 24, 0, 24) },
+			Center = { Vector2.new(0.5, 0.5), UDim2.fromScale(0.5, 0.5) },
+		}
+		if place == "Tile" then
+			for r = 0, 5 do
+				for c = 0, 6 do
+					New("ImageLabel", { BackgroundTransparency = 1, Image = img, ImageTransparency = tr, ScaleType = Enum.ScaleType.Fit,
+						AnchorPoint = Vector2.new(0.5, 0.5), Size = UDim2.fromOffset(size, size), Rotation = -18,
+						Position = UDim2.new((c + (r % 2) * 0.5) / 6, 0, (r + 0.5) / 5.5, 0), Parent = ScreenWM })
+				end
+			end
+		else
+			local spot = spots[place] or spots.BottomRight
+			New("ImageLabel", { BackgroundTransparency = 1, Image = img, ImageTransparency = tr, ScaleType = Enum.ScaleType.Fit,
+				AnchorPoint = spot[1], Position = spot[2], Size = UDim2.fromOffset(size, size), Parent = ScreenWM })
+		end
+		return
+	end
 	for r = 0, 7 do
 		for c = 0, 4 do
 			New("TextLabel", {
@@ -8579,7 +10321,7 @@ end
 
 local function PaletteScore(q, text)
 	if q == "" then return 1 end
-	text = text:lower()
+	text = Utf8.Lower(text)
 	local i = text:find(q, 1, true)
 	if i then return 1000 - i end
 	local qi = 1
@@ -8593,7 +10335,7 @@ local function PaletteScore(q, text)
 end
 
 local function PaletteSearch(query)
-	local q = query:lower():gsub("^%s*>?%s*", "")
+	local q = Utf8.Lower(query):gsub("^%s*>?%s*", "")
 	local out = {}
 	local cat = TingUI._Catalog
 	for i = #cat, 1, -1 do
@@ -8949,10 +10691,11 @@ do local function Setup()
 
 	local function Initials(name)
 		local words = {}
-		for w in tostring(name):gmatch("%w+") do table.insert(words, w) end
-		if #words >= 2 then return (words[1]:sub(1, 1) .. words[2]:sub(1, 1)):upper() end
+		-- words in any script (a Cyrillic or Georgian name gets its own initials, not "?")
+		for w in tostring(name):gmatch("[^%s%p]+") do table.insert(words, w) end
+		if #words >= 2 then return (Utf8.Clip(words[1], 1) .. Utf8.Clip(words[2], 1)):upper() end
 		local w = words[1] or "?"
-		return w:sub(1, 1):upper() .. w:sub(2, 2):lower()
+		return Utf8.Clip(w, 1):upper() .. Utf8.Lower(Utf8.Clip(w, 2):sub(#Utf8.Clip(w, 1) + 1))
 	end
 
 	local function IsImage(s)
@@ -9434,6 +11177,10 @@ function TingUI:CreateWindow(o)
 	if o.Watermark == false then self:SetWatermarkVisible(false) end
 	if o.Hotkeys == false then self:SetHotkeysVisible(false) end
 	if o.WatermarkTitle then self:SetWatermarkTitle(o.WatermarkTitle) end
+	if o.WatermarkImage then
+		local wi = o.WatermarkImage
+		if type(wi) == "table" then self:SetWatermarkImage(wi.Image, wi) else self:SetWatermarkImage(wi) end
+	end
 
 	local main = New("Frame", {
 		Name = "Window", Size = UDim2.fromOffset(size.X, size.Y),
@@ -10423,9 +12170,10 @@ function TingUI:CreateWindow(o)
 			Frost = "Pale ice, thin rounded type, a frosted double border, spinning ice crystals. A short snowfall settles into a thin drift along the bottom and a dusting on top, and stays; brush it with your cursor.",
 			Royal = "Midnight navy and gold, serif type, a gilded double border, glinting sparkles.",
 			Cosmos = "Deep space: drifting nebula clouds over a parallax star layer, a turning aurora border, twinkling stars, shooting stars and comets.",
-			Storm = "Slate and steel, condensed type, rain in a shifting wind, clouds that light up, drops that bead and run down the glass (wipe them with your cursor) and bolts that fork through.",
-			Blueprint = "Drafting paper: navy blue, a white grid, a ruled double border, handwritten labels, drafting marks.",
+			Storm = "Slate and steel, clean readable type, rain in a shifting wind, clouds that light up, drops that bead and run down the glass (wipe them with your cursor) and bolts that fork through.",
+			Blueprint = "Drafting paper: navy blue, a white grid, a ruled double border, handwritten labels.",
 			Hazard = "Industrial yellow and black, a striped warning-tape border, square corners.",
+			Flames = "The window burns: real-looking fire along the top and down the sides, sparks, a heat glow, lava creeping along the bottom and glowing fissures in the corners. Hover the top edge to feed it, click for sparks. Recolour it for blue or green fire.",
 			Serotonin = "A crisp classic cheat-menu look: square corners, a hairline teal outline in a dark teal frame, teal light from the top, plain type. No particles.",
 			Glass = "See-through frosted surfaces over a blurred world, soft rounded type, real lens bokeh drifting at different depths with a glint now and then.",
 			Hologram = "A cyan light projection: brackets lock on as it opens, a scan line sweeps each page, the image tears now and then, clicks ripple out as hexagons, a projector beam glows underneath.",
@@ -10809,6 +12557,11 @@ function TingUI:Unload()
 	for _, c in ipairs(Connections) do pcall(function() c:Disconnect() end) end
 	if BlurEffect then pcall(function() BlurEffect:Destroy() end) end
 	Gui:Destroy()
+	-- let go of everything the instance was holding on to, so a re-run starts clean and nothing lingers in memory
+	for _, t in ipairs({ Connections, Themed, Refreshers, FontObjs, Gradients, Keybinds }) do pcall(table.clear, t) end
+	pcall(table.clear, self.Options)
+	pcall(table.clear, self.Flags)
+	pcall(table.clear, self._Catalog)
 	if env.TingUIInstances and env.TingUIInstances[self.Id] == self then env.TingUIInstances[self.Id] = nil end
 	if env.TingUI == self then env.TingUI = nil end
 	-- the rest of the Shell re-arranges itself straight away (a new host takes over the taskbar if this was it)
@@ -10853,7 +12606,7 @@ do
 			or (type(http) == "table" and has(http.request)) or (type(fluxus) == "table" and has(fluxus.request)),
 		HiddenGui = has(gethui),
 		Studio = RunService:IsStudio(),
-		Version = "0.0.9",
+		Version = "0.1.0",
 	}
 end
 
@@ -10967,7 +12720,7 @@ do local function Setup()
 	local function CleanText(s, max)
 		if type(s) ~= "string" then return "" end
 		s = s:gsub("[%c<>]", ""):gsub("^%s+", ""):gsub("%s+$", "")
-		return s:sub(1, max)
+		return Utf8.Clip(s, max)
 	end
 	local function CleanName(s)
 		local n = CleanText(s, 32)
@@ -10998,6 +12751,9 @@ do local function Setup()
 		-- scene colours (v0.0.9)
 		SnowColor = { COLOR }, BloomColor = { COLOR }, VineColor = { COLOR }, SunColor = { COLOR }, BirdColor = { COLOR },
 		CloudColor = { COLOR }, BoltColor = { COLOR },
+		-- Flames (v0.1.0)
+		FlameColor = { COLOR }, FlameCore = { COLOR }, FlameHeight = { NUM, 20, 140 }, FlameIntensity = { NUM, 0, 2 },
+		FlameSides = { BOOL }, Lava = { BOOL }, LavaCracks = { BOOL },
 	}
 	local LAYER_KEYS = {
 		Transparency = { NUM, 0, 1 }, Drift = { NUM, -1, 1 }, Zoom = { NUM, 0.05, 10 }, Pulse = { NUM, 0, 1 },
@@ -11354,7 +13110,7 @@ TingUI.API = {
 -- The studio is an ordinary TingUI window, so it previews every edit on itself as well as on your own windows.
 -- It edits a draft (the twelve base colours, the status colours and the whole style) and pushes it to SetTheme and
 -- SetStyle a few times a second while you drag. A theme change from anywhere else reloads the draft.
-TingUI.FontNames = { "Inter", "Gotham", "Mono", "Michroma", "Jura", "Merriweather", "FredokaOne", "Arcade", "TitilliumWeb", "Oswald", "Ubuntu",
+TingUI.FontNames = { "Inter", "BuilderSans", "Gotham", "Mono", "Michroma", "Jura", "Merriweather", "FredokaOne", "Arcade", "TitilliumWeb", "Oswald", "Ubuntu",
 	"Nunito", "SourceSans", "PatrickHand", "SpecialElite", "Sarpanch", "Creepster", "Fondamento", "RobotoCondensed", "Cartoon", "JosefinSans", "Arial" }
 do local function Setup()
 	local BASE = { "Accent", "Background", "Group", "GroupBorder", "Control", "ControlHover", "Border", "Outline", "Text", "Label", "TextDim", "TextMuted" }
@@ -11671,7 +13427,7 @@ do local function Setup()
 		end
 
 		local scene = motionTab:AddGroup({ Title = "Scene", Side = "Right" })
-		local sceneRows = { Circuit = {}, Ocean = {}, Hologram = {}, Frost = {}, Rose = {}, Sunset = {}, Storm = {}, Other = {} }
+		local sceneRows = { Circuit = {}, Ocean = {}, Hologram = {}, Frost = {}, Rose = {}, Sunset = {}, Storm = {}, Flames = {}, Other = {} }
 		local function ShowSceneRows()
 			local cur = St.Draft.Style.Scene
 			local which = cur == nil and "" or (sceneRows[cur] and cur or "Other")
@@ -11706,6 +13462,18 @@ do local function Setup()
 		table.insert(sceneRows.Sunset, ColorFlag(scene, "BirdColor", "Birds", "The flocks crossing the sky. Off uses the text colour.", Draft("Text")))
 		table.insert(sceneRows.Storm, ColorFlag(scene, "CloudColor", "Clouds", "The cloud bank along the top. Off uses the panel colour.", Draft("Group")))
 		table.insert(sceneRows.Storm, ColorFlag(scene, "BoltColor", "Lightning", "Bolts and the light inside the clouds.", function() return Color3.fromRGB(225, 236, 255) end))
+		table.insert(sceneRows.Flames, ColorFlag(scene, "FlameColor", "Flame", "The outer flame, the heat glow, the lava and the cracks. Try a blue or green for magic fire.", function() return Color3.fromRGB(255, 96, 22) end))
+		table.insert(sceneRows.Flames, ColorFlag(scene, "FlameCore", "Core", "The white-hot middle of the flames and the sparks.", function() return Color3.fromRGB(255, 226, 150) end))
+		table.insert(sceneRows.Flames, scene:AddSlider({ Text = "Flame height", Min = 20, Max = 140, Default = St.Draft.Style.FlameHeight or 64, Suffix = " px",
+			Callback = Quiet(function(v) St.Draft.Style.FlameHeight = v Push(false, true) end) }))
+		table.insert(sceneRows.Flames, scene:AddSlider({ Text = "Intensity", Min = 0, Max = 2, Increment = 0.05, Default = St.Draft.Style.FlameIntensity or 1,
+			Callback = Quiet(function(v) St.Draft.Style.FlameIntensity = v Push(false, true) end) }))
+		table.insert(sceneRows.Flames, scene:AddToggle({ Text = "Flames down the sides", Default = St.Draft.Style.FlameSides ~= false,
+			Callback = Quiet(function(v) St.Draft.Style.FlameSides = v Push(false, true) end) }))
+		table.insert(sceneRows.Flames, scene:AddToggle({ Text = "Lava along the bottom", Default = St.Draft.Style.Lava ~= false,
+			Callback = Quiet(function(v) St.Draft.Style.Lava = v Push(false, true) end) }))
+		table.insert(sceneRows.Flames, scene:AddToggle({ Text = "Glowing cracks", Default = St.Draft.Style.LavaCracks ~= false,
+			Callback = Quiet(function(v) St.Draft.Style.LavaCracks = v Push(false, true) end) }))
 		table.insert(sceneRows.Other, scene:AddLabel("This scene reads its own style keys. Set them in code; share codes carry their colours and numbers.", { Dim = true }))
 		ShowSceneRows()
 
@@ -12766,12 +14534,40 @@ function TingUI:_LoadIcons()
 		if not isfolder(dir) then makefolder(dir) end
 	end)
 	if not ok then return false end
-	local pending, got = #ICON_NAMES, 0
-	for _, name in ipairs(ICON_NAMES) do
+	-- an icon that was redrawn gets a new cache name, so an old copy on disk isn't reused
+	local REV = { discord = 3 }
+	-- icons carried inside the library itself: written straight to disk, never fetched, so a stale copy on GitHub can't win
+	local BUNDLED = {
+		discord = "iVBORw0KGgoAAAANSUhEUgAAAGAAAABgCAYAAADimHc4AAAGAElEQVR42u2cW4xdVRnHf9/YITBNoVrF1l5QpLTQERPUVIMXLiFQEk0gEYJIiYaGIolGUwGNBIgREx9UAia+6ItgIprwQGJAkwYfClEJEi4pJMilLa2hVyjVttP258PZxjLtzJyzz7fPnM5Zv2TeZu3/dznf2mut/e0NhUKhUCgUCoVCoVAoFAqFQqFQKBQKhUaJfjFEXQicD5weEb9qSGMNsBV4OiK2DXTm1eXqLerv1Dd8N5c2oLdqnMYm9bfqWnXpIAR8lnqJep/6mpPz1wb0/zaF5svqz9QvqO+ZSYFfqf5C3W5nXJZow6Udav9LvVc9/4S8B6hzgNXAWmC05mUeB34CLAUWAwuA9wPzgFOBWeP+/wDwDrAT2AFsAzYDLwPrgItr2vEM8EvgwYh4p68ToAZwD/CNKkgziT3AfcCdEWG/JuAW4P4Zfju7MXOVFonBXwy8AMyZ4QnYA6yIiK0ZFxtKNOzeAQg+wNzK1/6pAHUV8McB28pcFhF/mvYEqMPA88DZA5aAF4HzImJsuqegmwcw+ADLK9+nrwLUU4FXqrX5ILIDOCsi3pquClg3wMGn2hh+Z1oqQH0v8CpwGoPN28CHI2J3ryvgmyX4UO34v9XTClBHgNerEiy0zp/OiIh9vaqA1SX472IecENPKqA6cHsBOKfE/Zh9wbmdHtTVqYALS/An3Bdc1Isp6MYS6wlZ0+gUpJ5G60HHKSXWx2U/sCAi9jRVAVeW4E/KyVWMGpuCrikxzo1R21OQOhd4ExguMZ6UMVq9TXuyK+DyEvy2GAba7ujoJAGrGjD22WoD86GIiGoOvYBWF8JYos4h4NfA54CRSms+8FXgqQb8uiL9iuoWc/nhZA1Q6sfVVxJ0tqifmkRnSP2eeiTRty3ZwV+aHPy72tRdom7rQmeXuqxNrW8n+7g0MwFfTzTsCXWoA+0vdqF1fYd+Ppro59cy7wErEwvqjog40vYyLeIRoE6v6EbggQ7H/CDRz5WZCfhkklFbgfU1xj1YZ0ynB2MR8RTwUpKvn0hJQNX1MJpk1BM12/qerKNV08Ynk3xdoc7KqICzgJOSjKq7Onijh1pZK5hTgDMzErCMPKR31NXK7JddllUBWSysOW5RD7UWJvr70YwELEk06DPVE7WOx/VoTDfjasVuqMe/iMXA52uMu7bGmOs6TXb1RkzmlLsoIwEfTJ6b7+4kMOoVwKdr6IwCX+7UtmRf52fsgl80n9va1F7Q5RnUdvUjbWqtacDP5zMSsK0Bw46ot09WCdX508YErVfVj03h41r1UAN+bs5IwF6bY4P6parR6396y9Ufq/sSdfarP1VHj9I5Wb1c/XOD/k3ZrhhtJGCMY99IzOYwre6y2dVfk/yb1tuU7+uBX/+JiJFuE9DLzdNM41BEDGccxhXqMdT1PwBHShzrV0BGAg6WONbmYEYC9pU41mZfRgL2ljjWZm9GAnYnGnQi3E8OJ15rd0YCdiQZsxFYAVwCPNzODaqHjAEPAZ+l9Sjxn0nX3ZGRgN/Q6vrtlg3A1ohYHxFXAWcAtwPPTWPgnwW+CyyOiGsiYgOwiXpNAMdswui8KWDCzdio+o+Erfl2dZ06e9z1l6m3qo+rBxo8GjhQadyqnj3OhjlVg9auBJ2/q7kvsagnqXerB5MScZc6/zg6I+pF1WHdQ9VpbB3NMfUl9ffq99WLjz5zOkpvofojdWfSmdMdVSNDW9R5R2yUVu/mBUnr5J9HxG1TaM6i9XBjEXB6dY4zwv/fVdhfnfHsBLbTeoi/earvOKj3AzclnQn9Bbg5IjY2PnGqoa4+ztcO63DDdN0Aqq82dssm9Ss1H7V27cDsquTeqmn8M520KTZg/3AXD5x2VdPk9L8xpM5T76mRiAv7wPZVnZ7xV/fCuX23g1HnVr+KdqamB/rI7j+0Ye/r1Qqu/z9GWJX21er6Cfru31Q/0Ef2Lphg+XlYfUy96oT9mKt6pnrnuLn2yj6087qj7HuuWrouYSahnqde28f2Xa+eW84QC4VCoVAoFAqFQqFQKBQKhUKhUCgUZhD/BbLEXfCOfKHSAAAAAElFTkSuQmCC",
+	}
+	local function Unb64(s)
+		local map, out, bits, n = {}, {}, 0, 0
+		local abc = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/"
+		for i = 1, 64 do map[abc:byte(i)] = i - 1 end
+		for i = 1, #s do
+			local v = map[s:byte(i)]
+			if v then
+				bits = bits * 64 + v
+				n = n + 6
+				if n >= 8 then
+					n = n - 8
+					local byte = math.floor(bits / 2 ^ n)
+					out[#out + 1] = string.char(byte)
+					bits = bits - byte * 2 ^ n
+				end
+			end
+		end
+		return table.concat(out)
+	end
+	local list = table.clone(ICON_NAMES)
+	table.insert(list, "atlas-v1")
+	local pending, got = #list, 0
+	for _, name in ipairs(list) do
 		task.spawn(function()
-			if not IconImages[name] then
+			if not IconImages[name] and not (name == "atlas-v1" and IconAtlas.Image) then
 				pcall(function()
-					local path = dir .. "/" .. name .. ".png"
+					local path = dir .. "/" .. name .. (REV[name] and ("-r" .. REV[name]) or "") .. ".png"
+					if not isfile(path) and BUNDLED[name] then writefile(path, Unb64(BUNDLED[name])) end
 					if not isfile(path) then
 						for _, base in ipairs(ICON_BASES) do
 							local okGet, data = pcall(function() return game:HttpGet(base .. name .. ".png") end)
@@ -12782,7 +14578,7 @@ function TingUI:_LoadIcons()
 						end
 					end
 					if isfile(path) then
-						IconImages[name] = getcustomasset(path)
+						if name == "atlas-v1" then IconAtlas.Image = getcustomasset(path) else IconImages[name] = getcustomasset(path) end
 						got = got + 1
 					end
 				end)
@@ -12802,6 +14598,16 @@ function TingUI:_LoadIcons()
 			IconImage(f, info.Kind, info.Key, true)
 		end
 		LiveIcons[f] = nil
+	end
+	if IconAtlas.Image then
+		for img, kind in pairs(IconAtlas.Live) do
+			if img.Parent then
+				IconAtlas.Paint(img, kind)
+				img.ImageTransparency = 1
+				Tween(img, 0.3, { ImageTransparency = 0 })
+			end
+			IconAtlas.Live[img] = nil
+		end
 	end
 	for _, fn in ipairs(Refreshers) do pcall(fn) end
 	return got > 0

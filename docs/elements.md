@@ -130,6 +130,59 @@ v:SetHighlight({ Outline = Color3.new(0, 1, 0), Thickness = 3 })
 
 `Group:AddCredits({ {Name, Role, RoleColor, Description}, ... })` puts credit cards inside any group. It returns an object with `:Add(entry)`. For a standalone credits panel, see [Key system and credits](windows.md#key-system-and-credits).
 
+## Button styles
+
+```lua
+Group:AddButton({ Text = "Save", Style = "Primary", Icon = TingUI.Icons.save, Callback = function() end })
+Group:AddButton({ Text = "Delete", Style = "Danger", Hold = 1, Callback = function() end })  -- hold for 1 second
+Group:AddButton({ Text = "Fetch", Style = "Outline", Loading = true, Callback = function() task.wait(2) end })
+Group:AddButton({ Text = "Settings", IconOnly = true, Icon = TingUI.Icons.settings })
+```
+
+`Style` is `Primary`, `Secondary`, `Outline`, `Ghost`, `Danger` or `Pill`. `Icon` puts an icon before the text and `IconOnly` shows only the icon, with the text as its tooltip. `Loading = true` swaps the text for a spinner and locks the button until the callback returns (or call `b:SetLoading(true/false)` yourself). `Hold = seconds` fills the button while it's held and only fires once it's full. Sub-buttons take the same options. Leaving them all out keeps the classic button.
+
+## Slider options
+
+```lua
+Group:AddSlider({ Text = "Bullets", Min = 0, Max = 10, Rounding = 0, Ticks = true })
+Group:AddSlider({ Text = "Volume", Min = 0, Max = 1, Rounding = 2, ValueTooltip = true })
+Group:AddSlider({ Text = "Speed", Min = 0, Max = 50, Rounding = 1, Input = true, Suffix = "°" })
+Group:AddRangeSlider({ Text = "Distance", Min = 0, Max = 1000, Default = { 150, 600 }, MinGap = 50, Suffix = " st", Flag = "Range" })
+Group:AddVerticalSlider({ Text = "Gain", Min = 0, Max = 100, Default = 40, Height = 120, Flag = "Gain" })
+```
+
+`Ticks = true` marks every step (or `Ticks = n` for n marks). `ValueTooltip` shows a bubble above the handle while you drag. `Input` adds a box where you can type an exact value. A range slider's value is `{low, high}`.
+
+## Newer elements
+
+```lua
+Group:AddSwitch({ Text = "Spring switch", Default = true, Flag = "Switch" })
+Group:AddStepper({ Text = "Bullets", Min = 0, Max = 30, Step = 1, Default = 12, Flag = "Bullets" })
+Group:AddSegmented({ Text = "Target", Values = { "Head", "Torso", "Closest" }, Default = "Head", Flag = "Part" })
+Group:AddChips({ Text = "Whitelist", Default = { "builderman" }, Max = 10, MaxLength = 20, Flag = "Whitelist" })
+local ring = Group:AddProgressRing({ Text = "Download", Default = 0.25 })   -- ring:Set(0.6), Indeterminate = true spins
+Group:AddSpinner({ Text = "Loading", Style = "Dots" })                     -- Ring, Dots, Bars, Pulse
+local sk = Group:AddSkeleton({ Lines = 3, Avatar = true })                -- sk:SetLoading(false) when the data is in
+local acc = Group:AddAccordion({ Title = "Advanced", Open = false })       -- add elements to it like a group
+local box = Group:AddTabBox({ Tabs = { "Audio", "Video" } })               -- box.Tabs.Audio:AddToggle(...)
+TingUI:Toast({ Text = "Saved", Icon = TingUI.Icons.save, Type = "Success", Duration = 3 })
+```
+
+- **Switch**: a toggle with a springy knob. It behaves exactly like `AddToggle`.
+- **Stepper**: minus and plus buttons around a number. Holding a button repeats, faster the longer you hold.
+- **Segmented**: one choice from a few, with a sliding highlight.
+- **Chips**: type and press Enter to add a tag; click × to remove one. `Unique` (default true) skips duplicates.
+- **Progress ring**, **spinner** and **skeleton**: loading states. They pause their animation while hidden.
+- **Accordion**: a collapsible section that holds any elements. `:SetOpen(bool)` and `:Toggle()`.
+- **Tab box**: tabs inside a group, with a sliding underline. `:Select(name)`.
+- **Toast**: a small pill at the bottom of the screen. Up to four stack, hovering pauses the timer and clicking dismisses it.
+
+Elements with a value save to configs and restore on load.
+
+## Text in any language
+
+Labels, inputs, dropdown search and chips count characters, not bytes, so `MaxLength` and clipping never split a letter in Cyrillic, Greek, Georgian, Arabic, Hebrew or CJK text. Arabic and Hebrew labels line up on the right by themselves; pass `RTL = true` or `RTL = false` to force a direction. `TingUI.Utf8` has the helpers (`Len`, `Clip`, `Lower`, `IsRTL`).
+
 ## Addons
 
 ```lua

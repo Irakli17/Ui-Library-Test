@@ -3,9 +3,9 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/version-v0.0.9--stable-9f96c1?style=flat-square" alt="version v0.0.9-stable">
+  <img src="https://img.shields.io/badge/version-v0.1.0--stable-9f96c1?style=flat-square" alt="version v0.1.0-stable">
   <img src="https://img.shields.io/badge/Luau-one%20file-00a2ff?style=flat-square" alt="one Luau file">
-  <img src="https://img.shields.io/badge/themes-15-ff60c4?style=flat-square" alt="15 themes">
+  <img src="https://img.shields.io/badge/themes-16-ff60c4?style=flat-square" alt="16 themes">
   <img src="https://img.shields.io/badge/Rojo-ready-e13835?style=flat-square" alt="Rojo ready">
   <img src="https://img.shields.io/badge/Wally-irakli17%2Ftingui-ad8a4a?style=flat-square" alt="Wally irakli17/tingui">
 </p>
@@ -30,7 +30,7 @@ TingUI is a dark, compact UI library for Roblox in a single Luau file. It loads 
 ```lua
 local TingUI = loadstring(game:HttpGet("https://raw.githubusercontent.com/Irakli17/Ui-Library-Test/main/TingUI.lua"))({ Id = "MyHub" })
 
-local Window = TingUI:CreateWindow({ Title = "My Hub", Tag = "Pro", Version = "v0.0.9", Snow = true })
+local Window = TingUI:CreateWindow({ Title = "My Hub", Tag = "Pro", Version = "v0.1.0", Snow = true })
 local Tab = Window:AddTab("Main")
 local Group = Tab:AddGroup("Hello")
 
@@ -65,7 +65,7 @@ Requiring it on the server gives a clear error instead of a broken UI. See [Gett
 ```toml
 # wally.toml
 [dependencies]
-TingUI = "irakli17/tingui@0.0.9"
+TingUI = "irakli17/tingui@0.1.0"
 ```
 
 With Rojo, `default.project.json` maps `TingUI.lua` as the package. `rojo serve dev.project.json` builds a test place with TingUI, a DataStore config server and a small demo.
@@ -80,13 +80,25 @@ With Rojo, `default.project.json` maps `TingUI.lua` as the package. `rojo serve 
 
 ```lua
 local TingUI, err = loadstring(game:HttpGet("https://raw.githubusercontent.com/Irakli17/Ui-Library-Test/main/Loader.lua"))()({
-	Id = "MyHub", Version = "v0.0.9-stable",
+	Id = "MyHub", Version = "v0.1.0-stable",
 })
 if not TingUI then return warn(err) end
 ```
 </details>
 
-## New in v0.0.9
+## New in v0.1.0
+
+**Flames**, a sixteenth theme: realistic animated fire around the window, embers, a lava flow and glowing cracks, all adjustable. [Read more](docs/themes.md#flames-scene)
+
+<img src="docs/images/themes/flames.png" alt="Flames theme" width="60%">
+
+- **New elements**: spring switches, progress rings, spinners, skeleton loaders, accordions, tab boxes with a sliding indicator, tag chips, number steppers, segmented controls, range and vertical sliders, and stacking toasts. [Elements](docs/elements.md#newer-elements)
+- **Button styles**: Primary, Secondary, Outline, Ghost, Danger and Pill, with icons, a loading state and hold-to-confirm. [Buttons](docs/elements.md#button-styles)
+- **About 240 named icons** from Lucide and Simple Icons: `TingUI.Icons.settings`, `TingUI.Icons["brand-github"]`. [Icons](docs/extending.md#icons)
+- **Every language**: text is measured and cut by character, and Arabic and Hebrew line up on the right by themselves.
+- **Image watermarks**, a fixed and config-safe dropdown, the official Discord mark, Builder Sans for Storm, and lighter loops that pause while hidden. [Full changelog](docs/changelog.md)
+
+## v0.0.9 highlights
 
 <table>
   <tr>
@@ -301,7 +313,7 @@ Switching themes blends everything at once: colours, corner shapes, glow, fonts,
 | [Getting started](docs/getting-started.md) | Loading on executors and in games, every load option, your first window |
 | [Windows and layout](docs/windows.md) | Windows, tabs, groups, panels, dock, HUD, command palette, menu keys |
 | [Elements](docs/elements.md) | Every element and addon, hover explanations, dialogs, notifications |
-| [Themes](docs/themes.md) | The 15 presets, scenes, particles, textures, fonts, scale, making your own |
+| [Themes](docs/themes.md) | The 16 presets, scenes, particles, textures, fonts, scale, making your own |
 | [Configs](docs/configs.md) | The config tab, saving and loading, storage adapters, DataStore, events and flags |
 | [Executors](docs/executors.md) | What TingUI uses from your executor, fallbacks, files, re-running scripts |
 | [Stability](docs/stability.md) | How TingUI stays the same size and behaviour in any project, and the compatibility promise |
@@ -320,4 +332,4 @@ Switching themes blends everything at once: colours, corner shapes, glow, fonts,
 - **Images.** Upload the `assets` folder with `TingUI.lua`. The library downloads icons and theme art from the same repo when it needs them and caches them. `tools/build_icons.py` and `tools/build_textures.py` rebuild them.
 - **Doc previews.** `python3 tools/build_previews.py` redraws every image in `docs/images` from the presets in `TingUI.lua`, so the gallery always matches the code.
 
-Versions are `vX.X.X`. The current version is **v0.0.9-stable**.
+Versions are `vX.X.X`. The current version is **v0.1.0-stable**.
