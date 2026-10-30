@@ -2833,15 +2833,18 @@ function FX.FlameBuild(S)
 		local x = (i - 1) * tw - 30
 		FX.FlameFade(tile, x, tw, function(px)
 			local W = S.W
-			if px < 26 then return 1 - (px + 2) / 28 end
-			if px > W - 26 then return 1 - (W + 2 - px) / 28 end
+			-- full strength right up to the corner, then a short fade just past it, where the corner flame takes over
+			if px < 10 then return 1 - (px + 8) / 18 end
+			if px > W - 10 then return 1 - (W + 8 - px) / 18 end
 			return 0
 		end)
 	end
 	-- the sides: tongues rooted along each upper side edge, turned 90 degrees so they burn outward from the window. Their own edges are faded so no cut line shows.
 	if st.FlameSides ~= false then
 		for side = 1, 2 do
-			for k = 1, 3 do
+			-- k = 0 is the corner flame, rooted on the corner point and leaning out at 45 degrees, which joins the
+			-- top line to the column down the side so there's no gap or step at the corner
+			for k = 0, 3 do
 				local t = FX.FlameTile(S, S.Root, 1, Vector2.new(120, FLAME.H))
 				t.Side, t.K, t.SubX = side, k, ((side * 3 + k * 5) % 7) * 54
 				FX.FlameFade(t, 0, 1, function(u) return 1 - math.clamp(math.min(u, 1 - u) / 0.32, 0, 1) end)
@@ -2941,22 +2944,26 @@ Kinds.Flames = {
 			local ig = math.clamp(S.Ignite * 2.2 - math.abs(cx - W / 2) / math.max(W, 1) * 1.6, 0, 1)
 			local surge = S.SurgeT and math.max(0, 1 - math.abs(cx / math.max(W, 1) - (S.SurgeT / 0.95 - 0.1)) * 2.5) * 0.4 or 0
 			local th = h * (0.92 + 0.12 * math.min(heat, 1.5) + surge) * ig
-			-- the base sits just under the top edge, behind the window: the fire rises straight off the edge and its
-			-- dense bed never shows as a band
-			FX.FlameDraw(S, tile, UDim2.fromOffset(x, 9), UDim2.fromOffset(tw, th), S.Phase, heat * ig, F)
+			-- the base sits 3px under the top edge, just behind the window border, so the fire rises cleanly off the edge
+			FX.FlameDraw(S, tile, UDim2.fromOffset(x, 3), UDim2.fromOffset(tw, th), S.Phase, heat * ig, F)
 		end
 		for _, tile in ipairs(S.Sides) do
 			local s, k = tile.Side, tile.K
-			local full = h * (0.8 - k * 0.14)
+			local full = k == 0 and h * 0.62 or h * (0.8 - k * 0.14)
 			local sz = full * S.Ignite * (0.9 + 0.1 * math.min(heat, 1.5))
-			-- turned a quarter: rooted along the side edge and burning straight out sideways, in a column running
-			-- down from the corner, each piece a little smaller than the one above
-			local step = 0
-			for j = 1, k - 1 do step = step + h * (0.8 - j * 0.14) * 120 / FLAME.H * 0.82 end
-			local by = 6 + full * 120 / FLAME.H * 0.5 + step
-			local lean = 90 * (s == 1 and -1 or 1)
+			local by, lean, bx
+			if k == 0 then
+				-- the corner: rooted just inside the corner point, so the straight base of the flame stays behind the window
+				by, lean, bx = 7, 45 * (s == 1 and -1 or 1), s == 1 and 7 or W - 7
+			else
+				-- turned a quarter: rooted along the side edge and burning straight out sideways, in a column that
+				-- starts right under the corner, each piece a little smaller than the one above
+				local step = 0
+				for j = 1, k - 1 do step = step + h * (0.8 - j * 0.14) * 120 / FLAME.H * 0.82 end
+				by = 2 + full * 120 / FLAME.H * 0.5 + step
+				lean, bx = 90 * (s == 1 and -1 or 1), s == 1 and 1 or W - 1
+			end
 			local r = math.rad(lean)
-			local bx = s == 1 and 2 or W - 2
 			local wide = sz * 120 / FLAME.H
 			-- a frame turns about its centre, so the centre is placed half a flame up the lean from the root
 			local cx, cy = bx + math.sin(r) * sz * 0.5, by - math.cos(r) * sz * 0.5
